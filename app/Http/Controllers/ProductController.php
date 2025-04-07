@@ -19,7 +19,7 @@ class ProductController extends Controller
     public function index()
     {
         try {
-            $products = Product::all();
+            $products = Product::with('outlets')->get();
             return $this->successResponse($products, 'Products retrieved successfully');
         } catch (\Throwable $th) {
             return $this->errorResponse($th->getMessage());
@@ -31,41 +31,37 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        // Validasi request
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'sku' => 'required|string|max:255',
-            'description' => 'required|string|max:255',
-            'price' => 'required|numeric',
-            'category_id' => 'required|exists:categories,id',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:10048',
-            'is_active' => 'required|boolean',
-            'outlet_ids' => 'required|array', // Ubah ke array
-            'outlet_ids.*' => 'exists:outlets,id', // Validasi setiap item array
-            'quantity' => 'required|numeric',
-            'min_stock' => 'required|numeric',
-        ]);
-
-
+        
         try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'sku' => 'required|string|max:255',
+                'description' => 'required|string|max:255',
+                'price' => 'required|numeric',
+                'category_id' => 'required|exists:categories,id',
+                'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:10048',
+                'is_active' => 'required|boolean',
+                'outlet_ids' => 'required|array',
+                'outlet_ids.*' => 'exists:outlets,id',
+                'quantity' => 'required|numeric',
+                'min_stock' => 'required|numeric',
+            ]);
 
             DB::beginTransaction();
-            // Simpan gambar ke storage
             if ($request->hasFile('image')) {
-                $path = $request->file('image')->store('products', 'public'); // Simpan di folder 'public/products'
-                $imagePath = $path; // Simpan path gambar
+                $path = $request->file('image')->store('products', 'public');
+                $imagePath = $path;
             } else {
                 return $this->errorResponse('Image is required', 400);
             }
 
-            // Buat produk tanpa menyimpan file temporary
             $product = Product::create([
                 'name' => $request->name,
                 'sku' => $request->sku,
                 'description' => $request->description,
                 'price' => $request->price,
                 'category_id' => $request->category_id,
-                'image' => $imagePath, // Simpan path gambar, bukan file temporary
+                'image' => $imagePath,
                 'is_active' => $request->is_active,
             ]);
 
@@ -73,7 +69,7 @@ class ProductController extends Controller
                 Inventory::create([
                     'product_id' => $product->id,
                     'outlet_id' => $outletId,
-                    'quantity' => $request->quantity, // Atur nilai default quantity
+                    'quantity' => $request->quantity,
                     'min_stock' => $request->min_stock,
                 ]);
             }
@@ -112,28 +108,78 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'sku' => 'required|string|max:255',
-            'description' => 'required|string|max:255',
-            'price' => 'required|numeric',
-            'category_id' => 'required|exists:categories,id',
-            'is_active' => 'required|boolean',
-        ]);
 
+        // dd($request->all());
+
+        // if ($request->isMethod('PUT') && $request->hasFile('gambar')) {
+        //     $request->setMethod('POST');
+        // }
+        // if ($request->isMethod('put') && $request->hasFile('image')) {
+        //     $request->merge(['_method' => 'PUT']);
+        // }
         try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'sku' => 'required|string|max:255|unique:products,sku,' . $product->id,
+                'description' => 'required|string|max:255',
+                'price' => 'required|numeric',
+                'category_id' => 'required|exists:categories,id',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10048',
+                'is_active' => 'required|boolean',
+                'outlet_ids' => 'required|array',
+                'outlet_ids.*' => 'exists:outlets,id',
+                'quantity' => 'required|numeric',
+                'min_stock' => 'required|numeric',
+            ]);
 
+            DB::beginTransaction();
+            // Handle image update
             if ($request->hasFile('image')) {
-                Storage::delete('images/' . $product->image);
-                $image = $request->file('image');
-                $imageName = time() . '.' . $image->getClientOriginalExtension();
-                $image->move(public_path('images'), $imageName);
-                $request['image'] = $imageName;
+                // Delete old image
+                // if ($product->image) {
+                //     Storage::disk('public')->delete($product->image);
+                // }
+                // Store new image
+                $imagePath = $request->file('image')->store('products', 'public');
+            } else {
+                $imagePath = $product->image;
             }
-            $product->update($request->all());
+
+            // Update product
+            $product->update([
+                'name' => $request->name,
+                'sku' => $request->sku,
+                'description' => $request->description,
+                'price' => $request->price,
+                'category_id' => $request->category_id,
+                'image' => $imagePath,
+                'is_active' => $request->is_active,
+            ]);
+
+            foreach ($request->outlet_ids as $outletId) {
+                Inventory::updateOrCreate(
+                    [
+                        'product_id' => $product->id,
+                        'outlet_id' => $outletId // Cari berdasarkan kombinasi ini
+                    ],
+                    [
+                        'quantity' => $request->quantity,
+                        'min_stock' => $request->min_stock
+                    ]
+                );
+            }
+
+            // Hapus outlet yang tidak ada di request
+            Inventory::where('product_id', $product->id)
+                ->whereNotIn('outlet_id', $request->outlet_ids)
+                ->delete();
+
+            DB::commit();
+
             return $this->successResponse($product, 'Product updated successfully');
         } catch (\Throwable $th) {
-            return $this->errorResponse($th->getMessage());
+            DB::rollBack();
+            return $this->errorResponse($th->validator->errors());
         }
     }
 
@@ -143,54 +189,77 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         try {
+            DB::beginTransaction();
+            Inventory::where('product_id', $product->id)->delete();
             $product->delete();
-            Storage::delete('images/' . $product->image);
+            Storage::disk('public')->delete($product->image);
+            DB::commit();
             return $this->successResponse(null, 'Product deleted successfully');
         } catch (\Throwable $th) {
+            DB::rollBack();
             return $this->errorResponse($th->getMessage());
         }
     }
 
-    public function getOutletProducts($outletId)
-    {
-        try {
-            $outlet = Outlet::findOrFail($outletId);
+    public function getOutletProducts(Request $request, $outletId)
+{
+    try {
+        $user = $request->user(); // Dapatkan user yang sedang login
+        $outlet = Outlet::findOrFail($outletId); // Gunakan outletId dari parameter, bukan dari user
 
-            $products = $outlet->products()
-                ->with(['category'])
-                ->withPivot(['quantity', 'min_stock'])
-                ->get()
-                ->map(function ($product) {
-                    return [
-                        'id' => $product->id,
-                        'name' => $product->name,
-                        'sku' => $product->sku,
-                        'description' => $product->description,
-                        'price' => $product->price,
-                        'image' => asset('storage/' . $product->image),
-                        'is_active' => $product->is_active,
-                        'category' => [
-                            'id' => $product->category->id,
-                            'name' => $product->category->name,
-                        ],
-                        'min_stock' => $product->pivot->min_stock,
-                        'quantity' => $product->pivot->quantity,
-                    ];
-                });
+        // Cek apakah user adalah kasir
+        $isCashier = strtolower($user->role) === 'kasir';
 
-            return $this->successResponse($products, 'Products retrieved successfully');
-        } catch (\Throwable $th) {
-            return $this->errorResponse($th->getMessage());
-        }
+        $products = $outlet->products()
+            ->with(['category', 'outlets'])
+            ->when($isCashier, function ($query) {
+                $query->where('is_active', true); // Hanya produk aktif untuk kasir
+            })
+            ->get()
+            ->map(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'sku' => $product->sku,
+                    'description' => $product->description,
+                    'price' => $product->price,
+                    'image' => asset('storage/' . $product->image),
+                    'is_active' => $product->is_active,
+                    'category' => [
+                        'id' => $product->category->id,
+                        'name' => $product->category->name,
+                    ],
+                    'min_stock' => $product->pivot->min_stock ?? null,
+                    'quantity' => $product->pivot->quantity ?? 0,
+                    'outlets' => $product->outlets->map(function ($outlet) {
+                        return [
+                            'id' => $outlet->id,
+                            'name' => $outlet->name,
+                        ];
+                    }),
+                ];
+            });
+
+        return $this->successResponse($products, 'Products retrieved successfully');
+    } catch (\Throwable $th) {
+        return $this->errorResponse($th->getMessage());
     }
+}
+
     public function getOutletProductsPos(Request $request)
     {
         try {
-            $outlet = Outlet::findOrFail($request->user()->outlet_id);
+            $user = $request->user(); // Dapatkan user saat ini
+            $outlet = Outlet::findOrFail($user->outlet_id);
 
+            // Cek apakah user adalah kasir
+            $isCashier = $user->role === 'kasir';
             $products = $outlet->products()
                 ->with(['category'])
                 ->withPivot(['quantity', 'min_stock'])
+                ->when($isCashier, function ($query) {
+                    return $query->where('is_active', true); // Hanya produk aktif untuk kasir
+                })
                 ->get()
                 ->map(function ($product) {
                     return [

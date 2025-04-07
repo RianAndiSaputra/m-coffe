@@ -177,25 +177,32 @@ class CashRegisterTransactionController extends Controller
         }
     }
 
+    // Di bawah ini yang kepake
+
     // menambah uang kas
     public function addCash(Request $request)
     {
         $request->validate([
             'amount' => 'required|numeric|min:0',
-            'cash_register_id' => 'required|exists:cash_registers,id',
+            'outlet_id' => 'required|exists:outlets,id',
             'reason' => 'nullable|string'
         ]);
 
-        $cashRegister = CashRegister::findOrFail($request->cash_register_id);
+        try {
+            $cashRegister = CashRegister::where('outlet_id', $request->outlet_id)->first();
 
-        $transaction = $cashRegister->addCash(
-            amount: $request->amount,
-            userId: $request->user()->id, 
-            shiftId: $request->user()->lastShift()->id, 
-            reason: $request->reason
-        );
+            $transaction = $cashRegister->addCash(
+                amount: $request->amount,
+                userId: $request->user()->id,
+                shiftId: $request->user()->lastShift()->value('id'),
+                reason: $request->reason,
+                source: 'cash'
+            );
 
-        return $this->successResponse($transaction, 'Successfully add cash');
+            return $this->successResponse($transaction, 'Successfully add cash');
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     // mengurangi uang kas
@@ -203,18 +210,23 @@ class CashRegisterTransactionController extends Controller
     {
         $request->validate([
             'amount' => 'required|numeric|min:0',
-            'cash_register_id' => 'required|exists:cash_registers,id',
+            'outlet_id' => 'required|exists:outlets,id',
             'reason' => 'nullable|string'
         ]);
-
-        $cashRegister = CashRegister::findOrFail($request->cash_register_id);
-
+  
         try {
+            $cashRegister = CashRegister::where('outlet_id', $request->outlet_id)->first();
+            
+            if ($request->amount > $cashRegister->balance) {
+                return $this->errorResponse('Insufficient balance');
+            }
+
             $transaction = $cashRegister->subtractCash(
                 amount: $request->amount,
                 userId: $request->user()->id,
-                shiftId: $request->user()->lastShift()->id,
-                reason: $request->reason
+                shiftId: $request->user()->lastShift()->value('id'),
+                reason: $request->reason,
+                source: 'cash'
             );
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());

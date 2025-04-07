@@ -14,6 +14,7 @@ class CashRegisterTransaction extends Model
         'shift_id', 
         'user_id',
         'reason',
+        'source',
     ];
 
     public function cashRegister()

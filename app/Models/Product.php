@@ -23,15 +23,29 @@ class Product extends Model
         'is_active' => 'boolean',
     ];
 
+    protected $appends = ['image_url']; // Tambahkan atribut image_url ke JSON
+
+    // Accessor untuk image_url
+    public function getImageUrlAttribute()
+    {
+        return $this->image ? asset('storage/' . $this->image) : null;
+    }
+
     public function outlet()
     {
         return $this->belongsTo(Outlet::class);
     }
 
+    // public function outlets()
+    // {
+    //     return $this->belongsToMany(Outlet::class, 'inventories')
+    //         ->withPivot('quantity'); // Ambil kolom quantity dari tabel pivot
+    // }
+
     public function outlets()
     {
         return $this->belongsToMany(Outlet::class, 'inventories')
-            ->withPivot('quantity'); // Ambil kolom quantity dari tabel pivot
+            ->withPivot(['quantity', 'min_stock']); // Tambahkan 'min_stock'
     }
 
     public function orders()

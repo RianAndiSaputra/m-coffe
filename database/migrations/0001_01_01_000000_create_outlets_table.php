@@ -16,9 +16,12 @@ return new class extends Migration
             $table->string('name');
             $table->text('address');
             $table->string('phone');
+            $table->string('qris')->nullable();
+            $table->decimal('tax', 10, 2)->default(0);
             $table->string('email')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

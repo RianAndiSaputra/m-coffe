@@ -12,6 +12,8 @@ class CashRegister extends Model
         'user_id',
         'amount',
         'status',
+        'is_active',
+        'balance',
     ];
 
     public function outlet()
@@ -29,9 +31,9 @@ class CashRegister extends Model
         return $this->hasMany(CashRegisterTransaction::class);
     }
 
-    public function addCash(float $amount, int $userId, int $shiftId, string $reason): CashRegisterTransaction
+    public function addCash(float $amount, int $userId, int $shiftId, string $reason, string $source): CashRegisterTransaction
     {
-        return DB::transaction(function () use ($amount, $userId, $shiftId, $reason) {
+        return DB::transaction(function () use ($amount, $userId, $shiftId, $reason, $source) {
             // Update saldo
             $this->increment('balance', $amount);
 
@@ -41,14 +43,15 @@ class CashRegister extends Model
                 'user_id' => $userId,
                 'type' => 'add',
                 'amount' => $amount,
-                'reason' => $reason
+                'reason' => $reason,
+                'source' => $source
             ]);
         });
     }
 
-    public function subtractCash(float $amount, int $userId, int $shiftId, string $reason): CashRegisterTransaction
+    public function subtractCash(float $amount, int $userId, int $shiftId, string $reason, string $source): CashRegisterTransaction
     {
-        return DB::transaction(function () use ($amount, $userId, $shiftId, $reason) {
+        return DB::transaction(function () use ($amount, $userId, $shiftId, $reason, $source) {
             // Pastikan saldo cukup
             if ($this->balance < $amount) {
                 throw new \Exception('Saldo kas tidak mencukupi');
@@ -63,7 +66,8 @@ class CashRegister extends Model
                 'user_id' => $userId,
                 'type' => 'remove',
                 'amount' => $amount,
-                'reason' => $reason
+                'reason' => $reason,
+                'source' => $source
             ]);
         });
     }

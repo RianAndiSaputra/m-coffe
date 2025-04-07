@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('shift_id')->constrained('shifts');
             $table->foreignId('user_id')->constrained('users');
             $table->enum('type', ['add', 'remove']);
+            $table->enum('source', ['cash', 'bank', 'pos', 'other']);
             $table->decimal('amount', 10, 2);
             $table->text('reason')->nullable();
             $table->timestamps();

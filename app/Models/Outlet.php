@@ -3,15 +3,19 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Outlet extends Model
 {
+    use SoftDeletes;
     protected $fillable = [
         'name',
         'address',
         'phone',
         'email',
         'is_active',
+        'tax',
+        'qris',
     ];
 
     protected $casts = [
@@ -23,15 +27,26 @@ class Outlet extends Model
         return $this->hasMany(User::class);
     }
 
+    public function cashRegisters()
+    {
+        return $this->hasOne(CashRegister::class);
+    }
+
     public function orders()
     {
         return $this->hasMany(Order::class);
     }
 
+    // public function products()
+    // {
+    //     return $this->belongsToMany(Product::class, 'inventories')
+    //         ->withPivot('quantity'); // Ambil kolom quantity dari tabel pivot
+    // }
+
     public function products()
     {
         return $this->belongsToMany(Product::class, 'inventories')
-            ->withPivot('quantity'); // Ambil kolom quantity dari tabel pivot
+            ->withPivot(['quantity', 'min_stock']); // Sesuaikan dengan kolom di tabel pivot
     }
     
     public function kasir()

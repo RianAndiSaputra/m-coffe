@@ -46,48 +46,47 @@ class InventoryHistoryController extends Controller
                 'notes' => 'nullable|string',
             ]);
 
-            DB::transaction(function () use ($request) {
-                $inventory = Inventory::firstOrCreate(
-                    [
-                        'outlet_id' => $request->outlet_id,
-                        'product_id' => $request->product_id,
-                    ],
-                    ['quantity' => 0]
-                );
+            DB::beginTransaction();
 
-                $quantityBefore = $inventory->quantity;
-
-                $inventory->quantity += $request->quantity_change;
-                $inventory->save();
-
-                InventoryHistory::create([
+            $inventory = Inventory::firstOrCreate(
+                [
                     'outlet_id' => $request->outlet_id,
                     'product_id' => $request->product_id,
-                    'quantity_before' => $quantityBefore,
-                    'quantity_after' => $inventory->quantity,
-                    'quantity_change' => $request->quantity_change,
-                    'type' => $request->type,
-                    'notes' => $request->notes,
-                    'user_id' => $request->user()->id,
-                ]);
-            });
+                ],
+                ['quantity' => 0]
+            );
+
+            $quantityBefore = $inventory->quantity;
+
+            $inventory->quantity += $request->quantity_change;
+            $inventory->save();
+
+            $inventoryHistory = InventoryHistory::create([
+                'outlet_id' => $request->outlet_id,
+                'product_id' => $request->product_id,
+                'quantity_before' => $quantityBefore,
+                'quantity_after' => $inventory->quantity,
+                'quantity_change' => $request->quantity_change,
+                'type' => $request->type,
+                'notes' => $request->notes,
+                'user_id' => $request->user()->id,
+            ]);
+
+            DB::commit();
+
+            return $this->successResponse($inventoryHistory, 'Inventory history created successfully');
         } catch (\Throwable $th) {
+            DB::rollBack();
             return $this->errorResponse($th->getMessage());
         }
     }
 
-    public function getStock($outletId, $productId)
+    public function getStock($outletId)
     {
         try {
-            $inventory = Inventory::where('outlet_id', $outletId)
-                ->where('product_id', $productId)
-                ->first();
+            $inventory = Inventory::where('outlet_id', $outletId)->with('lastStock', 'product.category')->get();
 
-            if (!$inventory) {
-                return $this->errorResponse('Stok tidak ditemukan', 404);
-            }
-
-            return $this->successResponse($inventory->quantity, 'Stok retrieved successfully');
+            return $this->successResponse($inventory, 'Stok retrieved successfully');
         } catch (\Throwable $th) {
             return $this->errorResponse($th->getMessage());
         }
@@ -112,5 +111,16 @@ class InventoryHistoryController extends Controller
     public function destroy(InventoryHistory $inventoryHistory)
     {
         //
+    }
+
+    public function getHistoryByOutlet(Request $request, $outletId)
+    {
+        try {
+            $date = $request->date;
+            $inventoryHistory = InventoryHistory::where('outlet_id', $outletId)->where('created_at', 'like', '%' . $date . '%')->with('outlet', 'product', 'user')->orderBy('created_at', 'desc')->get();
+            return $this->successResponse($inventoryHistory, 'Inventory history retrieved successfully');
+        } catch (\Throwable $th) {
+            return $this->errorResponse($th->getMessage());
+        }
     }
 }

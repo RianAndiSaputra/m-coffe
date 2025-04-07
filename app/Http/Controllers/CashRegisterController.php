@@ -56,7 +56,7 @@ class CashRegisterController extends Controller
     public function show($outlet_id)
     {
         try {
-            $cashRegister = CashRegister::where('outlet_id', $outlet_id)->with('outlet', 'cashRegisterTransactions')->first();
+            $cashRegister = CashRegister::where('outlet_id', $outlet_id)->first();
             return $this->successResponse($cashRegister, 'Successfully get cash register');
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());

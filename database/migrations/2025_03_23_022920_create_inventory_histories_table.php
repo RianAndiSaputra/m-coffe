@@ -18,7 +18,7 @@ return new class extends Migration
             $table->integer('quantity_before');
             $table->integer('quantity_after');
             $table->integer('quantity_change');
-            $table->enum('type', ['purchase', 'sale', 'adjustment', 'transfer', 'stocktake']);
+            $table->enum('type', ['purchase', 'sale', 'adjustment', 'other', 'stocktake']);
             $table->text('notes')->nullable();
             $table->foreignId('user_id')->constrained('users');
             $table->timestamps();

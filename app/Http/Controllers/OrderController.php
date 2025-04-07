@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CashRegister;
 use App\Models\Inventory;
 use App\Models\InventoryHistory;
 use App\Models\Order;
@@ -166,10 +167,12 @@ class OrderController extends Controller
 
             // Buat order items TANPA subtotal
             foreach ($request->items as $item) {
+                $subtotal = $item['quantity'] * $item['price'];
                 $order->items()->create([
                     'product_id' => $item['product_id'],
                     'quantity' => $item['quantity'],
                     'price' => $item['price'],
+                    'subtotal' => $subtotal,
                 ]);
 
                 // Update inventory
@@ -193,6 +196,9 @@ class OrderController extends Controller
                     ]);
                 }
             }
+
+            $cashRegister = CashRegister::where('outlet_id', $request->outlet_id)->first();
+            $cashRegister->addCash($total, $request->user()->id, $request->shift_id, 'Penjualan POS, Invoice #' . $order->order_number, 'pos');
 
             $order->update(['status' => 'completed']);
             DB::commit();
@@ -276,6 +282,9 @@ class OrderController extends Controller
             // Update status order menjadi cancelled
             $order->update(['status' => 'cancelled']);
 
+            $cashRegister = CashRegister::where('outlet_id', $order->outlet_id)->first();
+            $cashRegister->subtractCash($order->total, $order->user_id, $order->shift_id, 'Pembatalan Order #' . $order->order_number, 'pos');
+
             // Commit transaksi jika semua operasi berhasil
             DB::commit();
 
@@ -298,21 +307,21 @@ class OrderController extends Controller
                 'per_page' => 'nullable|integer|min:1|max:100',
                 'search' => 'nullable|string|max:255',
             ]);
-            
+
             if ($validator->fails()) {
                 return $this->errorResponse($validator->errors(), 422);
             }
-    
+
             $user = $request->user();
-    
+
             // Query dasar
             $query = Order::query();
-    
+
             // Terapkan filter berdasarkan peran pengguna
             // if ($user->role !== 'admin') {
             //     $query->where('user_id', $user->id);
             // }
-    
+
             // Terapkan filter tambahan berdasarkan permintaan
             if ($request->filled('outlet_id')) {
                 $query->where('outlet_id', $request->outlet_id);
@@ -330,11 +339,11 @@ class OrderController extends Controller
                 $searchTerm = '%' . $request->search . '%';
                 $query->where('order_number', 'like', $searchTerm);
             }
-    
+
             // Hitung total jumlah pesanan dan total pendapatan
             $totalOrders = $query->count();
             $totalRevenue = $query->sum('total');
-    
+
             // Paginasi hasil
             $perPage = $request->per_page ?? 10;
             $orders = $query->with([
@@ -343,7 +352,7 @@ class OrderController extends Controller
                 'shift:id',
                 'user:id,name'
             ])->latest()->paginate($perPage);
-    
+
             // Transformasi respons
             $orders->getCollection()->transform(function ($order) {
                 return [
@@ -365,18 +374,17 @@ class OrderController extends Controller
                     })
                 ];
             });
-    
+
             // Tambahkan informasi total ke dalam respons
             $response = [
                 'total_orders' => $totalOrders,
                 'total_revenue' => $totalRevenue,
                 'orders' => $orders
             ];
-    
+
             return $this->successResponse($response, 'Riwayat order berhasil diambil');
         } catch (\Exception $e) {
             return $this->errorResponse('Terjadi kesalahan: ' . $e->getMessage());
         }
     }
-    
 }

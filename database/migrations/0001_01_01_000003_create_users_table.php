@@ -20,6 +20,7 @@ return new class extends Migration
             $table->foreignId('outlet_id')->nullable()->constrained('outlets');
             $table->string('password');
             $table->boolean('is_active')->default(true);    
+            $table->softDeletes();
             $table->rememberToken();
             $table->timestamps();
         });

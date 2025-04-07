@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Shift;
 use App\Models\User;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 /**
@@ -124,9 +126,12 @@ class AuthController extends Controller
             'password' => 'required|string|min:6',
             'role' => 'required|string|in:admin,kasir',
             'outlet_id' => 'nullable|exists:outlets,id',
+            'start_time' => 'nullable|date_format:H:i',
+            'end_time' => 'nullable|date_format:H:i',
         ]);
 
         try {
+            DB::beginTransaction();
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
@@ -134,7 +139,28 @@ class AuthController extends Controller
                 'role' => $request->role,
                 'outlet_id' => $request->outlet_id,
             ]);
+
+            if ($request->outlet_id) {
+                Shift::create([
+                    'user_id' => $user->id,
+                    'outlet_id' => $request->outlet_id,
+                    'start_time' => $request->start_time,
+                    'end_time' => $request->end_time,
+                ]);
+            }
+            DB::commit();
             return $this->successResponse($user, 'User created successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+
+    public function getAllUsers($outletId)
+    {
+        try {
+            $users = User::with('outlet', 'lastShift')->where('outlet_id', $outletId)->get();
+            return $this->successResponse($users, 'Users retrieved successfully');
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
         }
@@ -148,16 +174,25 @@ class AuthController extends Controller
             'password' => 'nullable|string|min:6',
             'role' => 'required|string|in:admin,kasir',
             'outlet_id' => 'nullable|exists:outlets,id',
+            'start_time' => 'nullable|date_format:H:i',
+            'end_time' => 'nullable|date_format:H:i',
         ]);
 
         try {
+            DB::beginTransaction();
             if ($request->has('password')) {
                 $request->merge(['password' => Hash::make($request->password)]);
             }
 
             $user->update($request->all());
+            $user->shift()->update([
+                'start_time' => $request->start_time,
+                'end_time' => $request->end_time,
+            ]);
+            DB::commit();
             return $this->successResponse($user, 'User updated successfully');
         } catch (\Exception $e) {
+            DB::rollBack();
             return $this->errorResponse($e->getMessage());
         }
     }
@@ -190,5 +225,10 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
         }
+    }
+
+    public function validateToken(Request $request)
+    {
+        return $this->successResponse($request->user(), 'Token is valid');
     }
 }

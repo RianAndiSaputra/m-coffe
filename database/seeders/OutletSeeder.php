@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\CashRegister;
 use App\Models\Outlet;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -21,7 +22,13 @@ class OutletSeeder extends Seeder
         ];
 
         foreach ($outlets as $outlet) {
-            Outlet::create($outlet);
+            $newOutlet = Outlet::create($outlet);
+
+            CashRegister::create([
+                'outlet_id' => $newOutlet->id,
+                'balance' => 0,
+                'is_active' => true,
+            ]);
         }
     }
 }

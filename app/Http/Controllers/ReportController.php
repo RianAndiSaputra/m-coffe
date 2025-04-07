@@ -1,6 +1,7 @@
 <?php
 
-namespace App\Http\Controllers\API;
+// namespace App\Http\Controllers\API;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Inventory;
@@ -11,12 +12,14 @@ use App\Models\OrderItem;
 use App\Models\Outlet;
 use App\Models\Product;
 use App\Models\Shift;
+use App\Traits\ApiResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
+    use ApiResponse;
     /**
      * Laporan penjualan harian berdasarkan outlet
      *
@@ -26,22 +29,24 @@ class ReportController extends Controller
      */
     public function dailySales(Request $request, Outlet $outlet)
     {
-        $request->validate([
-            'date' => 'nullable|date_format:Y-m-d',
-        ]);
+        // $request->validate([
+        //     'date' => 'nullable|date_format:Y-m-d',
+        // ]);
 
         $date = $request->date ? Carbon::parse($request->date) : Carbon::today();
-        
+
+        $date = Carbon::today();
+
         $sales = Order::where('outlet_id', $outlet->id)
             ->whereDate('created_at', $date)
             ->where('status', 'completed')
             ->get();
-        
+
         $totalSales = $sales->sum('total');
         $totalItems = OrderItem::whereIn('order_id', $sales->pluck('id'))->sum('quantity');
         $totalOrders = $sales->count();
         $averageOrderValue = $totalOrders > 0 ? $totalSales / $totalOrders : 0;
-        
+
         // Penjualan per jam
         $hourlyData = Order::where('outlet_id', $outlet->id)
             ->whereDate('created_at', $date)
@@ -56,7 +61,7 @@ class ReportController extends Controller
                     'sales' => $items->sum('total'),
                 ];
             });
-        
+
         // Penjualan per kategori produk
         $categorySales = DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
@@ -68,7 +73,7 @@ class ReportController extends Controller
             ->where('orders.status', 'completed')
             ->groupBy('categories.name')
             ->get();
-        
+
         // Penjualan per metode pembayaran
         $paymentMethodSales = $sales->groupBy('payment_method')
             ->map(function ($items) {
@@ -77,7 +82,7 @@ class ReportController extends Controller
                     'total' => $items->sum('total'),
                 ];
             });
-        
+
         return response()->json([
             'status' => true,
             'data' => [
@@ -112,15 +117,15 @@ class ReportController extends Controller
 
         $year = $request->year ?: Carbon::now()->year;
         $month = $request->month ?: Carbon::now()->month;
-        
+
         $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
         $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth();
-        
+
         // Cek apakah laporan bulanan sudah ada
         $existingReport = MonthlyReport::where('outlet_id', $outlet->id)
             ->where('report_date', $startDate->format('Y-m-01'))
             ->first();
-        
+
         if ($existingReport) {
             // Ambil data laporan yang tersimpan
             $reportData = [
@@ -135,11 +140,11 @@ class ReportController extends Controller
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->where('status', 'completed')
                 ->get();
-            
+
             $totalSales = $sales->sum('total');
             $totalTransactions = $sales->count();
             $averageTransaction = $totalTransactions > 0 ? $totalSales / $totalTransactions : 0;
-            
+
             // Simpan laporan bulanan
             $report = new MonthlyReport();
             $report->outlet_id = $outlet->id;
@@ -149,7 +154,7 @@ class ReportController extends Controller
             $report->average_transaction = $averageTransaction;
             $report->generated_by = $request->user()->id;
             $report->save();
-            
+
             $reportData = [
                 'total_sales' => $totalSales,
                 'total_transactions' => $totalTransactions,
@@ -157,7 +162,7 @@ class ReportController extends Controller
                 'report_date' => $startDate->format('Y-m-d'),
             ];
         }
-        
+
         // Data penjualan harian dalam bulan
         $dailySales = Order::where('outlet_id', $outlet->id)
             ->whereBetween('created_at', [$startDate, $endDate])
@@ -169,7 +174,7 @@ class ReportController extends Controller
             )
             ->groupBy('date')
             ->get();
-        
+
         // Penjualan produk terbaik
         $topProducts = DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
@@ -187,7 +192,7 @@ class ReportController extends Controller
             ->orderBy('total_sales', 'desc')
             ->limit(10)
             ->get();
-        
+
         return response()->json([
             'status' => true,
             'data' => [
@@ -217,15 +222,15 @@ class ReportController extends Controller
 
         $year = $request->year ?: Carbon::now()->year;
         $month = $request->month ?: Carbon::now()->month;
-        
+
         $reportDate = Carbon::createFromDate($year, $month, 1)->format('Y-m-d');
-        
+
         // Cek apakah laporan sudah ada
         $existingReports = MonthlyInventoryReport::where('outlet_id', $outlet->id)
             ->where('report_date', $reportDate)
             ->with('product') // Eager load product data
             ->get();
-        
+
         if ($existingReports->count() > 0) {
             // Return laporan yang sudah ada
             return response()->json([
@@ -239,26 +244,26 @@ class ReportController extends Controller
                 ]
             ]);
         }
-        
+
         // Jika belum ada laporan, generate laporan baru
         $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
         $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth();
         $previousMonthDate = Carbon::createFromDate($year, $month, 1)->subMonth()->format('Y-m-d');
-        
+
         // Ambil produk di outlet
         $products = Product::whereHas('inventory', function ($query) use ($outlet) {
             $query->where('outlet_id', $outlet->id);
         })->get();
-        
+
         $reports = [];
         $totalStockValue = 0;
-        
+
         foreach ($products as $product) {
             // Cek inventory saat ini
             $currentStock = Inventory::where('outlet_id', $outlet->id)
                 ->where('product_id', $product->id)
                 ->first();
-            
+
             // Riwayat transaksi inventory
             $historySales = DB::table('inventory_histories')
                 ->where('outlet_id', $outlet->id)
@@ -266,32 +271,32 @@ class ReportController extends Controller
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->where('type', 'sale')
                 ->sum('quantity_change');
-            
+
             $historyPurchases = DB::table('inventory_histories')
                 ->where('outlet_id', $outlet->id)
                 ->where('product_id', $product->id)
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->where('type', 'purchase')
                 ->sum('quantity_change');
-            
+
             $historyAdjustments = DB::table('inventory_histories')
                 ->where('outlet_id', $outlet->id)
                 ->where('product_id', $product->id)
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->where('type', 'adjustment')
                 ->sum('quantity_change');
-            
+
             // Cari laporan bulan sebelumnya untuk opening stock
             $previousMonthReport = MonthlyInventoryReport::where('outlet_id', $outlet->id)
                 ->where('product_id', $product->id)
                 ->where('report_date', $previousMonthDate)
                 ->first();
-            
+
             $openingStock = $previousMonthReport ? $previousMonthReport->closing_stock : 0;
             $closingStock = $currentStock ? $currentStock->quantity : 0;
             $stockValue = $closingStock * $product->price;
             $totalStockValue += $stockValue;
-            
+
             // Create report
             $report = new MonthlyInventoryReport();
             $report->outlet_id = $outlet->id;
@@ -304,15 +309,15 @@ class ReportController extends Controller
             $report->adjustment_quantity = $historyAdjustments;
             $report->stock_value = $stockValue;
             $report->save();
-            
+
             $reports[] = $report;
         }
-        
+
         // Eager load product information
         $reports = MonthlyInventoryReport::whereIn('id', collect($reports)->pluck('id'))
             ->with('product')
             ->get();
-        
+
         return response()->json([
             'status' => true,
             'data' => [
@@ -337,90 +342,92 @@ class ReportController extends Controller
         $request->validate([
             'date' => 'required|date_format:Y-m-d',
         ]);
-        
-        $date = Carbon::parse($request->date);
-        $isToday = $date->isToday();
-        
-        if ($isToday) {
-            // Jika ini adalah stok hari ini, langsung ambil dari tabel inventory (realtime)
-            $inventoryItems = Inventory::where('outlet_id', $outlet->id)
-                ->with('product')
-                ->get();
-            
-            $totalValue = 0;
-            $formattedItems = $inventoryItems->map(function ($item) use (&$totalValue) {
-                $value = $item->quantity * $item->product->price;
-                $totalValue += $value;
-                
-                return [
-                    'product_id' => $item->product_id,
-                    'product_name' => $item->product->name,
-                    'sku' => $item->product->sku,
-                    'category' => $item->product->category->name,
-                    'quantity' => $item->quantity,
-                    'price' => $item->product->price,
-                    'value' => $value,
-                ];
-            });
-            
-            return response()->json([
-                'status' => true,
-                'data' => [
+
+        try {
+            $date = Carbon::parse($request->date);
+            $isToday = $date->isToday();
+
+            // dd($date->toDateString(), Carbon::today()->toDateString());
+            // dd($re);
+
+
+            if ($isToday) {
+                // Jika ini adalah stok hari ini, langsung ambil dari tabel inventory (realtime)
+                $inventoryItems = Inventory::where('outlet_id', $outlet->id)
+                    ->with(['product.category']) // Pastikan relasi category dimuat untuk menghindari query N+1
+                    ->get();
+
+                $totalValue = 0;
+                $formattedItems = $inventoryItems->map(function ($item) use (&$totalValue) {
+                    $value = $item->quantity * $item->product->price;
+                    $totalValue += $value;
+
+                    return [
+                        'product_id' => $item->product_id,
+                        'product_name' => $item->product->name,
+                        'sku' => $item->product->sku,
+                        'category' => $item->product->category->name,
+                        'quantity' => $item->quantity,
+                        'min_stock' => $item->min_stock,
+                        'price' => $item->product->price,
+                        'value' => $value,
+                    ];
+                });
+
+                return $this->successResponse([
                     'date' => $date->format('Y-m-d'),
                     'outlet' => $outlet->name,
                     'is_realtime' => true,
                     'inventory_items' => $formattedItems,
                     'total_value' => $totalValue,
-                ]
-            ]);
-        } else {
-            // Jika ini adalah tanggal lampau, hitung dari riwayat stok
-            $products = Product::whereHas('inventory', function ($query) use ($outlet) {
-                $query->where('outlet_id', $outlet->id);
-            })->with('category')->get();
-            
-            $inventoryItems = [];
-            $totalValue = 0;
-            
-            foreach ($products as $product) {
-                // Ambil histori inventory sampai tanggal tertentu
-                $lastHistory = DB::table('inventory_histories')
-                    ->where('outlet_id', $outlet->id)
-                    ->where('product_id', $product->id)
-                    ->whereDate('created_at', '<=', $date)
-                    ->orderBy('created_at', 'desc')
-                    ->first();
-                
-                if ($lastHistory) {
-                    $quantity = $lastHistory->quantity_after;
-                    $value = $quantity * $product->price;
-                    $totalValue += $value;
-                    
-                    $inventoryItems[] = [
-                        'product_id' => $product->id,
-                        'product_name' => $product->name,
-                        'sku' => $product->sku,
-                        'category' => $product->category->name,
-                        'quantity' => $quantity,
-                        'price' => $product->price,
-                        'value' => $value,
-                    ];
+                ]);
+            } else {
+                // Jika ini adalah tanggal lampau, hitung dari riwayat stok
+                $products = Product::whereHas('inventory', function ($query) use ($outlet) {
+                    $query->where('outlet_id', $outlet->id);
+                })->with('category')->get();
+
+                $inventoryItems = [];
+                $totalValue = 0;
+
+                foreach ($products as $product) {
+                    // Ambil histori inventory sampai tanggal tertentu
+                    $lastHistory = DB::table('inventory_histories')
+                        ->where('outlet_id', $outlet->id)
+                        ->where('product_id', $product->id)
+                        ->whereDate('created_at', '<=', $date)
+                        ->orderBy('created_at', 'desc')
+                        ->first();
+
+                    if ($lastHistory) {
+                        $quantity = $lastHistory->quantity_after;
+                        $value = $quantity * $product->price;
+                        $totalValue += $value;
+
+                        $inventoryItems[] = [
+                            'product_id' => $product->id,
+                            'product_name' => $product->name,
+                            'sku' => $product->sku,
+                            'category' => $product->category->name,
+                            'quantity' => $quantity,
+                            'price' => $product->price,
+                            'value' => $value,
+                        ];
+                    }
                 }
-            }
-            
-            return response()->json([
-                'status' => true,
-                'data' => [
+
+                return $this->successResponse([
                     'date' => $date->format('Y-m-d'),
                     'outlet' => $outlet->name,
                     'is_realtime' => false,
                     'inventory_items' => $inventoryItems,
                     'total_value' => $totalValue,
-                ]
-            ]);
+                ]);
+            }
+        } catch (\Throwable $th) {
+            return $this->errorResponse($th->getMessage());
         }
     }
-
     /**
      * Laporan shift berdasarkan outlet
      *
@@ -435,34 +442,34 @@ class ReportController extends Controller
             'end_date' => 'nullable|date_format:Y-m-d',
             'cashier_id' => 'nullable|exists:users,id',
         ]);
-        
+
         $startDate = $request->start_date ? Carbon::parse($request->start_date) : Carbon::today()->subDays(7);
         $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : Carbon::today()->endOfDay();
-        
+
         $query = Shift::where('outlet_id', $outlet->id)
             ->whereBetween('start_time', [$startDate, $endDate])
             ->with(['user']);
-        
+
         if ($request->cashier_id) {
             $query->where('user_id', $request->cashier_id);
         }
-        
+
         $shifts = $query->orderBy('start_time', 'desc')->get();
-        
+
         $totalStartingCash = $shifts->sum('starting_cash');
         $totalEndingCash = $shifts->sum('ending_cash');
         $totalExpectedCash = $shifts->sum('expected_cash');
         $totalDifference = $shifts->sum('cash_difference');
-        
+
         // Ambil order per shift
         $shiftData = $shifts->map(function ($shift) {
             $orders = Order::where('shift_id', $shift->id)
                 ->where('status', 'completed')
                 ->get();
-            
+
             $totalSales = $orders->sum('total');
             $orderCount = $orders->count();
-            
+
             return [
                 'id' => $shift->id,
                 'cashier' => $shift->user->name,
@@ -478,7 +485,7 @@ class ReportController extends Controller
                 'orders' => $orderCount,
             ];
         });
-        
+
         return response()->json([
             'status' => true,
             'data' => [
@@ -508,53 +515,52 @@ class ReportController extends Controller
      */
     public function dashboardSummary(Request $request, Outlet $outlet)
     {
-        // Sales hari ini
         $today = Carbon::today();
         $yesterday = Carbon::yesterday();
         $thisMonth = Carbon::now()->startOfMonth();
         $lastMonth = Carbon::now()->subMonth()->startOfMonth();
-        
+        $endOfYesterday = Carbon::yesterday()->endOfDay();
+    
         // Sales hari ini
         $todaySales = Order::where('outlet_id', $outlet->id)
-            ->whereDate('created_at', $today)
+            ->whereBetween('created_at', [$today->startOfDay(), $today->endOfDay()])
             ->where('status', 'completed')
             ->sum('total');
-        
+    
         // Sales kemarin
         $yesterdaySales = Order::where('outlet_id', $outlet->id)
-            ->whereDate('created_at', $yesterday)
+            ->whereBetween('created_at', [$yesterday->startOfDay(), $yesterday->endOfDay()])
             ->where('status', 'completed')
             ->sum('total');
-        
+    
         // Persentase perubahan
-        $salesChange = $yesterdaySales > 0 
-            ? (($todaySales - $yesterdaySales) / $yesterdaySales) * 100 
-            : 100;
-        
+        $salesChange = $yesterdaySales > 0
+            ? (($todaySales - $yesterdaySales) / $yesterdaySales) * 100
+            : ($todaySales > 0 ? 100 : 0);
+    
         // Order hari ini
         $todayOrders = Order::where('outlet_id', $outlet->id)
             ->whereDate('created_at', $today)
             ->where('status', 'completed')
             ->count();
-        
+    
         // Sales bulan ini
         $thisMonthSales = Order::where('outlet_id', $outlet->id)
-            ->whereDate('created_at', '>=', $thisMonth)
+            ->where('created_at', '>=', $thisMonth)
             ->where('status', 'completed')
             ->sum('total');
-        
+    
         // Sales bulan lalu
         $lastMonthSales = Order::where('outlet_id', $outlet->id)
-            ->whereDate('created_at', '>=', $lastMonth)
-            ->whereDate('created_at', '<', $thisMonth)
+            ->whereBetween('created_at', [$lastMonth, $thisMonth->copy()->subDay()])
             ->where('status', 'completed')
             ->sum('total');
-        
+    
         // Monthly change
-        $monthlySalesChange = $lastMonthSales > 0 
-            ? (($thisMonthSales - $lastMonthSales) / $lastMonthSales) * 100 
-            : 100;
-        
+        $monthlySalesChange = $lastMonthSales > 0
+            ? (($thisMonthSales - $lastMonthSales) / $lastMonthSales) * 100
+            : ($thisMonthSales > 0 ? 100 : 0);
+    
         // Top 5 produk hari ini
         $topProducts = DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
@@ -568,29 +574,29 @@ class ReportController extends Controller
             ->whereDate('orders.created_at', $today)
             ->where('orders.status', 'completed')
             ->groupBy('products.name')
-            ->orderBy('quantity', 'desc')
+            ->orderByDesc('quantity')
             ->limit(5)
             ->get();
-        
+    
         // Stok yang perlu perhatian (low stock)
         $lowStock = Inventory::where('outlet_id', $outlet->id)
-            ->where('quantity', '<', 10) // Asumsi stok dibawah 10 adalah low stock
+            ->where('quantity', '<', $outlet->min_stock)
             ->with('product')
             ->get()
             ->map(function ($item) {
                 return [
                     'product_name' => $item->product->name,
                     'quantity' => $item->quantity,
-                    'min_stock' => 10, // Bisa diubah sesuai dengan setting di aplikasi
+                    'min_stock' => 10,
                 ];
             });
-        
+    
         // Shift aktif
         $activeShift = Shift::where('outlet_id', $outlet->id)
             ->where('is_closed', false)
             ->with('user')
             ->first();
-        
+    
         return response()->json([
             'status' => true,
             'data' => [
@@ -610,9 +616,10 @@ class ReportController extends Controller
                 'active_shift' => $activeShift ? [
                     'cashier' => $activeShift->user->name,
                     'started_at' => $activeShift->start_time,
-                    'duration' => Carbon::parse($activeShift->start_time)->diffInHours(Carbon::now()) . ' hours',
+                    'duration' => Carbon::parse($activeShift->start_time)->diffForHumans(null, true), // contoh: "3 hours"
                 ] : null,
             ]
         ]);
     }
+    
 }
