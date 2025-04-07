@@ -182,13 +182,14 @@ class CashRegisterTransactionController extends Controller
     // menambah uang kas
     public function addCash(Request $request)
     {
-        $request->validate([
-            'amount' => 'required|numeric|min:0',
-            'outlet_id' => 'required|exists:outlets,id',
-            'reason' => 'nullable|string'
-        ]);
-
+        
         try {
+            $request->validate([
+                'amount' => 'required|numeric|min:0',
+                'outlet_id' => 'required|exists:outlets,id',
+                'reason' => 'nullable|string'
+            ]);
+            
             $cashRegister = CashRegister::where('outlet_id', $request->outlet_id)->first();
 
             $transaction = $cashRegister->addCash(
@@ -208,13 +209,14 @@ class CashRegisterTransactionController extends Controller
     // mengurangi uang kas
     public function subtractCash(Request $request)
     {
-        $request->validate([
-            'amount' => 'required|numeric|min:0',
-            'outlet_id' => 'required|exists:outlets,id',
-            'reason' => 'nullable|string'
-        ]);
-  
+        
         try {
+            $request->validate([
+                'amount' => 'required|numeric|min:0',
+                'outlet_id' => 'required|exists:outlets,id',
+                'reason' => 'nullable|string'
+            ]);
+
             $cashRegister = CashRegister::where('outlet_id', $request->outlet_id)->first();
             
             if ($request->amount > $cashRegister->balance) {
@@ -228,10 +230,10 @@ class CashRegisterTransactionController extends Controller
                 reason: $request->reason,
                 source: 'cash'
             );
+            return $this->successResponse($transaction, 'Successfully subtract cash');
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
         }
 
-        return $this->successResponse($transaction, 'Successfully subtract cash');
     }
 }
