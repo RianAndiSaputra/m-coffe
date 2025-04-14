@@ -86,7 +86,7 @@ class ProductController extends Controller
             return $this->successResponse($product, 'Product created successfully');
         } catch (\Throwable $th) {
             DB::rollBack();
-            return $this->errorResponse($th);
+            return $this->errorResponse($th->getMessage());
         // } catch (\Illuminate\Validation\ValidationException $e) {
         //     return response()->json([
         //         'success' => false,
