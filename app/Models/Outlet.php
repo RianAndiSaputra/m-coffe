@@ -22,6 +22,13 @@ class Outlet extends Model
         'is_active' => 'boolean',
     ];
 
+    protected $appends = ['qris_url']; 
+
+    public function getQrisUrlAttribute()
+    {
+        return $this->qris ? asset('storage/' . $this->qris) : null;
+    }
+
     public function users()
     {
         return $this->hasMany(User::class);

@@ -74,7 +74,7 @@ class AuthController extends Controller
         // $user->tokens()->delete();
 
         $data = [
-            'user' => $user,
+            'user' => $user->load(['outlet', 'lastShift']),
             'token' => $user->createToken('auth_token')->plainTextToken
         ];
 
@@ -185,7 +185,7 @@ class AuthController extends Controller
             }
 
             $user->update($request->all());
-            $user->shift()->update([
+            $user->shifts()->update([
                 'start_time' => $request->start_time,
                 'end_time' => $request->end_time,
             ]);

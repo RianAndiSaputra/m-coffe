@@ -64,7 +64,7 @@ class OutletController extends Controller
             return $this->successResponse($outlet, 'Outlet created successfully');
         } catch (ValidationException $th) {
             DB::rollBack();
-            return $this->errorResponse('Validation error', 422, $th->errors());
+            return $this->errorResponse('Validation error', $th->errors());
         }catch (\Throwable $th) {
             DB::rollBack();
             return $this->errorResponse($th->getMessage());
@@ -95,20 +95,20 @@ class OutletController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, Outlet $outlet)
-    {
-        
-        
+    {    
         try {
             
             $request->validate([
                 'name' => 'required|string|max:255',
                 'address' => 'required|string|max:255',
                 'phone' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255|unique:outlets,email,' . $outlet->id,
+                'email' => 'required|string|email|max:255',
                 'is_active' => 'required|boolean',
                 'tax' => 'nullable|numeric|min:0',
                 'qris' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10048',
             ]);
+
+            $qrisPath = $outlet->qris;
 
             if ($request->hasFile('qris')) {
                 $path = $request->file('qris')->store('qris', 'public');
@@ -127,7 +127,7 @@ class OutletController extends Controller
             return $this->successResponse($outlet, 'Outlet updated successfully');
         }
         catch (ValidationException $th) {
-            return $this->errorResponse('Validation error', 422, $th->errors());
+            return $this->errorResponse('Validation error', $th->errors());
         }
         
         catch (\Throwable $th) {

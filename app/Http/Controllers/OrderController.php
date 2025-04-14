@@ -148,6 +148,13 @@ class OrderController extends Controller
             $total = $subtotal + $tax - $discount;
             $change = ($request->total_paid ?? 0) - $total;
 
+            $totalPaid = $request->total_paid;
+
+            if ($request->payment_method === 'qris') {
+                $totalPaid = $total;
+                $change = 0;
+            }
+
             // Buat order dengan subtotal
             $order = Order::create([
                 'order_number' => 'INV-' . time() . '-' . strtoupper(Str::random(6)),
@@ -158,7 +165,7 @@ class OrderController extends Controller
                 'tax' => $tax,
                 'discount' => $discount,
                 'total' => $total,
-                'total_paid' => $request->total_paid ?? 0,
+                'total_paid' => $totalPaid,
                 'change' => $change,
                 'payment_method' => $request->payment_method,
                 'status' => 'pending',
@@ -201,9 +208,10 @@ class OrderController extends Controller
             $cashRegister->addCash($total, $request->user()->id, $request->shift_id, 'Penjualan POS, Invoice #' . $order->order_number, 'pos');
 
             $order->update(['status' => 'completed']);
+
             DB::commit();
 
-            return $this->successResponse($order, 'Order berhasil dibuat');
+            return $this->successResponse($order->load('items'), 'Order berhasil dibuat');
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->errorResponse('Terjadi kesalahan: ' . $e->getMessage());
@@ -317,11 +325,6 @@ class OrderController extends Controller
             // Query dasar
             $query = Order::query();
 
-            // Terapkan filter berdasarkan peran pengguna
-            // if ($user->role !== 'admin') {
-            //     $query->where('user_id', $user->id);
-            // }
-
             // Terapkan filter tambahan berdasarkan permintaan
             if ($request->filled('outlet_id')) {
                 $query->where('outlet_id', $request->outlet_id);
@@ -362,6 +365,13 @@ class OrderController extends Controller
                     'user' => $order->user->name,
                     'total' => $order->total,
                     'status' => $order->status,
+
+                    'subtotal' => $order->subtotal,
+                    'tax' => $order->tax,
+                    'discount' => $order->discount,
+                    'total_paid' => $order->total_paid,
+                    'change' => $order->change,
+
                     'payment_method' => $order->payment_method,
                     'created_at' => $order->created_at->format('d/m/Y H:i'),
                     'items' => $order->items->map(function ($item) {
@@ -376,6 +386,92 @@ class OrderController extends Controller
             });
 
             // Tambahkan informasi total ke dalam respons
+            $response = [
+                'total_orders' => $totalOrders,
+                'total_revenue' => $totalRevenue,
+                'orders' => $orders
+            ];
+
+            return $this->successResponse($response, 'Riwayat order berhasil diambil');
+        } catch (\Exception $e) {
+            return $this->errorResponse('Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    public function orderHistoryAdmin(Request $request)
+    {
+        try {
+            // Validasi parameter query (hapus validasi date dan per_page)
+            $validator = Validator::make($request->query(), [
+                'outlet_id' => 'nullable|exists:outlets,id',
+                'status' => 'nullable|in:pending,completed,canceled',
+                'search' => 'nullable|string|max:255',
+            ]);
+
+            if ($validator->fails()) {
+                return $this->errorResponse($validator->errors(), 422);
+            }
+
+            $user = $request->user();
+
+            // Query dasar
+            $query = Order::query();
+
+            // Filter tambahan
+            if ($request->filled('outlet_id')) {
+                $query->where('outlet_id', $request->outlet_id);
+            }
+
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+
+            if ($request->filled('search')) {
+                $searchTerm = '%' . $request->search . '%';
+                $query->where('order_number', 'like', $searchTerm);
+            }
+
+            // Hitung total jumlah pesanan dan total pendapatan
+            $totalOrders = $query->count();
+            $totalRevenue = $query->sum('total');
+
+            // Ambil semua hasil (tanpa pagination)
+            $orders = $query->with([
+                'items.product:id,name,sku',
+                'outlet:id,name',
+                'shift:id',
+                'user:id,name'
+            ])->latest()->get();
+
+            // Transformasi data
+            $orders = $orders->map(function ($order) {
+                return [
+                    'id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'outlet' => $order->outlet->name,
+                    'user' => $order->user->name,
+                    'total' => $order->total,
+                    'status' => $order->status,
+
+                    'subtotal' => $order->subtotal,
+                    'tax' => $order->tax,
+                    'discount' => $order->discount,
+                    'total_paid' => $order->total_paid,
+                    'change' => $order->change,
+
+                    'payment_method' => $order->payment_method,
+                    'created_at' => $order->created_at->format('d/m/Y H:i'),
+                    'items' => $order->items->map(function ($item) {
+                        return [
+                            'product' => $item->product->name,
+                            'quantity' => $item->quantity,
+                            'price' => $item->price,
+                            'total' => $item->quantity * $item->price
+                        ];
+                    })
+                ];
+            });
+
             $response = [
                 'total_orders' => $totalOrders,
                 'total_revenue' => $totalRevenue,

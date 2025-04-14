@@ -31,15 +31,21 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        
+
+        if ($request->has('image') && $request->image === null) {
+            $request->request->remove('image');
+        }
+
+        // dd($request->all);
+
         try {
             $request->validate([
                 'name' => 'required|string|max:255',
                 'sku' => 'required|string|max:255',
-                'description' => 'required|string|max:255',
+                'description' => 'nullable|string|max:255',
                 'price' => 'required|numeric',
                 'category_id' => 'required|exists:categories,id',
-                'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:10048',
+                'image' => 'nullable|sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:10048',
                 'is_active' => 'required|boolean',
                 'outlet_ids' => 'required|array',
                 'outlet_ids.*' => 'exists:outlets,id',
@@ -52,7 +58,8 @@ class ProductController extends Controller
                 $path = $request->file('image')->store('products', 'public');
                 $imagePath = $path;
             } else {
-                return $this->errorResponse('Image is required', 400);
+                $imagePath = null;
+                // return $this->errorResponse('Image is required', 400);
             }
 
             $product = Product::create([
@@ -79,7 +86,18 @@ class ProductController extends Controller
             return $this->successResponse($product, 'Product created successfully');
         } catch (\Throwable $th) {
             DB::rollBack();
-            return $this->errorResponse($th->getMessage());
+            return $this->errorResponse($th);
+        // } catch (\Illuminate\Validation\ValidationException $e) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Validasi gagal',
+        //         'errors' => collect($e->errors())->map(function ($messages, $field) {
+        //             return [
+        //                 'field' => $field,
+        //                 'messages' => $messages
+        //             ];
+        //         })->values()->all()
+        //     ], 422);
         }
     }
 
@@ -121,7 +139,7 @@ class ProductController extends Controller
             $request->validate([
                 'name' => 'required|string|max:255',
                 'sku' => 'required|string|max:255|unique:products,sku,' . $product->id,
-                'description' => 'required|string|max:255',
+                'description' => 'nullable|string|max:255',
                 'price' => 'required|numeric',
                 'category_id' => 'required|exists:categories,id',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10048',
@@ -202,66 +220,21 @@ class ProductController extends Controller
     }
 
     public function getOutletProducts(Request $request, $outletId)
-{
-    try {
-        $user = $request->user(); // Dapatkan user yang sedang login
-        $outlet = Outlet::findOrFail($outletId); // Gunakan outletId dari parameter, bukan dari user
-
-        // Cek apakah user adalah kasir
-        $isCashier = strtolower($user->role) === 'kasir';
-
-        $products = $outlet->products()
-            ->with(['category', 'outlets'])
-            ->when($isCashier, function ($query) {
-                $query->where('is_active', true); // Hanya produk aktif untuk kasir
-            })
-            ->get()
-            ->map(function ($product) {
-                return [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'sku' => $product->sku,
-                    'description' => $product->description,
-                    'price' => $product->price,
-                    'image' => asset('storage/' . $product->image),
-                    'is_active' => $product->is_active,
-                    'category' => [
-                        'id' => $product->category->id,
-                        'name' => $product->category->name,
-                    ],
-                    'min_stock' => $product->pivot->min_stock ?? null,
-                    'quantity' => $product->pivot->quantity ?? 0,
-                    'outlets' => $product->outlets->map(function ($outlet) {
-                        return [
-                            'id' => $outlet->id,
-                            'name' => $outlet->name,
-                        ];
-                    }),
-                ];
-            });
-
-        return $this->successResponse($products, 'Products retrieved successfully');
-    } catch (\Throwable $th) {
-        return $this->errorResponse($th->getMessage());
-    }
-}
-
-    public function getOutletProductsPos(Request $request)
     {
         try {
-            $user = $request->user(); // Dapatkan user saat ini
-            $outlet = Outlet::findOrFail($user->outlet_id);
+            $user = $request->user(); // Dapatkan user yang sedang login
+            $outlet = Outlet::findOrFail($outletId); // Gunakan outletId dari parameter, bukan dari user
 
             // Cek apakah user adalah kasir
-            $isCashier = $user->role === 'kasir';
+            $isCashier = strtolower($user->role) === 'kasir';
+
             $products = $outlet->products()
-                ->with(['category'])
-                ->withPivot(['quantity', 'min_stock'])
+                ->with(['category', 'outlets'])
                 ->when($isCashier, function ($query) {
-                    return $query->where('is_active', true); // Hanya produk aktif untuk kasir
+                    $query->where('is_active', true);
                 })
                 ->get()
-                ->map(function ($product) {
+                ->map(function ($product) use ($outlet) {
                     return [
                         'id' => $product->id,
                         'name' => $product->name,
@@ -274,8 +247,21 @@ class ProductController extends Controller
                             'id' => $product->category->id,
                             'name' => $product->category->name,
                         ],
-                        'min_stock' => $product->pivot->min_stock,
-                        'quantity' => $product->pivot->quantity,
+                        'min_stock' => $product->pivot->min_stock ?? null,
+                        'quantity' => $product->pivot->quantity ?? 0,
+                        'outlets' => $product->outlets
+                            ->filter(function ($o) use ($outlet) {
+                                return $o->id === $outlet->id;
+                            })
+                            ->values()
+                            ->map(function ($o) {
+                                return [
+                                    'id' => $o->id,
+                                    'name' => $o->name,
+                                    'qris_url' => $o->qris_url,
+                                    'tax' => $o->tax,
+                                ];
+                            }),
                     ];
                 });
 
@@ -284,4 +270,96 @@ class ProductController extends Controller
             return $this->errorResponse($th->getMessage());
         }
     }
+
+    public function getOutletProductsPOS(Request $request, $outletId)
+    {
+        try {
+            $user = $request->user();
+            $outlet = Outlet::with('cashRegisters')->findOrFail($outletId);
+
+            // Cek apakah user adalah kasir
+            $isCashier = strtolower($user->role) === 'kasir';
+
+            $products = $outlet->products()
+                ->with(['category', 'outlets'])
+                ->when($isCashier, function ($query) {
+                    $query->where('is_active', true);
+                })
+                ->get()
+                ->map(function ($product) use ($outlet) {
+                    return [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'sku' => $product->sku,
+                        'description' => $product->description,
+                        'price' => $product->price,
+                        'image' => asset('storage/' . $product->image),
+                        'is_active' => $product->is_active,
+                        'category' => [
+                            'id' => $product->category->id,
+                            'name' => $product->category->name,
+                        ],
+                        'min_stock' => $product->pivot->min_stock ?? null,
+                        'quantity' => $product->pivot->quantity ?? 0,
+                    ];
+                });
+
+            $outletData = [
+                'id' => $outlet->id,
+                'name' => $outlet->name,
+                'address' => $outlet->address,
+                'phone' => $outlet->phone,
+                'email' => $outlet->email,
+                'tax' => $outlet->tax,
+                'qris_url' => $outlet->qris ? asset('storage/' . $outlet->qris) : null,
+                'is_active' => $outlet->is_active,
+            ];
+
+            return $this->successResponse([
+                'products' => $products,
+                'outlet' => $outletData
+            ], 'Products and outlet data retrieved successfully');
+        } catch (\Throwable $th) {
+            return $this->errorResponse($th->getMessage());
+        }
+    }
+
+    // public function getOutletProductsPos(Request $request)
+    // {
+    //     try {
+    //         $user = $request->user(); // Dapatkan user saat ini
+    //         $outlet = Outlet::findOrFail($user->outlet_id);
+
+    //         // Cek apakah user adalah kasir
+    //         $isCashier = $user->role === 'kasir';
+    //         $products = $outlet->products()
+    //             ->with(['category'])
+    //             ->withPivot(['quantity', 'min_stock'])
+    //             ->when($isCashier, function ($query) {
+    //                 return $query->where('is_active', true); // Hanya produk aktif untuk kasir
+    //             })
+    //             ->get()
+    //             ->map(function ($product) {
+    //                 return [
+    //                     'id' => $product->id,
+    //                     'name' => $product->name,
+    //                     'sku' => $product->sku,
+    //                     'description' => $product->description,
+    //                     'price' => $product->price,
+    //                     'image' => asset('storage/' . $product->image),
+    //                     'is_active' => $product->is_active,
+    //                     'category' => [
+    //                         'id' => $product->category->id,
+    //                         'name' => $product->category->name,
+    //                     ],
+    //                     'min_stock' => $product->pivot->min_stock,
+    //                     'quantity' => $product->pivot->quantity,
+    //                 ];
+    //             });
+
+    //         return $this->successResponse($products, 'Products retrieved successfully');
+    //     } catch (\Throwable $th) {
+    //         return $this->errorResponse($th->getMessage());
+    //     }
+    // }
 }

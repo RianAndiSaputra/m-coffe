@@ -20,10 +20,20 @@ class CashRegisterTransactionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $transactions = CashRegisterTransaction::with(['cashRegister', 'shift', 'user'])->get();
+
+            $source = $request->source;
+            $outlet_id = $request->outlet_id;
+
+            $transactions = CashRegisterTransaction::with(['cashRegister', 'shift', 'user'])
+                ->where('source', $source)
+                ->orderBy('created_at', 'desc')
+                ->whereHas('cashRegister', function ($query) use ($outlet_id) {
+                    $query->where('outlet_id', $outlet_id);
+                })
+                ->get();
             return $this->successResponse($transactions, 'Successfully get cash register transactions');
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
@@ -182,14 +192,13 @@ class CashRegisterTransactionController extends Controller
     // menambah uang kas
     public function addCash(Request $request)
     {
-        
         try {
             $request->validate([
                 'amount' => 'required|numeric|min:0',
                 'outlet_id' => 'required|exists:outlets,id',
                 'reason' => 'nullable|string'
             ]);
-            
+
             $cashRegister = CashRegister::where('outlet_id', $request->outlet_id)->first();
 
             $transaction = $cashRegister->addCash(
@@ -209,7 +218,7 @@ class CashRegisterTransactionController extends Controller
     // mengurangi uang kas
     public function subtractCash(Request $request)
     {
-        
+
         try {
             $request->validate([
                 'amount' => 'required|numeric|min:0',
@@ -218,7 +227,7 @@ class CashRegisterTransactionController extends Controller
             ]);
 
             $cashRegister = CashRegister::where('outlet_id', $request->outlet_id)->first();
-            
+
             if ($request->amount > $cashRegister->balance) {
                 return $this->errorResponse('Insufficient balance');
             }
@@ -234,6 +243,18 @@ class CashRegisterTransactionController extends Controller
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
         }
+    }
 
+    public function cashRegisterHistory(Request $request)
+    {
+
+        $outletId =  $request->outlet_id;
+
+        try {
+            $cash = CashRegisterTransaction::where('outlet_id', $outletId)->orderBy('created_at', 'desc')->get();
+            return $this->successResponse($cash, 'Successfully getting cash history');
+        } catch (\Throwable $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 }

@@ -113,57 +113,17 @@ class ReportController extends Controller
         $request->validate([
             'year' => 'nullable|integer|min:2000|max:2100',
             'month' => 'nullable|integer|min:1|max:12',
+            'force_refresh' => 'nullable|boolean',
         ]);
 
         $year = $request->year ?: Carbon::now()->year;
         $month = $request->month ?: Carbon::now()->month;
+        $forceRefresh = $request->force_refresh ?: false;
 
         $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
         $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth();
 
-        // Cek apakah laporan bulanan sudah ada
-        $existingReport = MonthlyReport::where('outlet_id', $outlet->id)
-            ->where('report_date', $startDate->format('Y-m-01'))
-            ->first();
-
-        if ($existingReport) {
-            // Ambil data laporan yang tersimpan
-            $reportData = [
-                'total_sales' => $existingReport->total_sales,
-                'total_transactions' => $existingReport->total_transactions,
-                'average_transaction' => $existingReport->average_transaction,
-                'report_date' => $existingReport->report_date,
-            ];
-        } else {
-            // Generate laporan baru
-            $sales = Order::where('outlet_id', $outlet->id)
-                ->whereBetween('created_at', [$startDate, $endDate])
-                ->where('status', 'completed')
-                ->get();
-
-            $totalSales = $sales->sum('total');
-            $totalTransactions = $sales->count();
-            $averageTransaction = $totalTransactions > 0 ? $totalSales / $totalTransactions : 0;
-
-            // Simpan laporan bulanan
-            $report = new MonthlyReport();
-            $report->outlet_id = $outlet->id;
-            $report->report_date = $startDate->format('Y-m-d');
-            $report->total_sales = $totalSales;
-            $report->total_transactions = $totalTransactions;
-            $report->average_transaction = $averageTransaction;
-            $report->generated_by = $request->user()->id;
-            $report->save();
-
-            $reportData = [
-                'total_sales' => $totalSales,
-                'total_transactions' => $totalTransactions,
-                'average_transaction' => $averageTransaction,
-                'report_date' => $startDate->format('Y-m-d'),
-            ];
-        }
-
-        // Data penjualan harian dalam bulan
+        // Ambil data penjualan harian dalam bulan
         $dailySales = Order::where('outlet_id', $outlet->id)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->where('status', 'completed')
@@ -174,6 +134,83 @@ class ReportController extends Controller
             )
             ->groupBy('date')
             ->get();
+
+        // Get top categories for this month
+        $topCategories = DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->join('categories', 'products.category_id', '=', 'categories.id')
+            ->select(
+                'categories.id',
+                'categories.name',
+                DB::raw('SUM(order_items.quantity) as total_quantity'),
+                DB::raw('SUM(order_items.subtotal) as total_sales'),
+                DB::raw('COUNT(DISTINCT orders.id) as total_orders')
+            )
+            ->where('orders.outlet_id', $outlet->id)
+            ->whereBetween('orders.created_at', [$startDate, $endDate])
+            ->where('orders.status', 'completed')
+            ->groupBy('categories.id', 'categories.name')
+            ->orderBy('total_sales', 'desc')
+            ->limit(5)
+            ->get();
+
+        // Cek apakah laporan bulanan sudah ada
+        $existingReport = MonthlyReport::where('outlet_id', $outlet->id)
+            ->where('report_date', $startDate->format('Y-m-01'))
+            ->first();
+
+        // Hitung total penjualan dari data harian yang aktual
+        $actualTotalSales = $dailySales->sum('total_sales');
+        $actualTotalTransactions = $dailySales->sum('total_orders');
+        $actualAverageTransaction = $actualTotalTransactions > 0 ? $actualTotalSales / $actualTotalTransactions : 0;
+
+        if ($existingReport && !$forceRefresh) {
+            // Periksa apakah data yang disimpan masih cocok dengan data aktual
+            if (
+                $existingReport->total_sales != $actualTotalSales ||
+                $existingReport->total_transactions != $actualTotalTransactions
+            ) {
+
+                // Update laporan jika ada perbedaan
+                $existingReport->total_sales = $actualTotalSales;
+                $existingReport->total_transactions = $actualTotalTransactions;
+                $existingReport->average_transaction = $actualAverageTransaction;
+                $existingReport->updated_at = now();
+                $existingReport->save();
+            }
+
+            $reportData = [
+                'total_sales' => $existingReport->total_sales,
+                'total_transactions' => $existingReport->total_transactions,
+                'average_transaction' => $existingReport->average_transaction,
+                'report_date' => $existingReport->report_date,
+                'last_updated' => $existingReport->updated_at,
+            ];
+        } else {
+            // Generate laporan baru atau refresh laporan
+            if ($existingReport) {
+                $report = $existingReport;
+            } else {
+                $report = new MonthlyReport();
+                $report->outlet_id = $outlet->id;
+                $report->report_date = $startDate->format('Y-m-d');
+                $report->generated_by = $request->user()->id;
+            }
+
+            $report->total_sales = $actualTotalSales;
+            $report->total_transactions = $actualTotalTransactions;
+            $report->average_transaction = $actualAverageTransaction;
+            $report->save();
+
+            $reportData = [
+                'total_sales' => $actualTotalSales,
+                'total_transactions' => $actualTotalTransactions,
+                'average_transaction' => $actualAverageTransaction,
+                'report_date' => $startDate->format('Y-m-d'),
+                'last_updated' => $report->updated_at,
+            ];
+        }
 
         // Penjualan produk terbaik
         $topProducts = DB::table('order_items')
@@ -202,6 +239,17 @@ class ReportController extends Controller
                 'summary' => $reportData,
                 'daily_sales' => $dailySales,
                 'top_products' => $topProducts,
+                'top_categories' => $topCategories->map(function ($category) {
+                    return [
+                        'name' => $category->name,
+                        'total_quantity' => $category->total_quantity,
+                        'total_sales' => $category->total_sales,
+                        'total_orders' => $category->total_orders,
+                        'average_order_value' => $category->total_orders > 0
+                            ? round($category->total_sales / $category->total_orders, 2)
+                            : 0
+                    ];
+                }),
             ]
         ]);
     }
@@ -219,20 +267,22 @@ class ReportController extends Controller
             'year' => 'nullable|integer|min:2000|max:2100',
             'month' => 'nullable|integer|min:1|max:12',
         ]);
-
-        $year = $request->year ?: Carbon::now()->year;
-        $month = $request->month ?: Carbon::now()->month;
-
-        $reportDate = Carbon::createFromDate($year, $month, 1)->format('Y-m-d');
-
-        // Cek apakah laporan sudah ada
+    
+        $year = $request->year ?? now()->year;
+        $month = $request->month ?? now()->month;
+    
+        $reportDate = Carbon::create($year, $month, 1)->format('Y-m-d');
+        $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+        $endDate = Carbon::create($year, $month, 1)->endOfMonth();
+        $previousMonthDate = Carbon::create($year, $month, 1)->subMonth()->format('Y-m-d');
+    
+        // Cek jika laporan sudah ada
         $existingReports = MonthlyInventoryReport::where('outlet_id', $outlet->id)
-            ->where('report_date', $reportDate)
-            ->with('product') // Eager load product data
+            ->whereDate('report_date', $reportDate)
+            ->with('product')
             ->get();
-
-        if ($existingReports->count() > 0) {
-            // Return laporan yang sudah ada
+    
+        if ($existingReports->isNotEmpty()) {
             return response()->json([
                 'status' => true,
                 'data' => [
@@ -244,80 +294,75 @@ class ReportController extends Controller
                 ]
             ]);
         }
-
-        // Jika belum ada laporan, generate laporan baru
-        $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
-        $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth();
-        $previousMonthDate = Carbon::createFromDate($year, $month, 1)->subMonth()->format('Y-m-d');
-
-        // Ambil produk di outlet
+    
+        // Ambil semua produk dengan inventory yang terkait
         $products = Product::whereHas('inventory', function ($query) use ($outlet) {
             $query->where('outlet_id', $outlet->id);
         })->get();
-
+    
+        // Preload semua inventory
+        $inventories = Inventory::where('outlet_id', $outlet->id)
+            ->whereIn('product_id', $products->pluck('id'))
+            ->get()
+            ->keyBy('product_id');
+    
         $reports = [];
-        $totalStockValue = 0;
-
+    
         foreach ($products as $product) {
-            // Cek inventory saat ini
-            $currentStock = Inventory::where('outlet_id', $outlet->id)
-                ->where('product_id', $product->id)
-                ->first();
-
-            // Riwayat transaksi inventory
-            $historySales = DB::table('inventory_histories')
+            $productId = $product->id;
+    
+            $currentStock = $inventories[$productId]->quantity ?? 0;
+    
+            $sales = DB::table('inventory_histories')
                 ->where('outlet_id', $outlet->id)
-                ->where('product_id', $product->id)
+                ->where('product_id', $productId)
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->where('type', 'sale')
                 ->sum('quantity_change');
-
-            $historyPurchases = DB::table('inventory_histories')
+    
+            $purchases = DB::table('inventory_histories')
                 ->where('outlet_id', $outlet->id)
-                ->where('product_id', $product->id)
+                ->where('product_id', $productId)
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->where('type', 'purchase')
                 ->sum('quantity_change');
-
-            $historyAdjustments = DB::table('inventory_histories')
+    
+            $adjustments = DB::table('inventory_histories')
                 ->where('outlet_id', $outlet->id)
-                ->where('product_id', $product->id)
+                ->where('product_id', $productId)
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->where('type', 'adjustment')
                 ->sum('quantity_change');
-
-            // Cari laporan bulan sebelumnya untuk opening stock
-            $previousMonthReport = MonthlyInventoryReport::where('outlet_id', $outlet->id)
-                ->where('product_id', $product->id)
-                ->where('report_date', $previousMonthDate)
+    
+            // Opening stock dari bulan sebelumnya
+            $previousReport = MonthlyInventoryReport::where('outlet_id', $outlet->id)
+                ->where('product_id', $productId)
+                ->whereDate('report_date', $previousMonthDate)
                 ->first();
-
-            $openingStock = $previousMonthReport ? $previousMonthReport->closing_stock : 0;
-            $closingStock = $currentStock ? $currentStock->quantity : 0;
-            $stockValue = $closingStock * $product->price;
-            $totalStockValue += $stockValue;
-
-            // Create report
-            $report = new MonthlyInventoryReport();
-            $report->outlet_id = $outlet->id;
-            $report->product_id = $product->id;
-            $report->report_date = $reportDate;
-            $report->opening_stock = $openingStock;
-            $report->closing_stock = $closingStock;
-            $report->sales_quantity = abs($historySales);
-            $report->purchase_quantity = abs($historyPurchases);
-            $report->adjustment_quantity = $historyAdjustments;
-            $report->stock_value = $stockValue;
-            $report->save();
-
-            $reports[] = $report;
+    
+            $openingStock = $previousReport->closing_stock ?? 0;
+            $closingStock = $currentStock;
+            $stockValue = $closingStock * ($product->price ?? 0);
+    
+            $report = MonthlyInventoryReport::create([
+                'outlet_id' => $outlet->id,
+                'product_id' => $productId,
+                'report_date' => $reportDate,
+                'opening_stock' => $openingStock,
+                'closing_stock' => $closingStock,
+                'sales_quantity' => abs($sales),
+                'purchase_quantity' => abs($purchases),
+                'adjustment_quantity' => $adjustments,
+                'stock_value' => $stockValue,
+            ]);
+    
+            $reports[] = $report->id;
         }
-
-        // Eager load product information
-        $reports = MonthlyInventoryReport::whereIn('id', collect($reports)->pluck('id'))
+    
+        $reports = MonthlyInventoryReport::whereIn('id', $reports)
             ->with('product')
             ->get();
-
+    
         return response()->json([
             'status' => true,
             'data' => [
@@ -325,10 +370,243 @@ class ReportController extends Controller
                 'month' => $month,
                 'outlet' => $outlet->name,
                 'inventory_reports' => $reports,
-                'total_stock_value' => $totalStockValue,
+                'total_stock_value' => $reports->sum('stock_value'),
             ]
         ]);
     }
+    
+
+    // public function monthlyInventory(Request $request, Outlet $outlet)
+    // {
+    //     $request->validate([
+    //         'year' => 'nullable|integer|min:2000|max:2100',
+    //         'month' => 'nullable|integer|min:1|max:12',
+    //         'force_refresh' => 'nullable|boolean', // Parameter untuk paksa pembaruan
+    //     ]);
+
+    //     $year = $request->year ?: Carbon::now()->year;
+    //     $month = $request->month ?: Carbon::now()->month;
+    //     $forceRefresh = $request->force_refresh ?: false;
+
+    //     $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
+    //     $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth();
+
+    //     try {
+    //         // Cek apakah laporan bulanan sudah ada
+    //         $existingReports = MonthlyInventoryReport::where('outlet_id', $outlet->id)
+    //             ->where('report_date', $startDate->format('Y-m-01'))
+    //             ->with('product')
+    //             ->get();
+
+    //         if ($existingReports->count() > 0 && !$forceRefresh) {
+    //             $totalStockValue = $existingReports->sum('stock_value');
+
+    //             // Hitung product turnover rates dari data yang ada
+    //             $productTurnoverRates = $existingReports->map(function ($report) {
+    //                 $averageStock = ($report->opening_stock + $report->closing_stock) / 2;
+    //                 $salesQuantity = $report->sales_quantity;
+
+    //                 $turnoverRate = $averageStock > 0 ? $salesQuantity / $averageStock : ($salesQuantity > 0 ? 999 : 0);
+
+    //                 return [
+    //                     'product_id' => $report->product_id,
+    //                     'product_name' => $report->product->name,
+    //                     'turnover_rate' => $turnoverRate,
+    //                     'sales_quantity' => $salesQuantity,
+    //                     'average_stock' => $averageStock,
+    //                     'closing_stock' => $report->closing_stock,
+    //                     'stock_value' => $report->stock_value
+    //                 ];
+    //             })->all();
+
+    //             // Calculate fast and slow moving products
+    //             $fastMovingProducts = collect($productTurnoverRates)
+    //                 ->filter(function ($item) {
+    //                     return $item['sales_quantity'] > 0;
+    //                 })
+    //                 ->sortByDesc('turnover_rate')
+    //                 ->take(5)
+    //                 ->values();
+
+    //             $slowMovingProducts = collect($productTurnoverRates)
+    //                 ->filter(function ($item) {
+    //                     return $item['closing_stock'] > 0 && $item['turnover_rate'] >= 0;
+    //                 })
+    //                 ->sortBy('turnover_rate')
+    //                 ->take(5)
+    //                 ->values();
+
+    //             return response()->json([
+    //                 'status' => true,
+    //                 'data' => [
+    //                     'year' => $year,
+    //                     'month' => $month,
+    //                     'outlet' => $outlet->name,
+    //                     'is_cached' => true,
+    //                     'report_date' => $startDate->format('Y-m-d'),
+    //                     'last_updated' => $existingReports->max('updated_at'),
+    //                     'inventory_reports' => $existingReports->map(function ($report) {
+    //                         return [
+    //                             'name' => $report->product->name,
+    //                             'opening_stock' => $report->opening_stock,
+    //                             'closing_stock' => $report->closing_stock,
+    //                             'sales_quantity' => $report->sales_quantity,
+    //                             'purchase_quantity' => $report->purchase_quantity,
+    //                             'adjustment_quantity' => $report->adjustment_quantity,
+    //                             'stock_value' => $report->stock_value
+    //                         ];
+    //                     }),
+    //                     'total_stock_value' => $totalStockValue,
+    //                     'fast_moving_products' => $fastMovingProducts,
+    //                     'slow_moving_products' => $slowMovingProducts,
+    //                 ]
+    //             ]);
+    //         }
+
+    //         // Generate laporan baru jika tidak ada atau force refresh
+    //         $products = Product::whereHas('inventory', function ($query) use ($outlet) {
+    //             $query->where('outlet_id', $outlet->id);
+    //         })->get();
+
+    //         $reports = [];
+    //         $totalStockValue = 0;
+    //         $productTurnoverRates = [];
+
+    //         foreach ($products as $product) {
+    //             // Get current inventory
+    //             $currentInventory = Inventory::where('outlet_id', $outlet->id)
+    //                 ->where('product_id', $product->id)
+    //                 ->first();
+
+    //             // Get opening stock
+    //             $openingStockHistory = DB::table('inventory_histories')
+    //                 ->where('outlet_id', $outlet->id)
+    //                 ->where('product_id', $product->id)
+    //                 ->where('created_at', '<', $startDate)
+    //                 ->orderBy('created_at', 'desc')
+    //                 ->first();
+
+    //             $openingStock = $openingStockHistory ? $openingStockHistory->quantity_after : 0;
+
+    //             // Get transactions
+    //             $salesTransactions = DB::table('inventory_histories')
+    //                 ->where('outlet_id', $outlet->id)
+    //                 ->where('product_id', $product->id)
+    //                 ->whereBetween('created_at', [$startDate, $endDate])
+    //                 ->where('type', 'sale')
+    //                 ->sum('quantity_change');
+
+    //             $purchaseTransactions = DB::table('inventory_histories')
+    //                 ->where('outlet_id', $outlet->id)
+    //                 ->where('product_id', $product->id)
+    //                 ->whereBetween('created_at', [$startDate, $endDate])
+    //                 ->where('type', 'purchase')
+    //                 ->sum('quantity_change');
+
+    //             $adjustmentTransactions = DB::table('inventory_histories')
+    //                 ->where('outlet_id', $outlet->id)
+    //                 ->where('product_id', $product->id)
+    //                 ->whereBetween('created_at', [$startDate, $endDate])
+    //                 ->where('type', 'adjustment')
+    //                 ->sum('quantity_change');
+
+    //             $closingStock = $currentInventory ? $currentInventory->quantity : 0;
+    //             $stockValue = $closingStock * $product->price;
+    //             $totalStockValue += $stockValue;
+
+    //             // Create or update report
+    //             $report = MonthlyInventoryReport::updateOrCreate(
+    //                 [
+    //                     'outlet_id' => $outlet->id,
+    //                     'product_id' => $product->id,
+    //                     'report_date' => $startDate->format('Y-m-01')
+    //                 ],
+    //                 [
+    //                     'opening_stock' => abs($openingStock),
+    //                     'closing_stock' => abs($closingStock),
+    //                     'sales_quantity' => abs($salesTransactions),
+    //                     'purchase_quantity' => abs($purchaseTransactions),
+    //                     'adjustment_quantity' => $adjustmentTransactions,
+    //                     'stock_value' => $stockValue,
+    //                     'generated_by' => $request->user()->id ?? null
+    //                 ]
+    //             );
+
+    //             // Calculate turnover rate
+    //             $averageStock = ($openingStock + $closingStock) / 2;
+    //             $salesQuantity = abs($salesTransactions);
+
+    //             $turnoverRate = $averageStock > 0 ? $salesQuantity / $averageStock : ($salesQuantity > 0 ? 999 : 0);
+
+    //             $productTurnoverRates[] = [
+    //                 'product_id' => $product->id,
+    //                 'product_name' => $product->name,
+    //                 'turnover_rate' => $turnoverRate,
+    //                 'sales_quantity' => $salesQuantity,
+    //                 'average_stock' => $averageStock,
+    //                 'closing_stock' => $closingStock,
+    //                 'stock_value' => $stockValue
+    //             ];
+
+    //             $reports[] = $report;
+    //         }
+
+    //         // Reload reports with product information
+    //         $reports = MonthlyInventoryReport::where('outlet_id', $outlet->id)
+    //             ->where('report_date', $startDate->format('Y-m-01'))
+    //             ->with('product')
+    //             ->get();
+
+    //         // Calculate fast and slow moving products
+    //         $fastMovingProducts = collect($productTurnoverRates)
+    //             ->filter(function ($item) {
+    //                 return $item['sales_quantity'] > 0;
+    //             })
+    //             ->sortByDesc('turnover_rate')
+    //             ->take(5)
+    //             ->values();
+
+    //         $slowMovingProducts = collect($productTurnoverRates)
+    //             ->filter(function ($item) {
+    //                 return $item['closing_stock'] > 0 && $item['turnover_rate'] >= 0;
+    //             })
+    //             ->sortBy('turnover_rate')
+    //             ->take(5)
+    //             ->values();
+
+    //         return response()->json([
+    //             'status' => true,
+    //             'data' => [
+    //                 'year' => $year,
+    //                 'month' => $month,
+    //                 'outlet' => $outlet->name,
+    //                 'is_cached' => false,
+    //                 'report_date' => $startDate->format('Y-m-d'),
+    //                 'last_updated' => now(),
+    //                 'inventory_reports' => $reports->map(function ($report) {
+    //                     return [
+    //                         'name' => $report->product->name,
+    //                         'opening_stock' => $report->opening_stock,
+    //                         'closing_stock' => $report->closing_stock,
+    //                         'sales_quantity' => $report->sales_quantity,
+    //                         'purchase_quantity' => $report->purchase_quantity,
+    //                         'adjustment_quantity' => $report->adjustment_quantity,
+    //                         'stock_value' => $report->stock_value
+    //                     ];
+    //                 }),
+    //                 'total_stock_value' => $totalStockValue,
+    //                 'fast_moving_products' => $fastMovingProducts,
+    //                 'slow_moving_products' => $slowMovingProducts,
+    //             ]
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         \Log::error('Monthly Inventory Report Error: ' . $e->getMessage());
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'Error generating monthly inventory report: ' . $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
 
     /**
      * Laporan inventory berdasarkan tanggal
@@ -513,54 +791,54 @@ class ReportController extends Controller
      * @param  \App\Models\Outlet  $outlet
      * @return \Illuminate\Http\Response
      */
-    public function dashboardSummary(Request $request, Outlet $outlet)
+    public function dashboardSummaryOld(Request $request, Outlet $outlet)
     {
         $today = Carbon::today();
         $yesterday = Carbon::yesterday();
         $thisMonth = Carbon::now()->startOfMonth();
         $lastMonth = Carbon::now()->subMonth()->startOfMonth();
         $endOfYesterday = Carbon::yesterday()->endOfDay();
-    
+
         // Sales hari ini
         $todaySales = Order::where('outlet_id', $outlet->id)
             ->whereBetween('created_at', [$today->startOfDay(), $today->endOfDay()])
             ->where('status', 'completed')
             ->sum('total');
-    
+
         // Sales kemarin
         $yesterdaySales = Order::where('outlet_id', $outlet->id)
             ->whereBetween('created_at', [$yesterday->startOfDay(), $yesterday->endOfDay()])
             ->where('status', 'completed')
             ->sum('total');
-    
+
         // Persentase perubahan
         $salesChange = $yesterdaySales > 0
             ? (($todaySales - $yesterdaySales) / $yesterdaySales) * 100
             : ($todaySales > 0 ? 100 : 0);
-    
+
         // Order hari ini
         $todayOrders = Order::where('outlet_id', $outlet->id)
             ->whereDate('created_at', $today)
             ->where('status', 'completed')
             ->count();
-    
+
         // Sales bulan ini
         $thisMonthSales = Order::where('outlet_id', $outlet->id)
             ->where('created_at', '>=', $thisMonth)
             ->where('status', 'completed')
             ->sum('total');
-    
+
         // Sales bulan lalu
         $lastMonthSales = Order::where('outlet_id', $outlet->id)
             ->whereBetween('created_at', [$lastMonth, $thisMonth->copy()->subDay()])
             ->where('status', 'completed')
             ->sum('total');
-    
+
         // Monthly change
         $monthlySalesChange = $lastMonthSales > 0
             ? (($thisMonthSales - $lastMonthSales) / $lastMonthSales) * 100
             : ($thisMonthSales > 0 ? 100 : 0);
-    
+
         // Top 5 produk hari ini
         $topProducts = DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
@@ -577,7 +855,7 @@ class ReportController extends Controller
             ->orderByDesc('quantity')
             ->limit(5)
             ->get();
-    
+
         // Stok yang perlu perhatian (low stock)
         $lowStock = Inventory::where('outlet_id', $outlet->id)
             ->where('quantity', '<', $outlet->min_stock)
@@ -590,13 +868,13 @@ class ReportController extends Controller
                     'min_stock' => 10,
                 ];
             });
-    
+
         // Shift aktif
         $activeShift = Shift::where('outlet_id', $outlet->id)
             ->where('is_closed', false)
             ->with('user')
             ->first();
-    
+
         return response()->json([
             'status' => true,
             'data' => [
@@ -621,5 +899,235 @@ class ReportController extends Controller
             ]
         ]);
     }
-    
+
+    //baru 
+    public function dashboardSummary(Request $request, Outlet $outlet)
+    {
+        try {
+            $today = Carbon::today();
+            $yesterday = Carbon::yesterday();
+            $thisMonth = Carbon::now()->startOfMonth();
+            $lastMonth = Carbon::now()->subMonth()->startOfMonth();
+
+            // Get start and end of week
+            $startOfWeek = Carbon::now()->startOfWeek();
+            $endOfWeek = Carbon::now()->endOfWeek();
+
+            // Data untuk response
+            $responseData = [
+                'outlet' => $outlet->name,
+                'cash' => $outlet->cashRegisters->balance,
+                'date' => $today->format('Y-m-d'),
+                'summary' => [],
+                'sales' => [],
+                // 'orders_today' => 0,
+                'daily_sales' => [], // Ganti hourly_sales menjadi daily_sales
+                'category_sales' => [],
+                'payment_method_sales' => [],
+                'top_products' => [],
+                'low_stock_items' => [],
+                'active_shift' => null,
+            ];
+
+            try {
+                // Daily sales data
+                $sales = Order::where('outlet_id', $outlet->id)
+                    ->whereDate('created_at', $today)
+                    ->where('status', 'completed')
+                    ->get();
+
+                $totalSales = $sales->sum('total');
+                $totalItems = OrderItem::whereIn('order_id', $sales->pluck('id'))->sum('quantity');
+                $totalOrders = $sales->count();
+                $averageOrderValue = $totalOrders > 0 ? $totalSales / $totalOrders : 0;
+
+                $responseData['summary'] = [
+                    'total_sales' => $totalSales,
+                    'total_orders' => $totalOrders,
+                    'total_items' => $totalItems,
+                    'average_order_value' => $averageOrderValue,
+                ];
+
+                // Sales comparison data
+                $yesterdaySales = Order::where('outlet_id', $outlet->id)
+                    ->whereDate('created_at', $yesterday)
+                    ->where('status', 'completed')
+                    ->sum('total');
+
+                $salesChange = $yesterdaySales > 0
+                    ? (($totalSales - $yesterdaySales) / $yesterdaySales) * 100
+                    : ($totalSales > 0 ? 100 : 0);
+
+                // Monthly sales data
+                $thisMonthSales = Order::where('outlet_id', $outlet->id)
+                    ->whereMonth('created_at', $today->month)
+                    ->whereYear('created_at', $today->year)
+                    ->where('status', 'completed')
+                    ->sum('total');
+
+                $lastMonthSales = Order::where('outlet_id', $outlet->id)
+                    ->whereMonth('created_at', $lastMonth->month)
+                    ->whereYear('created_at', $lastMonth->year)
+                    ->where('status', 'completed')
+                    ->sum('total');
+
+                $monthlySalesChange = $lastMonthSales > 0
+                    ? (($thisMonthSales - $lastMonthSales) / $lastMonthSales) * 100
+                    : ($thisMonthSales > 0 ? 100 : 0);
+
+                $responseData['sales'] = [
+                    'today' => $totalSales,
+                    'yesterday' => $yesterdaySales,
+                    'change_percentage' => round($salesChange, 2),
+                    'this_month' => $thisMonthSales,
+                    'last_month' => $lastMonthSales,
+                    'monthly_change_percentage' => round($monthlySalesChange, 2),
+                ];
+
+                // Daily sales data (per day of week)
+                $weeklyOrders = Order::where('outlet_id', $outlet->id)
+                    ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
+                    ->where('status', 'completed')
+                    ->get();
+
+                $dailySalesData = [];
+                $daysOfWeek = [
+                    'Senin' => 1,
+                    'Selasa' => 2,
+                    'Rabu' => 3,
+                    'Kamis' => 4,
+                    'Jumat' => 5,
+                    'Sabtu' => 6,
+                    'Minggu' => 0,
+                ];
+
+                // Initialize data for each day
+                foreach ($daysOfWeek as $day => $dayNumber) {
+                    $dailySalesData[$day] = [
+                        'orders' => 0,
+                        'sales' => 0,
+                        'items' => 0,
+                        'average_order' => 0,
+                        'day_number' => $dayNumber,
+                    ];
+                }
+
+                // Fill in the actual data
+                foreach ($weeklyOrders as $order) {
+                    $dayName = Carbon::parse($order->created_at)->locale('id')->isoFormat('dddd');
+                    $dayItems = OrderItem::where('order_id', $order->id)->sum('quantity');
+
+                    $dailySalesData[$dayName]['orders']++;
+                    $dailySalesData[$dayName]['sales'] += $order->total;
+                    $dailySalesData[$dayName]['items'] += $dayItems;
+                }
+
+                // Calculate averages and format data
+                foreach ($dailySalesData as $day => &$data) {
+                    $data['average_order'] = $data['orders'] > 0 ?
+                        round($data['sales'] / $data['orders'], 2) : 0;
+
+                    // Format numbers
+                    $data['sales'] = round($data['sales'], 2);
+                    $data['average_order'] = round($data['average_order'], 2);
+                }
+
+                // Sort by day number
+                uasort($dailySalesData, function ($a, $b) {
+                    return $a['day_number'] - $b['day_number'];
+                });
+
+                $responseData['daily_sales'] = $dailySalesData;
+
+                // Category sales data
+                $responseData['category_sales'] = DB::table('order_items')
+                    ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                    ->join('products', 'order_items.product_id', '=', 'products.id')
+                    ->join('categories', 'products.category_id', '=', 'categories.id')
+                    ->select(
+                        'categories.name',
+                        DB::raw('SUM(order_items.quantity) as total_quantity'),
+                        DB::raw('SUM(order_items.subtotal) as total_sales')
+                    )
+                    ->where('orders.outlet_id', $outlet->id)
+                    ->whereDate('orders.created_at', $today)
+                    ->where('orders.status', 'completed')
+                    ->groupBy('categories.name')
+                    ->get();
+
+                // Payment method sales data
+                $responseData['payment_method_sales'] = $sales->groupBy('payment_method')
+                    ->map(function ($items) {
+                        return [
+                            'count' => $items->count(),
+                            'total' => $items->sum('total'),
+                        ];
+                    });
+
+                // Top products data
+                $responseData['top_products'] = DB::table('order_items')
+                    ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                    ->join('products', 'order_items.product_id', '=', 'products.id')
+                    ->select(
+                        'products.name',
+                        DB::raw('SUM(order_items.quantity) as quantity'),
+                        DB::raw('SUM(order_items.subtotal) as total')
+                    )
+                    ->where('orders.outlet_id', $outlet->id)
+                    ->whereDate('orders.created_at', $today)
+                    ->where('orders.status', 'completed')
+                    ->groupBy('products.name')
+                    ->orderByDesc('quantity')
+                    ->limit(5)
+                    ->get();
+
+                // Low stock items
+                $minStock = $outlet->min_stock ?? 10;
+                $responseData['low_stock_items'] = Inventory::where('outlet_id', $outlet->id)
+                    ->where('quantity', '<', $minStock)
+                    ->with('product')
+                    ->get()
+                    ->map(function ($item) use ($minStock) {
+                        return [
+                            'product_name' => $item->product->name,
+                            'quantity' => $item->quantity,
+                            'min_stock' => $minStock,
+                        ];
+                    });
+
+                // Active shift
+                $activeShift = Shift::where('outlet_id', $outlet->id)
+                    // ->where('is_closed', true)
+                    ->with('user')
+                    ->first();
+
+                if ($activeShift) {
+                    $responseData['active_shift'] = [
+                        'cashier' => $activeShift->user->name,
+                        'started_at' => $activeShift->start_time,
+                        'duration' => Carbon::parse($activeShift->start_time)->diffForHumans(null, true),
+                    ];
+                }
+
+                return $this->successResponse($responseData, 'Successfully getting dashboard data');
+
+                // return response()->json([
+                //     'status' => true,
+                //     'data' => $responseData
+                // ]);
+            } catch (\Exception $e) {
+                \Log::error('Error in data gathering: ' . $e->getMessage());
+                // throw $e;
+
+                return $this->errorResponse('Error in data gathering', $e->getMessage());
+            }
+        } catch (\Exception $e) {
+            \Log::error('Daily sales error: ' . $e->getMessage());
+            return $this->errorResponse('Error in data gathering', $e->getMessage());
+            // return response()->json([
+            //     'status' => false,
+            //     'message' => 'Error generating daily sales report: ' . $e->getMessage()
+            // ], 500);
+        }
+    }
 }

@@ -37,7 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/outlets', 'index');
             Route::post('/outlets', 'store');
             Route::get('/outlets/{outlet}', 'show');
-            Route::put('/outlets/{outlet}', 'update'); 
+            Route::post('/outlets/{outlet}', 'update'); 
             Route::delete('/outlets/{outlet}', 'destroy');
         });
 
@@ -112,7 +112,7 @@ Route::middleware('auth:sanctum')->group(function () {
         });
 
         Route::controller(ProductController::class)->group(function () {
-            Route::get('/products/outlet/pos', 'getOutletProductsPos');
+            Route::get('/products/outlet/pos/{outletId}', 'getOutletProductsPos');
             Route::get('/products/outlet/{outletId}', 'getOutletProducts');
         });
 
@@ -122,6 +122,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/orders', 'store');
             Route::get('/orders/cancel/{id}', 'cancelOrder');
             Route::get('/orders/history', 'orderHistory');
+            Route::get('/orders/history/admin', 'orderAdmin');
         });
 
         Route::controller(CashRegisterController::class)->group(function () {
