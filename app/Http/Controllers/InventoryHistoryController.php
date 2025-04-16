@@ -42,7 +42,7 @@ class InventoryHistoryController extends Controller
                 'outlet_id' => 'required|exists:outlets,id',
                 'product_id' => 'required|exists:products,id',
                 'quantity_change' => 'required|integer',
-                'type' => 'required|in:purchase,sale,adjustment,transfer,stocktake',
+                'type' => 'required|in:purchase,sale,adjustment,transfer,stocktake,shipment,other',
                 'notes' => 'nullable|string',
             ]);
 
@@ -80,6 +80,147 @@ class InventoryHistoryController extends Controller
             return $this->errorResponse($th->getMessage());
         }
     }
+
+    public function cashierAdjustStock(Request $request)
+    {
+        try {
+            $request->validate([
+                'outlet_id' => 'required|exists:outlets,id',
+                'product_id' => 'required|exists:products,id',
+                'quantity_change' => 'required|integer',
+                'type' => 'required|in:purchase,sale,adjustment,transfer,stocktake,shipment,other',
+                'notes' => 'nullable|string',
+            ]);
+
+            // Tidak mengupdate inventory langsung, hanya mencatat request kasir
+            $inventory = Inventory::firstOrCreate(
+                [
+                    'outlet_id' => $request->outlet_id,
+                    'product_id' => $request->product_id,
+                ],
+                ['quantity' => 0]
+            );
+
+            // Mencatat perubahan stok secara sementara
+            $inventoryHistory = InventoryHistory::create([
+                'outlet_id' => $request->outlet_id,
+                'product_id' => $request->product_id,
+                'quantity_before' => $inventory->quantity,
+                'quantity_after' => $inventory->quantity, // Belum diubah sampai admin approve
+                'quantity_change' => $request->quantity_change,
+                'type' => $request->type,
+                'notes' => $request->notes,
+                'user_id' => $request->user()->id,
+                'status' => 'pending', // request kasir ditandai pending
+            ]);
+
+            return $this->successResponse($inventoryHistory, 'Stock adjustment request has been submitted and is awaiting admin approval.');
+        } catch (\Throwable $th) {
+            return $this->errorResponse($th->getMessage());
+        }
+    }
+
+    public function adminApprovStock(Request $request)
+    {
+        try {
+            $request->validate([
+                'inventory_history_id' => 'required|exists:inventory_histories,id',
+            ]);
+
+            $inventoryHistory = InventoryHistory::where('id', $request->inventory_history_id)
+                ->where('status', 'pending')
+                ->first();
+
+            if (!$inventoryHistory) {
+                return $this->errorResponse('No pending stock adjustment found for the provided ID.');
+            }
+
+            DB::beginTransaction();
+
+            $inventory = Inventory::firstOrCreate(
+                [
+                    'outlet_id' => $inventoryHistory->outlet_id,
+                    'product_id' => $inventoryHistory->product_id,
+                ],
+                ['quantity' => 0]
+            );
+            $quantityBefore = $inventory->quantity;
+            $inventory->quantity += $inventoryHistory->quantity_change;
+            $inventory->save();
+
+            $inventoryHistory->update([
+                'quantity_before' => $quantityBefore,
+                'quantity_after'  => $inventory->quantity,
+                'status' => 'approved',
+                'approved_by' => $request->user()->id,
+                'approved_at' => now(),
+            ]);
+
+            DB::commit();
+
+            return $this->successResponse($inventoryHistory, 'Stock adjustment approved successfully.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return $this->errorResponse($th->getMessage());
+        }
+    }
+
+    public function adminRejectStock(Request $request)
+    {
+        try {
+            $request->validate([
+                'inventory_history_id' => 'required|exists:inventory_histories,id',
+            ]);
+
+            $inventoryHistory = InventoryHistory::where('id', $request->inventory_history_id)
+                ->where('status', 'pending')
+                ->first();
+
+            if (!$inventoryHistory) {
+                return $this->errorResponse('No pending stock adjustment found for the provided ID.');
+            }
+
+            $inventoryHistory->update([
+                'status' => 'rejected',
+                'approved_by' => $request->user()->id,
+                'approved_at' => now(),
+            ]);
+
+            return $this->successResponse($inventoryHistory, 'Stock adjustment has been rejected.');
+        } catch (\Throwable $th) {
+            return $this->errorResponse($th->getMessage());
+        }
+    }
+
+
+    public function showCashierInventoryHistories(Request $request, $outletId)
+    {
+        try {
+
+            $date = $request->date;
+
+            $cashierHistories = InventoryHistory::with(['user', 'product'])
+                ->where('outlet_id', $outletId)
+                ->where('type', '!=', 'sale')
+                ->when($date, function ($query) use ($date) {
+                    $query->whereDate('created_at', $date);
+                })
+                ->whereHas('user', function ($query) {
+                    $query->where('role', 'kasir');
+                })
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return $this->successResponse(
+                $cashierHistories,
+                'Inventory histories from cashier retrieved successfully.'
+            );
+        } catch (\Throwable $th) {
+            return $this->errorResponse($th->getMessage());
+        }
+    }
+
+
 
     public function getStock($outletId)
     {

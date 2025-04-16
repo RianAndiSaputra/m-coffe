@@ -17,10 +17,15 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained('products');
             $table->integer('quantity_before');
             $table->integer('quantity_after');
-            $table->integer('quantity_change');
-            $table->enum('type', ['purchase', 'sale', 'adjustment', 'other', 'stocktake']);
+            $table->integer('quantity_change')->nullable();
+            $table->enum('type', ['purchase', 'sale', 'adjustment', 'other', 'stocktake', 'shipment', 'transfer_in', 'transfer_out']);
             $table->text('notes')->nullable();
             $table->foreignId('user_id')->constrained('users');
+
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('approved'); // atau default 'approved' untuk perubahan langsung
+            $table->unsignedBigInteger('approved_by')->nullable();
+            $table->timestamp('approved_at')->nullable();
+
             $table->timestamps();
         });
     }

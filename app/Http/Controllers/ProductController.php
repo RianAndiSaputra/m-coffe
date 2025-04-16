@@ -233,6 +233,7 @@ class ProductController extends Controller
                 ->when($isCashier, function ($query) {
                     $query->where('is_active', true);
                 })
+                ->orderBy('name', 'asc')
                 ->get()
                 ->map(function ($product) use ($outlet) {
                     return [
@@ -286,6 +287,7 @@ class ProductController extends Controller
                     $query->where('is_active', true);
                 })
                 ->get()
+                ->orderBy('name', 'asc')
                 ->map(function ($product) use ($outlet) {
                     return [
                         'id' => $product->id,

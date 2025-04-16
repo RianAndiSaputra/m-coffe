@@ -56,11 +56,12 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/products/{product}', 'update');
             Route::delete('/products/{product}', 'destroy');
             Route::get('/products/outlet/{outletId}', 'getOutletProducts');
-
         });
 
         Route::controller(InventoryController::class)->group(function () {
             Route::get('/inventories', 'index');
+            Route::post('/inventories/transfer', 'transferStock');
+            Route::get('/inventories/listAll', 'listAllInventories');
             Route::post('/inventories', 'store');
             Route::get('/inventories/{inventory}', 'show');
             Route::put('/inventories/{inventory}', 'update');
@@ -70,6 +71,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::controller(InventoryHistoryController::class)->group(function () {
             Route::get('/inventory-histories', 'index');
             Route::post('/inventory-histories', 'store');
+            Route::post('/inventory-histories/approval', 'adminApprovStock');
+            Route::post('/inventory-histories/reject', 'adminRejectStock');
             Route::get('/inventory-histories/{inventoryHistory}', 'show');
             Route::put('/inventory-histories/{inventoryHistory}', 'update');
             Route::delete('/inventory-histories/{inventoryHistory}', 'destroy');
@@ -87,11 +90,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::controller(ReportController::class)->prefix('reports')->group(function () {
             Route::get('/daily-sales/{outlet}', 'dailySales');
-            Route::get('/monthly-sales/{outlet}', 'monthlySales');
+            // Route::get('/monthly-sales/{outlet}', 'monthlySales');
+            Route::get('/monthly-sales/{outlet}', 'listProductsByDateRange');
             Route::get('/monthly-inventory/{outlet}', 'monthlyInventory');
             Route::get('/inventory-by-date/{outlet}', 'inventoryByDate');
             Route::get('/shift-report/{outlet}', 'shiftReport');
             Route::get('/dashboard-summary/{outlet}', 'dashboardSummary');
+
+            Route::get('/sales-by-category/{outlet}', 'salesByCategory');
         });
 
         Route::get('/admin', function () {
@@ -120,7 +126,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::controller(OrderController::class)->group(function () {
             Route::post('/orders', 'store');
-            Route::get('/orders/cancel/{id}', 'cancelOrder');
+            Route::post('/orders/cancel/{orderId}', 'cancelOrder');
             Route::get('/orders/history', 'orderHistory');
             Route::get('/orders/history/admin', 'orderAdmin');
         });
@@ -131,6 +137,11 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/cash-registers/{outlet_id}', 'show');
             // Route::put('/cash-registers/{id}', 'update');
             // Route::delete('/cash-registers/{id}', 'destroy');
+        });
+
+        Route::controller(InventoryHistoryController::class)->group(function() {
+            Route::post('/adjust-inventory', 'cashierAdjustStock');
+            Route::get('/adjust-inventory/{outlet_id}', 'showCashierInventoryHistories');
         });
 
         Route::controller(CashRegisterTransactionController::class)->prefix('cash-register-transactions')->group(function () {

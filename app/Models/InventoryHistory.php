@@ -15,6 +15,9 @@ class InventoryHistory extends Model
         'type',
         'notes',
         'user_id',
+        'status',
+        'approved_by',
+        'approved_at'
     ];
 
     public function outlet()

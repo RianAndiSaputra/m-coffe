@@ -280,7 +280,7 @@ class OrderController extends Controller
                         'quantity_before' => $quantityBefore,
                         'quantity_after' => $inventory->quantity,
                         'quantity_change' => $item->quantity, // Nilai positif karena penambahan
-                        'type' => 'adjustment',
+                        'type' => 'sale',
                         'notes' => 'Pembatalan Order #' . $order->order_number,
                         'user_id' => $order->user_id,
                     ]);
@@ -309,18 +309,18 @@ class OrderController extends Controller
             // Validasi parameter query
             $validator = Validator::make($request->query(), [
                 'outlet_id' => 'nullable|exists:outlets,id',
-                'status' => 'nullable|in:pending,completed,canceled',
+                // 'status' => 'nullable|in:pending,completed,canceled',
                 'date_from' => 'nullable|date',
                 'date_to' => 'nullable|date|after_or_equal:date_from',
-                'per_page' => 'nullable|integer|min:1|max:100',
-                'search' => 'nullable|string|max:255',
+                // 'per_page' => 'nullable|integer|min:1|max:100',
+                // 'search' => 'nullable|string|max:255',
             ]);
 
             if ($validator->fails()) {
                 return $this->errorResponse($validator->errors(), 422);
             }
 
-            $user = $request->user();
+            // $user = $request->user();
 
             // Query dasar
             $query = Order::query();
@@ -329,35 +329,33 @@ class OrderController extends Controller
             if ($request->filled('outlet_id')) {
                 $query->where('outlet_id', $request->outlet_id);
             }
-            if ($request->filled('status')) {
-                $query->where('status', $request->status);
-            }
             if ($request->filled('date_from') && $request->filled('date_to')) {
                 $query->whereBetween('created_at', [
                     $request->date_from,
                     $request->date_to . ' 23:59:59'
                 ]);
             }
-            if ($request->filled('search')) {
-                $searchTerm = '%' . $request->search . '%';
-                $query->where('order_number', 'like', $searchTerm);
-            }
+            // if ($request->filled('search')) {
+            //     $searchTerm = '%' . $request->search . '%';
+            //     $query->where('order_number', 'like', $searchTerm);
+            // }
 
             // Hitung total jumlah pesanan dan total pendapatan
             $totalOrders = $query->count();
-            $totalRevenue = $query->sum('total');
+            // $totalRevenue = $query->sum('total');
+            $totalRevenue = (clone $query)->where('status', 'completed')->sum('total');
 
             // Paginasi hasil
-            $perPage = $request->per_page ?? 10;
+            // $perPage = $request->per_page ?? 10;
             $orders = $query->with([
                 'items.product:id,name,sku',
                 'outlet:id,name',
                 'shift:id',
                 'user:id,name'
-            ])->latest()->paginate($perPage);
+            ])->latest()->get();
 
             // Transformasi respons
-            $orders->getCollection()->transform(function ($order) {
+            $orders->transform(function ($order) {
                 return [
                     'id' => $order->id,
                     'order_number' => $order->order_number,
@@ -387,6 +385,8 @@ class OrderController extends Controller
 
             // Tambahkan informasi total ke dalam respons
             $response = [
+                'date_from' => date('d-m-Y', strtotime($request->date_from)),
+                'date_to' => date('d-m-Y', strtotime($request->date_to)),
                 'total_orders' => $totalOrders,
                 'total_revenue' => $totalRevenue,
                 'orders' => $orders

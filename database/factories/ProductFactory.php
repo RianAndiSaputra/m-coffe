@@ -15,7 +15,7 @@ class ProductFactory extends Factory
         return [
             'name' => $this->faker->name(),
             'price' => $this->faker->randomFloat(0, 1000, 10000),
-            'sku' => 'SKU-' . $this->generateBigRandomNumber(10),
+            'sku' => 'SKU-' . $this->generateBigRandomNumber(7),
             'description' => $this->faker->sentence(),
             'image' => 'products/gambar.jpg',
             'category_id' => $this->faker->numberBetween(1, 5),
