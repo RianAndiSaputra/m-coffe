@@ -347,12 +347,19 @@ class OrderController extends Controller
 
             // Paginasi hasil
             // $perPage = $request->per_page ?? 10;
+            // $orders = $query->with([
+            //     'items.product:id,name,sku',
+            //     'outlet:id,name',
+            //     'shift:id',
+            //     'user:id,name'
+            // ])->latest()->get();
+
             $orders = $query->with([
                 'items.product:id,name,sku',
                 'outlet:id,name',
                 'shift:id',
                 'user:id,name'
-            ])->latest()->get();
+            ])->has('outlet')->has('user')->latest()->get();
 
             // Transformasi respons
             $orders->transform(function ($order) {

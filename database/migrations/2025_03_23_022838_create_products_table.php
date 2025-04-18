@@ -20,6 +20,7 @@ return new class extends Migration
             $table->foreignId('category_id')->constrained('categories');
             $table->string('image')->nullable();
             $table->boolean('is_active')->default(true);
+            $table->enum('unit', ['pcs', 'kg', 'box', 'pack', 'other'])->default('pcs');
             $table->timestamps();
             $table->softDeletes();
         });

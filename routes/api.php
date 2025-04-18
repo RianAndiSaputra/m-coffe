@@ -7,6 +7,7 @@ use App\Http\Controllers\CashRegisterTransactionController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\InventoryHistoryController;
+use App\Http\Controllers\MemberController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OutletController;
 use App\Http\Controllers\ProductController;
@@ -30,7 +31,6 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/all/{outletId}', 'getAllUsers');
             Route::put('/update/{user}', 'update');
             Route::delete('/delete/{user}', 'destroy');
-            // Route::put('/update/{user}', 'update');
         });
 
         Route::controller(OutletController::class)->group(function () {
@@ -47,6 +47,13 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/categories/{category}', 'show');
             Route::put('/categories/{category}', 'update');
             Route::delete('/categories/{category}', 'destroy');
+        });
+
+        Route::controller(MemberController::class)->prefix('members')->group(function () {
+            Route::get('/', 'index');
+            Route::post('/', 'store');
+            Route::put('/{member}', 'update');
+            Route::delete('/{member}', 'destroy');
         });
 
         Route::controller(ProductController::class)->group(function () {
@@ -90,9 +97,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::controller(ReportController::class)->prefix('reports')->group(function () {
             Route::get('/daily-sales/{outlet}', 'dailySales');
-            // Route::get('/monthly-sales/{outlet}', 'monthlySales');
             Route::get('/monthly-sales/{outlet}', 'listProductsByDateRange');
-            Route::get('/monthly-inventory/{outlet}', 'monthlyInventory');
+            Route::get('/monthly-inventory/{outlet}', 'inventoryReport');
             Route::get('/inventory-by-date/{outlet}', 'inventoryByDate');
             Route::get('/shift-report/{outlet}', 'shiftReport');
             Route::get('/dashboard-summary/{outlet}', 'dashboardSummary');
@@ -133,10 +139,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::controller(CashRegisterController::class)->group(function () {
             Route::get('/cash-registers', 'index');
-            // Route::post('/cash-registers', 'store');
             Route::get('/cash-registers/{outlet_id}', 'show');
-            // Route::put('/cash-registers/{id}', 'update');
-            // Route::delete('/cash-registers/{id}', 'destroy');
         });
 
         Route::controller(InventoryHistoryController::class)->group(function() {

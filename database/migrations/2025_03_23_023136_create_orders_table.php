@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('outlet_id')->constrained('outlets');
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('shift_id')->constrained('shifts');
+            $table->foreignId('member_id')->nullable()->constrained('members');
             $table->decimal('subtotal', 10, 2);
             $table->decimal('tax', 10, 2)->default(0);
             $table->decimal('discount', 10, 2)->default(0);

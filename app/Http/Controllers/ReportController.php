@@ -9,6 +9,7 @@ use App\Models\MonthlyInventoryReport;
 use App\Models\MonthlyReport;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\InventoryHistory;
 use App\Models\Outlet;
 use App\Models\Product;
 use App\Models\Shift;
@@ -132,6 +133,7 @@ class ReportController extends Controller
                 'order_time' => $order->created_at->format('H:i:s'),
                 'total' => $order->total,
                 'payment_method' => $order->payment_method,
+                'tax' => $order->tax,
                 'cashier' => $order->user->name ?? 'Unknown',
                 'items' => $order->items->map(function ($item) {
                     return [
@@ -139,6 +141,7 @@ class ReportController extends Controller
                         'product_name' => $item->product->name,
                         'category' => $item->product->category->name ?? 'Uncategorized',
                         'sku' => $item->product->sku,
+                        'unit' => $item->product->unit,
                         'quantity' => $item->quantity,
                         'unit_price' => $item->price,
                         'subtotal' => $item->subtotal,
@@ -188,6 +191,7 @@ class ReportController extends Controller
             ->select(
                 'products.id',
                 'products.sku as sku',
+                // 'orders.order_number as order_number',
                 'products.name as product_name',
                 'categories.name as category_name',
                 DB::raw('SUM(order_items.quantity) as total_quantity'),
@@ -253,113 +257,157 @@ class ReportController extends Controller
     public function monthlyInventory(Request $request, Outlet $outlet)
     {
         $request->validate([
-            'year' => 'nullable|integer|min:2000|max:2100',
-            'month' => 'nullable|integer|min:1|max:12',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
         ]);
     
-        $year = $request->year ?? now()->year;
-        $month = $request->month ?? now()->month;
+        $startDate = Carbon::parse($request->start_date)->startOfDay();
+        $endDate = Carbon::parse($request->end_date)->endOfDay();
     
-        $reportDate = Carbon::create($year, $month, 1)->format('Y-m-d');
-        $startDate = Carbon::create($year, $month, 1)->startOfMonth();
-        $endDate = Carbon::create($year, $month, 1)->endOfMonth();
-        $previousMonthDate = Carbon::create($year, $month, 1)->subMonth()->format('Y-m-d');
-    
-        // Cek jika laporan sudah ada
-        $existingReports = MonthlyInventoryReport::where('outlet_id', $outlet->id)
-            ->whereDate('report_date', $reportDate)
-            ->with('product')
-            ->get();
-    
-        if ($existingReports->isNotEmpty()) {
-            return response()->json([
-                'status' => true,
-                'data' => [
-                    'year' => $year,
-                    'month' => $month,
-                    'outlet' => $outlet->name,
-                    'inventory_reports' => $existingReports,
-                    'total_stock_value' => $existingReports->sum('stock_value'),
-                ]
-            ]);
-        }
-    
-        // Ambil semua produk dengan inventory yang terkait
-        $products = Product::whereHas('inventory', function ($query) use ($outlet) {
-            $query->where('outlet_id', $outlet->id);
+        $products = Product::whereHas('inventory', function($q) use ($outlet) {
+            $q->where('outlet_id', $outlet->id);
         })->get();
     
-        // Preload semua inventory
-        $inventories = Inventory::where('outlet_id', $outlet->id)
-            ->whereIn('product_id', $products->pluck('id'))
-            ->get()
-            ->keyBy('product_id');
-    
-        $reports = [];
+        $results = [];
     
         foreach ($products as $product) {
-            $productId = $product->id;
+            $inventory = Inventory::where('outlet_id', $outlet->id)
+                ->where('product_id', $product->id)
+                ->first();
     
-            $currentStock = $inventories[$productId]->quantity ?? 0;
-    
-            $sales = DB::table('inventory_histories')
-                ->where('outlet_id', $outlet->id)
-                ->where('product_id', $productId)
+            // Hitung transaksi dengan tanda yang benar
+            $sales = InventoryHistory::where('outlet_id', $outlet->id)
+                ->where('product_id', $product->id)
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->where('type', 'sale')
-                ->sum('quantity_change');
+                ->sum('quantity_change'); // seharusnya negatif
     
-            $purchases = DB::table('inventory_histories')
-                ->where('outlet_id', $outlet->id)
-                ->where('product_id', $productId)
+            $purchases = InventoryHistory::where('outlet_id', $outlet->id)
+                ->where('product_id', $product->id)
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->where('type', 'purchase')
-                ->sum('quantity_change');
+                ->sum('quantity_change'); // seharusnya positif
     
-            $adjustments = DB::table('inventory_histories')
-                ->where('outlet_id', $outlet->id)
-                ->where('product_id', $productId)
+            $adjustments = InventoryHistory::where('outlet_id', $outlet->id)
+                ->where('product_id', $product->id)
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->where('type', 'adjustment')
                 ->sum('quantity_change');
     
-            // Opening stock dari bulan sebelumnya
-            $previousReport = MonthlyInventoryReport::where('outlet_id', $outlet->id)
-                ->where('product_id', $productId)
-                ->whereDate('report_date', $previousMonthDate)
-                ->first();
-    
-            $openingStock = $previousReport->closing_stock ?? 0;
-            $closingStock = $currentStock;
-            $stockValue = $closingStock * ($product->price ?? 0);
-    
-            $report = MonthlyInventoryReport::create([
-                'outlet_id' => $outlet->id,
-                'product_id' => $productId,
-                'report_date' => $reportDate,
-                'opening_stock' => $openingStock,
-                'closing_stock' => $closingStock,
+            $results[] = [
+                'product_id' => $product->id,
+                'product_name' => $product->name,
+                'opening_stock' => $inventory->quantity - $purchases + abs($sales) - $adjustments,
+                'closing_stock' => $inventory->quantity,
                 'sales_quantity' => abs($sales),
-                'purchase_quantity' => abs($purchases),
-                'adjustment_quantity' => $adjustments,
-                'stock_value' => $stockValue,
-            ]);
-    
-            $reports[] = $report->id;
+                'purchase_quantity' => $purchases,
+                'adjustment_quantity' => $adjustments
+            ];
         }
-    
-        $reports = MonthlyInventoryReport::whereIn('id', $reports)
-            ->with('product')
-            ->get();
     
         return response()->json([
             'status' => true,
             'data' => [
-                'year' => $year,
-                'month' => $month,
                 'outlet' => $outlet->name,
-                'inventory_reports' => $reports,
-                'total_stock_value' => $reports->sum('stock_value'),
+                'start_date' => $startDate->format('Y-m-d'),
+                'end_date' => $endDate->format('Y-m-d'),
+                'inventory' => $results
+            ]
+        ]);
+    }
+
+    public function inventoryReport(Request $request, Outlet $outlet)
+    {
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
+
+        $startDate = Carbon::parse($request->start_date)->startOfDay();
+        $endDate = Carbon::parse($request->end_date)->endOfDay();
+        $previousDay = $startDate->copy()->subDay();
+
+        $products = Product::whereHas('inventory', function($q) use ($outlet) {
+            $q->where('outlet_id', $outlet->id);
+        })->get();
+
+        $results = [];
+
+        foreach ($products as $product) {
+            // 1. Hitung SALDO AWAL (stok akhir hari sebelumnya)
+            $previousInventory = InventoryHistory::where('outlet_id', $outlet->id)
+                ->where('product_id', $product->id)
+                ->whereDate('created_at', '<=', $previousDay)
+                ->latest('created_at')
+                ->first();
+
+            $openingStock = $previousInventory ? $previousInventory->quantity_after : 0;
+
+            // 2. Hitung STOCK MASUK (pembelian + adjustment plus)
+            $incomingStock = InventoryHistory::where('outlet_id', $outlet->id)
+                ->where('product_id', $product->id)
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->where(function($query) {
+                    $query->where('type', 'purchase')
+                        ->orWhere(function($q) {
+                            $q->where('type', 'adjustment')
+                                ->where('quantity_change', '>', 0);
+                        });
+                })
+                ->sum('quantity_change');
+
+            // 3. Hitung STOCK KELUAR (penjualan + adjustment minus)
+            $outgoingStock = InventoryHistory::where('outlet_id', $outlet->id)
+                ->where('product_id', $product->id)
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->where(function($query) {
+                    $query->where('type', 'sale')
+                        ->orWhere(function($q) {
+                            $q->where('type', 'adjustment')
+                                ->where('quantity_change', '<', 0);
+                        });
+                })
+                ->sum('quantity_change');
+
+            $outgoingStock = abs($outgoingStock); // Convert to positive number
+
+            // 4. Hitung STOCK AKHIR
+            $closingStock = $openingStock + $incomingStock - $outgoingStock;
+
+            // 5. Dapatkan stok aktual terakhir
+            $currentInventory = Inventory::where('outlet_id', $outlet->id)
+                ->where('product_id', $product->id)
+                ->first();
+
+            $results[] = [
+                'product_id' => $product->id,
+                'product_name' => $product->name,
+                'product_code' => $product->sku,
+                'unit' => $product->unit,
+                'saldo_awal' => $openingStock,
+                'stock_masuk' => $incomingStock,
+                'stock_keluar' => $outgoingStock,
+                'stock_akhir' => $closingStock,
+                'stock_aktual' => $currentInventory ? $currentInventory->quantity : 0,
+                'selisih' => ($currentInventory ? $currentInventory->quantity : 0) - $closingStock
+            ];
+        }
+
+        return response()->json([
+            'status' => true,
+            'data' => [
+                'outlet' => $outlet->name,
+                'periode' => [
+                    'start_date' => $startDate->format('Y-m-d'),
+                    'end_date' => $endDate->format('Y-m-d'),
+                ],
+                'products' => $results,
+                'summary' => [
+                    'total_saldo_awal' => collect($results)->sum('saldo_awal'),
+                    'total_stock_masuk' => collect($results)->sum('stock_masuk'),
+                    'total_stock_keluar' => collect($results)->sum('stock_keluar'),
+                    'total_stock_akhir' => collect($results)->sum('stock_akhir'),
+                ]
             ]
         ]);
     }
@@ -931,6 +979,7 @@ class ReportController extends Controller
                     'products.id as product_id',
                     'products.name as product_name',
                     'products.sku as product_sku',
+                    'products.unit as product_unit',
                     DB::raw('SUM(order_items.quantity) as total_quantity'),
                     DB::raw('SUM(order_items.subtotal) as total_sales'),
                     DB::raw('COUNT(DISTINCT orders.id) as order_count')
@@ -939,7 +988,7 @@ class ReportController extends Controller
                 ->where('products.category_id', $category->category_id)
                 ->whereBetween('orders.created_at', [$startDate, $endDate])
                 ->where('orders.status', 'completed')
-                ->groupBy('products.id', 'products.name', 'products.sku')
+                ->groupBy('products.id', 'products.name', 'products.sku', 'products.unit')
                 ->orderBy('total_sales', 'desc')
                 ->get();
     
@@ -968,6 +1017,7 @@ class ReportController extends Controller
                         'product_sku' => $product->product_sku,
                         'quantity' => $product->total_quantity,
                         'sales' => $product->total_sales,
+                        'product_unit' => $product->product_unit,
                         'order_count' => $product->order_count,
                         'sales_percentage' => $categoryTotalSales > 0 
                             ? round(($product->total_sales / $categoryTotalSales) * 100, 2) 

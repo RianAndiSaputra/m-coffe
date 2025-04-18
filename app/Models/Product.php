@@ -18,6 +18,7 @@ class Product extends Model
         'image',
         // 'outlet_id',
         'is_active',
+        'unit'
     ];
 
     protected $casts = [
@@ -40,7 +41,7 @@ class Product extends Model
     // public function outlets()
     // {
     //     return $this->belongsToMany(Outlet::class, 'inventories')
-    //         ->withPivot('quantity'); // Ambil kolom quantity dari tabel pivot
+//         ->withPivot('quantity'); // Ambil kolom quantity dari tabel pivot
     // }
 
     public function outlets()

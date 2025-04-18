@@ -23,22 +23,27 @@ class CashRegisterTransactionController extends Controller
     public function index(Request $request)
     {
         try {
-
             $source = $request->source;
             $outlet_id = $request->outlet_id;
+            $date = $request->date; // Format: YYYY-MM-DD
 
             $transactions = CashRegisterTransaction::with(['cashRegister', 'shift', 'user'])
                 ->where('source', $source)
                 ->orderBy('created_at', 'desc')
+                ->when($date, function ($query) use ($date) {
+                    $query->whereDate('created_at', $date);
+                })
                 ->whereHas('cashRegister', function ($query) use ($outlet_id) {
                     $query->where('outlet_id', $outlet_id);
                 })
                 ->get();
+
             return $this->successResponse($transactions, 'Successfully get cash register transactions');
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
         }
     }
+
 
 
     /**
