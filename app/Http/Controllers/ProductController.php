@@ -222,8 +222,8 @@ class ProductController extends Controller
     public function getOutletProducts(Request $request, $outletId)
     {
         try {
-            $user = $request->user(); // Dapatkan user yang sedang login
-            $outlet = Outlet::findOrFail($outletId); // Gunakan outletId dari parameter, bukan dari user
+            $user = $request->user(); 
+            $outlet = Outlet::findOrFail($outletId);
 
             // Cek apakah user adalah kasir
             $isCashier = strtolower($user->role) === 'kasir';
@@ -233,7 +233,7 @@ class ProductController extends Controller
                 ->when($isCashier, function ($query) {
                     $query->where('is_active', true);
                 })
-                ->orderBy('name', 'asc')
+                // ->orderBy('name', 'asc')
                 ->get()
                 ->map(function ($product) use ($outlet) {
                     return [

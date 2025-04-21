@@ -179,10 +179,10 @@ class ReportController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
         ]);
-    
+
         $startDate = Carbon::parse($request->start_date)->startOfDay();
         $endDate = Carbon::parse($request->end_date)->endOfDay();
-    
+
         // Get all products sold within the date range
         $products = DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
@@ -204,7 +204,7 @@ class ReportController extends Controller
             ->groupBy('products.id', 'products.name', 'products.sku', 'categories.name')
             ->orderBy('total_sales', 'desc')
             ->get();
-    
+
         // Calculate summary statistics
         $totalSales = $products->sum('total_sales');
         $totalQuantity = $products->sum('total_quantity');
@@ -214,20 +214,20 @@ class ReportController extends Controller
             ->where('status', 'completed')
             ->count();
         $averageOrderValue = $totalOrders > 0 ? $totalSales / $totalOrders : 0;
-    
+
         // Add percentage contribution to each product
         $productsWithPercentage = $products->map(function ($product) use ($totalSales) {
-            $product->sales_percentage = $totalSales > 0 
-                ? round(($product->total_sales / $totalSales) * 100, 2) 
+            $product->sales_percentage = $totalSales > 0
+                ? round(($product->total_sales / $totalSales) * 100, 2)
                 : 0;
-            
+
             $product->average_order_value = $product->order_count > 0
                 ? round($product->total_sales / $product->order_count, 2)
                 : 0;
-                
+
             return $product;
         });
-    
+
         return response()->json([
             'status' => true,
             'data' => [
@@ -260,40 +260,40 @@ class ReportController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
         ]);
-    
+
         $startDate = Carbon::parse($request->start_date)->startOfDay();
         $endDate = Carbon::parse($request->end_date)->endOfDay();
-    
-        $products = Product::whereHas('inventory', function($q) use ($outlet) {
+
+        $products = Product::whereHas('inventory', function ($q) use ($outlet) {
             $q->where('outlet_id', $outlet->id);
         })->get();
-    
+
         $results = [];
-    
+
         foreach ($products as $product) {
             $inventory = Inventory::where('outlet_id', $outlet->id)
                 ->where('product_id', $product->id)
                 ->first();
-    
+
             // Hitung transaksi dengan tanda yang benar
             $sales = InventoryHistory::where('outlet_id', $outlet->id)
                 ->where('product_id', $product->id)
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->where('type', 'sale')
                 ->sum('quantity_change'); // seharusnya negatif
-    
+
             $purchases = InventoryHistory::where('outlet_id', $outlet->id)
                 ->where('product_id', $product->id)
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->where('type', 'purchase')
                 ->sum('quantity_change'); // seharusnya positif
-    
+
             $adjustments = InventoryHistory::where('outlet_id', $outlet->id)
                 ->where('product_id', $product->id)
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->where('type', 'adjustment')
                 ->sum('quantity_change');
-    
+
             $results[] = [
                 'product_id' => $product->id,
                 'product_name' => $product->name,
@@ -304,7 +304,7 @@ class ReportController extends Controller
                 'adjustment_quantity' => $adjustments
             ];
         }
-    
+
         return response()->json([
             'status' => true,
             'data' => [
@@ -327,7 +327,7 @@ class ReportController extends Controller
         $endDate = Carbon::parse($request->end_date)->endOfDay();
         $previousDay = $startDate->copy()->subDay();
 
-        $products = Product::whereHas('inventory', function($q) use ($outlet) {
+        $products = Product::whereHas('inventory', function ($q) use ($outlet) {
             $q->where('outlet_id', $outlet->id);
         })->get();
 
@@ -347,9 +347,9 @@ class ReportController extends Controller
             $incomingStock = InventoryHistory::where('outlet_id', $outlet->id)
                 ->where('product_id', $product->id)
                 ->whereBetween('created_at', [$startDate, $endDate])
-                ->where(function($query) {
+                ->where(function ($query) {
                     $query->where('type', 'purchase')
-                        ->orWhere(function($q) {
+                        ->orWhere(function ($q) {
                             $q->where('type', 'adjustment')
                                 ->where('quantity_change', '>', 0);
                         });
@@ -360,9 +360,9 @@ class ReportController extends Controller
             $outgoingStock = InventoryHistory::where('outlet_id', $outlet->id)
                 ->where('product_id', $product->id)
                 ->whereBetween('created_at', [$startDate, $endDate])
-                ->where(function($query) {
+                ->where(function ($query) {
                     $query->where('type', 'sale')
-                        ->orWhere(function($q) {
+                        ->orWhere(function ($q) {
                             $q->where('type', 'adjustment')
                                 ->where('quantity_change', '<', 0);
                         });
@@ -809,10 +809,10 @@ class ReportController extends Controller
                     ->get();
 
                 $dailySalesData = [];
-                
+
                 // Get all dates between start and end date
                 $period = \Carbon\CarbonPeriod::create($startDate, $endDate);
-                
+
                 // Initialize data for each day
                 foreach ($period as $date) {
                     $dayName = $date->format('Y-m-d');
@@ -913,7 +913,6 @@ class ReportController extends Controller
                 }
 
                 return $this->successResponse($responseData, 'Successfully getting dashboard data');
-
             } catch (\Exception $e) {
                 \Log::error('Error in data gathering: ' . $e->getMessage());
                 return $this->errorResponse('Error in data gathering', $e->getMessage());
@@ -937,10 +936,10 @@ class ReportController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
         ]);
-    
+
         $startDate = Carbon::parse($request->start_date)->startOfDay();
         $endDate = Carbon::parse($request->end_date)->endOfDay();
-    
+
         // Ambil semua kategori yang memiliki penjualan
         $categories = DB::table('categories')
             ->join('products', 'categories.id', '=', 'products.category_id')
@@ -956,7 +955,7 @@ class ReportController extends Controller
             ->groupBy('categories.id', 'categories.name')
             ->orderBy('categories.name')
             ->get();
-    
+
         // Hitung total penjualan keseluruhan untuk persentase
         $totalSales = DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
@@ -964,12 +963,12 @@ class ReportController extends Controller
             ->whereBetween('orders.created_at', [$startDate, $endDate])
             ->where('orders.status', 'completed')
             ->sum('order_items.subtotal');
-    
+
         $result = [];
         $totalQuantityAll = 0;
         $totalSalesAll = 0;
         $totalOrdersAll = 0;
-    
+
         foreach ($categories as $category) {
             // Ambil data produk dalam kategori ini
             $products = DB::table('products')
@@ -991,17 +990,17 @@ class ReportController extends Controller
                 ->groupBy('products.id', 'products.name', 'products.sku', 'products.unit')
                 ->orderBy('total_sales', 'desc')
                 ->get();
-    
+
             // Hitung total untuk kategori ini
             $categoryTotalQuantity = $products->sum('total_quantity');
             $categoryTotalSales = $products->sum('total_sales');
             $categoryOrderCount = $products->sum('order_count');
-    
+
             // Tambahkan ke total keseluruhan
             $totalQuantityAll += $categoryTotalQuantity;
             $totalSalesAll += $categoryTotalSales;
             $totalOrdersAll += $categoryOrderCount;
-    
+
             // Format data kategori
             $result[] = [
                 'category_id' => $category->category_id,
@@ -1019,14 +1018,14 @@ class ReportController extends Controller
                         'sales' => $product->total_sales,
                         'product_unit' => $product->product_unit,
                         'order_count' => $product->order_count,
-                        'sales_percentage' => $categoryTotalSales > 0 
-                            ? round(($product->total_sales / $categoryTotalSales) * 100, 2) 
+                        'sales_percentage' => $categoryTotalSales > 0
+                            ? round(($product->total_sales / $categoryTotalSales) * 100, 2)
                             : 0,
                     ];
                 })
             ];
         }
-    
+
         return response()->json([
             'status' => true,
             'data' => [
@@ -1037,7 +1036,7 @@ class ReportController extends Controller
                 'outlet' => $outlet->name,
                 'summary' => [
                     'total_categories' => count($result),
-                    'total_products' => array_reduce($result, function($carry, $item) {
+                    'total_products' => array_reduce($result, function ($carry, $item) {
                         return $carry + count($item['products']);
                     }, 0),
                     'total_quantity' => $totalQuantityAll,
@@ -1045,6 +1044,131 @@ class ReportController extends Controller
                     'total_orders' => $totalOrdersAll,
                 ],
                 'categories' => $result
+            ]
+        ]);
+    }
+
+    public function inventoryApprovals(Request $request, Outlet $outlet)
+    {
+        $request->validate([
+            'start_date' => 'required|date_format:Y-m-d',
+            'end_date' => 'required|date_format:Y-m-d',
+        ]);
+
+        $startDate = $request->start_date;
+        $endDate = $request->end_date . ' 23:59:59';
+
+        // Query untuk data approved dan rejected sekaligus dengan eager loading
+        $histories = InventoryHistory::with(['product', 'approver'])
+            ->where('outlet_id', $outlet->id)
+            ->whereIn('status', ['approved', 'rejected'])
+            ->whereNotNull('approved_at')
+            ->whereBetween('approved_at', [$startDate, $endDate])
+            ->orderBy('approved_at', 'desc')
+            ->get();
+
+        // Pisahkan data berdasarkan status
+        $approved = $histories->where('status', 'approved')->values();
+        $rejected = $histories->where('status', 'rejected')->values();
+
+        return response()->json([
+            'approved' => $approved,
+            'rejected' => $rejected
+        ]);
+    }
+
+    public function listProductByMember(Request $request, Outlet $outlet)
+    {
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
+
+        $startDate = Carbon::parse($request->start_date)->startOfDay();
+        $endDate = Carbon::parse($request->end_date)->endOfDay();
+
+        // Query untuk mendapatkan penjualan per member
+        $members = DB::table('orders')
+            ->leftJoin('members', 'orders.member_id', '=', 'members.id')
+            ->select(
+                'members.id as member_id',
+                DB::raw('COALESCE(members.name, "Member Umum") as member_name'),
+                DB::raw('COUNT(DISTINCT orders.id) as total_orders'),
+                DB::raw('SUM(orders.total) as total_spent')
+            )
+            ->where('orders.outlet_id', $outlet->id)
+            ->whereBetween('orders.created_at', [$startDate, $endDate])
+            ->where('orders.status', 'completed')
+            ->groupBy('members.id', 'members.name')
+            ->orderBy('total_spent', 'desc')
+            ->get();
+
+        // Query untuk mendapatkan produk yang dibeli setiap member
+        $memberProducts = DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->leftJoin('members', 'orders.member_id', '=', 'members.id')
+            ->leftJoin('categories', 'products.category_id', '=', 'categories.id')
+            ->select(
+                'members.id as member_id',
+                'products.id as product_id',
+                'products.name as product_name',
+                'products.sku as product_sku',
+                'categories.name as category_name',
+                DB::raw('SUM(order_items.quantity) as total_quantity'),
+                DB::raw('SUM(order_items.subtotal) as total_spent')
+            )
+            ->where('orders.outlet_id', $outlet->id)
+            ->whereBetween('orders.created_at', [$startDate, $endDate])
+            ->where('orders.status', 'completed')
+            ->groupBy('members.id', 'products.id', 'products.name', 'products.sku', 'categories.name')
+            ->get();
+
+        // Kelompokkan produk berdasarkan member
+        $memberProductsGrouped = $memberProducts->groupBy('member_id');
+
+        // Gabungkan data member dengan produk yang dibeli
+        $membersWithProducts = $members->map(function ($member) use ($memberProductsGrouped) {
+            $products = $memberProductsGrouped->get($member->member_id, collect());
+
+            $member->products = $products->map(function ($product) {
+                return [
+                    'product_id' => $product->product_id,
+                    'product_name' => $product->product_name,
+                    'sku' => $product->product_sku,
+                    'category' => $product->category_name,
+                    'quantity' => $product->total_quantity,
+                    'total_spent' => $product->total_spent
+                ];
+            });
+
+            return $member;
+        });
+
+        // Hitung statistik summary
+        $totalSales = $members->sum('total_spent');
+        $totalOrders = DB::table('orders')
+            ->where('outlet_id', $outlet->id)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->where('status', 'completed')
+            ->count();
+        $averageOrderValue = $totalOrders > 0 ? $totalSales / $totalOrders : 0;
+
+        return response()->json([
+            'status' => true,
+            'data' => [
+                'date_range' => [
+                    'start_date' => $startDate->format('Y-m-d'),
+                    'end_date' => $endDate->format('Y-m-d'),
+                ],
+                'outlet' => $outlet->name,
+                'summary' => [
+                    'total_sales' => $totalSales,
+                    'total_orders' => $totalOrders,
+                    'average_order_value' => $averageOrderValue,
+                    'total_members' => $members->count()
+                ],
+                'members' => $membersWithProducts
             ]
         ]);
     }

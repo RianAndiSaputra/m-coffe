@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
@@ -20,7 +21,29 @@ class Order extends Model
         'payment_method',
         'status',
         'notes',
+        'member_id'
     ];
+
+    public function scopeMonthlyTotal($query, $month = null, $outletId = null)
+    {
+        $date = $month ? Carbon::parse($month) : Carbon::now();
+
+        $query = $query->whereBetween('created_at', [
+            $date->startOfMonth()->toDateTimeString(),
+            $date->endOfMonth()->toDateTimeString()
+        ]);
+
+        $query->where('status', 'completed');
+
+        if ($outletId) {
+            $query->where('outlet_id', $outletId);
+        }
+        // if ($outletId) {
+        //     $query->where('outlet_id', $outletId);
+        // }
+
+        return $query->sum('total');
+    }
 
     public function items()
     {
@@ -32,7 +55,8 @@ class Order extends Model
         return $this->belongsTo(Outlet::class);
     }
 
-    public function member() {
+    public function member()
+    {
         return $this->belongsTo(Member::class);
     }
 

@@ -50,7 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
         });
 
         Route::controller(MemberController::class)->prefix('members')->group(function () {
-            Route::get('/', 'index');
+            // Route::get('/', 'index');
             Route::post('/', 'store');
             Route::put('/{member}', 'update');
             Route::delete('/{member}', 'destroy');
@@ -104,6 +104,11 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/dashboard-summary/{outlet}', 'dashboardSummary');
 
             Route::get('/sales-by-category/{outlet}', 'salesByCategory');
+            Route::get('/inventory-approvals/{outlet}',  'inventoryApprovals');
+            Route::get('/sales-by-member/{outlet}', 'listProductByMember');
+
+
+
         });
 
         Route::get('/admin', function () {
@@ -116,6 +121,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:kasir,admin')->group(function () {
 
         Route::post('/update-profile', [AuthController::class, 'updateProfile']);
+        Route::get('/members', [MemberController::class, 'index']);
 
         Route::get('/kasir-admin', function () {
             return response()->json([
@@ -132,6 +138,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::controller(OrderController::class)->group(function () {
             Route::post('/orders', 'store');
+            Route::get('/orders/revenue/{outletId}', 'oneMonthRevenue');
             Route::post('/orders/cancel/{orderId}', 'cancelOrder');
             Route::get('/orders/history', 'orderHistory');
             Route::get('/orders/history/admin', 'orderAdmin');

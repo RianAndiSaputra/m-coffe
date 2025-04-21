@@ -7,6 +7,7 @@ use App\Models\Inventory;
 use App\Models\InventoryHistory;
 use App\Models\Order;
 use App\Traits\ApiResponse;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -132,6 +133,7 @@ class OrderController extends Controller
             'total_paid' => 'nullable|numeric|min:0',
             'tax' => 'nullable|numeric|min:0',
             'discount' => 'nullable|numeric|min:0',
+            'member_id' => 'nullable|exists:members,id',
         ]);
 
         try {
@@ -170,6 +172,7 @@ class OrderController extends Controller
                 'payment_method' => $request->payment_method,
                 'status' => 'pending',
                 'notes' => $request->notes,
+                'member_id' => $request->member_id
             ]);
 
             // Buat order items TANPA subtotal
@@ -303,56 +306,65 @@ class OrderController extends Controller
         }
     }
 
+    public function oneMonthRevenue($outletId)
+    {
+        try {
+            $from = Carbon::now()->startOfMonth();
+            $to = Carbon::now()->endOfMonth();
+
+            $total = Order::where('status', 'completed')
+                ->where('outlet_id', $outletId)
+                ->whereBetween('created_at', [
+                    $from,
+                    $to
+                ])
+                ->sum('total');
+
+            $data = [
+                'from' => $from->format('d/m/Y'),
+                'to' => $to->format('d/m/Y'),
+                'total' => $total
+            ];
+
+            return $this->successResponse($data, 'Succesfully getting one month revenue');
+        } catch (\Throwable $th) {
+            return $this->errorResponse($th->getMessage());
+        }
+    }
+
     public function orderHistory(Request $request)
     {
         try {
-            // Validasi parameter query
             $validator = Validator::make($request->query(), [
                 'outlet_id' => 'nullable|exists:outlets,id',
-                // 'status' => 'nullable|in:pending,completed,canceled',
+                'member_id' => 'nullable|exists:members,id',
                 'date_from' => 'nullable|date',
                 'date_to' => 'nullable|date|after_or_equal:date_from',
-                // 'per_page' => 'nullable|integer|min:1|max:100',
-                // 'search' => 'nullable|string|max:255',
             ]);
 
             if ($validator->fails()) {
                 return $this->errorResponse($validator->errors(), 422);
             }
 
-            // $user = $request->user();
-
-            // Query dasar
             $query = Order::query();
 
-            // Terapkan filter tambahan berdasarkan permintaan
             if ($request->filled('outlet_id')) {
                 $query->where('outlet_id', $request->outlet_id);
             }
+
+            if ($request->filled('member_id')) {
+                $query->where('member_id', $request->member_id);
+            }
+
             if ($request->filled('date_from') && $request->filled('date_to')) {
                 $query->whereBetween('created_at', [
                     $request->date_from,
                     $request->date_to . ' 23:59:59'
                 ]);
             }
-            // if ($request->filled('search')) {
-            //     $searchTerm = '%' . $request->search . '%';
-            //     $query->where('order_number', 'like', $searchTerm);
-            // }
 
-            // Hitung total jumlah pesanan dan total pendapatan
             $totalOrders = $query->count();
-            // $totalRevenue = $query->sum('total');
             $totalRevenue = (clone $query)->where('status', 'completed')->sum('total');
-
-            // Paginasi hasil
-            // $perPage = $request->per_page ?? 10;
-            // $orders = $query->with([
-            //     'items.product:id,name,sku',
-            //     'outlet:id,name',
-            //     'shift:id',
-            //     'user:id,name'
-            // ])->latest()->get();
 
             $orders = $query->with([
                 'items.product:id,name,sku',

@@ -220,12 +220,12 @@ class InventoryHistoryController extends Controller
         }
     }
 
-
-
     public function getStock($outletId)
     {
         try {
-            $inventory = Inventory::where('outlet_id', $outletId)->with('lastStock', 'product.category')->get();
+            $inventory = Inventory::where('outlet_id', $outletId)
+                ->with(['stockByType', 'product.category'])
+                ->get();
 
             return $this->successResponse($inventory, 'Stok retrieved successfully');
         } catch (\Throwable $th) {

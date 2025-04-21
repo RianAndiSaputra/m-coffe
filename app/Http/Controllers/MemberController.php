@@ -16,7 +16,7 @@ class MemberController extends Controller
     public function index()
     {
         try {
-            $members = Member::all();
+            $members = Member::withCount('orders')->get();
             return $this->successResponse($members, 'Successfully retrieved members');
         } catch (\Throwable $th) {
             return $this->errorResponse($th->getMessage());
@@ -39,7 +39,7 @@ class MemberController extends Controller
         try {
             $request->validate([
                 'name' => 'required|string',
-                'phone' => 'nullable|string',
+                'phone' => 'required|string',
                 'email' => 'nullable|string|email',
                 'address' => 'nullable|string',
                 'gender' => 'nullable|string|in:male,female'

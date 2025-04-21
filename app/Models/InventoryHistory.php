@@ -20,6 +20,10 @@ class InventoryHistory extends Model
         'approved_at'
     ];
 
+    protected $casts = [
+        'approved_at' => 'datetime',
+    ];
+
     public function outlet()
     {
         return $this->belongsTo(Outlet::class);
@@ -33,6 +37,11 @@ class InventoryHistory extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
     public function order()
