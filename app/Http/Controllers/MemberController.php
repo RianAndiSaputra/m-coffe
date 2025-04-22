@@ -40,6 +40,7 @@ class MemberController extends Controller
             $request->validate([
                 'name' => 'required|string',
                 'phone' => 'required|string',
+                'member_code' => 'required|string',
                 'email' => 'nullable|string|email',
                 'address' => 'nullable|string',
                 'gender' => 'nullable|string|in:male,female'
@@ -47,6 +48,7 @@ class MemberController extends Controller
 
             $member = Member::create([
                 'name' => $request->name,
+                'member_code' => $request->member_code,
                 'phone' => $request->phone,
                 'email' => $request->email,
                 'address' => $request->address,
@@ -83,6 +85,7 @@ class MemberController extends Controller
         try {
             $request->validate([
                 'name' => 'required|string',
+                'member_code' => 'required|string',
                 'phone' => 'nullable|string',
                 'email' => 'nullable|string|email',
                 'address' => 'nullable|string',
@@ -91,6 +94,7 @@ class MemberController extends Controller
 
             $member->update([
                 'name' => $request->name,
+                'member_code' => $request->member_code,
                 'phone' => $request->phone,
                 'email' => $request->email,
                 'address' => $request->address,

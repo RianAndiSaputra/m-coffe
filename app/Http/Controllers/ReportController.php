@@ -349,6 +349,9 @@ class ReportController extends Controller
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->where(function ($query) {
                     $query->where('type', 'purchase')
+                        ->orWhere('type', 'transfer_in')
+                        ->orWhere('type', 'shipment')
+                        ->orWhere('type', 'other') // Tambahkan transfer_in
                         ->orWhere(function ($q) {
                             $q->where('type', 'adjustment')
                                 ->where('quantity_change', '>', 0);
@@ -356,12 +359,13 @@ class ReportController extends Controller
                 })
                 ->sum('quantity_change');
 
-            // 3. Hitung STOCK KELUAR (penjualan + adjustment minus)
+            // 3. Hitung STOCK KELUAR (penjualan + adjustment minus + transfer_out)
             $outgoingStock = InventoryHistory::where('outlet_id', $outlet->id)
                 ->where('product_id', $product->id)
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->where(function ($query) {
                     $query->where('type', 'sale')
+                        ->orWhere('type', 'transfer_out') // Tambahkan transfer_out
                         ->orWhere(function ($q) {
                             $q->where('type', 'adjustment')
                                 ->where('quantity_change', '<', 0);
@@ -411,6 +415,7 @@ class ReportController extends Controller
             ]
         ]);
     }
+
 
     /**
      * Laporan inventory berdasarkan tanggal
