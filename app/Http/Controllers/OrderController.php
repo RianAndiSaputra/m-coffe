@@ -213,14 +213,15 @@ class OrderController extends Controller
             $order->update(['status' => 'completed']);
 
             $data = [];
-            $newOrder = $order->load(['items', 'user']);
+            $newOrder = $order->load(['items.product:id,name,sku', 'user']);
+            // $newOrder = $order->load(['items', 'user']);
 
             $data['user'] = $newOrder->user->name; 
 
             DB::commit();
 
             // return $this->successResponse($data, 'Order berhasil dibuat');
-            return $this->successResponse($order->load(['items', 'user']), 'Order berhasil dibuat');
+            return $this->successResponse($order->load(['items.product', 'user']), 'Order berhasil dibuat');
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->errorResponse('Terjadi kesalahan: ' . $e->getMessage());
