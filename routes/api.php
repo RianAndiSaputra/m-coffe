@@ -24,75 +24,75 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/validate-token', 'validateToken');
     });
     
-    Route::middleware('role:admin')->group(function () {
+    Route::middleware('role:admin,supervisor')->group(function () {
         
         Route::controller(AuthController::class)->prefix('user')->group(function () {
-            Route::post('/register', 'register');
+            Route::post('/register', 'register')->middleware('role:admin');
             Route::get('/all/{outletId}', 'getAllUsers');
-            Route::put('/update/{user}', 'update');
-            Route::delete('/delete/{user}', 'destroy');
+            Route::put('/update/{user}', 'update')->middleware('role:admin');
+            Route::delete('/delete/{user}', 'destroy')->middleware('role:admin');
         });
 
         Route::controller(OutletController::class)->group(function () {
             Route::get('/outlets', 'index');
-            Route::post('/outlets', 'store');
+            Route::post('/outlets', 'store')->middleware('role:admin');
             Route::get('/outlets/{outlet}', 'show');
-            Route::post('/outlets/{outlet}', 'update'); 
-            Route::delete('/outlets/{outlet}', 'destroy');
+            Route::post('/outlets/{outlet}', 'update')->middleware('role:admin'); 
+            Route::delete('/outlets/{outlet}', 'destroy')->middleware('role:admin');
         });
 
         Route::controller(CategoryController::class)->group(function () {
             Route::get('/categories', 'index');
-            Route::post('/categories', 'store');
+            Route::post('/categories', 'store')->middleware('role:admin');
             Route::get('/categories/{category}', 'show');
-            Route::put('/categories/{category}', 'update');
-            Route::delete('/categories/{category}', 'destroy');
+            Route::put('/categories/{category}', 'update')->middleware('role:admin');
+            Route::delete('/categories/{category}', 'destroy')->middleware('role:admin');
         });
 
         Route::controller(MemberController::class)->prefix('members')->group(function () {
             // Route::get('/', 'index');
-            Route::post('/', 'store');
-            Route::put('/{member}', 'update');
-            Route::delete('/{member}', 'destroy');
+            Route::post('/', 'store')->middleware('role:admin');
+            Route::put('/{member}', 'update')->middleware('role:admin');
+            Route::delete('/{member}', 'destroy')->middleware('role:admin');
         });
 
         Route::controller(ProductController::class)->group(function () {
             Route::get('/products', 'index');
-            Route::post('/products', 'store');
+            Route::post('/products', 'store')->middleware('role:admin');
             Route::get('/products/{product}', 'show');
-            Route::post('/products/{product}', 'update');
-            Route::delete('/products/{product}', 'destroy');
+            Route::post('/products/{product}', 'update')->middleware('role:admin');
+            Route::delete('/products/{product}', 'destroy')->middleware('role:admin');
             Route::get('/products/outlet/{outletId}', 'getOutletProducts');
         });
 
         Route::controller(InventoryController::class)->group(function () {
             Route::get('/inventories', 'index');
-            Route::post('/inventories/transfer', 'transferStock');
+            Route::post('/inventories/transfer', 'transferStock')->middleware('role:admin');
             Route::get('/inventories/listAll', 'listAllInventories');
-            Route::post('/inventories', 'store');
+            Route::post('/inventories', 'store')->middleware('role:admin');
             Route::get('/inventories/{inventory}', 'show');
-            Route::put('/inventories/{inventory}', 'update');
-            Route::delete('/inventories/{inventory}', 'destroy');
+            Route::put('/inventories/{inventory}', 'update')->middleware('role:admin');
+            Route::delete('/inventories/{inventory}', 'destroy')->middleware('role:admin');
         });
 
         Route::controller(InventoryHistoryController::class)->group(function () {
             Route::get('/inventory-histories', 'index');
-            Route::post('/inventory-histories', 'store');
-            Route::post('/inventory-histories/approval', 'adminApprovStock');
-            Route::post('/inventory-histories/reject', 'adminRejectStock');
+            Route::post('/inventory-histories', 'store')->middleware('role:admin');
+            Route::post('/inventory-histories/approval', 'adminApprovStock')->middleware('role:admin');
+            Route::post('/inventory-histories/reject', 'adminRejectStock')->middleware('role:admin');
             Route::get('/inventory-histories/{inventoryHistory}', 'show');
-            Route::put('/inventory-histories/{inventoryHistory}', 'update');
-            Route::delete('/inventory-histories/{inventoryHistory}', 'destroy');
+            Route::put('/inventory-histories/{inventoryHistory}', 'update')->middleware('role:admin');
+            Route::delete('/inventory-histories/{inventoryHistory}', 'destroy')->middleware('role:admin');
             Route::get('/inventory-histories/stock/{outletId}', 'getStock');
             Route::get('/inventory-histories/outlet/{outletId}', 'getHistoryByOutlet');
         });
 
         Route::controller(ShiftController::class)->group(function () {
             Route::get('/shifts', 'index');
-            Route::post('/shifts', 'store');
+            Route::post('/shifts', 'store')->middleware('role:admin');
             Route::get('/shifts/{shift}', 'show');
-            Route::put('/shifts/{shift}', 'update');
-            Route::delete('/shifts/{shift}', 'destroy');
+            Route::put('/shifts/{shift}', 'update')->middleware('role:admin');
+            Route::delete('/shifts/{shift}', 'destroy')->middleware('role:admin');
         });
 
         Route::controller(ReportController::class)->prefix('reports')->group(function () {
@@ -118,7 +118,7 @@ Route::middleware('auth:sanctum')->group(function () {
         });
     });
     
-    Route::middleware('role:kasir,admin')->group(function () {
+    Route::middleware('role:kasir,admin,supervisor')->group(function () {
 
         Route::post('/update-profile', [AuthController::class, 'updateProfile']);
         Route::get('/members', [MemberController::class, 'index']);

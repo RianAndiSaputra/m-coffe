@@ -92,7 +92,6 @@ class InventoryHistoryController extends Controller
                 'notes' => 'nullable|string',
             ]);
 
-            // Tidak mengupdate inventory langsung, hanya mencatat request kasir
             $inventory = Inventory::firstOrCreate(
                 [
                     'outlet_id' => $request->outlet_id,
@@ -101,21 +100,55 @@ class InventoryHistoryController extends Controller
                 ['quantity' => 0]
             );
 
-            // Mencatat perubahan stok secara sementara
-            $inventoryHistory = InventoryHistory::create([
-                'outlet_id' => $request->outlet_id,
-                'product_id' => $request->product_id,
-                'quantity_before' => $inventory->quantity,
-                'quantity_after' => $inventory->quantity, // Belum diubah sampai admin approve
-                'quantity_change' => $request->quantity_change,
-                'type' => $request->type,
-                'notes' => $request->notes,
-                'user_id' => $request->user()->id,
-                'status' => 'pending', // request kasir ditandai pending
-            ]);
+            $quantityBefore = $inventory->quantity;
 
-            return $this->successResponse($inventoryHistory, 'Stock adjustment request has been submitted and is awaiting admin approval.');
+            // Cek apakah tipe transaksi adalah adjustment
+            if ($request->type === 'adjustment') {
+                // Jika adjustment, hanya catat permintaan dan tunggu persetujuan admin
+                $inventoryHistory = InventoryHistory::create([
+                    'outlet_id' => $request->outlet_id,
+                    'product_id' => $request->product_id,
+                    'quantity_before' => $quantityBefore,
+                    'quantity_after' => $quantityBefore, // Belum berubah
+                    'quantity_change' => $request->quantity_change,
+                    'type' => $request->type,
+                    'notes' => $request->notes,
+                    'user_id' => $request->user()->id,
+                    'status' => 'pending', // Menunggu persetujuan
+                ]);
+
+                return $this->successResponse($inventoryHistory, 'Stock adjustment request has been submitted and is awaiting admin approval.');
+            } else {
+                // Untuk tipe transaksi lainnya, langsung ubah stok
+                DB::beginTransaction();
+
+                // Update quantity
+                $inventory->quantity += $request->quantity_change;
+                $inventory->save();
+
+                // Catat riwayat dengan status approved
+                $inventoryHistory = InventoryHistory::create([
+                    'outlet_id' => $request->outlet_id,
+                    'product_id' => $request->product_id,
+                    'quantity_before' => $quantityBefore,
+                    'quantity_after' => $inventory->quantity,
+                    'quantity_change' => $request->quantity_change,
+                    'type' => $request->type,
+                    'notes' => $request->notes,
+                    'user_id' => $request->user()->id,
+                    'status' => 'approved', // Langsung approved
+                    'approved_by' => $request->user()->id,
+                    'approved_at' => now(),
+                ]);
+
+                DB::commit();
+
+                return $this->successResponse($inventoryHistory, 'Stock has been updated successfully.');
+            }
         } catch (\Throwable $th) {
+            if (isset($db) && $db instanceof \Illuminate\Database\ConnectionInterface) {
+                DB::rollBack();
+            }
             return $this->errorResponse($th->getMessage());
         }
     }
