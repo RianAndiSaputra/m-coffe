@@ -55,11 +55,10 @@ class ProductController extends Controller
 
             DB::beginTransaction();
             if ($request->hasFile('image')) {
-                $path = $request->file('image')->store('products', 'public');
+                $path = $request->file('image')->store('products', 'uploads');
                 $imagePath = $path;
             } else {
                 $imagePath = null;
-                // return $this->errorResponse('Image is required', 400);
             }
 
             $product = Product::create([
@@ -158,7 +157,7 @@ class ProductController extends Controller
                 //     Storage::disk('public')->delete($product->image);
                 // }
                 // Store new image
-                $imagePath = $request->file('image')->store('products', 'public');
+                $imagePath = $request->file('image')->store('products', 'uploads');
             } else {
                 $imagePath = $product->image;
             }
@@ -210,7 +209,7 @@ class ProductController extends Controller
             DB::beginTransaction();
             Inventory::where('product_id', $product->id)->delete();
             $product->delete();
-            Storage::disk('public')->delete($product->image);
+            Storage::disk('uploads')->delete($product->image);
             DB::commit();
             return $this->successResponse(null, 'Product deleted successfully');
         } catch (\Throwable $th) {
@@ -242,7 +241,8 @@ class ProductController extends Controller
                         'sku' => $product->sku,
                         'description' => $product->description,
                         'price' => $product->price,
-                        'image' => asset('storage/' . $product->image),
+                        // 'image' => asset('storage/' . $product->image),
+                        'image_url' => $product->image_url,
                         'is_active' => $product->is_active,
                         'category' => [
                             'id' => $product->category->id,

@@ -172,7 +172,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:6',
-            'role' => 'required|string|in:admin,kasir',
+            'role' => 'required|string|in:admin,kasir,supervisor',
             'outlet_id' => 'nullable|exists:outlets,id',
             'start_time' => 'nullable|date_format:H:i',
             'end_time' => 'nullable|date_format:H:i',

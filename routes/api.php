@@ -10,6 +10,7 @@ use App\Http\Controllers\InventoryHistoryController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OutletController;
+use App\Http\Controllers\PrintTemplateController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShiftController;
 use Illuminate\Support\Facades\Route;
@@ -106,20 +107,20 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/sales-by-category/{outlet}', 'salesByCategory');
             Route::get('/inventory-approvals/{outlet}',  'inventoryApprovals');
             Route::get('/sales-by-member/{outlet}', 'listProductByMember');
-
-
-
         });
+
+        Route::post('/print-template', [PrintTemplateController::class, 'store']);
 
         Route::get('/admin', function () {
             return response()->json([
                 'message' => 'Ini untuk admin'
             ]);
         });
-    });
+    }); 
     
     Route::middleware('role:kasir,admin,supervisor')->group(function () {
 
+        Route::get('/print-template/{outlet_id}', [PrintTemplateController::class, 'show']);
         Route::post('/update-profile', [AuthController::class, 'updateProfile']);
         Route::get('/members', [MemberController::class, 'index']);
 

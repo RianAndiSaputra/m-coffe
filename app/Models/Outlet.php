@@ -13,6 +13,9 @@ class Outlet extends Model
         'address',
         'phone',
         'email',
+        'atas_nama_bank',
+        'nama_bank',
+        'nomor_transaksi_bank',
         'is_active',
         'tax',
         'qris',
@@ -26,7 +29,11 @@ class Outlet extends Model
 
     public function getQrisUrlAttribute()
     {
-        return $this->qris ? asset('storage/' . $this->qris) : null;
+        return $this->qris ? asset('uploads/' . $this->qris) : null;
+    }
+
+    public function print() {
+        return $this->hasOne(PrintTemplate::class);
     }
 
     public function users()
@@ -65,6 +72,8 @@ class Outlet extends Model
     {
         return $this->hasOne(User::class, 'outlet_id', 'id')->where('role', 'manajer');
     }
+
+    
     
     
 

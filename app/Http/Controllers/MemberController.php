@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Member;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class MemberController extends Controller
 {
@@ -36,27 +37,35 @@ class MemberController extends Controller
      */
     public function store(Request $request)
     {
+        DB::beginTransaction();
+
         try {
             $request->validate([
                 'name' => 'required|string',
                 'phone' => 'required|string',
-                'member_code' => 'required|string',
                 'email' => 'nullable|string|email',
                 'address' => 'nullable|string',
                 'gender' => 'nullable|string|in:male,female'
             ]);
 
+            $lastMember = Member::lockForUpdate()->orderBy('id', 'desc')->first();
+            $nextNumber = $lastMember ? $lastMember->id + 1 : 1;
+            $memberCode = str_pad($nextNumber, 7, '0', STR_PAD_LEFT);
+
             $member = Member::create([
                 'name' => $request->name,
-                'member_code' => $request->member_code,
+                'member_code' => $memberCode,
                 'phone' => $request->phone,
                 'email' => $request->email,
                 'address' => $request->address,
                 'gender' => $request->gender
             ]);
 
+            DB::commit();
+
             return $this->successResponse($member, "Member created successfully");
         } catch (\Throwable $th) {
+            DB::rollBack();
             return $this->errorResponse($th->getMessage());
         }
     }
@@ -85,7 +94,7 @@ class MemberController extends Controller
         try {
             $request->validate([
                 'name' => 'required|string',
-                'member_code' => 'required|string',
+                // 'member_code' => 'required|string',
                 'phone' => 'nullable|string',
                 'email' => 'nullable|string|email',
                 'address' => 'nullable|string',
@@ -95,7 +104,7 @@ class MemberController extends Controller
             $member->update([
                 'name' => $request->name,
                 'member_code' => $request->member_code,
-                'phone' => $request->phone,
+                // 'phone' => $request->phone,
                 'email' => $request->email,
                 'address' => $request->address,
                 'gender' => $request->gender

@@ -30,7 +30,7 @@ class Product extends Model
     // Accessor untuk image_url
     public function getImageUrlAttribute()
     {
-        return $this->image ? asset('storage/' . $this->image) : null;
+        return $this->image ? asset('uploads/' . $this->image) : null;
     }
 
     public function outlet()

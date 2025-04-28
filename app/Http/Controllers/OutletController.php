@@ -35,15 +35,18 @@ class OutletController extends Controller
                 'name' => 'required|string|max:255',
                 'address' => 'required|string|max:255',
                 'phone' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255|unique:outlets',
+                'email' => 'required|string|email|max:255',
                 'tax' => 'nullable|numeric|min:0',
                 'qris' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10048',
+                'atas_nama_bank' => 'nullable|string|max:255',
+                'nama_bank' => 'nullable|string|max:255',
+                'nomor_transaksi_bank' => 'nullable|integer',
             ]);
 
             DB::beginTransaction();
-            
+
             if ($request->hasFile('qris')) {
-                $path = $request->file('qris')->store('qris', 'public');
+                $path = $request->file('qris')->store('qris', 'uploads');
                 $qrisPath = $path;
             }
 
@@ -54,10 +57,13 @@ class OutletController extends Controller
                 'email' => $request->email,
                 'tax' => $request->tax,
                 'qris' => $qrisPath,
+                'atas_nama_bank' => $request->atas_nama_bank,
+                'nama_bank' => $request->nama_bank,
+                'nomor_transaksi_bank' => $request->nomor_transaksi_bank,
             ]);
             CashRegister::create([
                 'outlet_id' => $outlet->id,
-                'balance' => 0, 
+                'balance' => 0,
                 'is_active' => true,
             ]);
             DB::commit();
@@ -65,7 +71,7 @@ class OutletController extends Controller
         } catch (ValidationException $th) {
             DB::rollBack();
             return $this->errorResponse('Validation error', $th->errors());
-        }catch (\Throwable $th) {
+        } catch (\Throwable $th) {
             DB::rollBack();
             return $this->errorResponse($th->getMessage());
         }
@@ -95,23 +101,26 @@ class OutletController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, Outlet $outlet)
-    {    
+    {
         try {
-            
+
             $request->validate([
                 'name' => 'required|string|max:255',
-                'address' => 'required|string|max:255',
-                'phone' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255',
+                'address' => 'nullable|string|max:255',
+                'phone' => 'nullable|string|max:255',
+                'email' => 'nullable|string|email|max:255',
                 'is_active' => 'required|boolean',
                 'tax' => 'nullable|numeric|min:0',
                 'qris' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10048',
+                'atas_nama_bank' => 'nullable|string|max:255',
+                'nama_bank' => 'nullable|string|max:255',
+                'nomor_transaksi_bank' => 'nullable|integer',
             ]);
 
             $qrisPath = $outlet->qris;
 
             if ($request->hasFile('qris')) {
-                $path = $request->file('qris')->store('qris', 'public');
+                $path = $request->file('qris')->store('qris', 'uploads');
                 $qrisPath = $path;
             }
 
@@ -123,14 +132,14 @@ class OutletController extends Controller
                 'tax' => $request->tax,
                 'qris' => $qrisPath,
                 'is_active' => $request->is_active,
+                'atas_nama_bank' => $request->atas_nama_bank,
+                'nama_bank' => $request->nama_bank,
+                'nomor_transaksi_bank' => $request->nomor_transaksi_bank,
             ]);
             return $this->successResponse($outlet, 'Outlet updated successfully');
-        }
-        catch (ValidationException $th) {
+        } catch (ValidationException $th) {
             return $this->errorResponse('Validation error', $th->errors());
-        }
-        
-        catch (\Throwable $th) {
+        } catch (\Throwable $th) {
             return $this->errorResponse('Outlet update failed', $th->getMessage());
         }
     }

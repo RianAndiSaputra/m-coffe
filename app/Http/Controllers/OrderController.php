@@ -127,45 +127,59 @@ class OrderController extends Controller
             'items' => 'required|array',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
+            'items.*.discount' => 'required|numeric|min:0',
             'items.*.price' => 'required|numeric|min:0',
-            'payment_method' => 'required|in:cash,qris',
+            'payment_method' => 'required|in:cash,qris,transfer',
             'notes' => 'nullable|string',
             'total_paid' => 'nullable|numeric|min:0',
             'tax' => 'nullable|numeric|min:0',
-            'discount' => 'nullable|numeric|min:0',
+            'discount' => 'required|numeric|min:0',
             'member_id' => 'nullable|exists:members,id',
         ]);
-
+    
         try {
             DB::beginTransaction();
-
-            // Hitung subtotal dari semua items
-            $subtotal = collect($request->items)->sum(function ($item) {
+    
+             // 1. Hitung subtotal awal (tanpa diskon)
+            $rawSubtotal = collect($request->items)->sum(function ($item) {
                 return $item['quantity'] * $item['price'];
             });
-
-            // Hitung total (subtotal + tax - discount)
-            $tax = $request->tax ?? 0;
-            $discount = $request->discount ?? 0;
-            $total = $subtotal + $tax - $discount;
-            $change = ($request->total_paid ?? 0) - $total;
-
-            $totalPaid = $request->total_paid;
-
+            
+            // 2. Hitung total diskon item (pastikan ini nilai NOMINAL, bukan persentase)
+            $itemDiscountTotal = collect($request->items)->sum(function ($item) {
+                return floatval($item['discount'] ?? 0);
+            });
+            
+            // 3. Batasi diskon agar tidak melebihi subtotal
+            $totalDiscount = min($itemDiscountTotal, $rawSubtotal);
+            
+            // 4. Hitung subtotal setelah diskon
+            $orderSubtotal = $rawSubtotal - $totalDiscount;
+            
+            // 5. Tambahkan pajak
+            $tax = floatval($request->tax ?? 0);
+            
+            // 6. Hitung total akhir (tidak boleh negatif)
+            $total = max(0, $orderSubtotal + $tax);
+            
+            // 7. Hitung kembalian
+            $totalPaid = floatval($request->total_paid ?? 0);
             if ($request->payment_method === 'qris') {
                 $totalPaid = $total;
                 $change = 0;
+            } else {
+                $change = $totalPaid - $total;
             }
 
-            // Buat order dengan subtotal
+            // Buat order
             $order = Order::create([
                 'order_number' => 'INV-' . time() . '-' . strtoupper(Str::random(6)),
                 'outlet_id' => $request->outlet_id,
                 'user_id' => $request->user()->id,
                 'shift_id' => $request->shift_id,
-                'subtotal' => $subtotal,  // Subtotal disimpan di sini
+                'subtotal' => $rawSubtotal,
                 'tax' => $tax,
-                'discount' => $discount,
+                'discount' => $totalDiscount,
                 'total' => $total,
                 'total_paid' => $totalPaid,
                 'change' => $change,
@@ -175,25 +189,30 @@ class OrderController extends Controller
                 'member_id' => $request->member_id
             ]);
 
-            // Buat order items TANPA subtotal
+            // Buat order items
             foreach ($request->items as $item) {
-                $subtotal = $item['quantity'] * $item['price'];
+                $itemTotal = $item['quantity'] * $item['price'];
+                $itemDiscount = min(floatval($item['discount'] ?? 0), $itemTotal);
+                $subtotal = $itemTotal - $itemDiscount;
+                
                 $order->items()->create([
                     'product_id' => $item['product_id'],
                     'quantity' => $item['quantity'],
                     'price' => $item['price'],
-                    'subtotal' => $subtotal,
+                    'discount' => $itemDiscount,
+                    'subtotal' => $subtotal, // Ini HARUS positif
                 ]);
 
-                // Update inventory
+    
+                // Update inventory (tidak diubah)
                 $inventory = Inventory::where('outlet_id', $request->outlet_id)
                     ->where('product_id', $item['product_id'])
                     ->first();
-
+    
                 if ($inventory) {
                     $quantityBefore = $inventory->quantity;
                     $inventory->decrement('quantity', $item['quantity']);
-
+    
                     InventoryHistory::create([
                         'outlet_id' => $request->outlet_id,
                         'product_id' => $item['product_id'],
@@ -206,22 +225,48 @@ class OrderController extends Controller
                     ]);
                 }
             }
-
+    
+            // Tidak diubah
             $cashRegister = CashRegister::where('outlet_id', $request->outlet_id)->first();
             $cashRegister->addCash($total, $request->user()->id, $request->shift_id, 'Penjualan POS, Invoice #' . $order->order_number, 'pos');
-
+    
             $order->update(['status' => 'completed']);
-
-            $data = [];
-            $newOrder = $order->load(['items.product:id,name,sku', 'user']);
-            // $newOrder = $order->load(['items', 'user']);
-
-            $data['user'] = $newOrder->user->name; 
-
+            
             DB::commit();
 
-            // return $this->successResponse($data, 'Order berhasil dibuat');
-            return $this->successResponse($order->load(['items.product', 'user']), 'Order berhasil dibuat');
+            $data = [
+                'id' => $order->id,
+                'order_number' => $order->order_number,
+                'outlet' => $order->outlet->name,
+                'user' => $order->user->name,
+                'total' => $order->total,
+                'status' => $order->status,
+            
+                'subtotal' => $order->subtotal,
+                'tax' => $order->tax,
+                'discount' => $order->discount,
+                'total_paid' => $order->total_paid,
+                'change' => $order->change,
+            
+                'payment_method' => $order->payment_method,
+                'created_at' => $order->created_at->format('d/m/Y H:i'),
+                'items' => $order->items->map(function ($item) {
+                    return [
+                        'product' => $item->product->name,
+                        'quantity' => $item->quantity,
+                        'price' => $item->price,
+                        'discount' => $item->discount,
+                        'total' => $item->quantity * $item->price
+                    ];
+                }),
+                'member' => $order->member ? [
+                    'name' => $order->member->name,
+                    'member_code' => $order->member->member_code
+                ] : null
+            ];
+            
+            return $this->successResponse($data, "Succesfully created order");
+            // return $this->successResponse($order->load(['items.product', 'user']), 'Order berhasil dibuat');
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->errorResponse('Terjadi kesalahan: ' . $e->getMessage());
@@ -403,9 +448,14 @@ class OrderController extends Controller
                             'product' => $item->product->name,
                             'quantity' => $item->quantity,
                             'price' => $item->price,
+                            'discount' => $item->discount,
                             'total' => $item->quantity * $item->price
                         ];
-                    })
+                    }),
+                    'member' => $order->member ? [
+                        'name' => $order->member->name,
+                        'member_code' => $order->member->member_code
+                    ] : null
                 ];
             });
 
