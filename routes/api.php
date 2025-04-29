@@ -86,6 +86,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('/inventory-histories/{inventoryHistory}', 'destroy')->middleware('role:admin');
             Route::get('/inventory-histories/stock/{outletId}', 'getStock');
             Route::get('/inventory-histories/outlet/{outletId}', 'getHistoryByOutlet');
+            Route::get('/inventory-histories/type/{outletId}', 'getInventoryHistoryByType');
         });
 
         Route::controller(ShiftController::class)->group(function () {

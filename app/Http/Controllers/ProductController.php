@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Inventory;
+use App\Models\InventoryHistory;
 use App\Models\Outlet;
 use App\Models\Product;
 use App\Traits\ApiResponse;
@@ -77,6 +78,17 @@ class ProductController extends Controller
                     'outlet_id' => $outletId,
                     'quantity' => $request->quantity,
                     'min_stock' => $request->min_stock,
+                ]);
+                
+                InventoryHistory::create([
+                    'product_id' => $product->id,
+                    'outlet_id' => $outletId,
+                    'quantity_change' => $request->quantity,
+                    'quantity_before' => 0,
+                    'quantity_after' => $request->quantity,
+                    'type' => 'adjustment',
+                    'notes' => 'Stok awal produk baru',
+                    'user_id' => $request->user()->id,
                 ]);
             }
 
@@ -209,7 +221,7 @@ class ProductController extends Controller
             DB::beginTransaction();
             Inventory::where('product_id', $product->id)->delete();
             $product->delete();
-            Storage::disk('uploads')->delete($product->image);
+            // Storage::disk('uploads')->delete($product->image);
             DB::commit();
             return $this->successResponse(null, 'Product deleted successfully');
         } catch (\Throwable $th) {

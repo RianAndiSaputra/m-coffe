@@ -136,32 +136,32 @@ class OrderController extends Controller
             'discount' => 'required|numeric|min:0',
             'member_id' => 'nullable|exists:members,id',
         ]);
-    
+
         try {
             DB::beginTransaction();
-    
-             // 1. Hitung subtotal awal (tanpa diskon)
+
+            // 1. Hitung subtotal awal (tanpa diskon)
             $rawSubtotal = collect($request->items)->sum(function ($item) {
                 return $item['quantity'] * $item['price'];
             });
-            
+
             // 2. Hitung total diskon item (pastikan ini nilai NOMINAL, bukan persentase)
             $itemDiscountTotal = collect($request->items)->sum(function ($item) {
                 return floatval($item['discount'] ?? 0);
             });
-            
+
             // 3. Batasi diskon agar tidak melebihi subtotal
             $totalDiscount = min($itemDiscountTotal, $rawSubtotal);
-            
+
             // 4. Hitung subtotal setelah diskon
             $orderSubtotal = $rawSubtotal - $totalDiscount;
-            
+
             // 5. Tambahkan pajak
             $tax = floatval($request->tax ?? 0);
-            
+
             // 6. Hitung total akhir (tidak boleh negatif)
             $total = max(0, $orderSubtotal + $tax);
-            
+
             // 7. Hitung kembalian
             $totalPaid = floatval($request->total_paid ?? 0);
             if ($request->payment_method === 'qris') {
@@ -194,7 +194,7 @@ class OrderController extends Controller
                 $itemTotal = $item['quantity'] * $item['price'];
                 $itemDiscount = min(floatval($item['discount'] ?? 0), $itemTotal);
                 $subtotal = $itemTotal - $itemDiscount;
-                
+
                 $order->items()->create([
                     'product_id' => $item['product_id'],
                     'quantity' => $item['quantity'],
@@ -203,16 +203,16 @@ class OrderController extends Controller
                     'subtotal' => $subtotal, // Ini HARUS positif
                 ]);
 
-    
+
                 // Update inventory (tidak diubah)
                 $inventory = Inventory::where('outlet_id', $request->outlet_id)
                     ->where('product_id', $item['product_id'])
                     ->first();
-    
+
                 if ($inventory) {
                     $quantityBefore = $inventory->quantity;
                     $inventory->decrement('quantity', $item['quantity']);
-    
+
                     InventoryHistory::create([
                         'outlet_id' => $request->outlet_id,
                         'product_id' => $item['product_id'],
@@ -225,13 +225,13 @@ class OrderController extends Controller
                     ]);
                 }
             }
-    
+
             // Tidak diubah
             $cashRegister = CashRegister::where('outlet_id', $request->outlet_id)->first();
             $cashRegister->addCash($total, $request->user()->id, $request->shift_id, 'Penjualan POS, Invoice #' . $order->order_number, 'pos');
-    
+
             $order->update(['status' => 'completed']);
-            
+
             DB::commit();
 
             $data = [
@@ -241,13 +241,13 @@ class OrderController extends Controller
                 'user' => $order->user->name,
                 'total' => $order->total,
                 'status' => $order->status,
-            
+
                 'subtotal' => $order->subtotal,
                 'tax' => $order->tax,
                 'discount' => $order->discount,
                 'total_paid' => $order->total_paid,
                 'change' => $order->change,
-            
+
                 'payment_method' => $order->payment_method,
                 'created_at' => $order->created_at->format('d/m/Y H:i'),
                 'items' => $order->items->map(function ($item) {
@@ -264,7 +264,7 @@ class OrderController extends Controller
                     'member_code' => $order->member->member_code
                 ] : null
             ];
-            
+
             return $this->successResponse($data, "Succesfully created order");
             // return $this->successResponse($order->load(['items.product', 'user']), 'Order berhasil dibuat');
         } catch (\Exception $e) {
@@ -384,6 +384,98 @@ class OrderController extends Controller
         }
     }
 
+    // public function orderHistory(Request $request)
+    // {
+    //     try {
+    //         $validator = Validator::make($request->query(), [
+    //             'outlet_id' => 'nullable|exists:outlets,id',
+    //             'member_id' => 'nullable|exists:members,id',
+    //             'date_from' => 'nullable|date',
+    //             'date_to' => 'nullable|date|after_or_equal:date_from',
+    //         ]);
+
+    //         if ($validator->fails()) {
+    //             return $this->errorResponse($validator->errors(), 422);
+    //         }
+
+    //         $query = Order::query();
+
+    //         if ($request->filled('outlet_id')) {
+    //             $query->where('outlet_id', $request->outlet_id);
+    //         }
+
+    //         if ($request->filled('member_id')) {
+    //             $query->where('member_id', $request->member_id);
+    //         }
+
+    //         if ($request->filled('date_from') && $request->filled('date_to')) {
+    //             $query->whereBetween('created_at', [
+    //                 $request->date_from,
+    //                 $request->date_to . ' 23:59:59'
+    //             ]);
+    //         }
+
+    //         $totalOrders = $query->count();
+    //         $totalRevenue = (clone $query)->where('status', 'completed')->sum('total');
+
+    //         $orders = $query->with([
+    //             'items.product:id,name,sku',
+    //             'outlet:id,name',
+    //             'shift:id',
+    //             'user:id,name'
+    //         ])->has('outlet')->has('user')->latest()->get();
+
+    //         // Transformasi respons
+    //         $orders->transform(function ($order) {
+    //             return [
+    //                 'id' => $order->id,
+    //                 'order_number' => $order->order_number,
+    //                 'outlet' => $order->outlet->name,
+    //                 'user' => $order->user->name,
+    //                 'total' => $order->total,
+    //                 'status' => $order->status,
+
+    //                 'subtotal' => $order->subtotal,
+    //                 'tax' => $order->tax,
+    //                 'discount' => $order->discount,
+    //                 'total_paid' => $order->total_paid,
+    //                 'change' => $order->change,
+
+    //                 'payment_method' => $order->payment_method,
+    //                 'created_at' => $order->created_at->format('d/m/Y H:i'),
+    //                 'items' => $order->items->map(function ($item) {
+    //                     return [
+    //                         'product' => $item->product->name,
+    //                         'sku' => $item->product->sku,
+    //                         'unit' => $item->product->unit,
+    //                         'quantity' => $item->quantity,
+    //                         'price' => $item->price,
+    //                         'discount' => $item->discount,
+    //                         'total' => $item->quantity * $item->price
+    //                     ];
+    //                 }),
+    //                 'member' => $order->member ? [
+    //                     'name' => $order->member->name,
+    //                     'member_code' => $order->member->member_code
+    //                 ] : null
+    //             ];
+    //         });
+
+    //         // Tambahkan informasi total ke dalam respons
+    //         $response = [
+    //             'date_from' => date('d-m-Y', strtotime($request->date_from)),
+    //             'date_to' => date('d-m-Y', strtotime($request->date_to)),
+    //             'total_orders' => $totalOrders,
+    //             'total_revenue' => $totalRevenue,
+    //             'orders' => $orders
+    //         ];
+
+    //         return $this->successResponse($response, 'Riwayat order berhasil diambil');
+    //     } catch (\Exception $e) {
+    //         return $this->errorResponse('Terjadi kesalahan: ' . $e->getMessage());
+    //     }
+    // }
+
     public function orderHistory(Request $request)
     {
         try {
@@ -418,6 +510,18 @@ class OrderController extends Controller
             $totalOrders = $query->count();
             $totalRevenue = (clone $query)->where('status', 'completed')->sum('total');
 
+            // Hitung total item yang terjual
+            $totalItemsSold = 0;
+            $completedOrdersQuery = (clone $query)->where('status', 'completed')->with('items');
+            $completedOrders = $completedOrdersQuery->get();
+
+            foreach ($completedOrders as $order) {
+                $totalItemsSold += $order->items->sum('quantity');
+            }
+
+            // Hitung rata-rata penjualan (hanya untuk order yang completed)
+            $averageOrderValue = $totalOrders > 0 ? ($totalRevenue / $totalOrders) : 0;
+
             $orders = $query->with([
                 'items.product:id,name,sku',
                 'outlet:id,name',
@@ -446,6 +550,8 @@ class OrderController extends Controller
                     'items' => $order->items->map(function ($item) {
                         return [
                             'product' => $item->product->name,
+                            'sku' => $item->product->sku,
+                            'unit' => $item->product->unit ?? 'pcs',
                             'quantity' => $item->quantity,
                             'price' => $item->price,
                             'discount' => $item->discount,
@@ -465,6 +571,8 @@ class OrderController extends Controller
                 'date_to' => date('d-m-Y', strtotime($request->date_to)),
                 'total_orders' => $totalOrders,
                 'total_revenue' => $totalRevenue,
+                'average_order_value' => round($averageOrderValue, 2),
+                'total_items_sold' => $totalItemsSold,
                 'orders' => $orders
             ];
 

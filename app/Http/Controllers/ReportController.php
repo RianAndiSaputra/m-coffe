@@ -28,93 +28,24 @@ class ReportController extends Controller
      * @param  \App\Models\Outlet  $outlet
      * @return \Illuminate\Http\Response
      */
-    // public function dailySales(Request $request, Outlet $outlet)
-    // {
-    //     // $request->validate([
-    //     //     'date' => 'nullable|date_format:Y-m-d',
-    //     // ]);
-
-    //     $date = $request->date ? Carbon::parse($request->date) : Carbon::today();
-
-    //     $date = Carbon::today();
-
-    //     $sales = Order::where('outlet_id', $outlet->id)
-    //         ->whereDate('created_at', $date)
-    //         ->where('status', 'completed')
-    //         ->get();
-
-    //     $totalSales = $sales->sum('total');
-    //     $totalItems = OrderItem::whereIn('order_id', $sales->pluck('id'))->sum('quantity');
-    //     $totalOrders = $sales->count();
-    //     $averageOrderValue = $totalOrders > 0 ? $totalSales / $totalOrders : 0;
-
-    //     // Penjualan per jam
-    //     $hourlyData = Order::where('outlet_id', $outlet->id)
-    //         ->whereDate('created_at', $date)
-    //         ->where('status', 'completed')
-    //         ->get()
-    //         ->groupBy(function ($item) {
-    //             return Carbon::parse($item->created_at)->format('H');
-    //         })
-    //         ->map(function ($items) {
-    //             return [
-    //                 'orders' => $items->count(),
-    //                 'sales' => $items->sum('total'),
-    //             ];
-    //         });
-
-    //     // Penjualan per kategori produk
-    //     $categorySales = DB::table('order_items')
-    //         ->join('orders', 'order_items.order_id', '=', 'orders.id')
-    //         ->join('products', 'order_items.product_id', '=', 'products.id')
-    //         ->join('categories', 'products.category_id', '=', 'categories.id')
-    //         ->select('categories.name', DB::raw('SUM(order_items.quantity) as total_quantity'), DB::raw('SUM(order_items.subtotal) as total_sales'))
-    //         ->where('orders.outlet_id', $outlet->id)
-    //         ->whereDate('orders.created_at', $date)
-    //         ->where('orders.status', 'completed')
-    //         ->groupBy('categories.name')
-    //         ->get();
-
-    //     // Penjualan per metode pembayaran
-    //     $paymentMethodSales = $sales->groupBy('payment_method')
-    //         ->map(function ($items) {
-    //             return [
-    //                 'count' => $items->count(),
-    //                 'total' => $items->sum('total'),
-    //             ];
-    //         });
-
-    //     return response()->json([
-    //         'status' => true,
-    //         'data' => [
-    //             'date' => $date->format('Y-m-d'),
-    //             'outlet' => $outlet->name,
-    //             'summary' => [
-    //                 'total_sales' => $totalSales,
-    //                 'total_orders' => $totalOrders,
-    //                 'total_items' => $totalItems,
-    //                 'average_order_value' => $averageOrderValue,
-    //             ],
-    //             'hourly_sales' => $hourlyData,
-    //             'category_sales' => $categorySales,
-    //             'payment_method_sales' => $paymentMethodSales,
-    //         ]
-    //     ]);
-    // }
 
     public function dailySales(Request $request, Outlet $outlet)
     {
+        // Validasi input
         $request->validate([
-            'date' => 'nullable|date_format:Y-m-d',
+            'start_date' => 'required|date_format:Y-m-d',
+            'end_date' => 'required|date_format:Y-m-d',
         ]);
 
-        $date = $request->date ? Carbon::parse($request->date) : Carbon::today();
+        // Konversi string tanggal menjadi instance Carbon
+        $startDate = Carbon::createFromFormat('Y-m-d', $request->start_date);
+        $endDate = Carbon::createFromFormat('Y-m-d', $request->end_date);
 
         // Ambil data order dengan relasi items dan produk
         $orders = Order::where('outlet_id', $outlet->id)
-            ->whereDate('created_at', $date)
+            ->whereBetween('created_at', [$startDate, $endDate])
             ->where('status', 'completed')
-            ->with(['items.product.category'])
+            ->with(['items.product.category', 'user'])
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -153,7 +84,8 @@ class ReportController extends Controller
         return response()->json([
             'status' => true,
             'data' => [
-                'date' => $date->format('Y-m-d'),
+                'date_from' => $startDate->format('Y-m-d'),
+                'date_to' => $endDate->format('Y-m-d'),
                 'outlet' => $outlet->name,
                 'summary' => [
                     'total_sales' => $totalSales,
@@ -165,6 +97,77 @@ class ReportController extends Controller
             ]
         ]);
     }
+
+
+    // public function dailySales(Request $request, Outlet $outlet)
+    // {
+    //     $request->validate([
+    //         'start_date' => 'required|date_format:Y-m-d',
+    //         'end_date' => 'required|date_format:Y-m-d',
+    //     ]);
+
+    //     $startDate = $request->start_date;
+    //     $endDate = $request->end_date;
+
+    //     // $date = $request->date ? Carbon::parse($request->date) : Carbon::today();
+
+    //     // Ambil data order dengan relasi items dan produk
+    //     $orders = Order::where('outlet_id', $outlet->id)
+    //         // ->whereDate('created_at', $date)
+    //         ->whereBetween('created_at', [$startDate, $endDate])
+    //         ->where('status', 'completed')
+    //         ->with(['items.product.category'])
+    //         ->orderBy('created_at', 'desc')
+    //         ->get();
+
+    //     // Hitung summary
+    //     $totalSales = $orders->sum('total');
+    //     $totalItems = $orders->flatMap(function ($order) {
+    //         return $order->items;
+    //     })->sum('quantity');
+    //     $totalOrders = $orders->count();
+    //     $averageOrderValue = $totalOrders > 0 ? $totalSales / $totalOrders : 0;
+
+    //     // Format response data
+    //     $formattedOrders = $orders->map(function ($order) {
+    //         return [
+    //             'order_id' => $order->order_number,
+    //             'order_time' => $order->created_at->format('H:i:s'),
+    //             'total' => $order->total,
+    //             'payment_method' => $order->payment_method,
+    //             'tax' => $order->tax,
+    //             'cashier' => $order->user->name ?? 'Unknown',
+    //             'items' => $order->items->map(function ($item) {
+    //                 return [
+    //                     'product_id' => $item->product_id,
+    //                     'product_name' => $item->product->name,
+    //                     'category' => $item->product->category->name ?? 'Uncategorized',
+    //                     'sku' => $item->product->sku,
+    //                     'unit' => $item->product->unit,
+    //                     'quantity' => $item->quantity,
+    //                     'unit_price' => $item->price,
+    //                     'subtotal' => $item->subtotal,
+    //                 ];
+    //             })
+    //         ];
+    //     });
+
+    //     return response()->json([
+    //         'status' => true,
+    //         'data' => [
+    //             'date_from' => $startDate->format('Y-m-d'),
+    //             'date_to' => $endDate->format('Y-m-d'),
+    //             'outlet' => $outlet->name,
+    //             'summary' => [
+    //                 'total_sales' => $totalSales,
+    //                 'total_orders' => $totalOrders,
+    //                 'total_items' => $totalItems,
+    //                 'average_order_value' => round($averageOrderValue, 2),
+    //             ],
+    //             'orders' => $formattedOrders
+    //         ]
+    //     ]);
+    // }
 
     /**
      * Laporan penjualan bulanan berdasarkan outlet
@@ -316,6 +319,211 @@ class ReportController extends Controller
         ]);
     }
 
+    // public function inventoryReportOld(Request $request, Outlet $outlet)
+    // {
+    //     $request->validate([
+    //         'start_date' => 'required|date',
+    //         'end_date' => 'required|date|after_or_equal:start_date',
+    //     ]);
+
+    //     $startDate = Carbon::parse($request->start_date)->startOfDay();
+    //     $endDate = Carbon::parse($request->end_date)->endOfDay();
+    //     $previousDay = $startDate->copy()->subDay();
+
+    //     $products = Product::whereHas('inventory', function ($q) use ($outlet) {
+    //         $q->where('outlet_id', $outlet->id);
+    //     })->get();
+
+    //     $results = [];
+
+    //     foreach ($products as $product) {
+    //         // 1. Hitung SALDO AWAL (stok akhir hari sebelumnya)
+    //         $previousInventory = InventoryHistory::where('outlet_id', $outlet->id)
+    //             ->where('product_id', $product->id)
+    //             ->whereDate('created_at', '<=', $previousDay)
+    //             ->latest('created_at')
+    //             ->first();
+
+    //         $openingStock = $previousInventory ? $previousInventory->quantity_after : 0;
+
+    //         // 2. Hitung STOCK MASUK (pembelian + adjustment plus)
+    //         $incomingStock = InventoryHistory::where('outlet_id', $outlet->id)
+    //             ->where('product_id', $product->id)
+    //             ->whereBetween('created_at', [$startDate, $endDate])
+    //             ->where(function ($query) {
+    //                 $query->where('type', 'purchase')
+    //                     ->orWhere('type', 'transfer_in')
+    //                     ->orWhere('type', 'shipment')
+    //                     ->orWhere('type', 'other') // Tambahkan transfer_in
+    //                     ->orWhere(function ($q) {
+    //                         $q->where('type', 'adjustment')
+    //                             ->where('quantity_change', '>', 0);
+    //                     });
+    //             })
+    //             ->sum('quantity_change');
+
+    //         // 3. Hitung STOCK KELUAR (penjualan + adjustment minus + transfer_out)
+    //         $outgoingStock = InventoryHistory::where('outlet_id', $outlet->id)
+    //             ->where('product_id', $product->id)
+    //             ->whereBetween('created_at', [$startDate, $endDate])
+    //             ->where(function ($query) {
+    //                 $query->where('type', 'sale')
+    //                     ->orWhere('type', 'transfer_out') // Tambahkan transfer_out
+    //                     ->orWhere(function ($q) {
+    //                         $q->where('type', 'adjustment')
+    //                             ->where('quantity_change', '<', 0);
+    //                     });
+    //             })
+    //             ->sum('quantity_change');
+
+    //         $outgoingStock = abs($outgoingStock); // Convert to positive number
+
+    //         // 4. Hitung STOCK AKHIR
+    //         $closingStock = $openingStock + $incomingStock - $outgoingStock;
+
+    //         // 5. Dapatkan stok aktual terakhir
+    //         $currentInventory = Inventory::where('outlet_id', $outlet->id)
+    //             ->where('product_id', $product->id)
+    //             ->first();
+
+    //         $results[] = [
+    //             'product_id' => $product->id,
+    //             'product_name' => $product->name,
+    //             'product_code' => $product->sku,
+    //             'unit' => $product->unit,
+    //             'saldo_awal' => $openingStock,
+    //             'stock_masuk' => $incomingStock,
+    //             'stock_keluar' => $outgoingStock,
+    //             'stock_akhir' => $closingStock,
+    //             'stock_aktual' => $currentInventory ? $currentInventory->quantity : 0,
+    //             'selisih' => ($currentInventory ? $currentInventory->quantity : 0) - $closingStock
+    //         ];
+    //     }
+
+    //     return response()->json([
+    //         'status' => true,
+    //         'data' => [
+    //             'outlet' => $outlet->name,
+    //             'periode' => [
+    //                 'start_date' => $startDate->format('Y-m-d'),
+    //                 'end_date' => $endDate->format('Y-m-d'),
+    //             ],
+    //             'products' => $results,
+    //             'summary' => [
+    //                 'total_saldo_awal' => collect($results)->sum('saldo_awal'),
+    //                 'total_stock_masuk' => collect($results)->sum('stock_masuk'),
+    //                 'total_stock_keluar' => collect($results)->sum('stock_keluar'),
+    //                 'total_stock_akhir' => collect($results)->sum('stock_akhir'),
+    //             ]
+    //         ]
+    //     ]);
+    // }
+
+    // public function inventoryReportBaru(Request $request, Outlet $outlet)
+    // {
+    //     $request->validate([
+    //         'start_date' => 'required|date',
+    //         'end_date' => 'required|date|after_or_equal:start_date',
+    //     ]);
+
+    //     $startDate = Carbon::parse($request->start_date)->startOfDay();
+    //     $endDate = Carbon::parse($request->end_date)->endOfDay();
+    //     $previousDay = $startDate->copy()->subDay();
+
+    //     $products = Product::whereHas('inventory', function ($q) use ($outlet) {
+    //         $q->where('outlet_id', $outlet->id);
+    //     })->get();
+
+    //     $results = [];
+
+    //     foreach ($products as $product) {
+    //         // 1. Hitung SALDO AWAL (stok akhir hari sebelumnya)
+    //         $previousInventory = InventoryHistory::where('outlet_id', $outlet->id)
+    //             ->where('product_id', $product->id)
+    //             ->whereDate('created_at', '<=', $previousDay)
+    //             ->latest('created_at')
+    //             ->first();
+
+    //         $openingStock = $previousInventory ? $previousInventory->quantity_after : 0;
+
+    //         // 2. Hitung STOCK MASUK (pembelian + adjustment plus)
+    //         $incomingStock = InventoryHistory::where('outlet_id', $outlet->id)
+    //             ->where('product_id', $product->id)
+    //             ->whereBetween('created_at', [$startDate, $endDate])
+    //             ->where(function ($query) {
+    //                 $query->where('type', 'purchase')
+    //                     ->orWhere('type', 'transfer_in')
+    //                     ->orWhere('type', 'shipment')
+    //                     ->orWhere('type', 'other') // Tambahkan transfer_in
+    //                     ->orWhere(function ($q) {
+    //                         $q->where('type', 'adjustment')
+    //                             ->where('quantity_change', '>', 0);
+    //                     });
+    //             })
+    //             ->sum('quantity_change');
+
+    //         // 3. Hitung STOCK KELUAR (penjualan + adjustment minus + transfer_out)
+    //         $outgoingStock = InventoryHistory::where('outlet_id', $outlet->id)
+    //             ->where('product_id', $product->id)
+    //             ->whereBetween('created_at', [$startDate, $endDate])
+    //             ->where(function ($query) {
+    //                 $query->where('type', 'sale')
+    //                     ->orWhere('type', 'transfer_out') // Tambahkan transfer_out
+    //                     ->orWhere(function ($q) {
+    //                         $q->where('type', 'adjustment')
+    //                             ->where('quantity_change', '<', 0);
+    //                     });
+    //             })
+    //             ->sum('quantity_change');
+
+    //         $outgoingStock = abs($outgoingStock); // Convert to positive number
+
+    //         //saldo akhir
+    //         $saldoAkhir = $openingStock + $incomingStock - $outgoingStock;
+
+    //         // 4. Hitung STOCK AKHIR
+    //         $closingStock = $saldoAkhir + $incomingStock - $outgoingStock;
+
+
+    //         // 5. Dapatkan stok aktual terakhir
+    //         $currentInventory = Inventory::where('outlet_id', $outlet->id)
+    //             ->where('product_id', $product->id)
+    //             ->first();
+
+    //         $results[] = [
+    //             'product_id' => $product->id,
+    //             'product_name' => $product->name,
+    //             'product_code' => $product->sku,
+    //             'unit' => $product->unit,
+    //             'saldo_awal' => $openingStock,
+    //             'stock_masuk' => $incomingStock,
+    //             'stock_keluar' => $outgoingStock,
+    //             'stock_akhir' => $closingStock,
+    //             'saldo_akhir' => $saldoAkhir,
+    //             'stock_aktual' => $currentInventory ? $currentInventory->quantity : 0,
+    //             'selisih' => ($currentInventory ? $currentInventory->quantity : 0) - $closingStock
+    //         ];
+    //     }
+
+    //     return response()->json([
+    //         'status' => true,
+    //         'data' => [
+    //             'outlet' => $outlet->name,
+    //             'periode' => [
+    //                 'start_date' => $startDate->format('Y-m-d'),
+    //                 'end_date' => $endDate->format('Y-m-d'),
+    //             ],
+    //             'products' => $results,
+    //             'summary' => [
+    //                 'total_saldo_awal' => collect($results)->sum('saldo_awal'),
+    //                 'total_stock_masuk' => collect($results)->sum('stock_masuk'),
+    //                 'total_stock_keluar' => collect($results)->sum('stock_keluar'),
+    //                 'total_stock_akhir' => collect($results)->sum('stock_akhir'),
+    //             ]
+    //         ]
+    //     ]);
+    // }
+
     public function inventoryReport(Request $request, Outlet $outlet)
     {
         $request->validate([
@@ -327,6 +535,7 @@ class ReportController extends Controller
         $endDate = Carbon::parse($request->end_date)->endOfDay();
         $previousDay = $startDate->copy()->subDay();
 
+        // Ambil produk yang memiliki inventory di outlet ini
         $products = Product::whereHas('inventory', function ($q) use ($outlet) {
             $q->where('outlet_id', $outlet->id);
         })->get();
@@ -341,9 +550,20 @@ class ReportController extends Controller
                 ->latest('created_at')
                 ->first();
 
-            $openingStock = $previousInventory ? $previousInventory->quantity_after : 0;
+            // Dapatkan stok aktual terakhir sebagai fallback
+            $currentInventory = Inventory::where('outlet_id', $outlet->id)
+                ->where('product_id', $product->id)
+                ->first();
 
-            // 2. Hitung STOCK MASUK (pembelian + adjustment plus)
+            // Sebelum perhitungan saldo awal, cek apakah produk baru
+            $isNewProduct = !InventoryHistory::where('product_id', $product->id)
+                ->where('outlet_id', $outlet->id)
+                ->whereDate('created_at', '<', $startDate)
+                ->exists();
+
+            $openingStock = $isNewProduct ? 0 : ($previousInventory ? $previousInventory->quantity_after : ($currentInventory ? $currentInventory->quantity : 0));
+
+            // 2. Hitung STOCK MASUK (pembelian + adjustment plus + transfer masuk)
             $incomingStock = InventoryHistory::where('outlet_id', $outlet->id)
                 ->where('product_id', $product->id)
                 ->whereBetween('created_at', [$startDate, $endDate])
@@ -351,7 +571,7 @@ class ReportController extends Controller
                     $query->where('type', 'purchase')
                         ->orWhere('type', 'transfer_in')
                         ->orWhere('type', 'shipment')
-                        ->orWhere('type', 'other') // Tambahkan transfer_in
+                        ->orWhere('type', 'other')
                         ->orWhere(function ($q) {
                             $q->where('type', 'adjustment')
                                 ->where('quantity_change', '>', 0);
@@ -359,13 +579,13 @@ class ReportController extends Controller
                 })
                 ->sum('quantity_change');
 
-            // 3. Hitung STOCK KELUAR (penjualan + adjustment minus + transfer_out)
+            // 3. Hitung STOCK KELUAR (penjualan + adjustment minus + transfer keluar)
             $outgoingStock = InventoryHistory::where('outlet_id', $outlet->id)
                 ->where('product_id', $product->id)
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->where(function ($query) {
                     $query->where('type', 'sale')
-                        ->orWhere('type', 'transfer_out') // Tambahkan transfer_out
+                        ->orWhere('type', 'transfer_out')
                         ->orWhere(function ($q) {
                             $q->where('type', 'adjustment')
                                 ->where('quantity_change', '<', 0);
@@ -373,15 +593,14 @@ class ReportController extends Controller
                 })
                 ->sum('quantity_change');
 
-            $outgoingStock = abs($outgoingStock); // Convert to positive number
+            $outgoingStock = abs($outgoingStock); // Pastikan positif
 
-            // 4. Hitung STOCK AKHIR
+            // 4. Hitung SALDO AKHIR
             $closingStock = $openingStock + $incomingStock - $outgoingStock;
 
-            // 5. Dapatkan stok aktual terakhir
-            $currentInventory = Inventory::where('outlet_id', $outlet->id)
-                ->where('product_id', $product->id)
-                ->first();
+            // 5. Hitung selisih dengan stok aktual
+            $actualStock = $currentInventory ? $currentInventory->quantity : 0;
+            $difference = $actualStock - $closingStock;
 
             $results[] = [
                 'product_id' => $product->id,
@@ -392,13 +611,14 @@ class ReportController extends Controller
                 'stock_masuk' => $incomingStock,
                 'stock_keluar' => $outgoingStock,
                 'stock_akhir' => $closingStock,
-                'stock_aktual' => $currentInventory ? $currentInventory->quantity : 0,
-                'selisih' => ($currentInventory ? $currentInventory->quantity : 0) - $closingStock
+                'stock_aktual' => $actualStock,
+                'selisih' => $difference,
+                'status_stok' => $closingStock < 0 ? 'Negatif' : ($difference != 0 ? 'Tidak Sesuai' : 'Normal')
             ];
         }
 
         return response()->json([
-            'status' => true,
+            'success' => true,
             'data' => [
                 'outlet' => $outlet->name,
                 'periode' => [
@@ -411,6 +631,9 @@ class ReportController extends Controller
                     'total_stock_masuk' => collect($results)->sum('stock_masuk'),
                     'total_stock_keluar' => collect($results)->sum('stock_keluar'),
                     'total_stock_akhir' => collect($results)->sum('stock_akhir'),
+                    'total_selisih' => collect($results)->sum('selisih'),
+                    'produk_stok_negatif' => collect($results)->where('stock_akhir', '<', 0)->count(),
+                    'produk_tidak_sesuai' => collect($results)->where('selisih', '!=', 0)->count()
                 ]
             ]
         ]);

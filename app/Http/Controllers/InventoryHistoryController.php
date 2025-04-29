@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Inventory;
 use App\Models\InventoryHistory;
 use App\Traits\ApiResponse;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class InventoryHistoryController extends Controller
 {
@@ -253,16 +255,28 @@ class InventoryHistoryController extends Controller
         }
     }
 
-    public function getStock($outletId)
+    public function getStock(Request $request, $outletId)
     {
         try {
+
+            $request->validate([
+                'start_date' => 'required|date',
+                'end_date' => 'required|date|after_or_equal:start_date',
+            ]);
+
+            $startDate = Carbon::parse($request->start_date)->startOfDay();
+            $endDate = Carbon::parse($request->end_date)->endOfDay();
+
             $inventory = Inventory::where('outlet_id', $outletId)
                 ->with(['stockByType', 'product.category'])
+                ->whereBetween('created_at', [$startDate, $endDate])
                 ->get();
 
             return $this->successResponse($inventory, 'Stok retrieved successfully');
         } catch (\Throwable $th) {
             return $this->errorResponse($th->getMessage());
+        } catch (ValidationException $e) {
+            return $this->errorResponse($e->errors());
         }
     }
 
@@ -296,5 +310,70 @@ class InventoryHistoryController extends Controller
         } catch (\Throwable $th) {
             return $this->errorResponse($th->getMessage());
         }
+    }
+
+    public function getInventoryHistoryByType(Request $request, $outletId)
+    {
+        $validated = $request->validate([
+            'start_date' => 'required|date',
+            'end_date'   => 'required|date|after_or_equal:start_date',
+        ]);
+
+        $startDate = $validated['start_date'];
+        $endDate   = $validated['end_date'];
+
+        $histories = InventoryHistory::with('product:id,name,sku,price,unit')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->where('outlet_id', $outletId)
+            ->get();
+
+        // Dapatkan semua histori hingga end_date untuk hitung stok
+        $stockHistories = InventoryHistory::where('created_at', '<=', $endDate)
+            ->where('outlet_id', $outletId)
+            ->select('product_id', DB::raw('SUM(quantity_change) as stock'))
+            ->groupBy('product_id')
+            ->pluck('stock', 'product_id');
+
+        $grouped = $histories->groupBy('type')->map(function ($itemsByType) use ($stockHistories) {
+            return [
+                'total_entries' => $itemsByType->count(),
+                'total_quantity_changed' => $itemsByType->sum('quantity_change'),
+                'products' => $itemsByType->groupBy('product_id')->map(function ($itemsByProduct) use ($stockHistories) {
+                    $first = $itemsByProduct->first();
+                    return [
+                        'product_id' => $first->product_id,
+                        'product_name' => $first->product->name ?? null,
+                        'sku' => $first->product->sku ?? null,
+                        'price' => $first->product->price ?? null,
+                        'unit' => $first->product->unit ?? null,
+                        'stock_as_of_end_date' => $stockHistories[$first->product_id] ?? 0,
+                        'total_quantity_changed' => $itemsByProduct->sum('quantity_change'),
+                        'total_entries' => $itemsByProduct->count(),
+                        'entries' => $itemsByProduct->map(function ($entry) {
+                            return [
+                                'id' => $entry->id,
+                                'quantity_before' => $entry->quantity_before,
+                                'quantity_after' => $entry->quantity_after,
+                                'quantity_change' => $entry->quantity_change,
+                                'notes' => $entry->notes,
+                                'created_at' => $entry->created_at->toIso8601String(),
+                            ];
+                        })->toArray()
+                    ];
+                })->values()
+            ];
+        })->toArray();
+
+        return response()->json([
+            'meta' => [
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'outlet_id' => $outletId,
+                'generated_at' => Carbon::now()->toIso8601String(),
+            ],
+            'data' => [
+                'summary_by_type' => $grouped
+            ]
+        ]);
     }
 }
