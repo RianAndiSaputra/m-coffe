@@ -305,7 +305,41 @@ class InventoryHistoryController extends Controller
     {
         try {
             $date = $request->date;
-            $inventoryHistory = InventoryHistory::where('outlet_id', $outletId)->where('created_at', 'like', '%' . $date . '%')->with('outlet', 'product', 'user')->orderBy('created_at', 'desc')->get();
+
+            $inventoryHistory = InventoryHistory::where('outlet_id', $outletId)
+                ->whereDate('created_at', $date)
+                ->with([
+                    'outlet',
+                    'product' => function ($query) {
+                        $query->withTrashed(); // Menyertakan produk yang di-soft delete
+                    },
+                    'user'
+                ])
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->map(function ($item) {
+                    // Transformasi data untuk memastikan konsistensi response
+                    return [
+                        'id' => $item->id,
+                        'outlet' => $item->outlet,
+                        'product' => $item->product ? [
+                            'id' => $item->product->id,
+                            'name' => $item->product->name,
+                            'sku' => $item->product->sku,
+                            'deleted_at' => $item->product->deleted_at,
+                            // tambahkan field lain yang diperlukan
+                        ] : null,
+                        'user' => $item->user,
+                        'quantity_before' => $item->quantity_before,
+                        'quantity_after' => $item->quantity_after,
+                        'quantity_change' => $item->quantity_change,
+                        'type' => $item->type,
+                        'notes' => $item->notes,
+                        'created_at' => $item->created_at,
+                        'updated_at' => $item->updated_at
+                    ];
+                });
+
             return $this->successResponse($inventoryHistory, 'Inventory history retrieved successfully');
         } catch (\Throwable $th) {
             return $this->errorResponse($th->getMessage());

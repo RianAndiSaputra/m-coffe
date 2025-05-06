@@ -512,22 +512,30 @@ class OrderController extends Controller
 
             // Hitung total item yang terjual
             $totalItemsSold = 0;
-            $completedOrdersQuery = (clone $query)->where('status', 'completed')->with('items');
+            $completedOrdersQuery = (clone $query)->where('status', 'completed')->with(['items.product' => function ($q) {
+                $q->withTrashed()->select('id', 'name', 'sku', 'unit');
+            }]);
             $completedOrders = $completedOrdersQuery->get();
 
             foreach ($completedOrders as $order) {
                 $totalItemsSold += $order->items->sum('quantity');
             }
 
-            // Hitung rata-rata penjualan (hanya untuk order yang completed)
+            // Hitung rata-rata penjualan
             $averageOrderValue = $totalOrders > 0 ? ($totalRevenue / $totalOrders) : 0;
 
             $orders = $query->with([
-                'items.product:id,name,sku',
+                'items.product' => function ($q) {
+                    $q->withTrashed()->select('id', 'name', 'sku', 'unit');
+                },
                 'outlet:id,name',
                 'shift:id',
                 'user:id,name'
             ])->has('outlet')->has('user')->latest()->get();
+
+            $totalDiscount = $query->where('status', 'completed')->sum('discount');
+            $grossSales = $order->where('status', 'completed')->sum('subtotal');
+
 
             // Transformasi respons
             $orders->transform(function ($order) {
@@ -538,20 +546,18 @@ class OrderController extends Controller
                     'user' => $order->user->name,
                     'total' => $order->total,
                     'status' => $order->status,
-
                     'subtotal' => $order->subtotal,
                     'tax' => $order->tax,
                     'discount' => $order->discount,
                     'total_paid' => $order->total_paid,
                     'change' => $order->change,
-
                     'payment_method' => $order->payment_method,
                     'created_at' => $order->created_at->format('d/m/Y H:i'),
                     'items' => $order->items->map(function ($item) {
                         return [
-                            'product' => $item->product->name,
-                            'sku' => $item->product->sku,
-                            'unit' => $item->product->unit ?? 'pcs',
+                            'product' => $item->product ? $item->product->name : 'Produk tidak tersedia',
+                            'sku' => $item->product ? $item->product->sku : '',
+                            'unit' => $item->product ? ($item->product->unit ?? 'pcs') : 'pcs',
                             'quantity' => $item->quantity,
                             'price' => $item->price,
                             'discount' => $item->discount,
@@ -565,14 +571,16 @@ class OrderController extends Controller
                 ];
             });
 
-            // Tambahkan informasi total ke dalam respons
             $response = [
-                'date_from' => date('d-m-Y', strtotime($request->date_from)),
-                'date_to' => date('d-m-Y', strtotime($request->date_to)),
+                'date_from' => $request->date_from ? date('d-m-Y', strtotime($request->date_from)) : null,
+                'date_to' => $request->date_to ? date('d-m-Y', strtotime($request->date_to)) : null,
                 'total_orders' => $totalOrders,
                 'total_revenue' => $totalRevenue,
                 'average_order_value' => round($averageOrderValue, 2),
                 'total_items_sold' => $totalItemsSold,
+                'total_discount' => $totalDiscount,
+                'total_items_sold' => $totalItemsSold,
+                'gross_sales' => $grossSales,
                 'orders' => $orders
             ];
 
