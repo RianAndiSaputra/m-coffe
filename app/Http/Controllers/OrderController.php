@@ -478,6 +478,7 @@ class OrderController extends Controller
 
     public function orderHistory(Request $request)
     {
+        // knnnnninini
         try {
             $validator = Validator::make($request->query(), [
                 'outlet_id' => 'nullable|exists:outlets,id',
@@ -533,9 +534,10 @@ class OrderController extends Controller
                 'user:id,name'
             ])->has('outlet')->has('user')->latest()->get();
 
+            // $totalDiscount = $query->where('status', 'completed')->sum('discount');
+            // $grossSales = $order->where('status', 'completed')->sum('subtotal');
             $totalDiscount = $query->where('status', 'completed')->sum('discount');
-            $grossSales = $order->where('status', 'completed')->sum('subtotal');
-
+            $grossSales = $query->where('status', 'completed')->sum('subtotal');
 
             // Transformasi respons
             $orders->transform(function ($order) {
@@ -577,7 +579,6 @@ class OrderController extends Controller
                 'total_orders' => $totalOrders,
                 'total_revenue' => $totalRevenue,
                 'average_order_value' => round($averageOrderValue, 2),
-                'total_items_sold' => $totalItemsSold,
                 'total_discount' => $totalDiscount,
                 'total_items_sold' => $totalItemsSold,
                 'gross_sales' => $grossSales,
