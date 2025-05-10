@@ -103,7 +103,7 @@
     </div>
 </div>
 
-@include('partials.modal-tambah-produk')
+@include('partials.produk.modal-tambah-produk')
 
 <script>
     const modal = document.getElementById('modalTambahProduk');
