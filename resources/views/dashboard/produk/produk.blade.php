@@ -8,7 +8,7 @@
 <div class="mb-4">
     <div class="flex items-center justify-between">
         <h1 class="text-xl font-semibold text-gray-800">Manajemen Produk</h1>
-        <a href="#" class="px-4 py-2 text-sm text-white bg-orange-700 rounded hover:bg-orange-800">
+        <a href="#" class="px-4 py-2 text-sm text-white bg-orange-600 rounded hover:bg-orange-600">
             + Tambah Produk
         </a>
     </div>
@@ -38,14 +38,12 @@
     <!-- Header Table: Pencarian dan Tambah -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
         <input type="text" placeholder="Pencarian...." class="w-full md:w-1/3 border rounded px-3 py-2 text-sm mb-2 md:mb-0" />
-        <a href="#" class="px-4 py-2 text-sm text-white bg-orange-500 rounded hover:bg-orange-600">
-            + Tambah Produk
-        </a>
+        
     </div>
 
     <!-- Table -->
     <div class="overflow-x-auto">
-        <table class="w-full text-sm table-auto">
+        <table class="w-full text-sm table-100[vh]">
             <thead class="text-left text-gray-600 border-b">
                 <tr>
                     <th class="py-2">No.</th>
@@ -79,7 +77,24 @@
                     <td>
                         <span class="text-xs px-2 py-1 bg-orange-100 text-orange-600 rounded">Active</span>
                     </td>
-                    <td><i data-lucide="more-vertical" class="w-4 h-4 text-gray-500"></i></td>
+                    <td class="relative">
+                        <div class="relative">
+                            <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded">
+                                <i data-lucide="more-vertical" class="w-4 h-4 text-gray-500"></i>
+                            </button>
+
+                            <!-- Dropdown -->
+                            <div class="dropdown-menu hidden absolute right-0 z-10 mt-2 w-32 bg-white border border-gray-200 rounded shadow text-sm">
+                                <button onclick="editProduk(1)" class="flex items-center w-full px-3 py-2 hover:bg-gray-100 text-left">
+                                    <i data-lucide="pencil" class="w-4 h-4 mr-2 text-gray-500"></i> Edit
+                                </button>
+                                <button onclick="hapusProduk(1)" class="flex items-center w-full px-3 py-2 hover:bg-gray-100 text-left text-red-600">
+                                    <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i> Hapus
+                                </button>
+                            </div>
+                        </div>
+                    </td>
+
                 </tr>
 
                 <!-- Produk lainnya bisa ditambahkan sesuai pola di atas -->
@@ -94,27 +109,63 @@
     const modal = document.getElementById('modalTambahProduk');
     const batalBtn = document.getElementById('btnBatalModal');
 
-    // Buka modal
+    function openModal() {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeModal() {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    // Trigger buka modal
     document.querySelectorAll('a[href="#"]').forEach(btn => {
         btn.addEventListener('click', e => {
             e.preventDefault();
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            openModal();
         });
     });
 
-    // Tutup modal saat klik batal
+    // Klik batal
     batalBtn.addEventListener('click', () => {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
+        closeModal();
     });
 
-    // Tutup modal saat klik di luar kontennya
-    modal.addEventListener('click', () => {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
+    function toggleDropdown(button) {
+        // Tutup dropdown lain
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            if (menu !== button.nextElementSibling) {
+                menu.classList.add('hidden');
+            }
+        });
+
+        // Toggle dropdown terkait tombol yang diklik
+        const menu = button.nextElementSibling;
+        menu.classList.toggle('hidden');
+    }
+
+    // Tutup semua dropdown jika klik di luar
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('.relative')) {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => menu.classList.add('hidden'));
+        }
     });
+
+    // Fungsi edit & hapus
+    function editProduk(id) {
+        console.log('Edit produk ID:', id);
+        // Bisa buka modal edit di sini
+    }
+
+    function hapusProduk(id) {
+        if (confirm('Yakin ingin menghapus produk ini?')) {
+            console.log('Hapus produk ID:', id);
+            // Kirim permintaan hapus ke server di sini
+        }
+    }
 </script>
+
 
 
 @endsection
