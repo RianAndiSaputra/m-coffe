@@ -129,7 +129,7 @@
                     <i data-lucide="calendar" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Stok Pertanggal</span>
                 </a>
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
+                <a href="penyesuaian-stok" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="edit" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Penyesuaian Stok</span>
                 </a>

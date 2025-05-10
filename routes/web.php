@@ -37,3 +37,7 @@ Route::get('/riwayat-stok', function () {
 Route::get('/transfer-stok', function () {
     return view('dashboard.stok.transfer-stok');
 })->name('transfer-stok');
+
+Route::get('/penyesuaian-stok', function () {
+    return view('dashboard.stok.penyesuaian-stok');
+})->name('penyesuaian-stok');

@@ -39,16 +39,23 @@
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <h1 class="text-2xl font-bold text-gray-800">Manajemen Outlet</h1>
         <div class="flex items-center gap-2 w-full md:w-auto">
-            <input type="text" placeholder="Pencarian...."
-                class="w-full md:w-64 border rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" />
+            <!-- Input dengan ikon pencarian -->
+            <div class="relative w-full md:w-64">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
+                </span>
+                <input type="text" placeholder="Pencarian...."
+                    class="w-full pl-10 pr-4 py-3 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" />
+            </div>
+
+            <!-- Tombol Tambah Outlet -->
             <a href="#" onclick="openModalTambah()"
-            class="px-5 py-3 text-base font-medium text-white bg-orange-500 rounded-lg hover:bg-orange-600 shadow">
+                class="px-5 py-3 text-base font-medium text-white bg-orange-500 rounded-lg hover:bg-orange-600 shadow">
                 + Tambah Outlet
             </a>
         </div>
     </div>
 </div>
-
 <!-- Card: Outlet Info + Aksi -->
 <div class="bg-white rounded-md p-4 shadow-md mb-4 flex flex-col md:flex-row md:items-center md:justify-between">
     <!-- Kiri: Judul -->
