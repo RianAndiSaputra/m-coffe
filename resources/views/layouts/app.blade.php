@@ -5,13 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kifa Bakery - @yield('title')</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
             --sidebar-expanded-width: 280px;
-            --sidebar-collapsed-width: 70px;
+            --sidebar-collapsed-width: 80px;
             --transition-speed: 0.3s;
         }
 
@@ -25,7 +24,7 @@
             transition: all var(--transition-speed) ease;
             position: fixed;
             height: 100vh;
-            z-index: 30;
+            z-index: 50;
             left: 0;
             top: 0;
             border-right: 1px solid #e5e7eb;
@@ -56,11 +55,10 @@
         .navbar {
             position: sticky;
             top: 0;
-            z-index: 10;
+            z-index: 40;
             background-color: white;
             border-bottom: 1px solid #e5e7eb;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-            transition: all var(--transition-speed) ease;
         }
 
         /* Content area */
@@ -78,7 +76,7 @@
             right: 0;
             bottom: 0;
             background-color: rgba(0, 0, 0, 0.5);
-            z-index: 20;
+            z-index: 45;
             display: none;
         }
 
@@ -89,8 +87,8 @@
         /* Active menu styling */
         .active-menu {
             background-color: #FFF6F0;
-            border-left: 4px solid #FF6B00;
-            color: #FF6B00;
+            border-left: 4px solid #E65100;
+            color: #E65100;
         }
 
         /* Card shadow */
@@ -107,6 +105,7 @@
             
             .sidebar {
                 transform: translateX(-100%);
+                z-index: 60;
             }
             
             .sidebar.mobile-show {
@@ -118,6 +117,7 @@
         /* Sidebar specific styles */
         .rotate-180 {
             transform: rotate(180deg);
+            transition: transform 0.2s ease;
         }
 
         /* When sidebar is collapsed, center the icons */
@@ -141,6 +141,36 @@
         /* Center the icons in collapsed state */
         .sidebar.collapsed .flex.items-center {
             justify-content: center;
+        }
+
+        /* Darker orange color scheme */
+        .text-orange-700 {
+            color: #E65100;
+        }
+        
+        .bg-orange-700 {
+            background-color: #E65100;
+        }
+        
+        .border-orange-700 {
+            border-color: #E65100;
+        }
+        
+        .focus\:ring-orange-700:focus {
+            --tw-ring-color: #E65100;
+        }
+        
+        .focus\:border-orange-700:focus {
+            border-color: #E65100;
+        }
+        
+        .hover\:bg-orange-700:hover {
+            background-color: #E65100;
+        }
+
+        /* Smooth transitions */
+        .transition-all {
+            transition: all 0.3s ease;
         }
     </style>
 </head>
@@ -168,10 +198,10 @@
     </div>
 
     <script>
-        // Initialize Lucide icons
-        lucide.createIcons();
-        
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Lucide icons
+            lucide.createIcons();
+            
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.getElementById('mainContent');
             const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
@@ -217,6 +247,7 @@
                 mobileMenuBtn.addEventListener('click', function() {
                     sidebar.classList.toggle('mobile-show');
                     sidebarOverlay.classList.toggle('active');
+                    document.body.classList.toggle('overflow-hidden');
                 });
             }
             
@@ -225,18 +256,52 @@
                 sidebarOverlay.addEventListener('click', function() {
                     sidebar.classList.remove('mobile-show');
                     sidebarOverlay.classList.remove('active');
+                    document.body.classList.remove('overflow-hidden');
                 });
             }
+            
+            // Close sidebar when clicking on a link (mobile)
+            document.querySelectorAll('.sidebar a').forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 768) {
+                        sidebar.classList.remove('mobile-show');
+                        sidebarOverlay.classList.remove('active');
+                        document.body.classList.remove('overflow-hidden');
+                    }
+                });
+            });
             
             // Handle window resize
             function handleResize() {
                 if (window.innerWidth > 768) {
                     sidebar.classList.remove('mobile-show');
                     sidebarOverlay.classList.remove('active');
+                    document.body.classList.remove('overflow-hidden');
+                    
+                    // Apply collapsed state if it was saved
+                    if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                        sidebar.classList.add('collapsed');
+                        mainContent.classList.add('collapsed');
+                    } else {
+                        sidebar.classList.remove('collapsed');
+                        mainContent.classList.remove('collapsed');
+                    }
+                } else {
+                    // On mobile, always start with collapsed sidebar hidden
+                    sidebar.classList.add('collapsed');
+                    mainContent.classList.add('collapsed');
                 }
             }
             
-            window.addEventListener('resize', handleResize);
+            // Initial check
+            handleResize();
+            
+            // Add resize listener with debounce
+            let resizeTimer;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(handleResize, 250);
+            });
         });
     </script>
 </body>
