@@ -1,14 +1,8 @@
 <div class="sidebar bg-white text-gray-800 flex flex-col" id="sidebar">
     <!-- Logo -->
-    <div class="p-4 flex items-center justify-between">
+            <div class="p-4 flex items-center justify-between">
         <div class="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-croissant text-black sidebar-icon">
-                <path d="m4.6 13.11 5.79-3.21c1.89-1.05 4.79 1.78 3.71 3.71l-3.22 5.81C8.8 23.16.79 15.23 4.6 13.11Z"/>
-                <path d="m10.5 9.5-1-2.29C9.2 6.48 8.8 6 8 6H4.5C2.79 6 2 6.5 2 8.5a7.71 7.71 0 0 0 2 4.83"/>
-                <path d="M8 6c0-1.55.24-4-2-4-2 0-2.5 2.17-2.5 4"/>
-                <path d="m14.5 13.5 2.29 1c.73.3 1.21.7 1.21 1.5v3.5c0 1.71-.5 2.5-2.5 2.5a7.71 7.71 0 0 1-4.83-2"/>
-                <path d="M18 16c1.55 0 4-.24 4 2 0 2-2.17 2.5-4 2.5"/>
-            </svg>
+            <img src="/images/logo.png" alt="Kifa Bakery Logo" class="w-14 h-14 object-contain sidebar-icon" />
             <span class="ml-2 font-bold text-xl whitespace-nowrap sidebar-text">Kifa Bakery</span>
         </div>
         <button id="toggleSidebarBtn" class="text-gray-500 hover:text-black hidden md:block transition-all">
@@ -71,29 +65,29 @@
     </div>
     
     <!-- Menu -->
-    <nav class="flex-1 overflow-y-auto py-4 border-t">
-        <div class="px-4 py-2 active-menu">
-            <a href="{{ route('dashboard') }}" class="flex items-center whitespace-nowrap">
-                <i data-lucide="layout-dashboard" class="w-5 h-5 min-w-[20px] text-black sidebar-icon"></i>
-                <span class="ml-3 sidebar-text">Dashboard</span>
+            <nav class="flex-1 overflow-y-auto py-4 border-t">
+         <div class="px-4 py-2 hover:bg-gray-100 group rounded-lg transition-all menu-item">
+           <a href="/dashboard" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
+                <i data-lucide="layout-dashboard" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
+                <span class="sidebar-text">Dashboard</span>
             </a>
         </div>
-        
+
         <!-- Product Dropdown -->
-        <div class="px-4 py-2 hover:bg-gray-100 group rounded-lg transition-all">
-            <button id="productDropdownButton" class="w-full flex items-center justify-between">
+        <div class="px-4 py-2 hover:bg-gray-100 group rounded-lg transition-all menu-item" data-dropdown="productDropdown">
+            <div class="flex items-center justify-between cursor-pointer">
                 <div class="flex items-center">
                     <i data-lucide="package" class="w-5 h-5 text-black sidebar-icon"></i>
                     <span class="ml-3 sidebar-text">Produk</span>
                 </div>
                 <i data-lucide="chevron-down" class="w-4 h-4 text-black transition-transform sidebar-text sidebar-dropdown-arrow group-hover:text-black" id="productDropdownArrow"></i>
-            </button>
+            </div>
             <div id="productDropdown" class="hidden pl-8 mt-2 sidebar-dropdown">
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all">
+                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="list" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Daftar Produk</span>
                 </a>
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all">
+                <a href="/kategori" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="tag" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Kategori</span>
                 </a>
@@ -101,16 +95,16 @@
         </div>
 
         <!-- Outlet Management Dropdown -->
-        <div class="px-4 py-2 hover:bg-gray-100 group rounded-lg transition-all">
-            <button id="outletManagementDropdownButton" class="w-full flex items-center justify-between">
+        <div class="px-4 py-2 hover:bg-gray-100 group rounded-lg transition-all menu-item" data-dropdown="outletManagementDropdown">
+            <div class="flex items-center justify-between cursor-pointer">
                 <div class="flex items-center">
                     <i data-lucide="building-2" class="w-5 h-5 text-black sidebar-icon"></i>
                     <span class="ml-3 sidebar-text">Outlet</span>
                 </div>
                 <i data-lucide="chevron-down" class="w-4 h-4 text-black transition-transform sidebar-text sidebar-dropdown-arrow group-hover:text-black" id="outletManagementDropdownArrow"></i>
-            </button>
+            </div>
             <div id="outletManagementDropdown" class="hidden pl-8 mt-2 sidebar-dropdown">
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all">
+                <a href="/outlet" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="list" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Daftar Outlet</span>
                 </a>
@@ -118,32 +112,32 @@
         </div>
         
         <!-- Stock Dropdown -->
-        <div class="px-4 py-2 hover:bg-gray-100 group rounded-lg transition-all">
-            <button id="stockDropdownButton" class="w-full flex items-center justify-between">
+        <div class="px-4 py-2 hover:bg-gray-100 group rounded-lg transition-all menu-item" data-dropdown="stockDropdown">
+            <div class="flex items-center justify-between cursor-pointer">
                 <div class="flex items-center">
                     <i data-lucide="package-open" class="w-5 h-5 text-black sidebar-icon"></i>
                     <span class="ml-3 sidebar-text">Stok</span>
                 </div>
                 <i data-lucide="chevron-down" class="w-4 h-4 text-black transition-transform sidebar-text sidebar-dropdown-arrow group-hover:text-black" id="stockDropdownArrow"></i>
-            </button>
+            </div>
             <div id="stockDropdown" class="hidden pl-8 mt-2 sidebar-dropdown">
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all">
+                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="history" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Riwayat Stok</span>
                 </a>
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all">
+                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="calendar" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Stok Pertanggal</span>
                 </a>
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all">
+                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="edit" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Penyesuaian Stok</span>
                 </a>
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all">
+                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="truck" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Transfer Stok</span>
                 </a>
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all">
+                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="check-circle" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Approve Stok</span>
                 </a>
@@ -151,20 +145,20 @@
         </div>
 
         <!-- User Dropdown -->
-        <div class="px-4 py-2 hover:bg-gray-100 group rounded-lg transition-all">
-            <button id="userDropdownButton" class="w-full flex items-center justify-between">
+        <div class="px-4 py-2 hover:bg-gray-100 group rounded-lg transition-all menu-item" data-dropdown="userDropdown">
+            <div class="flex items-center justify-between cursor-pointer">
                 <div class="flex items-center">
                     <i data-lucide="users" class="w-5 h-5 text-black sidebar-icon"></i>
                     <span class="ml-3 sidebar-text">User</span>
                 </div>
                 <i data-lucide="chevron-down" class="w-4 h-4 text-black transition-transform sidebar-text sidebar-dropdown-arrow group-hover:text-black" id="userDropdownArrow"></i>
-            </button>
+            </div>
             <div id="userDropdown" class="hidden pl-8 mt-2 sidebar-dropdown">
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all">
+                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="user" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Member</span>
                 </a>
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all">
+                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="users" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Staff</span>
                 </a>
@@ -172,20 +166,20 @@
         </div>
 
         <!-- Closing Dropdown -->
-        <div class="px-4 py-2 hover:bg-gray-100 group rounded-lg transition-all">
-            <button id="closingDropdownButton" class="w-full flex items-center justify-between">
+        <div class="px-4 py-2 hover:bg-gray-100 group rounded-lg transition-all menu-item" data-dropdown="closingDropdown">
+            <div class="flex items-center justify-between cursor-pointer">
                 <div class="flex items-center">
                     <i data-lucide="clock" class="w-5 h-5 text-black sidebar-icon"></i>
                     <span class="ml-3 sidebar-text">Closing</span>
                 </div>
                 <i data-lucide="chevron-down" class="w-4 h-4 text-black transition-transform sidebar-text sidebar-dropdown-arrow group-hover:text-black" id="closingDropdownArrow"></i>
-            </button>
+            </div>
             <div id="closingDropdown" class="hidden pl-8 mt-2 sidebar-dropdown">
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all">
+                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="wallet" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Riwayat Kas</span>
                 </a>
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all">
+                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="receipt" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Riwayat Transaksi</span>
                 </a>
@@ -193,40 +187,40 @@
         </div>
 
         <!-- Report Dropdown -->
-        <div class="px-4 py-2 hover:bg-gray-100 group rounded-lg transition-all">
-            <button id="reportDropdownButton" class="w-full flex items-center justify-between">
+        <div class="px-4 py-2 hover:bg-gray-100 group rounded-lg transition-all menu-item" data-dropdown="reportDropdown">
+            <div class="flex items-center justify-between cursor-pointer">
                 <div class="flex items-center">
                     <i data-lucide="file-text" class="w-5 h-5 text-black sidebar-icon"></i>
                     <span class="ml-3 sidebar-text">Laporan</span>
                 </div>
                 <i data-lucide="chevron-down" class="w-4 h-4 text-black transition-transform sidebar-text sidebar-dropdown-arrow group-hover:text-black" id="reportDropdownArrow"></i>
-            </button>
+            </div>
             <div id="reportDropdown" class="hidden pl-8 mt-2 sidebar-dropdown">
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all">
+                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="calendar" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Perhari</span>
                 </a>
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all">
+                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="box" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Per Item</span>
                 </a>
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all">
+                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="tag" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Per Kategori</span>
                 </a>
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all">
+                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="user" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Per Member</span>
                 </a>
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all">
+                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="package" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Stock</span>
                 </a>
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all">
+                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="history" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Riwayat Stok</span>
                 </a>
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all">
+                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="check-circle" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Approve</span>
                 </a>
@@ -234,16 +228,16 @@
         </div>
 
         <!-- Settings Dropdown -->
-        <div class="px-4 py-2 hover:bg-gray-100 group rounded-lg transition-all">
-            <button id="settingsDropdownButton" class="w-full flex items-center justify-between">
+        <div class="px-4 py-2 hover:bg-gray-100 group rounded-lg transition-all menu-item" data-dropdown="settingsDropdown">
+            <div class="flex items-center justify-between cursor-pointer">
                 <div class="flex items-center">
                     <i data-lucide="settings" class="w-5 h-5 text-black sidebar-icon"></i>
                     <span class="ml-3 sidebar-text">Pengaturan</span>
                 </div>
                 <i data-lucide="chevron-down" class="w-4 h-4 text-black transition-transform sidebar-text sidebar-dropdown-arrow group-hover:text-black" id="settingsDropdownArrow"></i>
-            </button>
+            </div>
             <div id="settingsDropdown" class="hidden pl-8 mt-2 sidebar-dropdown">
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all">
+                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="printer" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Template Print</span>
                 </a>
@@ -295,10 +289,32 @@
         padding-left: 0;
     }
     
-    /* Active menu in collapsed state */
-    .sidebar.collapsed .active-menu {
-        border-left: none;
+    /* Active menu styles */
+    .active-menu {
+        background-color: #ffedd5;
+        border-left: 4px solid #ea580c;
+    }
+    
+    .active-menu a {
+        color: #ea580c;
+    }
+    
+    .active-menu .sidebar-icon {
+        color: #ea580c;
+    }
+    
+    /* Hover styles */
+    .menu-item:hover {
         background-color: #f3f4f6;
+    }
+    
+    .menu-subitem:hover {
+        color: #ea580c;
+    }
+    
+    /* Dropdown arrow rotation */
+    .rotate-180 {
+        transform: rotate(180deg);
     }
 </style>
 
@@ -351,66 +367,116 @@
             });
         }
 
-        // Setup all dropdown menus
-        const dropdownButtons = [
-            'productDropdownButton',
-            'outletManagementDropdownButton',
-            'stockDropdownButton',
-            'userDropdownButton',
-            'closingDropdownButton',
-            'reportDropdownButton',
-            'settingsDropdownButton'
-        ];
+        // Menu dropdown functionality
+        const menuItems = document.querySelectorAll('.menu-item');
         
-        function closeAllDropdowns() {
-            dropdownButtons.forEach(buttonId => {
-                const dropdown = document.getElementById(buttonId.replace('Button', ''));
-                const arrow = document.getElementById(buttonId.replace('Button', 'Arrow'));
-                
-                if (dropdown) {
-                    dropdown.classList.add('hidden');
-                }
-                
-                if (arrow) {
-                    arrow.classList.remove('rotate-180');
-                }
-            });
+        menuItems.forEach(item => {
+            const dropdownId = item.getAttribute('data-dropdown');
+            const dropdown = document.getElementById(dropdownId);
+            const arrow = item.querySelector('.sidebar-dropdown-arrow');
             
-            // Also close outlet dropdown
-            if (outletDropdown) {
-                outletDropdown.classList.add('hidden');
-                if (outletDropdownArrow) {
-                    outletDropdownArrow.classList.remove('rotate-180');
+            item.addEventListener('click', function(e) {
+                // Don't do anything if sidebar is collapsed
+                if (document.getElementById('sidebar').classList.contains('collapsed')) return;
+                
+                // Check if click was on a link inside dropdown
+                if (e.target.closest('.menu-subitem')) {
+                    // Set active state for submenu item
+                    document.querySelectorAll('.menu-subitem').forEach(subitem => {
+                        subitem.classList.remove('text-orange-700', 'font-medium');
+                    });
+                    e.target.closest('.menu-subitem').classList.add('text-orange-700', 'font-medium');
+                    return;
                 }
-            }
-        }
-        
-        dropdownButtons.forEach(buttonId => {
-            const button = document.getElementById(buttonId);
-            const dropdown = document.getElementById(buttonId.replace('Button', ''));
-            const arrow = document.getElementById(buttonId.replace('Button', 'Arrow'));
-            
-            if (button && dropdown) {
-                button.addEventListener('click', function(e) {
+                
+                // Check if click was on the menu item itself (not a child element)
+                if (e.currentTarget === e.target || 
+                    e.target.classList.contains('sidebar-icon') || 
+                    e.target.classList.contains('sidebar-text') ||
+                    e.target.classList.contains('sidebar-dropdown-arrow')) {
+                    
                     e.stopPropagation();
-                    // Don't open dropdown if sidebar is collapsed
-                    if (document.getElementById('sidebar').classList.contains('collapsed')) return;
                     
                     // Close all other dropdowns first
-                    closeAllDropdowns();
+                    document.querySelectorAll('.sidebar-dropdown').forEach(d => {
+                        if (d.id !== dropdownId) {
+                            d.classList.add('hidden');
+                        }
+                    });
                     
-                    // Open current dropdown
-                    dropdown.classList.remove('hidden');
-                    if (arrow) {
-                        arrow.classList.add('rotate-180');
+                    // Toggle current dropdown
+                    if (dropdown) {
+                        dropdown.classList.toggle('hidden');
                     }
-                });
-            }
+                    
+                    // Toggle arrow
+                    if (arrow) {
+                        arrow.classList.toggle('rotate-180');
+                    }
+                }
+            });
         });
         
         // Close dropdowns when clicking outside
         document.addEventListener('click', function() {
-            closeAllDropdowns();
+            document.querySelectorAll('.sidebar-dropdown').forEach(dropdown => {
+                dropdown.classList.add('hidden');
+            });
+            
+            document.querySelectorAll('.sidebar-dropdown-arrow').forEach(arrow => {
+                arrow.classList.remove('rotate-180');
+            });
         });
+        
+        // Set active menu based on current URL
+        function setActiveMenu() {
+            const currentPath = window.location.pathname;
+            
+            // Reset all active states
+            document.querySelectorAll('.menu-item, .menu-subitem').forEach(item => {
+                item.classList.remove('active-menu', 'text-orange-700', 'font-medium');
+            });
+            
+            // Check each menu item
+            document.querySelectorAll('.menu-item').forEach(item => {
+                const dropdownId = item.getAttribute('data-dropdown');
+                const dropdown = document.getElementById(dropdownId);
+                
+                if (dropdown) {
+                    const links = dropdown.querySelectorAll('a');
+                    
+                    links.forEach(link => {
+                        if (link.getAttribute('href') === currentPath) {
+                            // Mark subitem as active
+                            link.classList.add('text-orange-700', 'font-medium');
+                            
+                            // Open parent dropdown
+                            dropdown.classList.remove('hidden');
+                            item.querySelector('.sidebar-dropdown-arrow').classList.add('rotate-180');
+                            
+                            // Mark parent as active
+                            item.classList.add('active-menu');
+                        }
+                    });
+                }
+            });
+            
+            // Special case for dashboard
+            if (currentPath === "/dashboard") {
+                // Add active-menu class to dashboard menu item div
+                const dashboardMenuItem = document.querySelector('a[href="/dashboard"]').closest('.menu-item');
+                if (dashboardMenuItem) {
+                    dashboardMenuItem.classList.add('active-menu');
+                }
+                // Add active classes to dashboard link
+                const dashboardLink = document.querySelector('a[href="/dashboard"]');
+                if (dashboardLink) {
+                    dashboardLink.classList.add('text-orange-700', 'font-medium');
+                }
+            }
+        }
+        
+        // Call the function when page loads
+        setActiveMenu();
     });
 </script>
