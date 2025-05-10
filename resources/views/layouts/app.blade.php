@@ -6,6 +6,7 @@
     <title>Kifa Bakery - @yield('title')</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
             --sidebar-expanded-width: 280px;
