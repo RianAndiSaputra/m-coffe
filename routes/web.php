@@ -17,3 +17,7 @@ Route::get('/dashboard', function () {
 Route::get('/outlet', function () {
     return view('dashboard.outlet.daftar-outlet');
 })->name('outlet');
+
+Route::get('/list-produk', function () {
+    return view('dashboard.produk.produk');
+})->name('list.produk');
