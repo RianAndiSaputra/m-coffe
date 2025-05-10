@@ -2,6 +2,14 @@
 
 use Illuminate\Support\Facades\Route;
 
+// Route::get('/', function () {
+//     return response('IT Solution');
+// });
+
 Route::get('/', function () {
-    return response('IT Solution');
-});
+    return view('auth.login');
+})->name('login');
+
+Route::get('/dashboard', function () {
+    return view('dashboard.index');
+})->name('dashboard');
