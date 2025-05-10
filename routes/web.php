@@ -29,3 +29,7 @@ Route::get('/member', function () {
 Route::get('/kategori', function () {
     return view('dashboard.produk.kategori-produk');
 })->name('kategori');
+
+Route::get('/riwayat-stok', function () {
+    return view('dashboard.stok.riwayat-stock');
+})->name('kategori');
