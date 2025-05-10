@@ -41,3 +41,11 @@ Route::get('/transfer-stok', function () {
 Route::get('/penyesuaian-stok', function () {
     return view('dashboard.stok.penyesuaian-stok');
 })->name('penyesuaian-stok');
+
+Route::get('/stok-per-tanggal', function () {
+    return view('dashboard.stok.stok-per-tanggal');
+})->name('stok-per-tanggal');
+
+Route::get('/approve-stok', function () {
+    return view('dashboard.stok.approve-stok');
+})->name('approve-stok');

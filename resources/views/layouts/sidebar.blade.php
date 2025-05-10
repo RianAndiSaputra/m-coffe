@@ -125,7 +125,7 @@
                     <i data-lucide="history" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Riwayat Stok</span>
                 </a>
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
+                <a href="/stok-per-tanggal" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="calendar" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Stok Pertanggal</span>
                 </a>
@@ -137,7 +137,7 @@
                     <i data-lucide="truck" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Transfer Stok</span>
                 </a>
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
+                <a href="/approve-stok" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="check-circle" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Approve Stok</span>
                 </a>
