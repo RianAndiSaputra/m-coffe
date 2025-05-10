@@ -32,4 +32,8 @@ Route::get('/kategori', function () {
 
 Route::get('/riwayat-stok', function () {
     return view('dashboard.stok.riwayat-stock');
-})->name('kategori');
+})->name('riwayat-stok');
+
+Route::get('/transfer-stok', function () {
+    return view('dashboard.stok.transfer-stok');
+})->name('transfer-stok');

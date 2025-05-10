@@ -83,7 +83,7 @@
                 <i data-lucide="chevron-down" class="w-4 h-4 text-black transition-transform sidebar-text sidebar-dropdown-arrow group-hover:text-black" id="productDropdownArrow"></i>
             </div>
             <div id="productDropdown" class="hidden pl-8 mt-2 sidebar-dropdown">
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
+                <a href="/list-produk" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="list" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Daftar Produk</span>
                 </a>
@@ -121,7 +121,7 @@
                 <i data-lucide="chevron-down" class="w-4 h-4 text-black transition-transform sidebar-text sidebar-dropdown-arrow group-hover:text-black" id="stockDropdownArrow"></i>
             </div>
             <div id="stockDropdown" class="hidden pl-8 mt-2 sidebar-dropdown">
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
+                <a href="/riwayat-stok" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="history" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Riwayat Stok</span>
                 </a>
@@ -133,7 +133,7 @@
                     <i data-lucide="edit" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Penyesuaian Stok</span>
                 </a>
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
+                <a href="/transfer-stok" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="truck" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Transfer Stok</span>
                 </a>
@@ -154,7 +154,7 @@
                 <i data-lucide="chevron-down" class="w-4 h-4 text-black transition-transform sidebar-text sidebar-dropdown-arrow group-hover:text-black" id="userDropdownArrow"></i>
             </div>
             <div id="userDropdown" class="hidden pl-8 mt-2 sidebar-dropdown">
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
+                <a href="/member" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="user" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Member</span>
                 </a>

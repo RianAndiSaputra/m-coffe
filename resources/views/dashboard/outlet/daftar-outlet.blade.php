@@ -206,8 +206,8 @@
     </div>
 </div>
 
-@include('partials.modal-tambah-outlet')
-@include('partials.modal-edit-outlet')
+@include('partials.outlet.modal-tambah-outlet')
+@include('partials.outlet.modal-edit-outlet')
 
 <script>
     // Variabel global untuk menyimpan ID outlet yang akan dihapus
