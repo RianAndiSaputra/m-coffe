@@ -25,3 +25,7 @@ Route::get('/list-produk', function () {
 Route::get('/member', function () {
     return view('dashboard.user.member');
 })->name('dashboard.user.member');
+
+Route::get('/kategori', function () {
+    return view('dashboard.produk.kategori-produk');
+})->name('kategori');
