@@ -13,3 +13,7 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return view('dashboard.index');
 })->name('dashboard');
+
+Route::get('/list-produk', function () {
+    return view('dashboard.produk.produk');
+})->name('list.produk');
