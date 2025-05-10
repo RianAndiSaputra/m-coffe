@@ -21,3 +21,11 @@ Route::get('/outlet', function () {
 Route::get('/list-produk', function () {
     return view('dashboard.produk.produk');
 })->name('list.produk');
+
+Route::get('/member', function () {
+    return view('dashboard.user.member');
+})->name('dashboard.user.member');
+
+Route::get('/kategori', function () {
+    return view('dashboard.produk.kategori-produk');
+})->name('kategori');
