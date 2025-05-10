@@ -180,7 +180,7 @@ class AuthController extends Controller
 
         try {
             DB::beginTransaction();
-            if ($request->has('password')) {
+            if ($request->filled('password')) {
                 $request->merge(['password' => Hash::make($request->password)]);
             }
 

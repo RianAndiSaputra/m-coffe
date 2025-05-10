@@ -15,10 +15,14 @@ class OutletController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
             $outlets = Outlet::all();
+
+            if ($request->user()->role === 'supervisor') {
+                $outlets = Outlet::where('id', $request->user()->outlet_id)->get();
+            }
             return $this->successResponse($outlets, 'Outlets retrieved successfully');
         } catch (\Throwable $th) {
             return $this->errorResponse($th->getMessage());

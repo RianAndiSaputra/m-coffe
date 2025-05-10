@@ -348,13 +348,14 @@ class InventoryHistoryController extends Controller
 
     public function getInventoryHistoryByType(Request $request, $outletId)
     {
-        $validated = $request->validate([
+        $request->validate([
             'start_date' => 'required|date',
             'end_date'   => 'required|date|after_or_equal:start_date',
         ]);
 
-        $startDate = $validated['start_date'];
-        $endDate   = $validated['end_date'];
+        $endDate = Carbon::parse($request->end_date)->endOfDay();
+        $startDate = Carbon::parse($request->start_date)->startOfDay();
+
 
         $histories = InventoryHistory::with('product:id,name,sku,price,unit')
             ->whereBetween('created_at', [$startDate, $endDate])
