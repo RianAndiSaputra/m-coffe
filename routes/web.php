@@ -50,7 +50,18 @@ Route::get('/approve-stok', function () {
     return view('dashboard.stok.approve-stok');
 })->name('approve-stok');
 
-
 Route::get('/perhari', function () {
     return view('dashboard.laporan.perhari');
 })->name('perhari');
+
+Route::get('/per-item', function () {
+    return view('dashboard.laporan.per-item');
+})->name('per-item');
+
+Route::get('/per-kategori', function () {
+    return view('dashboard.laporan.per-kategori');
+})->name('per-kategori');
+
+Route::get('/per-member', function () {
+    return view('dashboard.laporan.per-member');
+})->name('per-member');
