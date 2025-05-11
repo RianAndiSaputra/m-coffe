@@ -196,7 +196,7 @@
                 <i data-lucide="chevron-down" class="w-4 h-4 text-black transition-transform sidebar-text sidebar-dropdown-arrow group-hover:text-black" id="reportDropdownArrow"></i>
             </div>
             <div id="reportDropdown" class="hidden pl-8 mt-2 sidebar-dropdown">
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
+                <a href="/perhari" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="calendar" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Perhari</span>
                 </a>

@@ -49,3 +49,8 @@ Route::get('/stok-per-tanggal', function () {
 Route::get('/approve-stok', function () {
     return view('dashboard.stok.approve-stok');
 })->name('approve-stok');
+
+
+Route::get('/perhari', function () {
+    return view('dashboard.laporan.perhari');
+})->name('perhari');
