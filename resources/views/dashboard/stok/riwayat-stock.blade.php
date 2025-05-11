@@ -5,67 +5,73 @@
 @section('content')
 
 <!-- Page Title -->
-<div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-    <h1 class="text-xl font-semibold text-gray-800">Manajemen Riwayat Stok</h1>
-    <div class="relative">
-        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-            <!-- Heroicons search icon -->
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 103.5 3.5a7.5 7.5 0 0013.65 13.65z" />
-            </svg>
-        </span>
-        <input 
-            type="text" 
-            placeholder="Cari Produk..." 
-            class="pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-            {{-- id="searchKategori" --}}
-        />
+<div class="mb-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <h1 class="text-3xl font-bold text-gray-800">Manajemen Riwayat Stok</h1>
+        <div class="relative w-full md:w-64">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                <!-- Heroicons search icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 103.5 3.5a7.5 7.5 0 0013.65 13.65z" />
+                </svg>
+            </span>
+            <input 
+                type="text" 
+                placeholder="Cari Produk..." 
+                class="w-full pl-10 pr-4 py-3 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                {{-- id="searchKategori" --}}
+            />
+        </div>
     </div>
 </div>
 
 <!-- Card: Outlet Info -->
-<div class="bg-white rounded-lg p-4 shadow mb-4">
-    <div>
-        <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
-            <i data-lucide="store" class="w-5 h-5 text-gray-600"></i>
-            Outlet Aktif: Kifa Bakery Pusat
-        </h2>
-        <p class="text-sm text-gray-600">Data riwayat perubahan stok untuk outlet Kifa Bakery Pusat.</p>
+<div class="bg-white rounded-md p-4 shadow-md mb-4 flex flex-col md:flex-row md:items-center md:justify-between">
+    <div class="mb-3 md:mb-0 flex items-start gap-2">
+        <i data-lucide="store" class="w-5 h-5 text-gray-600"></i>
+        <div>
+            <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">Outlet Aktif: Kifa Bakery Pusat</h2>
+            <p class="text-sm text-gray-600">Data riwayat perubahan stok untuk outlet Kifa Bakery Pusat.</p>
+        </div>
     </div>
 </div>
 
 <!-- Card: Tabel Riwayat Stok -->
 <div class="bg-white rounded-lg shadow p-4">
     <!-- Header Table: Filter Tanggal -->
-    <div class="mb-4">
-        <div class="flex items-center space-x-2">
-            <span class="text-sm text-gray-600">Tanggal:</span>
-            <input type="date" class="border rounded px-3 py-2 text-sm">
-            <button class="px-3 py-2 text-sm bg-orange-600 text-white rounded hover:bg-orange-700">
-                Tampilkan
-            </button>
+    <div class="mb-6">
+        <div class="mt-2">
+        <label for="reportDateInput" class="block text-sm font-medium text-gray-700 mb-1">Pilih Tanggal</label>
+            <div class="relative">
+                <input id="reportDateInput" type="text"
+                    class="w-full sm:w-56 pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    placeholder="Tanggal" />
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <i data-lucide="calendar" class="w-4 h-4 text-gray-500"></i>
+                </span>
+            </div>
         </div>
     </div>
 
     <!-- Table -->
     <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead class="text-left text-gray-600 border-b">
+        <table class="w-full text-base">
+            <thead class="text-left text-gray-700 border-b-2">
                 <tr>
-                    <th class="py-2">Jam</th>
-                    <th class="py-2">Produk</th>
-                    <th class="py-2">Stok Sebelumnya</th>
-                    <th class="py-2">Stok Baru</th>
-                    <th class="py-2">Perubahan</th>
-                    <th class="py-2">Tipe</th>
-                    <th class="py-2">Catatan</th>
+                    <th class="py-3 font-bold">Jam</th>
+                    <th class="py-3 font-bold">Produk</th>
+                    <th class="py-3 font-bold">Stok Sebelumnya</th>
+                    <th class="py-3 font-bold">Stok Baru</th>
+                    <th class="py-3 font-bold">Perubahan</th>
+                    <th class="py-3 font-bold">Tipe</th>
+                    <th class="py-3 font-bold">Catatan</th>
                 </tr>
             </thead>
-            <tbody class="text-gray-700">
+            <tbody class="text-gray-700 divide-y">
                 <!-- Riwayat 1 -->
                 <tr class="border-b hover:bg-gray-50">
-                    <td class="py-3">10:30:42</td>
-                    <td class="py-3">
+                    <td class="py-4">10:30:42</td>
+                    <td class="py-4">
                         <div class="flex items-center space-x-2">
                             <img src="https://via.placeholder.com/40" alt="gambar" class="w-8 h-8 bg-gray-100 rounded object-cover" />
                             <span>Bolu Pisang</span>
@@ -134,5 +140,47 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+    // Inisialisasi flatpickr
+    flatpickr("#reportDateInput", {
+        dateFormat: "d M Y",
+        defaultDate: "today",
+        onChange: function(selectedDates, dateStr) {
+            updateReportDateRange(dateStr);
+            filterStokByDate(dateStr); // Panggil fungsi filter (kalau ada)
+        },
+        locale: {
+            firstDayOfWeek: 1 // Senin sebagai awal minggu
+        }
+    });
+
+    // Ubah tampilan tanggal di bawah judul
+    function updateReportDateRange(dateStr) {
+        const display = document.getElementById('reportDateRange');
+        if (display) {
+            display.textContent = `Menampilkan stok per tanggal ${dateStr}`;
+        }
+    }
+
+    // Panggil fungsi ini saat halaman siap
+    document.addEventListener('DOMContentLoaded', function () {
+        const input = document.getElementById('reportDateInput');
+        if (input) {
+            const flatpickrInstance = input._flatpickr;
+            if (flatpickrInstance) {
+                updateReportDateRange(flatpickrInstance.input.value);
+            }
+        }
+    });
+
+    // Placeholder fungsi filter jika belum ada
+    function filterStokByDate(date) {
+        console.log("Filter stok berdasarkan tanggal:", date);
+        // Tambahkan logika filter sesuai kebutuhan di sini
+    }
+</script>
 
 @endsection
