@@ -5,32 +5,36 @@
 @section('content')
 
 <!-- Notification container -->
-<div id="notification-container"></div>
+<div id="alertContainer" class="fixed top-4 right-4 z-50 space-y-3 w-80">
+    <!-- Alert akan muncul di sini secara dinamis -->
+</div>
+
+@include('partials.produk.modal-konfirmasi-hapus')
 
 <!-- Page Title + Action -->
-<div class="mb-4">
+<div class="mb-6">
     <div class="flex items-center justify-between">
-        <h1 class="text-xl font-semibold text-gray-800">Manajemen Produk</h1>
-        <button onclick="openModal('modalTambahProduk')" class="px-4 py-2 text-sm text-white bg-orange-600 rounded hover:bg-orange-700">
+        <h1 class="text-2xl font-bold text-gray-800">Manajemen Produk</h1>
+        <button onclick="openModal('modalTambahProduk')" class="px-5 py-3 text-base font-medium text-white bg-orange-500 rounded-lg hover:bg-orange-600 shadow">
             + Tambah Produk
         </button>
     </div>
 </div>
 
 <!-- Card: Outlet Info + Aksi -->
-<div class="bg-white rounded-lg p-4 shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between">
-    <div class="mb-4 md:mb-0">
-        <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
-            <i data-lucide="store" class="w-5 h-5 text-gray-600"></i>
-            Outlet Aktif: Kifa Bakery Pusat
-        </h2>
-        <p class="text-sm text-gray-600">Data yang ditampilkan adalah untuk outlet Kifa Bakery Pusat.</p>
+<div class="bg-white rounded-md p-4 shadow-md mb-4 flex flex-col md:flex-row md:items-center md:justify-between">
+    <div class="mb-4 md:mb-0 flex items-start gap-2">
+        <i data-lucide="store" class="w-5 h-5 text-gray-600"></i>
+        <div>
+            <h2 class="text-lg font-semibold text-gray-800">Outlet Aktif: Kifa Bakery Pusat</h2>
+            <p class="text-sm text-gray-600">Data yang ditampilkan adalah untuk outlet Kifa Bakery Pusat.</p>
+        </div>
     </div>
     <div class="flex items-center space-x-2">
-        <button class="flex items-center px-4 py-2 text-sm bg-white border rounded shadow hover:bg-gray-50">
+        <button class="flex items-center px-4 py-2 text-sm font-medium bg-white border rounded shadow hover:bg-gray-50">
             <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Cetak
         </button>
-        <button class="flex items-center px-4 py-2 text-sm bg-white border rounded shadow hover:bg-gray-50">
+        <button class="flex items-center px-4 py-2 text-sm font-medium bg-white border rounded shadow hover:bg-gray-50">
             <i data-lucide="download" class="w-4 h-4 mr-2"></i> Ekspor
         </button>
     </div>
@@ -45,16 +49,17 @@
 
     <!-- Table -->
     <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead class="text-left text-gray-600 border-b">
+        <table class="w-full text-base">
+            <thead class="text-left text-base text-gray-600 border-b">
                 <tr>
-                    <th class="py-2">No.</th>
-                    <th class="py-2">Nama Produk</th>
-                    <th class="py-2">SKU</th>
-                    <th class="py-2">Kategori</th>
-                    <th class="py-2">Harga</th>
-                    <th class="py-2">Stok</th>
-                    <th class="py-2">Status</th>
+                    <th class="py-2 font-semibold">No.</th>
+                    <th class="py-2 font-semibold">Nama Produk</th>
+                    <th class="py-2 font-semibold">SKU</th>
+                    <th class="py-2 font-semibold">Kategori</th>
+                    <th class="py-2 font-semibold">Harga</th>
+                    <th class="py-2 font-semibold">Stok</th>
+                    <th class="py-2 font-semibold">Status</th>
+                    <th class="py-2 font-semibold">Aksi</th>
                     <th></th>
                 </tr>
             </thead>
@@ -77,21 +82,20 @@
                         <span class="text-xs text-gray-500">Min. stok: 5</span>
                     </td>
                     <td>
-                        <span class="text-xs px-2 py-1 bg-green-100 text-green-600 rounded">Active</span>
+                        <span class="px-3 py-1.5 text-sm font-medium bg-green-100 text-green-700 rounded-full">Aktif</span>
                     </td>
-                    <td class="relative">
-                        <div class="relative">
-                            <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded">
-                                <i data-lucide="more-vertical" class="w-4 h-4 text-gray-500"></i>
+                    <td class="py-4 relative">
+                        <div class="relative inline-block">
+                            <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded-lg">
+                                <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
                             </button>
-
                             <!-- Dropdown -->
-                            <div class="dropdown-menu hidden absolute right-0 z-50 mt-2 w-32 bg-white border border-gray-200 rounded shadow text-sm">
-                                <button onclick="openEditModal(1)" class="flex items-center w-full px-3 py-2 hover:bg-gray-100 text-left">
-                                    <i data-lucide="pencil" class="w-4 h-4 mr-2 text-gray-500"></i> Edit
+                            <div class="dropdown-menu hidden absolute right-0 z-20 bottom-full mb-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-base">
+                                <button onclick="openEditModal(1)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left rounded-t-lg">
+                                    <i data-lucide="pencil" class="w-5 h-5 mr-3 text-gray-500"></i> Edit
                                 </button>
-                                <button onclick="hapusProduk(1)" class="flex items-center w-full px-3 py-2 hover:bg-gray-100 text-left text-red-600">
-                                    <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i> Hapus
+                                <button onclick="hapusProduk(1)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left text-red-600 rounded-b-lg">
+                                    <i data-lucide="trash-2" class="w-5 h-5 mr-3"></i> Hapus
                                 </button>
                             </div>
                         </div>
@@ -170,54 +174,119 @@
         opacity: 0;
         transition: all 0.2s ease-in-out;
     }
+
+    .dropdown-menu.dropdown-up {
+        bottom: 100%;
+        top: auto;
+    }
+
+    .dropdown-menu.dropdown-down {
+        top: 100%;
+        bottom: auto;
+    }
+
+    /* Animasi untuk alert */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes fadeOut {
+        from {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+    }
+    
+    .animate-fade-in-up {
+        animation: fadeInUp 0.3s ease-out forwards;
+    }
+    
+    .animate-fade-out {
+        animation: fadeOut 0.3s ease-out forwards;
+    }
 </style>
 
 <script>
-    // Notification system
-    function showNotification(type, message) {
-        const container = document.getElementById('notification-container');
-        const notification = document.createElement('div');
+
+    let produkHapusId = null;
+    // Fungsi untuk menampilkan alert
+    function showAlert(type, message) {
+        const alertContainer = document.getElementById('alertContainer');
+        const alertId = 'alert-' + Date.now();
         
-        // Choose icon based on notification type
-        let iconName = 'alert-circle';
-        if (type === 'success') iconName = 'check-circle';
-        else if (type === 'info') iconName = 'info';
+        // Warna dan ikon berdasarkan jenis alert
+        const alertConfig = {
+            success: {
+                bgColor: 'bg-orange-50',
+                borderColor: 'border-orange-200',
+                textColor: 'text-orange-800',
+                icon: 'check-circle',
+                iconColor: 'text-orange-500'
+            },
+            error: {
+                bgColor: 'bg-red-50',
+                borderColor: 'border-red-200',
+                textColor: 'text-red-800',
+                icon: 'alert-circle',
+                iconColor: 'text-red-500'
+            },
+            info: {
+                bgColor: 'bg-blue-50',
+                borderColor: 'border-blue-200',
+                textColor: 'text-blue-800',
+                icon: 'info',
+                iconColor: 'text-blue-500'
+            }
+        };
         
-        notification.className = `notification ${type}`;
-        notification.innerHTML = `
-            <div class="notification-icon">
-                <i data-lucide="${iconName}" class="w-5 h-5"></i>
+        const config = alertConfig[type] || alertConfig.success;
+        
+        const alertElement = document.createElement('div');
+        alertElement.id = alertId;
+        alertElement.className = `p-4 border rounded-lg shadow-sm ${config.bgColor} ${config.borderColor} ${config.textColor} flex items-start gap-3 animate-fade-in-up`;
+        alertElement.innerHTML = `
+            <i data-lucide="${config.icon}" class="w-5 h-5 mt-0.5 ${config.iconColor}"></i>
+            <div class="flex-1">
+                <p class="text-sm font-medium">${message}</p>
             </div>
-            <div class="notification-message flex-1 text-sm font-medium">${message}</div>
-            <div class="notification-close">
+            <button onclick="closeAlert('${alertId}')" class="p-1 rounded-full hover:bg-gray-100">
                 <i data-lucide="x" class="w-4 h-4"></i>
-            </div>
+            </button>
         `;
         
-        container.appendChild(notification);
-        lucide.createIcons();
+        alertContainer.prepend(alertElement);
         
-        // Show notification
+        // Inisialisasi ikon Lucide
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+        
+        // Auto close setelah 5 detik
         setTimeout(() => {
-            notification.classList.add('show');
-        }, 10);
-        
-        // Auto-remove after 5 seconds
-        const autoRemove = setTimeout(() => {
-            notification.classList.remove('show');
-            setTimeout(() => {
-                container.removeChild(notification);
-            }, 300);
+            closeAlert(alertId);
         }, 5000);
-        
-        // Manual close
-        notification.querySelector('.notification-close').addEventListener('click', () => {
-            clearTimeout(autoRemove);
-            notification.classList.remove('show');
+    }
+
+    // Fungsi untuk menutup alert
+    function closeAlert(id) {
+        const alert = document.getElementById(id);
+        if (alert) {
+            alert.classList.add('animate-fade-out');
             setTimeout(() => {
-                container.removeChild(notification);
+                alert.remove();
             }, 300);
-        });
+        }
     }
 
     // Show specific notification types
@@ -327,15 +396,47 @@
             }
         });
 
-        // Toggle current dropdown
+        // Get the dropdown menu
         const menu = button.nextElementSibling;
+        const isOpen = !menu.classList.contains('hidden');
+        
+        // Toggle current dropdown
+        if (!isOpen) {
+            // Calculate position
+            const buttonRect = button.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - buttonRect.bottom;
+            const menuHeight = 128; // Approximate menu height
+            
+            // Remove previous positioning classes
+            menu.classList.remove('dropdown-up', 'dropdown-down');
+            
+            if (spaceBelow < menuHeight) {
+                menu.classList.add('dropdown-up');
+            } else {
+                menu.classList.add('dropdown-down');
+            }
+        }
+        
         menu.classList.toggle('hidden');
     }
 
-    // Close all dropdowns when clicking outside
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.relative')) {
-            document.querySelectorAll('.dropdown-menu').forEach(menu => menu.classList.add('hidden'));
+        document.addEventListener('click', function(e) {
+        const isDropdownButton = e.target.closest('[onclick^="toggleDropdown"]');
+        const isDropdownMenu = e.target.closest('.dropdown-menu');
+        
+        if (!isDropdownButton && !isDropdownMenu) {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.add('hidden');
+            });
+        }
+    });
+
+    // Handle escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.add('hidden');
+            });
         }
     });
 
@@ -401,27 +502,56 @@
         return products[productId];
     }
 
-    // Delete Product Function
+    // Delete Product Function (Updated)
     function hapusProduk(id) {
-        const productData = getProductData(id);
+        // Dapatkan data produk
+        const produkData = getProductData(id);
         
-        // Create confirmation dialog
-        showConfirmationDialog(
-            'Konfirmasi Hapus Produk',
-            `Yakin ingin menghapus produk "${productData.nama}"?`,
-            () => {
-                console.log('Hapus produk ID:', id);
-                // In a real app, you would send a delete request to your backend
-                // Example: axios.delete(`/products/${id}`).then(response => { ... });
-                
-                // Show success notification
-                showSuccess(`Produk ${productData.nama} berhasil dihapus!`);
-                
-                // You would then remove the product from the table
-                // Example: document.querySelector(`tr[data-product-id="${id}"]`).remove();
-            }
-        );
+        // Set ID produk yang akan dihapus
+        produkHapusId = id;
+        
+        // Update nama produk di modal konfirmasi
+        document.getElementById('hapusNamaProduk').textContent = produkData.nama;
+        
+        // Tampilkan modal konfirmasi
+        openModal('modalKonfirmasiHapus');
     }
+
+    // Event listeners untuk modal konfirmasi hapus
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tombol batal hapus
+        const btnBatalHapus = document.getElementById('btnBatalHapus');
+        if (btnBatalHapus) {
+            btnBatalHapus.addEventListener('click', function() {
+                closeModal('modalKonfirmasiHapus');
+                produkHapusId = null; // Reset ID produk
+            });
+        }
+        
+        // Tombol konfirmasi hapus
+        const btnKonfirmasiHapus = document.getElementById('btnKonfirmasiHapus');
+        if (btnKonfirmasiHapus) {
+            btnKonfirmasiHapus.addEventListener('click', function() {
+                // Di sini Anda akan melakukan penghapusan produk
+                // Misalnya dengan AJAX call ke backend
+                const produkData = getProductData(produkHapusId);
+                console.log('Menghapus produk ID:', produkHapusId);
+                
+                // Simulasi sukses (ganti dengan kode nyata)
+                setTimeout(() => {
+                    closeModal('modalKonfirmasiHapus');
+                    showAlert('success', `Produk ${produkData.nama} berhasil dihapus!`);
+                    
+                    // Di aplikasi nyata, Anda mungkin perlu me-refresh data
+                    // atau menghapus baris dari tabel
+                    
+                    // Reset ID produk
+                    produkHapusId = null;
+                }, 500);
+            });
+        }
+    });
+
     
     // Custom Confirmation Dialog
     function showConfirmationDialog(title, message, onConfirm) {
