@@ -65,3 +65,11 @@ Route::get('/per-kategori', function () {
 Route::get('/per-member', function () {
     return view('dashboard.laporan.per-member');
 })->name('per-member');
+
+Route::get('/stok', function () {
+    return view('dashboard.laporan.stok');
+})->name('stok');
+
+Route::get('/laporan-riwayat-stok', function () {
+    return view('dashboard.laporan.riwayat-stok');
+})->name('riwayat-stok');

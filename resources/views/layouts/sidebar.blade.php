@@ -216,7 +216,7 @@
                     <i data-lucide="package" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Stock</span>
                 </a>
-                <a href="/riwayat-stok" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
+                <a href="/laporan-riwayat-stok" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="history" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Riwayat Stok</span>
                 </a>
