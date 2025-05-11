@@ -196,31 +196,31 @@
                 <i data-lucide="chevron-down" class="w-4 h-4 text-black transition-transform sidebar-text sidebar-dropdown-arrow group-hover:text-black" id="reportDropdownArrow"></i>
             </div>
             <div id="reportDropdown" class="hidden pl-8 mt-2 sidebar-dropdown">
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
+                <a href="/perhari" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="calendar" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Perhari</span>
                 </a>
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
+                <a href="/per-item" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="box" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Per Item</span>
                 </a>
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
+                <a href="/per-kategori" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="tag" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Per Kategori</span>
                 </a>
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
+                <a href="/per-member" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="user" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Per Member</span>
                 </a>
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
+                <a href="/stok" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="package" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Stock</span>
                 </a>
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
+                <a href="/riwayat-stok" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="history" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Riwayat Stok</span>
                 </a>
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
+                <a href="/approve" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="check-circle" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Approve</span>
                 </a>
