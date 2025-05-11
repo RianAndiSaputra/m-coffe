@@ -65,3 +65,11 @@ Route::get('/per-kategori', function () {
 Route::get('/per-member', function () {
     return view('dashboard.laporan.per-member');
 })->name('per-member');
+
+Route::get('/riwayat-kas', function () {
+    return view('dashboard.closing.riwayat-kas');
+})->name('riwayat-closing');
+
+Route::get('/riwayat-transaksi', function () {
+    return view('dashboard.closing.riwayat-transaksi');
+})->name('riwayat-transaksi');
