@@ -81,3 +81,11 @@ Route::get('/stok', function () {
 Route::get('/laporan-riwayat-stok', function () {
     return view('dashboard.laporan.riwayat-stok');
 })->name('riwayat-stok');
+
+Route::get('/laporan-approve', function () {
+    return view('dashboard.laporan.approve');
+})->name('approve');
+
+Route::get('/template-print', function () {
+    return view('dashboard.pengaturan.template-print');
+})->name('template-print');
