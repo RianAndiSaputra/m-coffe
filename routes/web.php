@@ -89,3 +89,7 @@ Route::get('/laporan-approve', function () {
 Route::get('/template-print', function () {
     return view('dashboard.pengaturan.template-print');
 })->name('template-print');
+
+Route::get('/staff', function () {
+    return view('dashboard.user.staff');
+})->name('staff');
