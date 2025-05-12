@@ -93,3 +93,6 @@ Route::get('/template-print', function () {
 Route::get('/staff', function () {
     return view('dashboard.user.staff');
 })->name('staff');
+Route::get('/pos', function () {
+    return view('pos.index');
+})->name('index');
