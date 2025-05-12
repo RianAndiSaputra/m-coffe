@@ -1,444 +1,488 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard')
+@section('title', 'Manajemen Outlet')
 
 @section('content')
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Manajemen Member</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
-  />
-</head>
-<body class="bg-white text-gray-900 font-sans">
-  <!-- Modal Tambah Member -->
-  <div id="tambahMemberModal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-    <div
-      class="bg-white rounded-md shadow-lg w-[360px] p-6 relative font-sans"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-    >
-      <button
-        onclick="closeModal('tambahMemberModal')"
-        aria-label="Close"
-        class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none"
-      >
-        <i class="fas fa-times text-sm"></i>
-      </button>
-      <h2
-        id="modal-title"
-        class="font-semibold text-black text-base leading-5 mb-1"
-      >
-        Tambah Member Baru
-      </h2>
-      <p class="text-gray-500 text-xs leading-4 mb-5">
-        Tambahkan member baru dengan mengisi detail di bawah ini.
-      </p>
-      <form class="space-y-3">
-        <div class="flex items-center">
-          <label
-            for="nama"
-            class="w-24 text-xs text-black font-normal leading-4"
-            >Nama</label
-          >
-          <input
-            id="nama"
-            type="text"
-            placeholder="Nama member"
-            class="flex-1 border border-gray-300 rounded-md text-xs text-gray-400 placeholder-gray-400 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
-          />
-        </div>
-        <div class="flex items-center">
-          <label
-            for="telp"
-            class="w-24 text-xs text-black font-normal leading-4"
-            >Telp</label
-          >
-          <input
-            id="telp"
-            type="text"
-            placeholder="No. telp member"
-            class="flex-1 border border-gray-300 rounded-md text-xs text-gray-400 placeholder-gray-400 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
-          />
-        </div>
-        <div class="flex items-center">
-          <label
-            for="email"
-            class="w-24 text-xs text-black font-normal leading-4"
-            >Email</label
-          >
-          <input
-            id="email"
-            type="email"
-            placeholder="Email member (opsional)"
-            class="flex-1 border border-gray-300 rounded-md text-xs text-gray-400 placeholder-gray-400 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
-          />
-        </div>
-        <div class="flex items-center">
-          <label
-            for="alamat"
-            class="w-24 text-xs text-black font-normal leading-4"
-            >Alamat</label
-          >
-          <input
-            id="alamat"
-            type="text"
-            placeholder="Alamat member (opsional)"
-            class="flex-1 border border-gray-300 rounded-md text-xs text-gray-400 placeholder-gray-400 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
-          />
-        </div>
-        <div class="flex items-center">
-          <label
-            for="gender"
-            class="w-24 text-xs text-black font-normal leading-4"
-            >Jenis Kelamin</label
-          >
-          <select
-            id="gender"
-            class="flex-1 border border-orange-500 rounded-md text-xs text-black px-3 py-2 focus:outline-none"
-          >
-            <option selected disabled>Pilih gender</option>
-            <option>Laki-laki</option>
-            <option>Perempuan</option>
-          </select>
-        </div>
-        <div class="flex justify-end space-x-3 mt-5">
-          <button
-            type="button"
-            onclick="closeModal('tambahMemberModal')"
-            class="text-xs text-black font-normal leading-4 px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-100 focus:outline-none"
-          >
-            Batal
-          </button>
-          <button
-            type="submit"
-            class="text-xs font-semibold leading-4 px-4 py-2 rounded-md bg-orange-500 text-white hover:bg-orange-600 focus:outline-none"
-          >
-            Simpan
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
 
-  <!-- Modal Edit Member -->
-  <div id="editMemberModal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-    <div
-      class="bg-white rounded-md shadow-lg w-[360px] p-6 relative font-sans"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-    >
-      <button
-        onclick="closeModal('editMemberModal')"
-        aria-label="Close"
-        class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none"
-      >
-        <i class="fas fa-times text-sm"></i>
-      </button>
-      <h2
-        id="modal-title"
-        class="font-semibold text-black text-base leading-5 mb-1"
-      >
-        Edit Member
-      </h2>
-      <p class="text-gray-500 text-xs leading-4 mb-5">
-        Edit detail member di bawah ini.
-      </p>
-      <form class="space-y-3">
-        <div class="flex items-center">
-          <label
-            for="edit-nama"
-            class="w-24 text-xs text-black font-normal leading-4"
-            >Nama</label
-          >
-          <input
-            id="edit-nama"
-            type="text"
-            placeholder="Nama member"
-            class="flex-1 border border-gray-300 rounded-md text-xs text-gray-400 placeholder-gray-400 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
-          />
-        </div>
-        <div class="flex items-center">
-          <label
-            for="edit-telp"
-            class="w-24 text-xs text-black font-normal leading-4"
-            >Telp</label
-          >
-          <input
-            id="edit-telp"
-            type="text"
-            placeholder="No. telp member"
-            class="flex-1 border border-gray-300 rounded-md text-xs text-gray-400 placeholder-gray-400 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
-          />
-        </div>
-        <div class="flex items-center">
-          <label
-            for="edit-email"
-            class="w-24 text-xs text-black font-normal leading-4"
-            >Email</label
-          >
-          <input
-            id="edit-email"
-            type="email"
-            placeholder="Email member (opsional)"
-            class="flex-1 border border-gray-300 rounded-md text-xs text-gray-400 placeholder-gray-400 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
-          />
-        </div>
-        <div class="flex items-center">
-          <label
-            for="edit-alamat"
-            class="w-24 text-xs text-black font-normal leading-4"
-            >Alamat</label
-          >
-          <input
-            id="edit-alamat"
-            type="text"
-            placeholder="Alamat member (opsional)"
-            class="flex-1 border border-gray-300 rounded-md text-xs text-gray-400 placeholder-gray-400 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
-          />
-        </div>
-        <div class="flex items-center">
-          <label
-            for="edit-gender"
-            class="w-24 text-xs text-black font-normal leading-4"
-            >Jenis Kelamin</label
-          >
-          <select
-            id="edit-gender"
-            class="flex-1 border border-orange-500 rounded-md text-xs text-black px-3 py-2 focus:outline-none"
-          >
-            <option selected disabled>Pilih gender</option>
-            <option>Laki-laki</option>
-            <option>Perempuan</option>
-          </select>
-        </div>
-        <div class="flex justify-end space-x-3 mt-5">
-          <button
-            type="button"
-            onclick="closeModal('editMemberModal')"
-            class="text-xs text-black font-normal leading-4 px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-100 focus:outline-none"
-          >
-            Batal
-          </button>
-          <button
-            type="submit"
-            class="text-xs font-semibold leading-4 px-4 py-2 rounded-md bg-orange-500 text-white hover:bg-orange-600 focus:outline-none"
-          >
-            Simpan
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
+<!-- Alert Notification -->
+<div id="alertContainer" class="fixed top-4 right-4 z-50 space-y-3 w-80">
+    <!-- Alert akan muncul di sini secara dinamis -->
+</div>
 
-  <div class="max-w-full p-6">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-xl font-extrabold leading-tight">Manajemen Member</h1>
-      <button
-        type="button"
-        onclick="openModal('tambahMemberModal')"
-        class="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-semibold px-4 py-2 rounded transition"
-      >
-        <i class="fas fa-plus"></i>
-        Tambah Member
-      </button>
+<!-- Modal Konfirmasi Hapus -->
+<div id="modalHapusOutlet" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-96">
+        <div class="flex items-start gap-4">
+            <div class="flex-shrink-0 p-2 bg-red-100 rounded-full">
+                <i data-lucide="alert-triangle" class="w-6 h-6 text-red-600"></i>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-lg font-semibold text-gray-900">Konfirmasi Hapus</h3>
+                <div class="mt-2">
+                    <p class="text-sm text-gray-600">Anda yakin ingin menghapus outlet ini? Data yang dihapus tidak dapat dikembalikan.</p>
+                </div>
+                <div class="mt-4 flex justify-end gap-3">
+                    <button id="btnBatalHapus" type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none">
+                        Batal
+                    </button>
+                    <button id="btnKonfirmasiHapus" type="button" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md shadow-sm hover:bg-red-700 focus:outline-none">
+                        Hapus
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Page Title + Action -->
+<div class="mb-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <h1 class="text-2xl font-bold text-gray-800">Manajemen Outlet</h1>
+        <div class="flex items-center gap-2 w-full md:w-auto">
+            <!-- Input dengan ikon pencarian -->
+            <div class="relative w-full md:w-64">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
+                </span>
+                <input type="text" placeholder="Pencarian...."
+                    class="w-full pl-10 pr-4 py-3 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" />
+            </div>
+
+            <!-- Tombol Tambah Outlet -->
+            <a href="#" onclick="openModalTambah()"
+                class="px-5 py-3 text-base font-medium text-white bg-orange-500 rounded-lg hover:bg-orange-600 shadow">
+                + Tambah Outlet
+            </a>
+        </div>
+    </div>
+</div>
+<!-- Card: Outlet Info + Aksi -->
+<div class="bg-white rounded-md p-4 shadow-md mb-4 flex flex-col md:flex-row md:items-center md:justify-between">
+    <!-- Kiri: Judul -->
+    <div class="mb-3 md:mb-0 flex items-start gap-2">
+        <i data-lucide="store" class="w-5 h-5 text-gray-600 mt-1"></i>
+        <div>
+            <h2 class="text-lg font-semibold text-gray-800">Manajemen Outlet</h2>
+            <p class="text-sm text-gray-600">Kelola semua outlet Kifa Bakery di sini.</p>
+        </div>
     </div>
 
-    <div class="border border-gray-200 rounded-md p-5 bg-white">
-      <h2 class="text-lg font-bold mb-1">Daftar Member</h2>
-      <p class="text-xs text-gray-500 mb-4">Kelola member</p>
+    <!-- Kanan: Tombol -->
+    <div class="flex items-center space-x-2">
+        <button class="flex items-center px-4 py-2 text-sm font-medium bg-white border rounded-md shadow hover:bg-gray-50">
+            <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Cetak
+        </button>
+        <button class="flex items-center px-4 py-2 text-sm font-medium bg-white border rounded-md shadow hover:bg-gray-50">
+            <i data-lucide="download" class="w-4 h-4 mr-2"></i> Ekspor
+        </button>
+    </div>
+</div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-gray-700 text-xs sm:text-sm">
-          <thead>
-            <tr class="border-b border-gray-300">
-              <th class="pb-3 pr-6 pt-1 font-normal" style="min-width: 140px;">
-                Nama
-              </th>
-              <th class="pb-3 pr-6 pt-1 font-normal" style="min-width: 90px;">
-                Kode<br />Member
-              </th>
-              <th class="pb-3 pr-6 pt-1 font-normal" style="min-width: 160px;">
-                Email
-              </th>
-              <th class="pb-3 pr-6 pt-1 font-normal" style="min-width: 200px;">
-                Alamat
-              </th>
-              <th class="pb-3 pr-6 pt-1 font-normal" style="min-width: 90px;">
-                Jenis<br />Kelamin
-              </th>
-              <th class="pb-3 pr-6 pt-1 font-normal" style="min-width: 90px;">
-                Total<br />transaksi
-              </th>
-              <th class="pb-3 pt-1 font-normal text-center" style="min-width: 40px;">
-                Aksi
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="border-b border-gray-200">
-              <td class="py-3 pr-6 align-top">
-                <p class="font-semibold text-[13px] leading-tight">Dr. Buck Stracke I</p>
-                <p class="text-[10px] text-gray-500 leading-tight mt-0.5">347-807-8340</p>
-              </td>
-              <td class="py-3 pr-6 align-top font-mono text-[13px] leading-tight">MEM-EOHDH5</td>
-              <td class="py-3 pr-6 align-top text-[13px] leading-tight">xpacocha@example.com</td>
-              <td class="py-3 pr-6 align-top text-[13px] leading-tight">
-                42422 Reynolds Brook Suite 172 Lake Shanny, ID 26497
-              </td>
-              <td class="py-3 pr-6 align-top text-[13px] leading-tight">Laki-laki</td>
-              <td class="py-3 pr-6 align-top font-semibold text-[13px] leading-tight">2</td>
-              <td class="py-3 align-top text-center relative">
-                <div class="dropdown-container inline-block">
-                  <button onclick="toggleDropdown(this)" class="text-[20px] cursor-pointer select-none">...</button>
-                  <div class="dropdown-menu hidden absolute right-0 mt-2 w-32 bg-white rounded-md shadow-lg z-10 border border-gray-200" 
-                       style="bottom: full">
-                    <button onclick="openModal('editMemberModal')" class="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-100">Edit</button>
-                    <button class="block w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-gray-100">Hapus</button>
-                  </div>
-                </div>
-              </td>
-            </tr>
+<!-- Card: Tabel Outlet -->
+<div class="bg-white rounded-lg shadow-lg p-6">
+    <!-- Table -->
+    <div class="overflow-x-auto">
+        <table class="w-full text-base">
+            <thead class="text-left text-gray-700 border-b-2">
+                <tr>
+                    <th class="py-3 font-semibold">No.</th>
+                    <th class="py-3 font-semibold">Nama Outlet</th>
+                    <th class="py-3 font-semibold">Alamat</th>
+                    <th class="py-3 font-semibold">Kontak</th>
+                    <th class="py-3 font-semibold">PPN</th>
+                    <th class="py-3 font-semibold">Status</th>
+                    <th class="py-3 font-semibold">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="text-gray-700 divide-y">
+                <!-- Outlet 1 -->
+                <tr>
+                    <td class="py-4">1</td>
+                    <td class="py-4">
+                        <div class="flex items-center gap-4">
+                            <div class="bg-orange-100 p-2 rounded-full">
+                                <i data-lucide="map-pin" class="w-6 h-6 text-orange-500"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-base text-gray-900">Kifa Bakery Pusat</div>
+                                <div class="text-sm text-gray-500">outlet1@example.com</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-4">Jl. Merdeka No. 1, Jakarta Pusat</td>
+                    <td class="py-4">0812-3456-7890</td>
+                    <td class="py-4">12.345.678.9-012.345</td>
+                    <td class="py-4">
+                        <span class="px-3 py-1.5 text-sm font-medium bg-green-100 text-green-700 rounded-full">Aktif</span>
+                    </td>
+                    <td class="py-4 relative">
+                        <div class="relative inline-block">
+                            <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded-lg">
+                                <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
+                            </button>
+                            <!-- Dropdown -->
+                            <div class="dropdown-menu hidden absolute right-0 z-20 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-base">
+                                <button onclick="editOutlet(1)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left rounded-t-lg">
+                                    <i data-lucide="pencil" class="w-5 h-5 mr-3 text-gray-500"></i> Edit
+                                </button>
+                                <button onclick="showConfirmDelete(1)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left text-red-600 rounded-b-lg">
+                                    <i data-lucide="trash-2" class="w-5 h-5 mr-3"></i> Hapus
+                                </button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
 
-            <tr class="border-b border-gray-200">
-              <td class="py-3 pr-6 align-top">
-                <p class="font-semibold text-[13px] leading-tight">Ms. Lacey Crona PhD</p>
-                <p class="text-[10px] text-gray-500 leading-tight mt-0.5">+1-815-249-1548</p>
-              </td>
-              <td class="py-3 pr-6 align-top font-mono text-[13px] leading-tight">MEM-IPWEYN</td>
-              <td class="py-3 pr-6 align-top text-[13px] leading-tight">cdietrich@example.com</td>
-              <td class="py-3 pr-6 align-top text-[13px] leading-tight">
-                967 Neoma Wells Suite 360 Janiceport, OR 25723
-              </td>
-              <td class="py-3 pr-6 align-top text-[13px] leading-tight">Perempuan</td>
-              <td class="py-3 pr-6 align-top font-semibold text-[13px] leading-tight">1</td>
-              <td class="py-3 align-top text-center relative">
-                <div class="dropdown-container inline-block">
-                  <button onclick="toggleDropdown(this)" class="text-[20px] cursor-pointer select-none">...</button>
-                  <div class="dropdown-menu hidden absolute right-0 mt-2 w-32 bg-white rounded-md shadow-lg z-10 border border-gray-200" 
-                       style="bottom: full">
-                    <button onclick="openModal('editMemberModal')" class="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-100">Edit</button>
-                    <button class="block w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-gray-100">Hapus</button>
-                  </div>
-                </div>
-              </td>
-            </tr>
+                <!-- Outlet 2 -->
+                <tr>
+                    <td class="py-4">2</td>
+                    <td class="py-4">
+                        <div class="flex items-center gap-4">
+                            <div class="bg-orange-100 p-2 rounded-full">
+                                <i data-lucide="map-pin" class="w-6 h-6 text-orange-500"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-base text-gray-900">Kifa Bakery Cabang 1</div>
+                                <div class="text-sm text-gray-500">kifacbg1@example.com</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-4">Jl. Mangga No. 12, Jakarta Selatan</td>
+                    <td class="py-4">0812-9876-5432</td>
+                    <td class="py-4">98.765.432.1-098.765</td>
+                    <td class="py-4">
+                        <span class="px-3 py-1.5 text-sm font-medium bg-green-100 text-green-700 rounded-full">Aktif</span>
+                    </td>
+                    <td class="py-4 relative">
+                        <div class="relative inline-block">
+                            <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded-lg">
+                                <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
+                            </button>
+                            <!-- Dropdown -->
+                            <div class="dropdown-menu hidden absolute right-0 z-20 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-base">
+                                <button onclick="editOutlet(2)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left rounded-t-lg">
+                                    <i data-lucide="pencil" class="w-5 h-5 mr-3 text-gray-500"></i> Edit
+                                </button>
+                                <button onclick="showConfirmDelete(2)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left text-red-600 rounded-b-lg">
+                                    <i data-lucide="trash-2" class="w-5 h-5 mr-3"></i> Hapus
+                                </button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
 
-            <tr class="border-b border-gray-200">
-              <td class="py-3 pr-6 align-top">
-                <p class="font-semibold text-[13px] leading-tight">Zena Ondricka DDS</p>
-                <p class="text-[10px] text-gray-500 leading-tight mt-0.5">(423) 834-2351</p>
-              </td>
-              <td class="py-3 pr-6 align-top font-mono text-[13px] leading-tight">MEM-CLPXLD</td>
-              <td class="py-3 pr-6 align-top text-[13px] leading-tight">kconnelly@example.net</td>
-              <td class="py-3 pr-6 align-top text-[13px] leading-tight">
-                48900 Bauch Forge Hammesmouth, ME 58939
-              </td>
-              <td class="py-3 pr-6 align-top text-[13px] leading-tight">Perempuan</td>
-              <td class="py-3 pr-6 align-top font-semibold text-[13px] leading-tight">1</td>
-              <td class="py-3 align-top text-center relative">
-                <div class="dropdown-container inline-block">
-                  <button onclick="toggleDropdown(this)" class="text-[20px] cursor-pointer select-none">...</button>
-                  <div class="dropdown-menu hidden absolute right-0 mt-2 w-32 bg-white rounded-md shadow-lg z-10 border border-gray-200" 
-                       style="bottom: full">
-                    <button onclick="openModal('editMemberModal')" class="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-100">Edit</button>
-                    <button class="block w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-gray-100">Hapus</button>
-                  </div>
-                </div>
-              </td>
-            </tr>
-
-            <tr>
-              <td class="py-3 pr-6 align-top">
-                <p class="font-semibold text-[13px] leading-tight">Katherine McDermott</p>
-                <p class="text-[10px] text-gray-500 leading-tight mt-0.5">(951) 664-0233</p>
-              </td>
-              <td class="py-3 pr-6 align-top font-mono text-[13px] leading-tight">MEM-G4UFTK</td>
-              <td class="py-3 pr-6 align-top text-[13px] leading-tight">arno27@example.org</td>
-              <td class="py-3 pr-6 align-top text-[13px] leading-tight">
-                211 Vern Isle South Princessfort, AR 59258-5476
-              </td>
-              <td class="py-3 pr-6 align-top text-[13px] leading-tight">Perempuan</td>
-              <td class="py-3 pr-6 align-top font-semibold text-[13px] leading-tight">1</td>
-              <td class="py-3 align-top text-center relative">
-                <div class="dropdown-container inline-block">
-                  <button onclick="toggleDropdown(this)" class="text-[20px] cursor-pointer select-none">...</button>
-                  <div class="dropdown-menu hidden absolute right-0 mt-2 w-32 bg-white rounded-md shadow-lg z-10 border border-gray-200" 
-                       style="bottom: full">
-                    <button onclick="openModal('editMemberModal')" class="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-100">Edit</button>
-                    <button class="block w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-gray-100">Hapus</button>
-                  </div>
-                </div>
-              </td>
-            </tr>
-          </tbody>
+                <!-- Outlet 3 -->
+                <tr>
+                    <td class="py-4">3</td>
+                    <td class="py-4">
+                        <div class="flex items-center gap-4">
+                            <div class="bg-orange-100 p-2 rounded-full">
+                                <i data-lucide="map-pin" class="w-6 h-6 text-orange-500"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-base text-gray-900">Kifa Bakery Cabang 2</div>
+                                <div class="text-sm text-gray-500">kifacbg2@example.com</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-4">Jl. Kenanga No. 25, Jakarta Timur</td>
+                    <td class="py-4">0812-8765-4321</td>
+                    <td class="py-4">87.654.321.0-987.654</td>
+                    <td class="py-4">
+                        <span class="px-3 py-1.5 text-sm font-medium bg-yellow-100 text-yellow-700 rounded-full">Renovasi</span>
+                    </td>
+                    <td class="py-4 relative">
+                        <div class="relative inline-block">
+                            <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded-lg">
+                                <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
+                            </button>
+                            <!-- Dropdown -->
+                            <div class="dropdown-menu hidden absolute right-0 z-20 bottom-full mb-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-base">
+                                <button onclick="editOutlet(3)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left rounded-t-lg">
+                                    <i data-lucide="pencil" class="w-5 h-5 mr-3 text-gray-500"></i> Edit
+                                </button>
+                                <button onclick="showConfirmDelete(3)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left text-red-600 rounded-b-lg">
+                                    <i data-lucide="trash-2" class="w-5 h-5 mr-3"></i> Hapus
+                                </button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
         </table>
-      </div>
     </div>
-  </div>
+</div>
 
-  <script>
-    // Fungsi untuk membuka modal
-    function openModal(modalId) {
-      document.getElementById(modalId).classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-    }
+@include('partials.outlet.modal-tambah-outlet')
+@include('partials.outlet.modal-edit-outlet')
 
-    // Fungsi untuk menutup modal
-    function closeModal(modalId) {
-      document.getElementById(modalId).classList.add('hidden');
-      document.body.style.overflow = 'auto';
-    }
+<script>
+    // Variabel global untuk menyimpan ID outlet yang akan dihapus
+    let outletIdToDelete = null;
 
-    // Fungsi untuk toggle dropdown aksi
-    function toggleDropdown(button) {
-    const dropdownMenu = button.nextElementSibling;
-    const isOpen = !dropdownMenu.classList.contains('hidden');
-    
-    // Tutup semua dropdown yang terbuka
-    document.querySelectorAll('.dropdown-menu').forEach(menu => {
-        menu.classList.add('hidden');
-    });
-    
-    if (!isOpen) {
-        // Cek posisi relatif terhadap viewport
-        const rect = button.getBoundingClientRect();
-        const spaceBelow = window.innerHeight - rect.bottom;
-        const dropdownHeight = 64; // Tinggi dropdown (2 item x 32px)
+    // Fungsi untuk menampilkan alert
+    function showAlert(type, message) {
+        const alertContainer = document.getElementById('alertContainer');
+        const alertId = 'alert-' + Date.now();
         
-        // Jika tidak cukup space di bawah, tampilkan ke atas
-        if (spaceBelow < dropdownHeight) {
-        dropdownMenu.style.bottom = '-100%';
-        // dropdownMenu.style.top = 'auto';
-        dropdownMenu.style.mt = '0';
-        dropdownMenu.style.mb = '2';
-        } else {
-        dropdownMenu.style.top = '-100%';
-        // dropdownMenu.style.bottom = 'auto';
-        dropdownMenu.style.mt = '2';
-        dropdownMenu.style.mb = '0';
+        // Warna dan ikon berdasarkan jenis alert
+        const alertConfig = {
+            success: {
+                bgColor: 'bg-orange-50',
+                borderColor: 'border-orange-200',
+                textColor: 'text-orange-800',
+                icon: 'check-circle',
+                iconColor: 'text-orange-500'
+            },
+            error: {
+                bgColor: 'bg-red-50',
+                borderColor: 'border-red-200',
+                textColor: 'text-red-800',
+                icon: 'alert-circle',
+                iconColor: 'text-red-500'
+            }
+        };
+        
+        const config = alertConfig[type] || alertConfig.success;
+        
+        const alertElement = document.createElement('div');
+        alertElement.id = alertId;
+        alertElement.className = `p-4 border rounded-lg shadow-sm ${config.bgColor} ${config.borderColor} ${config.textColor} flex items-start gap-3 animate-fade-in-up`;
+        alertElement.innerHTML = `
+            <i data-lucide="${config.icon}" class="w-5 h-5 mt-0.5 ${config.iconColor}"></i>
+            <div class="flex-1">
+                <p class="text-sm font-medium">${message}</p>
+            </div>
+            <button onclick="closeAlert('${alertId}')" class="p-1 rounded-full hover:bg-gray-100">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        `;
+        
+        alertContainer.prepend(alertElement);
+        
+        // Inisialisasi ikon Lucide
+        if (window.lucide) {
+            window.lucide.createIcons();
         }
         
-        dropdownMenu.classList.remove('hidden');
-    }
+        // Auto close setelah 5 detik
+        setTimeout(() => {
+            closeAlert(alertId);
+        }, 5000);
     }
 
-    // Tutup dropdown ketika klik di luar
-    document.addEventListener('click', function(event) {
-      if (!event.target.closest('.dropdown-container')) {
-        document.querySelectorAll('.dropdown-menu').forEach(menu => {
-          menu.classList.add('hidden');
+    // Fungsi untuk menutup alert
+    function closeAlert(id) {
+        const alert = document.getElementById(id);
+        if (alert) {
+            alert.classList.add('animate-fade-out');
+            setTimeout(() => {
+                alert.remove();
+            }, 300);
+        }
+    }
+
+    // Fungsi untuk menampilkan modal konfirmasi hapus
+    function showConfirmDelete(id) {
+        outletIdToDelete = id;
+        const modal = document.getElementById('modalHapusOutlet');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    // Fungsi untuk menutup modal konfirmasi hapus
+    function closeConfirmDelete() {
+        const modal = document.getElementById('modalHapusOutlet');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        outletIdToDelete = null;
+    }
+
+    // Fungsi untuk menghapus outlet
+    function hapusOutlet() {
+        if (outletIdToDelete) {
+            console.log('Menghapus outlet ID:', outletIdToDelete);
+            // Di sini Anda bisa menambahkan AJAX request untuk menghapus data
+            
+            // Tampilkan alert sukses
+            showAlert('success', 'Outlet berhasil dihapus!');
+            
+            // Tutup modal konfirmasi
+            closeConfirmDelete();
+            
+            // Di production, Anda mungkin perlu me-refresh data atau menghapus baris dari tabel
+        }
+    }
+
+    // Event listener untuk modal konfirmasi hapus
+    document.getElementById('btnBatalHapus').addEventListener('click', closeConfirmDelete);
+    document.getElementById('btnKonfirmasiHapus').addEventListener('click', hapusOutlet);
+
+    // Fungsi toggle dropdown (sama seperti sebelumnya)
+    function toggleDropdown(button) {
+        const menu = button.nextElementSibling;
+
+        // Tutup semua dropdown lain
+        document.querySelectorAll('.dropdown-menu').forEach(m => {
+            if (m !== menu) {
+                m.classList.add('hidden');
+                m.classList.remove('dropdown-up');
+                m.classList.remove('dropdown-down');
+            }
         });
-      }
+
+        // Toggle dropdown terkait tombol yang diklik
+        menu.classList.toggle('hidden');
+
+        // Reset posisi
+        menu.classList.remove('dropdown-up', 'dropdown-down');
+
+        // Cek ruang yang tersedia
+        const menuRect = menu.getBoundingClientRect();
+        const buttonRect = button.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - buttonRect.bottom;
+        const spaceAbove = buttonRect.top;
+
+        // Atur arah dropdown
+        if (spaceBelow < menuRect.height && spaceAbove > menuRect.height) {
+            // Tampilkan ke atas
+            menu.classList.add('dropdown-up');
+        } else {
+            // Tampilkan ke bawah
+            menu.classList.add('dropdown-down');
+        }
+    }
+
+    // Tutup semua dropdown jika klik di luar
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('.relative.inline-block')) {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.add('hidden');
+                menu.classList.remove('dropdown-up');
+                menu.classList.remove('dropdown-down');
+            });
+        }
     });
-  </script>
-</body>
-</html>
+
+    // Fungsi untuk modal tambah dan edit (sama seperti sebelumnya)
+    const modalTambah = document.getElementById('modalTambahOutlet');
+    const modalEdit = document.getElementById('modalEditOutlet');
+    const batalBtnTambah = document.getElementById('btnBatalModalTambah');
+    const batalBtnEdit = document.getElementById('btnBatalModalEdit');
+
+    function openModalTambah() {
+        modalTambah.classList.remove('hidden');
+        modalTambah.classList.add('flex');
+    }
+
+    function closeModalTambah() {
+        modalTambah.classList.add('hidden');
+        modalTambah.classList.remove('flex');
+    }
+    
+    function openModalEdit() {
+        modalEdit.classList.remove('hidden');
+        modalEdit.classList.add('flex');
+    }
+    
+    function closeModalEdit() {
+        modalEdit.classList.add('hidden');
+        modalEdit.classList.remove('flex');
+    }
+
+    // Klik batal untuk modal tambah
+    batalBtnTambah.addEventListener('click', () => {
+        closeModalTambah();
+    });
+    
+    // Klik batal untuk modal edit
+    batalBtnEdit.addEventListener('click', () => {
+        closeModalEdit();
+    });
+
+    function editOutlet(id) {
+        console.log('Edit outlet ID:', id);
+        openModalEdit();
+        
+        const outletData = {
+            1: {
+                nama: 'Kifa Bakery Pusat',
+                alamat: 'Jl. Merdeka No. 1, Jakarta Pusat',
+                kontak: '0812-3456-7890',
+                ppn: '12.345.678.9-012.345',
+                status: 'Aktif'
+            },
+            2: {
+                nama: 'Kifa Bakery Cabang 1',
+                alamat: 'Jl. Mangga No. 12, Jakarta Selatan',
+                kontak: '0812-9876-5432',
+                ppn: '98.765.432.1-098.765',
+                status: 'Aktif'
+            },
+            3: {
+                nama: 'Kifa Bakery Cabang 2',
+                alamat: 'Jl. Kenanga No. 25, Jakarta Timur',
+                kontak: '0812-8765-4321',
+                ppn: '87.654.321.0-987.654',
+                status: 'Renovasi'
+            }
+        };
+        
+        if (outletData[id]) {
+            document.getElementById('editNamaOutlet').value = outletData[id].nama;
+            document.getElementById('editAlamatOutlet').value = outletData[id].alamat;
+            document.getElementById('editKontakOutlet').value = outletData[id].kontak;
+            document.getElementById('editPpnOutlet').value = outletData[id].ppn;
+            document.getElementById('editStatusOutlet').value = outletData[id].status;
+            document.getElementById('outletIdToEdit').value = id;
+        }
+    }
+
+    // Simulasi aksi form
+    document.getElementById('formTambahOutlet')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        closeModalTambah();
+        showAlert('success', 'Outlet baru berhasil ditambahkan!');
+    });
+
+    document.getElementById('formEditOutlet')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        closeModalEdit();
+        showAlert('success', 'Data outlet berhasil diperbarui!');
+    });
+</script>
+
+<style>
+    /* Animasi untuk alert */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes fadeOut {
+        from {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+    }
+    
+    .animate-fade-in-up {
+        animation: fadeInUp 0.3s ease-out forwards;
+    }
+    
+    .animate-fade-out {
+        animation: fadeOut 0.3s ease-out forwards;
+    }
+</style>
 
 @endsection
