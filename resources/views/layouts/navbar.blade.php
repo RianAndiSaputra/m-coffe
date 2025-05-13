@@ -88,7 +88,7 @@
     document.getElementById('logout-form').addEventListener('submit', async function(e) {
         e.preventDefault();
 
-        await fetch('/logout', {
+        await fetch('/api/logout', {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,

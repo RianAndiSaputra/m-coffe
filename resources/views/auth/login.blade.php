@@ -247,12 +247,16 @@
             });
 
             if (dashResponse.ok) {
-            window.location.href = '/dashboard'; // Redirect manual
+            showSuccess('Login berhasil! Mengarahkan ke dashboard...');
+            setTimeout(() => {
+                window.location.href = '/dashboard';
+            }, 2000); // Delay 2 detik
             } else {
-            alert('Akses gagal!');
+            showError('Akses gagal!');
             }
         } catch (error) {
             console.error('Error:', error);
+            showError('Terjadi kesalahan saat login. Silakan coba lagi.');
         }
         });
 
