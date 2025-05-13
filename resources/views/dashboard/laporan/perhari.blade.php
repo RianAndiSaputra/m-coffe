@@ -77,85 +77,8 @@
     </div>
 
     <!-- Cards Summary -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-        <!-- Card Template -->
-        <div class="bg-white rounded-lg shadow p-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-500">Total Order</p>
-                    <h3 class="text-2xl font-bold text-gray-800">125</h3>
-                </div>
-                <div class="p-3 rounded-full bg-orange-100 text-orange-500">
-                    <i data-lucide="shopping-bag" class="w-6 h-6"></i>
-                </div>
-            </div>
-            <p class="text-xs text-gray-500 mt-2">+12% dari kemarin</p>
-        </div>
-
-        <div class="bg-white rounded-lg shadow p-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-500">Total Item Terjual</p>
-                    <h3 class="text-2xl font-bold text-gray-800">543</h3>
-                </div>
-                <div class="p-3 rounded-full bg-blue-100 text-blue-500">
-                    <i data-lucide="package" class="w-6 h-6"></i>
-                </div>
-            </div>
-            <p class="text-xs text-gray-500 mt-2">+8% dari kemarin</p>
-        </div>
-
-        <div class="bg-white rounded-lg shadow p-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-500">Penjualan Kotor</p>
-                    <h3 class="text-2xl font-bold text-gray-800">Rp 12.450.000</h3>
-                </div>
-                <div class="p-3 rounded-full bg-green-100 text-green-500">
-                    <i data-lucide="dollar-sign" class="w-6 h-6"></i>
-                </div>
-            </div>
-            <p class="text-xs text-gray-500 mt-2">+15% dari kemarin</p>
-        </div>
-
-        <div class="bg-white rounded-lg shadow p-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-500">Penjualan Bersih</p>
-                    <h3 class="text-2xl font-bold text-gray-800">Rp 10.980.000</h3>
-                </div>
-                <div class="p-3 rounded-full bg-purple-100 text-purple-500">
-                    <i data-lucide="credit-card" class="w-6 h-6"></i>
-                </div>
-            </div>
-            <p class="text-xs text-gray-500 mt-2">+14% dari kemarin</p>
-        </div>
-
-        <div class="bg-white rounded-lg shadow p-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-500">Total Diskon</p>
-                    <h3 class="text-2xl font-bold text-gray-800">Rp 1.470.000</h3>
-                </div>
-                <div class="p-3 rounded-full bg-yellow-100 text-yellow-500">
-                    <i data-lucide="tag" class="w-6 h-6"></i>
-                </div>
-            </div>
-            <p class="text-xs text-gray-500 mt-2">5% dari total penjualan</p>
-        </div>
-
-        <div class="bg-white rounded-lg shadow p-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-500">Rata-rata Order</p>
-                    <h3 class="text-2xl font-bold text-gray-800">Rp 87.840</h3>
-                </div>
-                <div class="p-3 rounded-full bg-red-100 text-red-500">
-                    <i data-lucide="bar-chart-2" class="w-6 h-6"></i>
-                </div>
-            </div>
-            <p class="text-xs text-gray-500 mt-2">+3% dari kemarin</p>
-        </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6" id="summaryCards">
+        <!-- Cards will be populated by JavaScript -->
     </div>
     
     <!-- Tabel Transaksi -->
@@ -167,90 +90,13 @@
                     <th class="py-3 font-bold">Waktu</th>
                     <th class="py-3 font-bold">Kasir</th>
                     <th class="py-3 font-bold">Metode Pembayaran</th>
+                    <th class="py-3 font-bold">Status</th>
                     <th class="py-3 font-bold text-right">Total</th>
                     <th class="py-3 font-bold text-right">Aksi</th>
                 </tr>
             </thead>
             <tbody class="text-gray-700 divide-y" id="transactionTableBody">
-                <!-- Transaksi 1 -->
-                <tr>
-                    <td class="py-4 font-medium">INV-20230511-001</td>
-                    <td class="py-4">11 Mei 2023, 08:15</td>
-                    <td class="py-4">Ahmad Fauzi</td>
-                    <td class="py-4">
-                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Tunai</span>
-                    </td>
-                    <td class="py-4 text-right font-bold">Rp 125.000</td>
-                    <td class="py-4 text-right">
-                        <button onclick="showTransactionDetail('INV-20230511-001')" class="text-orange-500 hover:text-orange-700">
-                            <i data-lucide="eye" class="w-5 h-5"></i>
-                        </button>
-                    </td>
-                </tr>
-                
-                <!-- Transaksi 2 -->
-                <tr>
-                    <td class="py-4 font-medium">INV-20230511-002</td>
-                    <td class="py-4">11 Mei 2023, 09:30</td>
-                    <td class="py-4">Budi Santoso</td>
-                    <td class="py-4">
-                        <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">Debit Card</span>
-                    </td>
-                    <td class="py-4 text-right font-bold">Rp 245.500</td>
-                    <td class="py-4 text-right">
-                        <button onclick="showTransactionDetail('INV-20230511-002')" class="text-orange-500 hover:text-orange-700">
-                            <i data-lucide="eye" class="w-5 h-5"></i>
-                        </button>
-                    </td>
-                </tr>
-                
-                <!-- Transaksi 3 -->
-                <tr>
-                    <td class="py-4 font-medium">INV-20230511-003</td>
-                    <td class="py-4">11 Mei 2023, 11:45</td>
-                    <td class="py-4">Ahmad Fauzi</td>
-                    <td class="py-4">
-                        <span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">E-Wallet</span>
-                    </td>
-                    <td class="py-4 text-right font-bold">Rp 89.750</td>
-                    <td class="py-4 text-right">
-                        <button onclick="showTransactionDetail('INV-20230511-003')" class="text-orange-500 hover:text-orange-700">
-                            <i data-lucide="eye" class="w-5 h-5"></i>
-                        </button>
-                    </td>
-                </tr>
-                
-                <!-- Transaksi 4 -->
-                <tr>
-                    <td class="py-4 font-medium">INV-20230511-004</td>
-                    <td class="py-4">11 Mei 2023, 14:20</td>
-                    <td class="py-4">Citra Dewi</td>
-                    <td class="py-4">
-                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Tunai</span>
-                    </td>
-                    <td class="py-4 text-right font-bold">Rp 320.000</td>
-                    <td class="py-4 text-right">
-                        <button onclick="showTransactionDetail('INV-20230511-004')" class="text-orange-500 hover:text-orange-700">
-                            <i data-lucide="eye" class="w-5 h-5"></i>
-                        </button>
-                    </td>
-                </tr>
-                
-                <!-- Transaksi 5 -->
-                <tr>
-                    <td class="py-4 font-medium">INV-20230511-005</td>
-                    <td class="py-4">11 Mei 2023, 16:50</td>
-                    <td class="py-4">Budi Santoso</td>
-                    <td class="py-4">
-                        <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">Kredit Card</span>
-                    </td>
-                    <td class="py-4 text-right font-bold">Rp 175.250</td>
-                    <td class="py-4 text-right">
-                        <button onclick="showTransactionDetail('INV-20230511-005')" class="text-orange-500 hover:text-orange-700">
-                            <i data-lucide="eye" class="w-5 h-5"></i>
-                        </button>
-                    </td>
-                </tr>
+                <!-- Transactions will be populated by JavaScript -->
             </tbody>
         </table>
     </div>
@@ -262,8 +108,13 @@
 <!-- Flatpickr JS -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
-
+<script src="https://unpkg.com/lucide@latest"></script>
 <script>
+    lucide.createIcons();
+    // Global variables
+    let currentOutletId = 1; // Default outlet ID, you can change this as needed
+    let currentData = null;
+
     // Initialize date range picker
     flatpickr("#dateRange", {
         mode: "range",
@@ -272,11 +123,244 @@
         locale: "id",
         onChange: function(selectedDates, dateStr) {
             if (selectedDates.length === 2) {
-                // Automatically filter data when both dates are selected
-                filterData(selectedDates[0], selectedDates[1]);
+                // Format dates for API (YYYY-MM-DD)
+                const dateFrom = formatDateForAPI(selectedDates[0]);
+                const dateTo = formatDateForAPI(selectedDates[1]);
+                
+                // Fetch data with new date range
+                fetchData(currentOutletId, dateFrom, dateTo);
             }
         }
     });
+    
+    // Format date for API (YYYY-MM-DD)
+    function formatDateForAPI(date) {
+        return date.toISOString().split('T')[0];
+    }
+    
+    // Format date to Indonesian format
+    function formatDateToID(dateString) {
+        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+        return new Date(dateString).toLocaleDateString('id-ID', options);
+    }
+    
+    // Format currency to IDR
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(amount);
+    }
+    
+    // Get payment method badge class
+    function getPaymentMethodBadge(method) {
+        switch(method) {
+            case 'cash':
+                return 'bg-green-100 text-green-800';
+            case 'transfer':
+                return 'bg-blue-100 text-blue-800';
+            case 'qris':
+                return 'bg-purple-100 text-purple-800';
+            case 'credit':
+                return 'bg-yellow-100 text-yellow-800';
+            default:
+                return 'bg-gray-100 text-gray-800';
+        }
+    }
+    
+    // Get payment method display text
+    function getPaymentMethodText(method) {
+        switch(method) {
+            case 'cash':
+                return 'Tunai';
+            case 'transfer':
+                return 'Transfer';
+            case 'qris':
+                return 'Qris';
+            case 'credit':
+                return 'Kredit Card';
+            default:
+                return method;
+        }
+    }
+    
+    // Get status badge class
+    function getStatusBadge(status) {
+        switch(status) {
+            case 'completed':
+                return 'bg-green-100 text-green-800';
+            case 'cancelled':
+                return 'bg-red-100 text-red-800';
+            case 'pending':
+                return 'bg-yellow-100 text-yellow-800';
+            default:
+                return 'bg-gray-100 text-gray-800';
+        }
+    }
+    
+    // Get status display text
+    function getStatusText(status) {
+        switch(status) {
+            case 'completed':
+                return 'Selesai';
+            case 'cancelled':
+                return 'Dibatalkan';
+            case 'pending':
+                return 'Menunggu';
+            default:
+                return status;
+        }
+    }
+    
+    // Fetch data from API
+    async function fetchData(outletId, dateFrom, dateTo) {
+        try {
+            showAlert('info', 'Memuat data...');
+            
+            const response = await fetch(`http://127.0.0.1:8000/api/orders/history?outlet_id=${outletId}&date_from=${dateFrom}&date_to=${dateTo}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Accept': 'application/json'
+            }
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                currentData = data.data;
+                renderSummaryCards();
+                renderTransactionTable();
+                showAlert('success', 'Data berhasil dimuat');
+            } else {
+                throw new Error(data.message || 'Gagal memuat data');
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            showAlert('error', error.message);
+        }
+    }
+    
+    // Render summary cards
+    function renderSummaryCards() {
+        if (!currentData) return;
+        
+        const cardsContainer = document.getElementById('summaryCards');
+        const { total_orders, total_revenue, average_order_value, total_discount, total_items_sold, gross_sales } = currentData;
+        
+        cardsContainer.innerHTML = `
+            <!-- Card Template -->
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Total Order</p>
+                        <h3 class="text-2xl font-bold text-gray-800">${total_orders}</h3>
+                    </div>
+                    <div class="p-3 rounded-full bg-orange-100 text-orange-500">
+                        <i data-lucide="shopping-bag" class="w-6 h-6"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Periode ${currentData.date_from} - ${currentData.date_to}</p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Total Item Terjual</p>
+                        <h3 class="text-2xl font-bold text-gray-800">${total_items_sold}</h3>
+                    </div>
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-500">
+                        <i data-lucide="package" class="w-6 h-6"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Periode ${currentData.date_from} - ${currentData.date_to}</p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Penjualan Kotor</p>
+                        <h3 class="text-2xl font-bold text-gray-800">${formatCurrency(gross_sales)}</h3>
+                    </div>
+                    <div class="p-3 rounded-full bg-green-100 text-green-500">
+                        <i data-lucide="dollar-sign" class="w-6 h-6"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Periode ${currentData.date_from} - ${currentData.date_to}</p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Penjualan Bersih</p>
+                        <h3 class="text-2xl font-bold text-gray-800">${formatCurrency(total_revenue)}</h3>
+                    </div>
+                    <div class="p-3 rounded-full bg-purple-100 text-purple-500">
+                        <i data-lucide="credit-card" class="w-6 h-6"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Periode ${currentData.date_from} - ${currentData.date_to}</p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Total Diskon</p>
+                        <h3 class="text-2xl font-bold text-gray-800">${formatCurrency(total_discount)}</h3>
+                    </div>
+                    <div class="p-3 rounded-full bg-yellow-100 text-yellow-500">
+                        <i data-lucide="tag" class="w-6 h-6"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Periode ${currentData.date_from} - ${currentData.date_to}</p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Rata-rata Order</p>
+                        <h3 class="text-2xl font-bold text-gray-800">${formatCurrency(average_order_value)}</h3>
+                    </div>
+                    <div class="p-3 rounded-full bg-red-100 text-red-500">
+                        <i data-lucide="bar-chart-2" class="w-6 h-6"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Periode ${currentData.date_from} - ${currentData.date_to}</p>
+            </div>
+        `;
+        lucide.createIcons();
+    }
+    
+    // Render transaction table
+    function renderTransactionTable() {
+        if (!currentData || !currentData.orders) return;
+        
+        const tableBody = document.getElementById('transactionTableBody');
+        tableBody.innerHTML = '';
+        
+        currentData.orders.forEach(order => {
+            const row = document.createElement('tr');
+            row.className = 'py-4';
+            row.innerHTML = `
+                <td class="py-4 font-medium">${order.order_number}</td>
+                <td class="py-4">${order.created_at}</td>
+                <td class="py-4">${order.user}</td>
+                <td class="py-4">
+                    <span class="px-2 py-1 ${getPaymentMethodBadge(order.payment_method)} rounded-full text-xs">
+                        ${getPaymentMethodText(order.payment_method)}
+                    </span>
+                </td>
+                <td class="py-4">
+                    <span class="px-2 py-1 ${getStatusBadge(order.status)} rounded-full text-xs">
+                        ${getStatusText(order.status)}
+                    </span>
+                </td>
+                <td class="py-4 text-right font-bold">${formatCurrency(order.total)}</td>
+                <td class="py-4 text-right">
+                    <button onclick="showTransactionDetail('${order.id}')" class="text-orange-500 hover:text-orange-700">
+                        <i data-lucide="eye" class="w-5 h-5"></i>
+                    </button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        lucide.createIcons();
+        });
+    }
     
     // Search input handler
     document.getElementById('searchInput').addEventListener('keyup', function(e) {
@@ -292,62 +376,300 @@
             }
         });
         
-        if (searchTerm) {
-            showAlert('info', `Menampilkan hasil pencarian: ${searchTerm}`);
-        }
+        // if (searchTerm) {
+        //     showAlert('info', `Menampilkan hasil pencarian: ${searchTerm}`);
+        // }
     });
-    
-    // Filter data function
-    function filterData(startDate, endDate) {
-        // In a real app, you would make an AJAX request here
-        console.log(`Filter data dari ${startDate} sampai ${endDate}`);
-        showAlert('success', `Menampilkan data dari ${formatDate(startDate)} sampai ${formatDate(endDate)}`);
-        
-        // Simulate loading
-        const rows = document.querySelectorAll('#transactionTableBody tr');
-        rows.forEach(row => row.style.display = 'none');
-        
-        setTimeout(() => {
-            rows.forEach(row => row.style.display = '');
-        }, 500);
-    }
-    
-    // Format date to Indonesian format
-    function formatDate(date) {
-        const options = { day: 'numeric', month: 'long', year: 'numeric' };
-        return date.toLocaleDateString('id-ID', options);
-    }
     
     // Print report function
     function printReport() {
-        showAlert('info', 'Mempersiapkan laporan untuk dicetak...');
-        // In a real app, this would open print dialog or redirect to print page
+        if (!currentData) {
+            showAlert('error', 'Tidak ada data untuk dicetak');
+            return;
+        }
+
+        showAlert('info', 'Mempersiapkan laporan untuk diekspor...');
+
         setTimeout(() => {
-            window.print();
+        // Create a print window
+        const printWindow = window.open('', '_blank');
+        
+        // HTML content for printing
+        let printContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Laporan Penjualan - Kifa Bakery</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+                    h1 { font-size: 18px; margin: 0 0 10px 0; }
+                    hr { border: 0; border-top: 1px solid #000; margin: 10px 0; }
+                    .header-info { margin-bottom: 15px; }
+                    .report-header {
+                        display: flex;
+                        align-items: center;
+                        gap: 20px;
+                        margin-bottom: 20px;
+                    }
+                    .logo {
+                        width: 60px;
+                        height: auto;
+                    }
+                    .summary {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 10px;
+                        max-width: 600px;
+                        margin-bottom: 20px;
+                    }
+
+                    .summary-item {
+                        flex: 1 1 calc(50% - 10px);
+                        background: #f4f4f4;
+                        padding: 10px;
+                        border-radius: 6px;
+                        box-sizing: border-box;
+                    }
+                    .transaction { margin-bottom: 30px; page-break-inside: avoid; }
+                    .transaction-header { margin-bottom: 10px; }
+                    .transaction-items { width: 100%; border-collapse: collapse; margin: 10px 0; }
+                    .transaction-items th { text-align: left; padding: 5px; border-bottom: 1px solid #000; }
+                    .transaction-items td { padding: 5px; border-bottom: 1px solid #ddd; }
+                    .transaction-total { margin-top: 10px; text-align: right; }
+                    .footer { margin-top: 30px; font-size: 12px; text-align: center; }
+                    @page { size: auto; margin: 10mm; }
+                    @media print {
+                        body { padding: 0; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="report-header">
+                    <img src="/images/logo.png" alt="Logo Kifa Bakery" class="logo">
+                    <div>
+                        <h1>LAPORAN PENJUALAN</h1>
+                        <div class="header-info">
+                            Outlet: ${currentData.outlet || 'Outlet 1'}<br>
+                            Tanggal: ${currentData.date_from} - ${currentData.date_to}<br>
+                            Dicetak pada: ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        </div>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="summary">
+                    <div class="summary-item"><strong>Total Penjualan</strong><br><strong>${formatCurrency(currentData.total_revenue)}</strong></div>
+                    <div class="summary-item"><strong>Total Order</strong><br><strong>${currentData.total_orders}</strong></div>
+                    <div class="summary-item"><strong>Total Item</strong><br><strong>${currentData.total_items_sold}</strong></div>
+                    <div class="summary-item"><strong>Rata-rata Order</strong><br><strong>${formatCurrency(currentData.average_order_value)}</strong></div>
+                </div>
+                
+                <hr>
+        `;
+
+        // Add each transaction to the print content
+        currentData.orders.forEach(order => {
+            printContent += `
+                <div class="transaction">
+                    <div class="transaction-header">
+                        <strong>No Transaksi</strong><br>
+                        <strong>#${order.order_number}</strong><br>
+                        ${order.created_at}<br>
+                        Kasir: ${order.user}<br>
+                        ${getPaymentMethodText(order.payment_method)}
+                    </div>
+                    
+                    <table class="transaction-items">
+                        <thead>
+                            <tr>
+                                <th>Nama Item</th>
+                                <th>Kode Item</th>
+                                <th>Harga</th>
+                                <th>Jumlah</th>
+                                <th>Satuan</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            // Add items for this transaction
+            order.items.forEach(item => {
+                printContent += `
+                    <tr>
+                        <td>${item.product}</td>
+                        <td>${item.sku}</td>
+                        <td>${formatCurrency(item.price)}</td>
+                        <td>${item.quantity}</td>
+                        <td>${item.unit || 'pcs'}</td>
+                        <td>${formatCurrency(item.total)}</td>
+                    </tr>
+                `;
+            });
+
+            printContent += `
+                        </tbody>
+                    </table>
+                    
+                    <div class="transaction-total">
+                        <div>Tax<br>${formatCurrency(order.tax)}</div>
+                        <hr>
+                        <div><strong>Total<br>${formatCurrency(order.total)}</strong></div>
+                    </div>
+                </div>
+                
+                <hr>
+            `;
+        });
+
+        // Add footer
+        printContent += `
+                <div class="footer">
+                    Laporan ini dibuat secara otomatis oleh sistem.<br>
+                    © ${new Date().getFullYear()} Kifa Bakery
+                </div>
+            </body>
+            </html>
+        `;
+
+        // Write content to print window
+        printWindow.document.open();
+        printWindow.document.write(printContent);
+        printWindow.document.close();
+
+        // Wait for content to load before printing
+        printWindow.onload = function() {
+            setTimeout(() => {
+                printWindow.print();
+                // printWindow.close();
+            }, 2000);
+        };
+        showAlert('success', 'Laporan berhasil diekspor');
         }, 1000);
     }
     
-    // Export report function
     function exportReport() {
+        if (!currentData) {
+            showAlert('error', 'Tidak ada data untuk diekspor');
+            return;
+        }
+
         showAlert('info', 'Mempersiapkan laporan untuk diekspor...');
-        // In a real app, this would generate and download a file
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(value);
+        }
+
+
         setTimeout(() => {
+            let csvContent = [];
+
+            // Header
+            csvContent.push(['LAPORAN PENJUALAN - Kifa Bakery']);
+            csvContent.push([`Outlet:`, currentData.outlet || 'Outlet 1']);
+            csvContent.push([`Tanggal:`, `${currentData.date_from} - ${currentData.date_to}`]);
+            csvContent.push([`Dicetak pada:`, new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })]);
+            csvContent.push([]); // Empty line
+
+            // Summary Section
+            csvContent.push(['Ringkasan']);
+            csvContent.push(['Keterangan', 'Nilai']);
+            csvContent.push(['Total Penjualan', formatCurrency(currentData.total_revenue)]);
+            csvContent.push(['Total Order', currentData.total_orders]);
+            csvContent.push(['Total Item', currentData.total_items_sold]);
+            csvContent.push(['Rata-rata Order', formatCurrency(currentData.average_order_value)]);
+            csvContent.push([]); // Empty line
+
+            // Detail Orders
+            csvContent.push(['Detail Transaksi']);
+
+            currentData.orders.forEach(order => {
+                csvContent.push(['No Transaksi', `#${order.order_number}`]);
+                csvContent.push(['Tanggal', order.created_at]);
+                csvContent.push(['Kasir', order.user]);
+                csvContent.push(['Metode Pembayaran', getPaymentMethodText(order.payment_method)]);
+                csvContent.push(['Nama Item', 'Kode Item', 'Harga', 'Jumlah', 'Satuan', 'Total']);
+
+                order.items.forEach(item => {
+                    csvContent.push([
+                        item.product,
+                        item.sku,
+                        formatCurrency(item.price),
+                        item.quantity,
+                        item.unit || 'pcs',
+                        formatCurrency(item.total)
+                    ]);
+                });
+
+                csvContent.push(['', '', '', '', 'Tax', formatCurrency(order.tax)]);
+                csvContent.push(['', '', '', '', 'Total', formatCurrency(order.total)]);
+                csvContent.push([]); // Empty line after each order
+            });
+
+            csvContent.push(['Laporan ini dibuat otomatis oleh sistem']);
+            csvContent.push([`© ${new Date().getFullYear()} Kifa Bakery`]);
+
+            // Convert to CSV string
+            const csvString = csvContent.map(row => row.join(',')).join('\n');
+
+            // Trigger download
             const a = document.createElement('a');
-            a.href = 'data:text/csv;charset=utf-8,';
-            a.download = `laporan-harian-${new Date().toISOString().slice(0,10)}.csv`;
+            a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvString);
+            a.download = `laporan-penjualan-perhari-${new Date().toISOString().slice(0,10)}.csv`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
+
             showAlert('success', 'Laporan berhasil diekspor');
         }, 1000);
     }
-    
+
+
     // Show transaction detail modal
-    function showTransactionDetail(invoiceNumber) {
-        // Here you would typically make an AJAX request to get transaction details
-        console.log(`Menampilkan detail transaksi: ${invoiceNumber}`);
+    function showTransactionDetail(orderId) {
+        if (!currentData || !currentData.orders) return;
         
-        // For demo, we'll just show the modal with static data
+        const order = currentData.orders.find(o => o.id == orderId);
+        if (!order) return;
+        
+        // Populate modal with order details
+        document.getElementById('modalInvoiceNumber').textContent = order.order_number;
+        document.getElementById('modalTransactionDate').textContent = order.created_at;
+        document.getElementById('modalCashierName').textContent = order.user;
+        document.getElementById('modalPaymentMethod').textContent = getPaymentMethodText(order.payment_method);
+        document.getElementById('modalStatus').textContent = getStatusText(order.status);
+        document.getElementById('modalSubtotal').textContent = formatCurrency(order.subtotal);
+        document.getElementById('modalTax').textContent = formatCurrency(order.tax);
+        document.getElementById('modalDiscount').textContent = formatCurrency(order.discount);
+        document.getElementById('modalTotal').textContent = formatCurrency(order.total);
+        document.getElementById('modalTotalPaid').textContent = formatCurrency(order.total_paid);
+        document.getElementById('modalChange').textContent = formatCurrency(order.change);
+        
+        // Populate items table
+        const itemsTableBody = document.getElementById('modalItemsTableBody');
+        itemsTableBody.innerHTML = '';
+        
+        order.items.forEach(item => {
+            const row = document.createElement('tr');
+            row.className = 'border-b';
+            row.innerHTML = `
+                <td class="py-3">${item.product}</td>
+                <td class="py-3">${item.sku}</td>
+                <td class="py-3 text-center">${item.quantity}</td>
+                <td class="py-3 text-right">${formatCurrency(item.price)}</td>
+                <td class="py-3 text-right">${formatCurrency(item.discount)}</td>
+                <td class="py-3 text-right">${formatCurrency(item.total)}</td>
+            `;
+            itemsTableBody.appendChild(row);
+        });
+        
+        // Show modal
         const modal = document.getElementById('transactionDetailModal');
         modal.classList.remove('hidden');
     }
@@ -363,7 +685,7 @@
         const alertContainer = document.getElementById('alertContainer');
         const alert = document.createElement('div');
         alert.className = `px-4 py-3 rounded-lg shadow-md ${type === 'error' ? 'bg-red-100 text-red-700' : 
-                         type === 'success' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`;
+                         type === 'success' ? 'bg-orange-100 text-orange-700' : 'bg-orange-100 text-orange-700'}`;
         alert.innerHTML = `
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
@@ -384,6 +706,17 @@
             alert.remove();
         }, 5000);
     }
+    
+    // Initialize data on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set default dates (today)
+        const today = new Date();
+        const dateFrom = formatDateForAPI(today);
+        const dateTo = formatDateForAPI(today);
+        
+        // Fetch initial data
+        fetchData(currentOutletId, dateFrom, dateTo);
+    });
 </script>
 
 @endsection

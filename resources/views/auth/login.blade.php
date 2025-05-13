@@ -219,44 +219,43 @@
 
         // Modify the login submission handler in your HTML
         document.getElementById('loginForm').addEventListener('submit', async function (e) {
-    e.preventDefault(); // Wajib ada di sini!
+            e.preventDefault(); // Wajib ada di sini!
 
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
 
-    try {
-        const response = await fetch('/login', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify({ email, password }),
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    return showError(data.message || 'Login gagal.');
+                }
+
+                localStorage.setItem('token', data.data.token);
+                const userRole = data.data.user.role;
+
+                if (userRole === 'kasir') {
+                    showSuccess('Login berhasil! Mengarahkan ke POS...');
+                    setTimeout(() => window.location.href = '/pos', 1500);
+                } else {
+                    showSuccess('Login berhasil! Mengarahkan ke dashboard...');
+                    setTimeout(() => window.location.href = '/dashboard', 1500);
+                }
+
+            } catch (error) {
+                console.error('Login error:', error);
+                showError('Terjadi kesalahan pada server.');
+            }
         });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            return showError(data.message || 'Login gagal.');
-        }
-
-        localStorage.setItem('token', data.data.token);
-        const userRole = data.data.user.role;
-
-        if (userRole === 'kasir') {
-            showSuccess('Login berhasil! Mengarahkan ke POS...');
-            setTimeout(() => window.location.href = '/pos', 1500);
-        } else {
-            showSuccess('Login berhasil! Mengarahkan ke dashboard...');
-            setTimeout(() => window.location.href = '/dashboard', 1500);
-        }
-
-    } catch (error) {
-        console.error('Login error:', error);
-        showError('Terjadi kesalahan pada server.');
-    }
-});
-
 
         // Demo notifications (can be removed in production)
         document.addEventListener('DOMContentLoaded', function() {

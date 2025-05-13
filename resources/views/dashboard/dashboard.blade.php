@@ -214,7 +214,7 @@
         // Make API request
         fetch(`http://127.0.0.1:8000/api/reports/dashboard-summary/1?start_date=${startDate}&end_date=${endDate}`, {
             headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 'Accept': 'application/json'
                 
             }
@@ -242,79 +242,79 @@
     }
     
     // Function to use dummy data when API is unavailable
-    function useDummyData() {
-        console.log('Using dummy data instead');
+    // function useDummyData() {
+    //     console.log('Using dummy data instead');
         
-        // Dummy data matching expected API response format
-        const dummyData = {
-            "outlet": "Kifa Bakery Pusat",
-            "cash": "85413.00",
-            "period": {
-                "start_date": "2025-04-30",
-                "end_date": "2025-05-13"
-            },
-            "summary": {
-                "total_sales": 85413,
-                "total_orders": 5,
-                "total_items": "20",
-                "average_order_value": 42706.5
-            },
-            "sales": {
-                "current_period": 85413,
-                "previous_period": 0,
-                "change_percentage": 100,
-                "this_month": "85413.00",
-                "last_month": 0,
-                "monthly_change_percentage": 100
-            },
-            "daily_sales": {
-                "2025-04-30": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
-                "2025-05-01": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
-                "2025-05-02": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
-                "2025-05-03": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
-                "2025-05-04": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
-                "2025-05-05": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
-                "2025-05-06": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
-                "2025-05-07": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
-                "2025-05-08": { "orders": 2, "sales": 85413, "items": 12, "average_order": 42706.5 },
-                "2025-05-09": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
-                "2025-05-10": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
-                "2025-05-11": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
-                "2025-05-12": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
-                "2025-05-13": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 }
-            },
-            "top_products": [
-                {
-                    "name": "Roti Unyil",
-                    "quantity": "7",
-                    "total": "41223.00"
-                },
-                {
-                    "name": "Roti Tawar Original",
-                    "quantity": "5",
-                    "total": "44190.00"
-                },
-                {
-                    "name": "Bolu Gulung Pandan Ekonomis",
-                    "quantity": "3",
-                    "total": "45000.00"
-                },
-                {
-                    "name": "Bolu Gulung Coklat Ekonomis",
-                    "quantity": "2",
-                    "total": "30000.00"
-                },
-                {
-                    "name": "Bolu Gulung Tiramisu Ekonomis",
-                    "quantity": "6",
-                    "total": "30000.00"
-                }
-            ]
-        };
+    //     // Dummy data matching expected API response format
+    //     const dummyData = {
+    //         "outlet": "Kifa Bakery Pusat",
+    //         "cash": "85413.00",
+    //         "period": {
+    //             "start_date": "2025-04-30",
+    //             "end_date": "2025-05-13"
+    //         },
+    //         "summary": {
+    //             "total_sales": 85413,
+    //             "total_orders": 5,
+    //             "total_items": "20",
+    //             "average_order_value": 42706.5
+    //         },
+    //         "sales": {
+    //             "current_period": 85413,
+    //             "previous_period": 0,
+    //             "change_percentage": 100,
+    //             "this_month": "85413.00",
+    //             "last_month": 0,
+    //             "monthly_change_percentage": 100
+    //         },
+    //         "daily_sales": {
+    //             "2025-04-30": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
+    //             "2025-05-01": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
+    //             "2025-05-02": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
+    //             "2025-05-03": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
+    //             "2025-05-04": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
+    //             "2025-05-05": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
+    //             "2025-05-06": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
+    //             "2025-05-07": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
+    //             "2025-05-08": { "orders": 2, "sales": 85413, "items": 12, "average_order": 42706.5 },
+    //             "2025-05-09": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
+    //             "2025-05-10": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
+    //             "2025-05-11": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
+    //             "2025-05-12": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
+    //             "2025-05-13": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 }
+    //         },
+    //         "top_products": [
+    //             {
+    //                 "name": "Roti Unyil",
+    //                 "quantity": "7",
+    //                 "total": "41223.00"
+    //             },
+    //             {
+    //                 "name": "Roti Tawar Original",
+    //                 "quantity": "5",
+    //                 "total": "44190.00"
+    //             },
+    //             {
+    //                 "name": "Bolu Gulung Pandan Ekonomis",
+    //                 "quantity": "3",
+    //                 "total": "45000.00"
+    //             },
+    //             {
+    //                 "name": "Bolu Gulung Coklat Ekonomis",
+    //                 "quantity": "2",
+    //                 "total": "30000.00"
+    //             },
+    //             {
+    //                 "name": "Bolu Gulung Tiramisu Ekonomis",
+    //                 "quantity": "6",
+    //                 "total": "30000.00"
+    //             }
+    //         ]
+    //     };
         
-        // Update dashboard with dummy data
-        updateDashboard(dummyData);
-    }
+    //     // Update dashboard with dummy data
+    //     updateDashboard(dummyData);
+    // }
     
     // Function to update dashboard with API data
     function updateDashboard(data) {
@@ -542,9 +542,9 @@
                 
                 // Highlight selected range
                 if (startDate && endDate && currentDay >= startDate && currentDay <= endDate) {
-                    day.className += ' bg-blue-100 text-blue-600';
+                    day.className += ' bg-orange-100 text-orange-600';
                 } else if (startDate && !endDate && currentDay.getTime() === startDate.getTime()) {
-                    day.className += ' bg-blue-600 text-white';
+                    day.className += ' bg-orange-600 text-white';
                 }
                 
                 day.addEventListener('click', function() {
