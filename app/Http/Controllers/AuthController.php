@@ -81,6 +81,45 @@ class AuthController extends Controller
         return $this->successResponse($data, 'Login success');
     }
 
+    // public function login(Request $request)
+    // {
+    //     $credentials = $request->validate([
+    //         'email' => 'required|email',
+    //         'password' => 'required',
+    //     ]);
+
+    //     if (Auth::attempt($credentials, $request->remember)) {
+    //         $user = Auth::user();
+    //         $token = $user->createToken('auth_token')->plainTextToken;
+            
+    //         // Check if user has a valid role
+    //         $validRoles = ['admin', 'manajer', 'kasir'];
+            
+    //         if (!in_array($user->role, $validRoles)) {
+    //             Auth::logout();
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Anda tidak memiliki akses yang diperlukan',
+    //             ], 403);
+    //         }
+            
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Login berhasil',
+    //             'data' => [
+    //                 'token' => $token,
+    //                 'user' => $user,
+    //                 'role' => $user->role
+    //             ]
+    //         ]);
+    //     }
+
+    //     return response()->json([
+    //         'success' => false,
+    //         'message' => 'Email atau password salah',
+    //     ], 401);
+    // }
+
     /**
      * Get authenticated user info
      * 

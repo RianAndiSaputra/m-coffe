@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
 // Route::get('/', function () {
 //     return response('IT Solution');
@@ -10,9 +11,13 @@ Route::get('/', function () {
     return view('auth.login');
 })->name('login');
 
-Route::get('/dashboard', function () {
-    return view('dashboard.dashboard');
-})->name('dashboard');
+Route::post('/login', [AuthController::class, 'login']);
+    
+    Route::middleware('auth')->group(function(){
+        Route::get('/dashboard', function () {
+            return view('dashboard.dashboard');
+        })->name('dashboard')->middleware('role:admin,manajer');
+    });
 
 Route::get('/outlet', function () {
     return view('dashboard.outlet.daftar-outlet');
