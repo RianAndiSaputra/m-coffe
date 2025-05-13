@@ -78,3 +78,26 @@ Route::get('/riwayat-kas', function () {
 Route::get('/riwayat-transaksi', function () {
     return view('dashboard.closing.riwayat-transaksi');
 })->name('riwayat-transaksi');
+
+Route::get('/stok', function () {
+    return view('dashboard.laporan.stok');
+})->name('stok');
+
+Route::get('/laporan-riwayat-stok', function () {
+    return view('dashboard.laporan.riwayat-stok');
+})->name('riwayat-stok');
+
+Route::get('/laporan-approve', function () {
+    return view('dashboard.laporan.approve');
+})->name('approve');
+
+Route::get('/template-print', function () {
+    return view('dashboard.pengaturan.template-print');
+})->name('template-print');
+
+Route::get('/staff', function () {
+    return view('dashboard.user.staff');
+})->name('staff');
+Route::get('/pos', function () {
+    return view('pos.index');
+})->name('index');

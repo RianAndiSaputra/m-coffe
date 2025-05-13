@@ -175,11 +175,11 @@
                 <i data-lucide="chevron-down" class="w-4 h-4 text-black transition-transform sidebar-text sidebar-dropdown-arrow group-hover:text-black" id="closingDropdownArrow"></i>
             </div>
             <div id="closingDropdown" class="hidden pl-8 mt-2 sidebar-dropdown">
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
+                <a href="/riwayat-kas" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="wallet" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Riwayat Kas</span>
                 </a>
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
+                <a href="/riwayat-transaksi" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="receipt" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Riwayat Transaksi</span>
                 </a>
@@ -216,11 +216,11 @@
                     <i data-lucide="package" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Stock</span>
                 </a>
-                <a href="/riwayat-stok" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
+                <a href="/laporan-riwayat-stok" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="history" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Riwayat Stok</span>
                 </a>
-                <a href="/approve" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
+                <a href="/laporan-approve" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="check-circle" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Approve</span>
                 </a>
@@ -237,7 +237,7 @@
                 <i data-lucide="chevron-down" class="w-4 h-4 text-black transition-transform sidebar-text sidebar-dropdown-arrow group-hover:text-black" id="settingsDropdownArrow"></i>
             </div>
             <div id="settingsDropdown" class="hidden pl-8 mt-2 sidebar-dropdown">
-                <a href="#" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
+                <a href="/template-print" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
                     <i data-lucide="printer" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
                     <span class="sidebar-text">Template Print</span>
                 </a>
