@@ -1,109 +1,188 @@
-<div id="tambahMemberModal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-    <div
-      class="bg-white rounded-md shadow-lg w-[360px] p-6 relative font-sans"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-    >
-      <button
-        onclick="closeModal('tambahMemberModal')"
-        aria-label="Close"
-        class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none"
-      >
-        <i class="fas fa-times text-sm"></i>
-      </button>
-      <h2
-        id="modal-title"
-        class="font-semibold text-black text-base leading-5 mb-1"
-      >
-        Tambah Member Baru
-      </h2>
-      <p class="text-gray-500 text-xs leading-4 mb-5">
-        Tambahkan member baru dengan mengisi detail di bawah ini.
-      </p>
-      <form class="space-y-3">
-        <div class="flex items-center">
-          <label
-            for="nama"
-            class="w-24 text-xs text-black font-normal leading-4"
-            >Nama</label
-          >
-          <input
-            id="nama"
-            type="text"
-            placeholder="Nama member"
-            class="flex-1 border border-gray-300 rounded-md text-xs text-gray-400 placeholder-gray-400 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
-          />
+<div id="modalTambahMember" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center" onclick="closeModalTambah()">
+  <div class="bg-white w-full max-w-md rounded-xl shadow-lg max-h-screen flex flex-col" onclick="event.stopPropagation()">
+    
+    <!-- Header -->
+    <div class="p-6 border-b">
+      <h2 class="text-xl font-semibold">Tambah Member Baru</h2>
+      <p class="text-sm text-gray-500">Tambahkan member baru dengan mengisi detail di bawah ini.</p>
+    </div>
+
+    <!-- Scrollable Content -->
+    <div class="overflow-y-auto p-6 space-y-4 flex-1">
+      <form id="formTambahMember">
+        <!-- Nama -->
+        <div>
+          <label class="block font-medium mb-1">Nama <span class="text-red-500">*</span></label>
+          <input type="text" id="namaMember" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Nama member" required>
+          <p id="errorNama" class="text-red-500 text-xs mt-1 hidden">Nama member wajib diisi</p>
         </div>
-        <div class="flex items-center">
-          <label
-            for="telp"
-            class="w-24 text-xs text-black font-normal leading-4"
-            >Telp</label
-          >
-          <input
-            id="telp"
-            type="text"
-            placeholder="No. telp member"
-            class="flex-1 border border-gray-300 rounded-md text-xs text-gray-400 placeholder-gray-400 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
-          />
+
+        <!-- Telepon -->
+        <div>
+          <label class="block font-medium mb-1">Telp <span class="text-red-500">*</span></label>
+          <input type="text" id="teleponMember" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="No. telp member" required>
+          <p id="errorTelepon" class="text-red-500 text-xs mt-1 hidden">Nomor telepon wajib diisi</p>
         </div>
-        <div class="flex items-center">
-          <label
-            for="email"
-            class="w-24 text-xs text-black font-normal leading-4"
-            >Email</label
-          >
-          <input
-            id="email"
-            type="email"
-            placeholder="Email member (opsional)"
-            class="flex-1 border border-gray-300 rounded-md text-xs text-gray-400 placeholder-gray-400 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
-          />
+
+        <!-- Email -->
+        <div>
+          <label class="block font-medium mb-1">Email</label>
+          <input type="email" id="emailMember" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Email member (opsional)">
+          <p id="errorEmail" class="text-red-500 text-xs mt-1 hidden">Format email tidak valid</p>
         </div>
-        <div class="flex items-center">
-          <label
-            for="alamat"
-            class="w-24 text-xs text-black font-normal leading-4"
-            >Alamat</label
-          >
-          <input
-            id="alamat"
-            type="text"
-            placeholder="Alamat member (opsional)"
-            class="flex-1 border border-gray-300 rounded-md text-xs text-gray-400 placeholder-gray-400 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
-          />
+
+        <!-- Alamat -->
+        <div>
+          <label class="block font-medium mb-1">Alamat</label>
+          <textarea id="alamatMember" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Alamat member (opsional)"></textarea>
         </div>
-        <div class="flex items-center">
-          <label
-            for="gender"
-            class="w-24 text-xs text-black font-normal leading-4"
-            >Jenis Kelamin</label
-          >
-          <select
-            id="gender"
-            class="flex-1 border border-orange-500 rounded-md text-xs text-black px-3 py-2 focus:outline-none"
-          >
-            <option selected disabled>Pilih gender</option>
-            <option>Laki-laki</option>
-            <option>Perempuan</option>
+
+        <!-- Jenis Kelamin -->
+        <div>
+          <label class="block font-medium mb-1">Jenis Kelamin <span class="text-red-500">*</span></label>
+          <select id="jenisKelamin" class="w-full border rounded-lg px-4 py-2 text-sm" required>
+            <option value="">Pilih gender</option>
+            <option value="Laki-laki">Laki-laki</option>
+            <option value="Perempuan">Perempuan</option>
           </select>
-        </div>
-        <div class="flex justify-end space-x-3 mt-5">
-          <button
-            type="button"
-            onclick="closeModal('tambahMemberModal')"
-            class="text-xs text-black font-normal leading-4 px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-100 focus:outline-none"
-          >
-            Batal
-          </button>
-          <button
-            type="submit"
-            class="text-xs font-semibold leading-4 px-4 py-2 rounded-md bg-orange-500 text-white hover:bg-orange-600 focus:outline-none"
-          >
-            Simpan
-          </button>
+          <p id="errorJenisKelamin" class="text-red-500 text-xs mt-1 hidden">Jenis kelamin wajib dipilih</p>
         </div>
       </form>
     </div>
+
+    <!-- Footer -->
+    <div class="p-6 border-t flex justify-end gap-3">
+      <button id="btnBatalModalTambah" class="px-4 py-2 border rounded hover:bg-gray-100">Batal</button>
+      <button id="btnTambahMember" class="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 flex items-center gap-2">
+        <i data-lucide="plus" class="w-4 h-4"></i>
+        <span>Simpan</span>
+      </button>
+    </div>
   </div>
+</div>
+
+<script>
+// Fungsi untuk validasi form
+function validateForm() {
+  let isValid = true;
+  
+  // Validasi nama member
+  const namaMember = document.getElementById('namaMember');
+  const errorNama = document.getElementById('errorNama');
+  if (!namaMember.value.trim()) {
+    errorNama.classList.remove('hidden');
+    namaMember.classList.add('border-red-500');
+    isValid = false;
+  } else {
+    errorNama.classList.add('hidden');
+    namaMember.classList.remove('border-red-500');
+  }
+  
+  // Validasi telepon
+  const teleponMember = document.getElementById('teleponMember');
+  const errorTelepon = document.getElementById('errorTelepon');
+  if (!teleponMember.value.trim()) {
+    errorTelepon.classList.remove('hidden');
+    teleponMember.classList.add('border-red-500');
+    isValid = false;
+  } else {
+    errorTelepon.classList.add('hidden');
+    teleponMember.classList.remove('border-red-500');
+  }
+  
+  // Validasi email (jika diisi)
+  const emailMember = document.getElementById('emailMember');
+  const errorEmail = document.getElementById('errorEmail');
+  if (emailMember.value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailMember.value)) {
+    errorEmail.classList.remove('hidden');
+    emailMember.classList.add('border-red-500');
+    isValid = false;
+  } else {
+    errorEmail.classList.add('hidden');
+    emailMember.classList.remove('border-red-500');
+  }
+  
+  // Validasi jenis kelamin
+  const jenisKelamin = document.getElementById('jenisKelamin');
+  const errorJenisKelamin = document.getElementById('errorJenisKelamin');
+  if (!jenisKelamin.value) {
+    errorJenisKelamin.classList.remove('hidden');
+    jenisKelamin.classList.add('border-red-500');
+    isValid = false;
+  } else {
+    errorJenisKelamin.classList.add('hidden');
+    jenisKelamin.classList.remove('border-red-500');
+  }
+  
+  return isValid;
+}
+
+// Fungsi untuk reset form
+function resetForm() {
+  document.getElementById('namaMember').value = '';
+  document.getElementById('teleponMember').value = '';
+  document.getElementById('emailMember').value = '';
+  document.getElementById('alamatMember').value = '';
+  document.getElementById('jenisKelamin').value = '';
+  
+  // Reset error messages
+  document.querySelectorAll('[id^="error"]').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.border-red-500').forEach(el => el.classList.remove('border-red-500'));
+}
+
+// Fungsi untuk submit form
+function submitForm() {
+  if (!validateForm()) {
+    return;
+  }
+  
+  // Simulasi loading
+  const btnTambah = document.getElementById('btnTambahMember');
+  const originalText = btnTambah.innerHTML;
+  btnTambah.innerHTML = `
+    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+    Menyimpan...
+  `;
+  btnTambah.disabled = true;
+  
+  // Simulasi AJAX request (di production, ganti dengan fetch/axios)
+  setTimeout(() => {
+    // Ambil nilai dari form
+    const formData = {
+      nama: document.getElementById('namaMember').value,
+      telepon: document.getElementById('teleponMember').value,
+      email: document.getElementById('emailMember').value,
+      alamat: document.getElementById('alamatMember').value,
+      jenis_kelamin: document.getElementById('jenisKelamin').value
+    };
+    
+    console.log('Data member yang akan dikirim:', formData);
+    
+    // Reset form dan tutup modal
+    resetForm();
+    closeModalTambah();
+    
+    // Tampilkan alert sukses
+    showAlert('success', 'Member baru berhasil ditambahkan!');
+    
+    // Kembalikan tombol ke state semula
+    btnTambah.innerHTML = originalText;
+    btnTambah.disabled = false;
+  }, 1500);
+}
+
+// Event listener untuk tombol tambah
+document.getElementById('btnTambahMember').addEventListener('click', submitForm);
+
+// Event listener untuk form (submit saat tekan enter)
+document.querySelectorAll('#modalTambahMember input').forEach(input => {
+  input.addEventListener('keypress', e => {
+    if (e.key === 'Enter') {
+      submitForm();
+    }
+  });
+});
+</script>

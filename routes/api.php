@@ -15,7 +15,6 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShiftController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
     
@@ -25,7 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/validate-token', 'validateToken');
     });
     
-    Route::middleware('role:admin,supervisor')->group(function () {
+    Route::middleware('role:admin,manajer')->group(function () {
         
         Route::controller(AuthController::class)->prefix('user')->group(function () {
             Route::post('/register', 'register')->middleware('role:admin');
@@ -119,7 +118,7 @@ Route::middleware('auth:sanctum')->group(function () {
         });
     }); 
     
-    Route::middleware('role:kasir,admin,supervisor')->group(function () {
+    Route::middleware('role:kasir,admin,manajer')->group(function () {
 
         Route::get('/print-template/{outlet_id}', [PrintTemplateController::class, 'show']);
         Route::post('/update-profile', [AuthController::class, 'updateProfile']);

@@ -33,7 +33,7 @@
                         <div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
                             <i data-lucide="user" class="w-4 h-4 text-orange-700"></i>
                         </div>
-                        <span class="ml-2 text-sm font-medium hidden sm:inline">Admin</span>
+                        {{-- <span class="ml-2 text-sm font-medium hidden sm:inline">{{auth()->users()->name}}</span> --}}
                         <i data-lucide="chevron-down" class="ml-1 w-4 h-4 text-gray-500 hidden sm:inline transition-transform" id="userDropdownArrow"></i>
                     </button>
                 </div>
@@ -42,7 +42,7 @@
                 <div class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 py-1 z-50" id="user-dropdown-menu" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button">
                     <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-all" role="menuitem">Profil Anda</a>
                     <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-all" role="menuitem">Pengaturan</a>
-                    <form method="POST" action="/" id="logout-form">
+                    <form id="logout-form">
                         @csrf
                         <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-all" role="menuitem">
                             Keluar
@@ -84,4 +84,19 @@
             });
         }
     });
+
+    document.getElementById('logout-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        await fetch('/api/logout', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                'Accept': 'application/json'
+            }
+        });
+
+        window.location.href = '/'; // Redirect after logout
+    });
+
 </script>

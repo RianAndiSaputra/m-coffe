@@ -18,8 +18,8 @@
             </svg>
             
             <div>
-                <h2 class="text-lg font-semibold text-gray-800">Kifa Bakery Pusat</h2>
-                <p class="text-sm text-gray-600 mt-1">Data yang ditampilkan adalah untuk outlet Kifa Bakery Pusat.</p>
+                <h2 class="text-lg font-semibold text-gray-800" id="outletName">Loading...</h2>
+                <p class="text-sm text-gray-600 mt-1">Data yang ditampilkan adalah untuk outlet <span id="outletNameText">loading</span>.</p>
             </div>
         </div>
         
@@ -38,7 +38,7 @@
                     <path d="M12 18h.01"/>
                     <path d="M16 18h.01"/>
                 </svg>
-                <span id="dateRangeDisplay" class="text-sm font-medium text-gray-800">10 Mei 2024 - 17 Mei 2024</span>
+                <span id="dateRangeDisplay" class="text-sm font-medium text-gray-800">Loading...</span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down">
                     <path d="m6 9 6 6 6-6"/>
                 </svg>
@@ -52,7 +52,7 @@
                             <path d="m15 18-6-6 6-6"/>
                         </svg>
                     </button>
-                    <h3 id="currentMonthYear" class="font-medium">Mei 2024</h3>
+                    <h3 id="currentMonthYear" class="font-medium">Mei 2025</h3>
                     <button id="nextMonth" class="p-1 rounded-full hover:bg-gray-100">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right">
                             <path d="m9 18 6-6-6-6"/>
@@ -89,10 +89,14 @@
         <div class="flex justify-between items-start">
             <div>
                 <p class="text-sm text-gray-500">Total Penjualan</p>
-                <p class="text-xl font-bold">Rp 167.500</p>
+                <p class="text-xl font-bold" id="totalSales">Loading...</p>
             </div>
             <div class="bg-orange-100 p-2 rounded-lg">
-                <i data-lucide="shopping-bag" class="w-5 h-5 text-orange-500"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-orange-500">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
             </div>
         </div>
     </div>
@@ -102,10 +106,13 @@
         <div class="flex justify-between items-start">
             <div>
                 <p class="text-sm text-gray-500">Transaksi</p>
-                <p class="text-xl font-bold">5</p>
+                <p class="text-xl font-bold" id="totalOrders">Loading...</p>
             </div>
             <div class="bg-blue-100 p-2 rounded-lg">
-                <i data-lucide="credit-card" class="w-5 h-5 text-blue-500"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500">
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                    <line x1="1" y1="10" x2="23" y2="10"></line>
+                </svg>
             </div>
         </div>
     </div>
@@ -115,23 +122,30 @@
         <div class="flex justify-between items-start">
             <div>
                 <p class="text-sm text-gray-500">Total Item Terjual</p>
-                <p class="text-xl font-bold">20 Item</p>
+                <p class="text-xl font-bold" id="totalItems">Loading...</p>
             </div>
             <div class="bg-green-100 p-2 rounded-lg">
-                <i data-lucide="package" class="w-5 h-5 text-green-500"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-500">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
             </div>
         </div>
     </div>
     
-    <!-- Total Kas Kasir -->
+    <!-- Average Order Value -->
     <div class="bg-white rounded-lg p-4 card-shadow">
         <div class="flex justify-between items-start">
             <div>
-                <p class="text-sm text-gray-500">Total Kas Kasir</p>
-                <p class="text-xl font-bold">Rp 167.500</p>
+                <p class="text-sm text-gray-500">Rata-rata Nilai Order</p>
+                <p class="text-xl font-bold" id="averageOrder">Loading...</p>
             </div>
             <div class="bg-purple-100 p-2 rounded-lg">
-                <i data-lucide="dollar-sign" class="w-5 h-5 text-purple-500"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-500">
+                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
             </div>
         </div>
     </div>
@@ -144,8 +158,8 @@
     <!-- Overview with Bar Chart -->
     <div class="bg-white rounded-lg p-4 card-shadow mb-6">
         <h3 class="font-semibold text-gray-800 mb-4">Overview</h3>
-        <p class="text-sm text-gray-600 mb-2">Data penjualan untuk Kifa Bakery Pusat</p>
-        <p class="text-xl font-bold text-orange-500 mb-4">Rp 160k</p>
+        <p class="text-sm text-gray-600 mb-2">Data penjualan untuk <span class="outlet-name">loading</span></p>
+        <p class="text-xl font-bold text-orange-500 mb-4" id="totalSalesOverview">Loading...</p>
         
         <!-- Bar Chart Container -->
         <div class="relative h-64">
@@ -159,52 +173,16 @@
         <!-- Penjualan Terlaris -->
         <div class="bg-white rounded-lg p-4 card-shadow">
             <h3 class="font-semibold text-gray-800 mb-4">Penjualan Terlaris</h3>
-            <p class="text-sm text-gray-600 mb-2">5 produk terlaris</p>
+            <p class="text-sm text-gray-600 mb-2">Produk terlaris</p>
             
-            <div class="space-y-3">
-                <!-- Product 1 -->
+            <div class="space-y-3" id="topProductsList">
+                <!-- Top products will be inserted here -->
                 <div class="flex justify-between items-center">
                     <div>
-                        <p class="font-medium">Roti Unyil</p>
-                        <p class="text-sm text-gray-500">Qty: 5</p>
+                        <p class="font-medium">Loading...</p>
+                        <p class="text-sm text-gray-500">Qty: -</p>
                     </div>
-                    <p class="font-bold text-orange-500">Rp 10.000</p>
-                </div>
-                
-                <!-- Product 2 -->
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="font-medium">Roti Tawar Original</p>
-                        <p class="text-sm text-gray-500">Qty: 4</p>
-                    </div>
-                    <p class="font-bold text-orange-500">Rp 26.000</p>
-                </div>
-                
-                <!-- Product 3 -->
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="font-medium">Bolu Gulung Pandan Ekonomis</p>
-                        <p class="text-sm text-gray-500">Qty: 3</p>
-                    </div>
-                    <p class="font-bold text-orange-500">Rp 45.000</p>
-                </div>
-                
-                <!-- Product 4 -->
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="font-medium">Bolu Gulung Coklat Ekonomis</p>
-                        <p class="text-sm text-gray-500">Qty: 2</p>
-                    </div>
-                    <p class="font-bold text-orange-500">Rp 30.000</p>
-                </div>
-                
-                <!-- Product 5 -->
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="font-medium">Bolu Gulung Tiramisu Ekonomis</p>
-                        <p class="text-sm text-gray-500">Qty: 6</p>
-                    </div>
-                    <p class="font-bold text-orange-500">Rp 30.000</p>
+                    <p class="font-bold text-orange-500">Rp -</p>
                 </div>
             </div>
         </div>
@@ -214,17 +192,234 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM fully loaded. Initializing dashboard...');
+        
+        // Fetch dashboard data from API
+        fetchDashboardData();
+        
+        // Date Range Picker Functionality
+        initDatePicker();
+    });
+    
+    // Function to fetch dashboard data
+    function fetchDashboardData() {
+        // Get current date range from URL or use default
+        const urlParams = new URLSearchParams(window.location.search);
+        const startDate = urlParams.get('start_date') || '2025-04-30';
+        const endDate = urlParams.get('end_date') || '2025-05-13';
+        
+        // Update date display
+        updateDateDisplay(startDate, endDate);
+        
+        // Make API request
+        fetch(`http://127.0.0.1:8000/api/reports/dashboard-summary/1?start_date=${startDate}&end_date=${endDate}`, {
+            headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Accept': 'application/json'
+                
+            }
+        })
+            .then(response => {
+                // Check if response is ok
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    updateDashboard(data.data);
+                } else {
+                    console.error('Error fetching dashboard data:', data.message);
+                    useDummyData();
+                }
+            })
+            .catch(error => {
+                console.error('Failed to fetch dashboard data:', error);
+                // Use dummy data if API call fails
+                useDummyData();
+            });
+    }
+    
+    // Function to use dummy data when API is unavailable
+    function useDummyData() {
+        console.log('Using dummy data instead');
+        
+        // Dummy data matching expected API response format
+        const dummyData = {
+            "outlet": "Kifa Bakery Pusat",
+            "cash": "85413.00",
+            "period": {
+                "start_date": "2025-04-30",
+                "end_date": "2025-05-13"
+            },
+            "summary": {
+                "total_sales": 85413,
+                "total_orders": 5,
+                "total_items": "20",
+                "average_order_value": 42706.5
+            },
+            "sales": {
+                "current_period": 85413,
+                "previous_period": 0,
+                "change_percentage": 100,
+                "this_month": "85413.00",
+                "last_month": 0,
+                "monthly_change_percentage": 100
+            },
+            "daily_sales": {
+                "2025-04-30": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
+                "2025-05-01": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
+                "2025-05-02": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
+                "2025-05-03": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
+                "2025-05-04": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
+                "2025-05-05": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
+                "2025-05-06": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
+                "2025-05-07": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
+                "2025-05-08": { "orders": 2, "sales": 85413, "items": 12, "average_order": 42706.5 },
+                "2025-05-09": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
+                "2025-05-10": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
+                "2025-05-11": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
+                "2025-05-12": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
+                "2025-05-13": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 }
+            },
+            "top_products": [
+                {
+                    "name": "Roti Unyil",
+                    "quantity": "7",
+                    "total": "41223.00"
+                },
+                {
+                    "name": "Roti Tawar Original",
+                    "quantity": "5",
+                    "total": "44190.00"
+                },
+                {
+                    "name": "Bolu Gulung Pandan Ekonomis",
+                    "quantity": "3",
+                    "total": "45000.00"
+                },
+                {
+                    "name": "Bolu Gulung Coklat Ekonomis",
+                    "quantity": "2",
+                    "total": "30000.00"
+                },
+                {
+                    "name": "Bolu Gulung Tiramisu Ekonomis",
+                    "quantity": "6",
+                    "total": "30000.00"
+                }
+            ]
+        };
+        
+        // Update dashboard with dummy data
+        updateDashboard(dummyData);
+    }
+    
+    // Function to update dashboard with API data
+    function updateDashboard(data) {
+        // Update outlet info
+        document.getElementById('outletName').textContent = data.outlet;
+        document.getElementById('outletNameText').textContent = data.outlet;
+        document.querySelectorAll('.outlet-name').forEach(el => {
+            el.textContent = data.outlet;
+        });
+        
+        // Update summary stats
+        document.getElementById('totalSales').textContent = formatCurrency(data.summary.total_sales);
+        document.getElementById('totalOrders').textContent = data.summary.total_orders;
+        document.getElementById('totalItems').textContent = data.summary.total_items + ' Item';
+        document.getElementById('averageOrder').textContent = formatCurrency(data.summary.average_order_value);
+        document.getElementById('totalSalesOverview').textContent = formatCurrency(data.sales.current_period);
+        
+        // Update top products
+        updateTopProducts(data.top_products);
+        
+        // Update chart
+        updateSalesChart(data.daily_sales);
+    }
+    
+    // Format currency as IDR
+    function formatCurrency(value) {
+        return 'Rp ' + parseFloat(value).toLocaleString('id-ID');
+    }
+    
+    // Format date for display
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const day = date.getDate();
+        const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+                           'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        const month = monthNames[date.getMonth()];
+        const year = date.getFullYear();
+        
+        return `${day} ${month} ${year}`;
+    }
+    
+    // Update date display
+    function updateDateDisplay(startDate, endDate) {
+        const formattedStartDate = formatDate(startDate);
+        const formattedEndDate = formatDate(endDate);
+        document.getElementById('dateRangeDisplay').textContent = `${formattedStartDate} - ${formattedEndDate}`;
+    }
+    
+    // Update top products list
+    function updateTopProducts(products) {
+        const container = document.getElementById('topProductsList');
+        container.innerHTML = '';
+        
+        if (products.length === 0) {
+            container.innerHTML = `
+                <div class="flex justify-center items-center py-4">
+                    <p class="text-gray-500">Tidak ada produk terjual dalam periode ini</p>
+                </div>
+            `;
+            return;
+        }
+        
+        products.forEach(product => {
+            const productElement = document.createElement('div');
+            productElement.className = 'flex justify-between items-center';
+            productElement.innerHTML = `
+                <div>
+                    <p class="font-medium">${product.name}</p>
+                    <p class="text-sm text-gray-500">Qty: ${product.quantity}</p>
+                </div>
+                <p class="font-bold text-orange-500">${formatCurrency(product.total)}</p>
+            `;
+            container.appendChild(productElement);
+        });
+    }
+    
+    // Update sales chart
+    function updateSalesChart(dailySales) {
         // Get the canvas element
         const ctx = document.getElementById('salesChart').getContext('2d');
         
+        // If there's an existing chart, destroy it
+        if (window.salesChartInstance) {
+            window.salesChartInstance.destroy();
+        }
+        
+        // Extract dates and sales values
+        const dates = Object.keys(dailySales).sort();
+        const salesData = dates.map(date => dailySales[date].sales);
+        
+        // Format dates for display
+        const formattedDates = dates.map(date => {
+            const d = new Date(date);
+            const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+            return dayNames[d.getDay()] + ', ' + d.getDate();
+        });
+        
         // Create the bar chart
-        const salesChart = new Chart(ctx, {
+        window.salesChartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
+                labels: formattedDates,
                 datasets: [{
                     label: 'Penjualan (Rp)',
-                    data: [120, 140, 160, 130, 180, 200, 220], // Example weekly data
+                    data: salesData,
                     backgroundColor: 'rgba(249, 115, 22, 0.7)', // Orange color with transparency
                     borderColor: 'rgba(249, 115, 22, 1)', // Solid orange for border
                     borderWidth: 1
@@ -238,7 +433,10 @@
                         beginAtZero: true,
                         ticks: {
                             callback: function(value) {
-                                return 'Rp ' + value + 'k';
+                                if (value >= 1000) {
+                                    return 'Rp ' + (value / 1000) + 'k';
+                                }
+                                return 'Rp ' + value;
                             }
                         }
                     }
@@ -247,30 +445,44 @@
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                return 'Rp ' + context.raw + 'k';
+                                return 'Rp ' + context.raw.toLocaleString('id-ID');
                             }
                         }
                     }
                 }
             }
         });
-    });
-
-  // Date Range Picker Functionality
-    document.addEventListener('DOMContentLoaded', function() {
+    }
+    
+    // Initialize date picker
+    function initDatePicker() {
         const dateRangeButton = document.getElementById('dateRangeButton');
         const datePickerDropdown = document.getElementById('datePickerDropdown');
         const currentMonthYear = document.getElementById('currentMonthYear');
         const calendarDays = document.getElementById('calendarDays');
         const prevMonth = document.getElementById('prevMonth');
         const nextMonth = document.getElementById('nextMonth');
-        const dateRangeDisplay = document.getElementById('dateRangeDisplay');
         const cancelDateRange = document.getElementById('cancelDateRange');
         const applyDateRange = document.getElementById('applyDateRange');
         
         let currentDate = new Date();
         let startDate = null;
         let endDate = null;
+        
+        // Get current date range from URL or use default
+        const urlParams = new URLSearchParams(window.location.search);
+        const startDateParam = urlParams.get('start_date');
+        const endDateParam = urlParams.get('end_date');
+        
+        if (startDateParam && endDateParam) {
+            startDate = new Date(startDateParam);
+            endDate = new Date(endDateParam);
+        } else {
+            // Default to two weeks
+            startDate = new Date();
+            endDate = new Date();
+            endDate.setDate(startDate.getDate() + 14);
+        }
         
         // Toggle dropdown
         dateRangeButton.addEventListener('click', function() {
@@ -304,7 +516,10 @@
             const firstDay = new Date(year, month, 1);
             const lastDay = new Date(year, month + 1, 0);
             const daysInMonth = lastDay.getDate();
-            const startingDay = firstDay.getDay();
+            
+            // Adjust for Indonesian calendar (Monday = 0)
+            let startingDay = firstDay.getDay() - 1;
+            if (startingDay < 0) startingDay = 6; // Sunday becomes 6
             
             calendarDays.innerHTML = '';
             
@@ -320,7 +535,7 @@
             // Current month's days
             for (let i = 1; i <= daysInMonth; i++) {
                 const day = document.createElement('div');
-                day.className = 'p-1 rounded-full cursor-pointer hover:bg-gray-100';
+                day.className = 'p-1 rounded-full cursor-pointer hover:bg-gray-100 text-center';
                 day.textContent = i;
                 
                 const currentDay = new Date(year, month, i);
@@ -344,7 +559,7 @@
             const remainingCells = 42 - totalCells; // 6 weeks
             for (let i = 1; i <= remainingCells; i++) {
                 const day = document.createElement('div');
-                day.className = 'text-gray-400 p-1';
+                day.className = 'text-gray-400 p-1 text-center';
                 day.textContent = i;
                 calendarDays.appendChild(day);
             }
@@ -363,43 +578,33 @@
             }
             
             renderCalendar(currentDate);
-            
-            if (startDate && endDate) {
-                dateRangeDisplay.textContent = 
-                    `${startDate.getDate()} ${formatMonth(startDate.getMonth())} ${startDate.getFullYear()} - ` +
-                    `${endDate.getDate()} ${formatMonth(endDate.getMonth())} ${endDate.getFullYear()}`;
-            }
-        }
-        
-        // Format month name
-        function formatMonth(month) {
-            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
-                            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-            return months[month];
         }
         
         // Apply date range
         applyDateRange.addEventListener('click', function() {
+            if (startDate && endDate) {
+                const formattedStartDate = formatYMD(startDate);
+                const formattedEndDate = formatYMD(endDate);
+                
+                // Update URL and reload page
+                window.location.href = `?start_date=${formattedStartDate}&end_date=${formattedEndDate}`;
+            }
+            
             datePickerDropdown.classList.add('hidden');
-            // Here you would typically refresh data based on the selected range
         });
+        
+        // Format date as YYYY-MM-DD
+        function formatYMD(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
         
         // Cancel selection
         cancelDateRange.addEventListener('click', function() {
             datePickerDropdown.classList.add('hidden');
         });
-        
-        // Initialize with default range (today to +7 days)
-        const today = new Date();
-        const nextWeek = new Date();
-        nextWeek.setDate(today.getDate() + 7);
-        
-        startDate = today;
-        endDate = nextWeek;
-        
-        dateRangeDisplay.textContent = 
-            `${today.getDate()} ${formatMonth(today.getMonth())} ${today.getFullYear()} - ` +
-            `${nextWeek.getDate()} ${formatMonth(nextWeek.getMonth())} ${nextWeek.getFullYear()}`;
-    });  
+    }
 </script>
 @endsection

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kifa Bakery - Login</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -86,7 +87,7 @@
                 <p class="text-gray-500 text-center mt-2">Masukkan kredensial Anda untuk mengakses sistem</p>
             </div>
 
-            <form method="POST" action="{{ route('login') }}" id="loginForm">
+            <form id="loginForm">
                 @csrf
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="email">Email</label>
@@ -216,28 +217,46 @@
             showNotification('success', message);
         }
 
-        // Form submission (for demo purposes)
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            if (!email || !password) {
-                showError('Semua field harus diisi!');
-                return;
-            }
-            
-            // Simulate login validation
-            if (email === "admin@kifa.com" && password === "kifa123") {
-                showSuccess('Login berhasil! Mengarahkan ke dashboard...');
-                // Redirect after 1.5 seconds
-                setTimeout(() => {
-                    window.location.href = '/dashboard';
-                }, 1500);
-            } else {
-                showError('Email atau password salah!');
-            }
+        // Modify the login submission handler in your HTML
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+    e.preventDefault(); // Wajib ada di sini!
+
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    try {
+        const response = await fetch('/login', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({ email, password }),
         });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            return showError(data.message || 'Login gagal.');
+        }
+
+        localStorage.setItem('token', data.data.token);
+        const userRole = data.data.user.role;
+
+        if (userRole === 'kasir') {
+            showSuccess('Login berhasil! Mengarahkan ke POS...');
+            setTimeout(() => window.location.href = '/pos', 1500);
+        } else {
+            showSuccess('Login berhasil! Mengarahkan ke dashboard...');
+            setTimeout(() => window.location.href = '/dashboard', 1500);
+        }
+
+    } catch (error) {
+        console.error('Login error:', error);
+        showError('Terjadi kesalahan pada server.');
+    }
+});
+
 
         // Demo notifications (can be removed in production)
         document.addEventListener('DOMContentLoaded', function() {
