@@ -17,6 +17,10 @@ Route::post('/login', [AuthController::class, 'login']);
         Route::get('/dashboard', function () {
             return view('dashboard.dashboard');
         })->name('dashboard')->middleware('role:admin,manajer');
+
+        Route::get('/pos', function () {
+            return view('pos.index');
+        })->name('index')->middleware('role:kasir');
     });
 
 Route::get('/outlet', function () {
@@ -98,6 +102,4 @@ Route::get('/template-print', function () {
 Route::get('/staff', function () {
     return view('dashboard.user.staff');
 })->name('staff');
-Route::get('/pos', function () {
-    return view('pos.index');
-})->name('index');
+
