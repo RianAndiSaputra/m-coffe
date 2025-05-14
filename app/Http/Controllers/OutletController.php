@@ -151,13 +151,27 @@ class OutletController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Outlet $outlet)
-    {
-        try {
-            $outlet->delete();
-            return $this->successResponse(null, 'Outlet deleted successfully');
-        } catch (\Throwable $th) {
-            return $this->errorResponse('Outlet deletion failed', $th->getMessage());
+public function destroy(Outlet $outlet)
+{
+    try {
+        // Cek outlet ID yang akan dihapus
+        \Log::info('Attempting to delete outlet ID: ' . $outlet->id);
+        
+        $outletId = $outlet->id;
+        $deleted = $outlet->delete();
+
+        if (!$deleted) {
+            \Log::error("Gagal menghapus outlet ID: {$outletId}");
+            return response()->json(['message' => 'Outlet tidak dapat dihapus'], 400);
         }
+
+        \Log::info("Outlet ID: {$outletId} berhasil dihapus");
+        return response()->json(['message' => 'Outlet berhasil dihapus'], 200);
+    } catch (\Throwable $th) {
+        \Log::error("Error saat menghapus outlet: " . $th->getMessage());
+        return response()->json(['message' => 'Gagal menghapus outlet'], 500);
     }
 }
+
+
+ }

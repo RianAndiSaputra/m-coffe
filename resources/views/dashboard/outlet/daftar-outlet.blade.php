@@ -283,50 +283,41 @@
             outletIdToDelete = null;
         }
             //fungsi delete
-           async function hapusOutlet() {
-    if (!outletIdToDelete) return;
-
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-    const token = localStorage.getItem('token');
-
-    const formData = new FormData();
-    formData.append('_method', 'DELETE');
-    formData.append('_token', csrfToken);
-
-    try {
-        const response = await fetch(`/api/outlets/${outletIdToDelete}`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: formData,
-            credentials: 'include'
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.message || 'Gagal menghapus outlet');
+        async function hapusOutlet() {
+            if (!outletIdToDelete) return;
+            
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+            const token = localStorage.getItem('token');
+            
+            try {
+                const response = await fetch(`/api/outlets/${outletIdToDelete}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || 'Gagal menghapus outlet');
+                }
+                
+                showAlert('success', data.message || 'Outlet berhasil dihapus');
+                allOutlets = allOutlets.filter(outlet => outlet.id !== outletIdToDelete);
+                renderOutlets(allOutlets);
+            } catch (error) {
+                console.error('Delete error:', error);
+                showAlert('error', error.message);
+            } finally {
+                closeConfirmDelete();
+            }
         }
-
-        if (data.success) {
-            showAlert('success', data.message || 'Outlet berhasil dihapus');
-            allOutlets = allOutlets.filter(outlet => outlet.id !== outletIdToDelete);
-            renderOutlets(allOutlets);
-        } else {
-            throw new Error(data.message || 'Gagal menghapus outlet');
-        }
-    } catch (error) {
-        console.error('Delete error:', error);
-        showAlert('error', error.message);
-        loadOutlets();
-    } finally {
-        closeConfirmDelete();
-    }
-}
-
         // Fungsi untuk menambahkan outlet baru
         async function tambahOutlet() {
             // Validasi form sebelum submit
