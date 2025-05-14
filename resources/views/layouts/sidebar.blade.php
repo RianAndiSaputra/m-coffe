@@ -158,7 +158,7 @@
                     <i data-lucide="user" class="w-4 h-4 mr-3"></i>
                     <span>Member</span>
                 </a>
-                <a href="#" class="menu-subitem flex items-center py-2 transition-all w-full">
+                <a href="/staff" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="users" class="w-4 h-4 mr-3"></i>
                     <span>Staff</span>
                 </a>
