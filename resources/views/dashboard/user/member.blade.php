@@ -109,35 +109,104 @@
     let allMembers = [];
     let filteredMembers = [];
     const itemsPerPage = 10;
+    let debounceTimer;
+    let alertTimeout;
 
-    document.addEventListener('DOMContentLoaded', function () {
+    // Inisialisasi saat DOM siap
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeLucide();
+        initializeEventListeners();
+        loadMembers();
+    });
+
+    function initializeLucide() {
         if (window.lucide) {
             window.lucide.createIcons();
         }
+    }
 
-        loadMembers();
+    function initializeEventListeners() {
+        // Event listener untuk modal hapus
+        const btnBatalHapus = document.getElementById('btnBatalHapus');
+        const btnKonfirmasiHapus = document.getElementById('btnKonfirmasiHapus');
+        if (btnBatalHapus) btnBatalHapus.addEventListener('click', closeConfirmDelete);
+        if (btnKonfirmasiHapus) btnKonfirmasiHapus.addEventListener('click', hapusMember);
 
-        document.getElementById('btnBatalHapus').addEventListener('click', closeConfirmDelete);
-        document.getElementById('btnKonfirmasiHapus').addEventListener('click', hapusMember);
+        // Event listener untuk pagination
+        const prevPage = document.getElementById('prevPage');
+        const nextPage = document.getElementById('nextPage');
+        if (prevPage) prevPage.addEventListener('click', goToPrevPage);
+        if (nextPage) nextPage.addEventListener('click', goToNextPage);
 
-        document.getElementById('prevPage').addEventListener('click', () => {
-            if (currentPage > 1) {
-                currentPage--;
-                renderMembers();
-            }
-        });
+        // Event listener untuk modal tambah/edit
+        const batalTambah = document.getElementById('btnBatalModalTambah');
+        const batalEdit = document.getElementById('btnBatalModalEdit');
+        if (batalTambah) batalTambah.addEventListener('click', closeModalTambah);
+        if (batalEdit) batalEdit.addEventListener('click', closeModalEdit);
 
-        document.getElementById('nextPage').addEventListener('click', () => {
-            if (currentPage < totalPages) {
-                currentPage++;
-                renderMembers();
-            }
-        });
-    });
+        // Event listener untuk form
+        const formTambah = document.getElementById('formTambahMember');
+        const formEdit = document.getElementById('formEditMember');
+        if (formTambah) formTambah.addEventListener('submit', handleFormSubmit);
+        if (formEdit) formEdit.addEventListener('submit', handleEditSubmit);
+
+        // Event listener untuk pencarian
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', handleSearchInput);
+            searchInput.addEventListener('keypress', handleSearchEnter);
+        }
+    }
+
+    function goToPrevPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            renderMembers();
+        }
+    }
+
+    function goToNextPage() {
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderMembers();
+        }
+    }
+
+    function handleFormSubmit(e) {
+        e.preventDefault();
+        submitForm();
+    }
+
+    function handleEditSubmit(e) {
+        e.preventDefault();
+        submitEditMember(e);
+    }
+
+    function handleSearchInput() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(searchMembers, 300);
+    }
+
+    function handleSearchEnter(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            clearTimeout(debounceTimer);
+            searchMembers();
+        }
+    }
 
     function showAlert(type, message) {
+        // Hapus alert yang sedang aktif
+        clearExistingAlerts();
+        
+        // Hapus timeout sebelumnya jika ada
+        if (alertTimeout) {
+            clearTimeout(alertTimeout);
+        }
+
         const alertContainer = document.getElementById('alertContainer');
-        const alertId = 'alert-' + Date.now();
+        if (!alertContainer) return;
+
         const alertConfig = {
             success: {
                 bgColor: 'bg-orange-50',
@@ -156,6 +225,7 @@
         };
 
         const config = alertConfig[type] || alertConfig.success;
+        const alertId = 'alert-' + Date.now();
 
         const alertElement = document.createElement('div');
         alertElement.id = alertId;
@@ -170,22 +240,41 @@
 
         alertContainer.prepend(alertElement);
         if (window.lucide) window.lucide.createIcons();
-        setTimeout(() => closeAlert(alertId), 5000);
+        
+        // Set timeout untuk auto close
+        alertTimeout = setTimeout(() => closeAlert(alertId), 5000);
+    }
+
+    function clearExistingAlerts() {
+        const alertContainer = document.getElementById('alertContainer');
+        if (!alertContainer) return;
+        
+        const alerts = alertContainer.querySelectorAll('[id^="alert-"]');
+        alerts.forEach(alert => {
+            alert.remove();
+        });
     }
 
     function closeAlert(id) {
         const alert = document.getElementById(id);
         if (alert) {
             alert.classList.add('animate-fade-out');
-            setTimeout(() => alert.remove(), 300);
+            setTimeout(() => {
+                if (alert && alert.parentNode) {
+                    alert.remove();
+                }
+            }, 300);
         }
     }
 
     async function loadMembers() {
         try {
             const token = localStorage.getItem('token');
-            document.getElementById('loadingIndicator').classList.remove('hidden');
-            document.getElementById('memberTableBody').innerHTML = '';
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const memberTableBody = document.getElementById('memberTableBody');
+            
+            if (loadingIndicator) loadingIndicator.classList.remove('hidden');
+            if (memberTableBody) memberTableBody.innerHTML = '';
 
             const response = await fetch('http://127.0.0.1:8000/api/members', {
                 headers: {
@@ -197,7 +286,7 @@
             const data = await response.json();
 
             if (response.ok) {
-                allMembers = data.data;
+                allMembers = data.data || [];
                 filteredMembers = [...allMembers];
                 totalPages = Math.ceil(filteredMembers.length / itemsPerPage);
                 renderMembers();
@@ -205,17 +294,22 @@
                 throw new Error(data.message || 'Gagal memuat data member');
             }
         } catch (error) {
+            console.error('Error loading members:', error);
             showAlert('error', error.message);
         } finally {
-            document.getElementById('loadingIndicator').classList.add('hidden');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            if (loadingIndicator) loadingIndicator.classList.add('hidden');
         }
     }
 
     function renderMembers() {
+        const tableBody = document.getElementById('memberTableBody');
+        if (!tableBody) return;
+
         const startIndex = (currentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
         const paginatedMembers = filteredMembers.slice(startIndex, endIndex);
-        const tableBody = document.getElementById('memberTableBody');
+        
         tableBody.innerHTML = '';
 
         if (paginatedMembers.length === 0) {
@@ -286,27 +380,32 @@
         const prevButton = document.getElementById('prevPage');
         const nextButton = document.getElementById('nextPage');
 
-        pageInfo.textContent = `Halaman ${currentPage} dari ${totalPages}`;
-        prevButton.disabled = currentPage === 1;
-        nextButton.disabled = currentPage === totalPages || totalPages === 0;
+        if (pageInfo) pageInfo.textContent = `Halaman ${currentPage} dari ${totalPages}`;
+        if (prevButton) prevButton.disabled = currentPage === 1;
+        if (nextButton) nextButton.disabled = currentPage === totalPages || totalPages === 0;
     }
 
     function showConfirmDelete(id) {
         memberIdToDelete = id;
         const modal = document.getElementById('modalHapusMember');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
     }
 
     function closeConfirmDelete() {
         const modal = document.getElementById('modalHapusMember');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
         memberIdToDelete = null;
     }
 
     async function hapusMember() {
         if (!memberIdToDelete) return;
+        
         try {
             const token = localStorage.getItem('token');
             const response = await fetch(`http://127.0.0.1:8000/api/members/${memberIdToDelete}`, {
@@ -327,138 +426,153 @@
                 throw new Error(data.message || 'Gagal menghapus member');
             }
         } catch (error) {
+            console.error('Error deleting member:', error);
             showAlert('error', error.message);
         } finally {
             closeConfirmDelete();
         }
     }
 
-    // Fungsi untuk menampilkan history member
     function historyMember(id) {
         console.log('Melihat history member ID:', id);
         showAlert('success', `Melihat history member ID: ${id}`);
-        // Implementasi lebih lanjut untuk menampilkan history transaksi
     }
 
-    // Fungsi untuk edit member
     function editMember(id) {
         const member = allMembers.find(m => m.id === id);
         if (!member) return;
         
-        // Isi form edit dengan data member
-        document.getElementById('editNamaMember').value = member.name;
-        document.getElementById('editTeleponMember').value = member.phone || '';
-        document.getElementById('editEmailMember').value = member.email || '';
-        document.getElementById('editAlamatMember').value = member.address || '';
-        document.getElementById('editJenisKelamin').value = member.gender || '';
-        document.getElementById('memberIdToEdit').value = member.id;
+        const editNama = document.getElementById('editNamaMember');
+        const editTelepon = document.getElementById('editTeleponMember');
+        const editEmail = document.getElementById('editEmailMember');
+        const editAlamat = document.getElementById('editAlamatMember');
+        const editGender = document.getElementById('editJenisKelamin');
+        const editId = document.getElementById('memberIdToEdit');
         
-        // Buka modal edit
+        if (editNama) editNama.value = member.name;
+        if (editTelepon) editTelepon.value = member.phone || '';
+        if (editEmail) editEmail.value = member.email || '';
+        if (editAlamat) editAlamat.value = member.address || '';
+        if (editGender) editGender.value = member.gender || '';
+        if (editId) editId.value = member.id;
+        
         openModalEdit();
     }
 
-    // Fungsi untuk submit form edit member
-            async function submitEditMember(e) {
+    async function submitEditMember(e) {
+        e.preventDefault();
+        
+        if (!validateEditForm()) {
+            return;
+        }
+        
+        const btnEdit = document.getElementById('btnEditMember');
+        if (!btnEdit) return;
+        
+        const originalText = btnEdit.innerHTML;
+        btnEdit.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Menyimpan...`;
+        btnEdit.disabled = true;
+        
+        const memberId = document.getElementById('memberIdToEdit')?.value;
+        const token = localStorage.getItem('token');
+        
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/api/members/${memberId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    name: document.getElementById('editNamaMember')?.value,
+                    phone: document.getElementById('editTeleponMember')?.value,
+                    email: document.getElementById('editEmailMember')?.value,
+                    address: document.getElementById('editAlamatMember')?.value,
+                    gender: document.getElementById('editJenisKelamin')?.value
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                showAlert('success', 'Data member berhasil diperbarui!');
+                loadMembers();
+                closeModalEdit();
+            } else {
+                throw new Error(data.message || 'Gagal memperbarui member');
+            }
+        } catch (error) {
+            console.error('Error updating member:', error);
+            showAlert('error', error.message);
+        } finally {
+            btnEdit.innerHTML = originalText;
+            btnEdit.disabled = false;
+        }
+    }
+
+       document.addEventListener('DOMContentLoaded', function() {
+            // Event listener untuk form
+            document.getElementById('formTambahMember')?.addEventListener('submit', function (e) {
             e.preventDefault();
-            
-            // Validasi form terlebih dahulu
-            if (!validateEditForm()) {
-                return;
-            }
-            
-            const btnEdit = document.getElementById('btnEditMember');
-            const originalText = btnEdit.innerHTML;
-            btnEdit.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Menyimpan...`;
-            btnEdit.disabled = true;
-            
-            // Ambil ID member dari form
-            const memberId = document.getElementById('memberIdToEdit').value;
-            const token = localStorage.getItem('token');
-            
-            try {
-                const response = await fetch(`http://127.0.0.1:8000/api/members/${memberId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        name: document.getElementById('editNamaMember').value,
-                        phone: document.getElementById('editTeleponMember').value,
-                        email: document.getElementById('editEmailMember').value,
-                        address: document.getElementById('editAlamatMember').value,
-                        gender: document.getElementById('editJenisKelamin').value
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    showAlert('success', 'Data member berhasil diperbarui!');
-                    loadMembers(); // Refresh data
-                    closeModalEdit();
-                } else {
-                    throw new Error(data.message || 'Gagal memperbarui member');
-                }
-            } catch (error) {
-                showAlert('error', error.message);
-            } finally {
-                btnEdit.innerHTML = originalText;
-                btnEdit.disabled = false;
-            }
-        }
+            submitForm();
+            });
 
-    // Fungsi untuk submit form tambah member
-    async function submitForm() {
-    if (!validateForm()) return;
-
-    const btnTambah = document.getElementById('btnTambahMember');
-    const originalText = btnTambah.innerHTML;
-    btnTambah.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Menyimpan...`;
-    btnTambah.disabled = true;
-
-    const token = localStorage.getItem('token');
-
-    try {
-        const response = await fetch('http://127.0.0.1:8000/api/members', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                name: document.getElementById('namaMember').value,
-                phone: document.getElementById('teleponMember').value,
-                email: document.getElementById('emailMember').value,
-                address: document.getElementById('alamatMember').value,
-                gender: document.getElementById('jenisKelamin').value
-            })
+            document.getElementById('btnTambahMember')?.addEventListener('click', function () {
+                submitForm();
+             });
         });
+     async function submitForm() {
+        if (!validateForm()) return;
 
-        const result = await response.json();
+        const btnTambah = document.getElementById('btnTambahMember');
+        if (!btnTambah) return;
+        
+        const originalText = btnTambah.innerHTML;
+        btnTambah.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Menyimpan...`;
+        btnTambah.disabled = true;
 
-        if (response.ok) {
-            showAlert('success', 'Member baru berhasil ditambahkan!');
-            resetForm();
-            closeModalTambah();
-            loadMembers(); // refresh data di halaman utama
-        } else {
-            throw new Error(result.message || 'Gagal menambahkan member');
+        const token = localStorage.getItem('token');
+
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/members', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    name: document.getElementById('namaMember')?.value,
+                    phone: document.getElementById('teleponMember')?.value,
+                    email: document.getElementById('emailMember')?.value,
+                    address: document.getElementById('alamatMember')?.value,
+                    gender: document.getElementById('jenisKelamin')?.value
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                showAlert('success', 'Member baru berhasil ditambahkan!');
+                resetForm();
+                closeModalTambah();
+                loadMembers();
+            } else {
+                throw new Error(result.message || 'Gagal menambahkan member');
+            }
+        } catch (error) {
+            console.error('Error adding member:', error);
+            showAlert('error', error.message);
+        } finally {
+            btnTambah.innerHTML = originalText;
+            btnTambah.disabled = false;
         }
-
-    } catch (error) {
-        showAlert('error', error.message);
-    } finally {
-        btnTambah.innerHTML = originalText;
-        btnTambah.disabled = false;
-    }
     }
 
-    // Fungsi toggle dropdown yang diperbarui
     function toggleDropdown(button) {
         const menu = button.nextElementSibling;
+        if (!menu) return;
 
         // Tutup semua dropdown lain
         document.querySelectorAll('.dropdown-menu').forEach(m => {
@@ -515,77 +629,54 @@
         }
     });
 
-    // Fungsi untuk modal tambah dan edit
-    const modalTambah = document.getElementById('modalTambahMember');
-    const modalEdit = document.getElementById('modalEditMember');
-    const batalBtnTambah = document.getElementById('btnBatalModalTambah');
-    const batalBtnEdit = document.getElementById('btnBatalModalEdit');
-
     function openModalTambah() {
-        modalTambah.classList.remove('hidden');
-        modalTambah.classList.add('flex');
+        const modal = document.getElementById('modalTambahMember');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
     }
 
     function closeModalTambah() {
-        modalTambah.classList.add('hidden');
-        modalTambah.classList.remove('flex');
+        const modal = document.getElementById('modalTambahMember');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
     }
     
     function openModalEdit() {
-        modalEdit.classList.remove('hidden');
-        modalEdit.classList.add('flex');
+        const modal = document.getElementById('modalEditMember');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
     }
     
     function closeModalEdit() {
-        modalEdit.classList.add('hidden');
-        modalEdit.classList.remove('flex');
+        const modal = document.getElementById('modalEditMember');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
     }
 
-    // Klik batal untuk modal tambah
-    batalBtnTambah?.addEventListener('click', () => {
-        closeModalTambah();
-    });
-    
-    // Klik batal untuk modal edit
-    batalBtnEdit?.addEventListener('click', () => {
-        closeModalEdit();
-    });
-
-    document.addEventListener('DOMContentLoaded', function() {
-        // Event listener untuk form
-        document.getElementById('formTambahMember')?.addEventListener('submit', function (e) {
-        e.preventDefault();
-        submitForm();
-        });
-
-        document.getElementById('btnTambahMember')?.addEventListener('click', function () {
-            submitForm();
-        });
-
-        document.getElementById('formEditMember')?.addEventListener('submit', function(e) {
-            e.preventDefault();
-            submitEditMember(e);
-        });
-    });
-    document.getElementById('btnEditMember')?.addEventListener('click', function(e) {
-        e.preventDefault();
-        submitEditMember(e);
-    });
-
-    // Fungsi untuk melakukan pencarian member
     function searchMembers() {
-        const searchInput = document.getElementById('searchInput').value.toLowerCase();
+        const searchInput = document.getElementById('searchInput');
+        if (!searchInput) return;
         
-        if (searchInput.trim() === '') {
+        const searchTerm = searchInput.value.toLowerCase();
+        
+        if (searchTerm.trim() === '') {
             filteredMembers = [...allMembers];
         } else {
             filteredMembers = allMembers.filter(member => {
                 return (
-                    member.name.toLowerCase().includes(searchInput) ||
-                    (member.phone && member.phone.toLowerCase().includes(searchInput)) ||
-                    (member.member_code && member.member_code.toLowerCase().includes(searchInput)) ||
-                    (member.email && member.email.toLowerCase().includes(searchInput)) ||
-                    (member.address && member.address.toLowerCase().includes(searchInput))
+                    member.name.toLowerCase().includes(searchTerm) ||
+                    (member.phone && member.phone.toLowerCase().includes(searchTerm)) ||
+                    (member.member_code && member.member_code.toLowerCase().includes(searchTerm)) ||
+                    (member.email && member.email.toLowerCase().includes(searchTerm)) ||
+                    (member.address && member.address.toLowerCase().includes(searchTerm))
                 );
             });
         }
@@ -595,36 +686,20 @@
         renderMembers();
     }
 
-    // Event listener untuk input pencarian dengan debounce
-    let debounceTimer;
-    document.getElementById('searchInput')?.addEventListener('input', function() {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            searchMembers();
-        }, 300);
-    });
+    // Fungsi validasi dan reset form (sesuaikan dengan kebutuhan)
+    function validateForm() {
+        // Implementasi validasi form
+        return true;
+    }
 
-    // Event listener untuk enter key pada input pencarian
-    document.getElementById('searchInput')?.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            clearTimeout(debounceTimer);
-            searchMembers();
-        }
-    });
+    function validateEditForm() {
+        // Implementasi validasi form edit
+        return true;
+    }
 
-    // Lazy loading untuk tabel
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                // Jika tabel masuk viewport, load data
-                loadMembers();
-                observer.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.1 });
-
-    observer.observe(document.getElementById('memberTable'));
+    function resetForm() {
+        // Implementasi reset form
+    }
 </script>
 
 <style>
