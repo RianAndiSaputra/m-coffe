@@ -545,7 +545,7 @@
                 // printWindow.close();
             }, 2000);
         };
-        showAlert('success', 'Laporan berhasil diekspor');
+
         }, 1000);
     }
     
