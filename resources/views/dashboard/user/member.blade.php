@@ -358,43 +358,56 @@
     }
 
     // Fungsi untuk submit form edit member
-    async function submitEditMember(e) {
-        e.preventDefault();
-        
-        const form = e.target;
-        const formData = new FormData(form);
-        const memberId = formData.get('memberIdToEdit');
-        
-        try {
-            const response = await fetch(`http://127.0.0.1:8000/api/members/${memberId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({
-                    name: formData.get('editNamaMember'),
-                    phone: formData.get('editTeleponMember'),
-                    email: formData.get('editEmailMember'),
-                    address: formData.get('editAlamatMember'),
-                    gender: formData.get('editJenisKelamin'),
-                    member_code: formData.get('editKodeMember')
-                })
-            });
+            async function submitEditMember(e) {
+            e.preventDefault();
             
-            const data = await response.json();
-            
-            if (response.ok) {
-                showAlert('success', 'Data member berhasil diperbarui!');
-                loadMembers(); // Refresh data
-                closeModalEdit();
-            } else {
-                throw new Error(data.message || 'Gagal memperbarui member');
+            // Validasi form terlebih dahulu
+            if (!validateEditForm()) {
+                return;
             }
-        } catch (error) {
-            showAlert('error', error.message);
+            
+            const btnEdit = document.getElementById('btnEditMember');
+            const originalText = btnEdit.innerHTML;
+            btnEdit.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Menyimpan...`;
+            btnEdit.disabled = true;
+            
+            // Ambil ID member dari form
+            const memberId = document.getElementById('memberIdToEdit').value;
+            const token = localStorage.getItem('token');
+            
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/api/members/${memberId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        name: document.getElementById('editNamaMember').value,
+                        phone: document.getElementById('editTeleponMember').value,
+                        email: document.getElementById('editEmailMember').value,
+                        address: document.getElementById('editAlamatMember').value,
+                        gender: document.getElementById('editJenisKelamin').value
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showAlert('success', 'Data member berhasil diperbarui!');
+                    loadMembers(); // Refresh data
+                    closeModalEdit();
+                } else {
+                    throw new Error(data.message || 'Gagal memperbarui member');
+                }
+            } catch (error) {
+                showAlert('error', error.message);
+            } finally {
+                btnEdit.innerHTML = originalText;
+                btnEdit.disabled = false;
+            }
         }
-    }
 
     // Fungsi untuk submit form tambah member
     async function submitForm() {
@@ -538,14 +551,25 @@
         closeModalEdit();
     });
 
-    // Event listener untuk form
-   document.getElementById('formTambahMember')?.addEventListener('submit', function (e) {
-    e.preventDefault();
-    submitForm();
-    });
-    document.getElementById('formEditMember')?.addEventListener('submit', submitEditMember);
-    document.getElementById('btnTambahMember')?.addEventListener('click', function () {
+    document.addEventListener('DOMContentLoaded', function() {
+        // Event listener untuk form
+        document.getElementById('formTambahMember')?.addEventListener('submit', function (e) {
+        e.preventDefault();
         submitForm();
+        });
+
+        document.getElementById('btnTambahMember')?.addEventListener('click', function () {
+            submitForm();
+        });
+
+        document.getElementById('formEditMember')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitEditMember(e);
+        });
+    });
+    document.getElementById('btnEditMember')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        submitEditMember(e);
     });
 
     // Fungsi untuk melakukan pencarian member
