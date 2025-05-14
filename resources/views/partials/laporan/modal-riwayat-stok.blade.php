@@ -1,11 +1,11 @@
 <div id="stockHistoryModal" class="modal fixed inset-0 z-50 overflow-y-auto hidden" aria-hidden="true">
     <div class="modal-overlay absolute w-full h-full bg-gray-900 opacity-50"></div>
     
-    <div class="modal-container bg-white w-full max-w-3xl mx-auto rounded shadow-lg z-50 overflow-y-auto my-8 relative">
+    <div class="modal-container bg-white w-full max-w-3xl mx-auto rounded shadow-lg z-50 my-8 relative max-h-[90vh] overflow-y-auto">
         <!-- Modal header -->
         <div class="modal-header bg-gray-100 px-6 py-4 border-b flex items-center justify-between">
             <h3 class="text-xl font-bold text-gray-800">Detail Riwayat Stok</h3>
-            <button onclick="Modal.getInstance(document.getElementById('stockHistoryModal')).hide()" class="text-gray-500 hover:text-gray-700">
+            <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
                 <i data-lucide="x" class="w-6 h-6"></i>
             </button>
         </div>
@@ -62,7 +62,7 @@
         
         <!-- Modal footer -->
         <div class="modal-footer bg-gray-100 px-6 py-4 border-t flex justify-end">
-            <button onclick="Modal.getInstance(document.getElementById('stockHistoryModal')).hide()" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
+            <button onclick="closeModal()" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
                 Tutup
             </button>
         </div>

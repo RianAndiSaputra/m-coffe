@@ -394,7 +394,7 @@
 
         showAlert('info', 'Mempersiapkan laporan untuk dicetak...');
 
-        // Create a print-friendly version
+        setTimeout(() => {
         const printWindow = window.open('', '_blank');
         printWindow.document.write(`
             <!DOCTYPE html>
@@ -511,6 +511,7 @@
             printWindow.print();
             printWindow.close();
         }, 500);
+        }, 1000);
     }
 
     // Export report function
