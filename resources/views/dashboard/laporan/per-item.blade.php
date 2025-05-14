@@ -412,7 +412,6 @@
         }, 1000);
     }
 
-    
     // Export report function
     function exportReport() {
         showAlert('info', 'Mempersiapkan laporan untuk diekspor...');
