@@ -42,8 +42,8 @@
           <label class="block font-medium mb-1">Jenis Kelamin <span class="text-red-500">*</span></label>
           <select id="jenisKelamin" class="w-full border rounded-lg px-4 py-2 text-sm" required>
             <option value="">Pilih gender</option>
-            <option value="Laki-laki">Laki-laki</option>
-            <option value="Perempuan">Perempuan</option>
+            <option value="male">Laki-laki</option>
+            <option value="female">Perempuan</option>
           </select>
           <p id="errorJenisKelamin" class="text-red-500 text-xs mt-1 hidden">Jenis kelamin wajib dipilih</p>
         </div>
