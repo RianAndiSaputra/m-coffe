@@ -64,116 +64,110 @@
 </div>
 
 <script>
-        // Fungsi untuk validasi form edit
-        function validateEditForm() {
-      let isValid = true;
-      
-      // Validasi nama member
-      const namaMember = document.getElementById('editNamaMember');
-      const errorNama = document.getElementById('errorEditNama');
-      if (!namaMember.value.trim()) {
-        errorNama.classList.remove('hidden');
-        namaMember.classList.add('border-red-500');
-        isValid = false;
-      } else {
-        errorNama.classList.add('hidden');
-        namaMember.classList.remove('border-red-500');
-      }
-      
-      // Validasi telepon
-      const teleponMember = document.getElementById('editTeleponMember');
-      const errorTelepon = document.getElementById('errorEditTelepon');
-      if (!teleponMember.value.trim()) {
-        errorTelepon.classList.remove('hidden');
-        teleponMember.classList.add('border-red-500');
-        isValid = false;
-      } else {
-        errorTelepon.classList.add('hidden');
-        teleponMember.classList.remove('border-red-500');
-      }
-      
-      // Validasi email (jika diisi)
-      const emailMember = document.getElementById('editEmailMember');
-      const errorEmail = document.getElementById('errorEditEmail');
-      if (emailMember.value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailMember.value)) {
-        errorEmail.classList.remove('hidden');
-        emailMember.classList.add('border-red-500');
-        isValid = false;
-      } else {
-        errorEmail.classList.add('hidden');
-        emailMember.classList.remove('border-red-500');
-      }
-      
-      // Validasi jenis kelamin
-      const jenisKelamin = document.getElementById('editJenisKelamin');
-      const errorJenisKelamin = document.getElementById('errorEditJenisKelamin');
-      if (!jenisKelamin.value) {
-        errorJenisKelamin.classList.remove('hidden');
-        jenisKelamin.classList.add('border-red-500');
-        isValid = false;
-      } else {
-        errorJenisKelamin.classList.add('hidden');
-        jenisKelamin.classList.remove('border-red-500');
-      }
-      
-      return isValid;
+  // Fungsi untuk validasi form edit
+  function validateEditForm() {
+    let isValid = true;
+
+    // Validasi nama member
+    const namaMember = document.getElementById('editNamaMember');
+    const errorNama = document.getElementById('errorEditNama');
+    if (!namaMember.value.trim()) {
+      errorNama.classList.remove('hidden');
+      namaMember.classList.add('border-red-500');
+      isValid = false;
+    } else {
+      errorNama.classList.add('hidden');
+      namaMember.classList.remove('border-red-500');
     }
 
-    // Fungsi untuk submit form edit
-    function submitEditMember() {
-      if (!validateEditForm()) {
-        return;
-      }
-      
-      // Simulasi loading
-      const btnEdit = document.getElementById('btnEditMember');
-      const originalText = btnEdit.innerHTML;
-      btnEdit.innerHTML = `
-        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        Menyimpan...
-      `;
-      btnEdit.disabled = true;
-      
-      // Simulasi AJAX request (di production, ganti dengan fetch/axios)
-      setTimeout(() => {
-        // Ambil nilai dari form
-        const formData = {
-          id: document.getElementById('memberIdToEdit').value,
-          nama: document.getElementById('editNamaMember').value,
-          telepon: document.getElementById('editTeleponMember').value,
-          email: document.getElementById('editEmailMember').value,
-          alamat: document.getElementById('editAlamatMember').value,
-          jenis_kelamin: document.getElementById('editJenisKelamin').value
-        };
-        
-        console.log('Data member yang akan diupdate:', formData);
-        
-        // Tutup modal
-        closeModalEdit();
-        
-        // Tampilkan alert sukses
-        showAlert('success', 'Data member berhasil diperbarui!');
-        
-        // Kembalikan tombol ke state semula
-        btnEdit.innerHTML = originalText;
-        btnEdit.disabled = false;
-      }, 1500);
+    // Validasi telepon
+    const teleponMember = document.getElementById('editTeleponMember');
+    const errorTelepon = document.getElementById('errorEditTelepon');
+    if (!teleponMember.value.trim()) {
+      errorTelepon.classList.remove('hidden');
+      teleponMember.classList.add('border-red-500');
+      isValid = false;
+    } else {
+      errorTelepon.classList.add('hidden');
+      teleponMember.classList.remove('border-red-500');
     }
 
-    // Event listener untuk tombol edit
-   document.getElementById('btnEditMember')?.addEventListener('click', function () {
+    // Validasi email (jika diisi)
+    const emailMember = document.getElementById('editEmailMember');
+    const errorEmail = document.getElementById('errorEditEmail');
+    if (emailMember.value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailMember.value)) {
+      errorEmail.classList.remove('hidden');
+      emailMember.classList.add('border-red-500');
+      isValid = false;
+    } else {
+      errorEmail.classList.add('hidden');
+      emailMember.classList.remove('border-red-500');
+    }
+
+    // Validasi jenis kelamin
+    const jenisKelamin = document.getElementById('editJenisKelamin');
+    const errorJenisKelamin = document.getElementById('errorEditJenisKelamin');
+    if (!jenisKelamin.value) {
+      errorJenisKelamin.classList.remove('hidden');
+      jenisKelamin.classList.add('border-red-500');
+      isValid = false;
+    } else {
+      errorJenisKelamin.classList.add('hidden');
+      jenisKelamin.classList.remove('border-red-500');
+    }
+
+    return isValid;
+  }
+
+  // Fungsi untuk submit form edit
+  function submitEditMember() {
+    if (!validateEditForm()) {
+      return;
+    }
+
+    const btnEdit = document.getElementById('btnEditMember');
+    const originalText = btnEdit.innerHTML;
+    btnEdit.innerHTML = `
+      <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      Menyimpan...
+    `;
+    btnEdit.disabled = true;
+
+    setTimeout(() => {
+      const formData = {
+        id: document.getElementById('memberIdToEdit').value,
+        nama: document.getElementById('editNamaMember').value,
+        telepon: document.getElementById('editTeleponMember').value,
+        email: document.getElementById('editEmailMember').value,
+        alamat: document.getElementById('editAlamatMember').value,
+        jenis_kelamin: document.getElementById('editJenisKelamin').value
+      };
+
+      console.log('Data member yang akan diupdate:', formData);
+
+      // Tutup modal
+      closeModalEdit();
+
+      // Tombol kembali ke normal
+      btnEdit.innerHTML = originalText;
+      btnEdit.disabled = false;
+    }, 1500);
+  }
+
+  // Event listener tombol edit
+  document.getElementById('btnEditMember')?.addEventListener('click', function () {
     submitEditMember(new Event('submit'));
-    });
+  });
 
-    // Event listener untuk form (submit saat tekan enter)
-    document.querySelectorAll('#modalEditMember input').forEach(input => {
-      input.addEventListener('keypress', e => {
-        if (e.key === 'Enter') {
-          submitEditMember();
-        }
-      });
+  // Submit form saat tekan enter
+  document.querySelectorAll('#modalEditMember input').forEach(input => {
+    input.addEventListener('keypress', e => {
+      if (e.key === 'Enter') {
+        submitEditMember();
+      }
     });
+  });
 </script>
