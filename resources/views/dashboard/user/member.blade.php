@@ -104,11 +104,8 @@
 <script>
     // Variabel global
     let memberIdToDelete = null;
-    let currentPage = 1;
-    let totalPages = 1;
     let allMembers = [];
     let filteredMembers = [];
-    const itemsPerPage = 10;
     let debounceTimer;
     let alertTimeout;
 
@@ -132,12 +129,6 @@
         if (btnBatalHapus) btnBatalHapus.addEventListener('click', closeConfirmDelete);
         if (btnKonfirmasiHapus) btnKonfirmasiHapus.addEventListener('click', hapusMember);
 
-        // Event listener untuk pagination
-        const prevPage = document.getElementById('prevPage');
-        const nextPage = document.getElementById('nextPage');
-        if (prevPage) prevPage.addEventListener('click', goToPrevPage);
-        if (nextPage) nextPage.addEventListener('click', goToNextPage);
-
         // Event listener untuk modal tambah/edit
         const batalTambah = document.getElementById('btnBatalModalTambah');
         const batalEdit = document.getElementById('btnBatalModalEdit');
@@ -155,20 +146,6 @@
         if (searchInput) {
             searchInput.addEventListener('input', handleSearchInput);
             searchInput.addEventListener('keypress', handleSearchEnter);
-        }
-    }
-
-    function goToPrevPage() {
-        if (currentPage > 1) {
-            currentPage--;
-            renderMembers();
-        }
-    }
-
-    function goToNextPage() {
-        if (currentPage < totalPages) {
-            currentPage++;
-            renderMembers();
         }
     }
 
@@ -288,7 +265,6 @@
             if (response.ok) {
                 allMembers = data.data || [];
                 filteredMembers = [...allMembers];
-                totalPages = Math.ceil(filteredMembers.length / itemsPerPage);
                 renderMembers();
             } else {
                 throw new Error(data.message || 'Gagal memuat data member');
@@ -305,14 +281,10 @@
     function renderMembers() {
         const tableBody = document.getElementById('memberTableBody');
         if (!tableBody) return;
-
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        const paginatedMembers = filteredMembers.slice(startIndex, endIndex);
         
         tableBody.innerHTML = '';
 
-        if (paginatedMembers.length === 0) {
+        if (filteredMembers.length === 0) {
             tableBody.innerHTML = `
                 <tr id="noResultsMessage">
                     <td colspan="8" class="py-8 text-center">
@@ -327,11 +299,11 @@
             return;
         }
 
-        paginatedMembers.forEach((member, index) => {
+        filteredMembers.forEach((member, index) => {
             const row = document.createElement('tr');
             row.className = 'hover:bg-gray-50';
             row.innerHTML = `
-                <td class="py-4">${startIndex + index + 1}</td>
+                <td class="py-4">${index + 1}</td>
                 <td class="py-4">
                     <div class="flex items-center gap-4">
                         <div class="bg-orange-100 p-2 rounded-full">
@@ -353,7 +325,7 @@
                         <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded-lg">
                             <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
                         </button>
-                        <div class="dropdown-menu hidden absolute right-0 z-20 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-base">
+                        <div class="dropdown-menu hidden absolute right-0 z-50 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-base">
                             <div class="px-4 py-2 font-bold text-left border-b">Aksi</div>
                             <button onclick="historyMember(${member.id})" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left">
                                 <i data-lucide="history" class="w-5 h-5 mr-3 text-gray-500"></i> History
@@ -371,18 +343,7 @@
             tableBody.appendChild(row);
         });
 
-        updatePaginationControls();
         if (window.lucide) window.lucide.createIcons();
-    }
-
-    function updatePaginationControls() {
-        const pageInfo = document.getElementById('pageInfo');
-        const prevButton = document.getElementById('prevPage');
-        const nextButton = document.getElementById('nextPage');
-
-        if (pageInfo) pageInfo.textContent = `Halaman ${currentPage} dari ${totalPages}`;
-        if (prevButton) prevButton.disabled = currentPage === 1;
-        if (nextButton) nextButton.disabled = currentPage === totalPages || totalPages === 0;
     }
 
     function showConfirmDelete(id) {
@@ -511,18 +472,19 @@
         }
     }
 
-       document.addEventListener('DOMContentLoaded', function() {
-            // Event listener untuk form
-            document.getElementById('formTambahMember')?.addEventListener('submit', function (e) {
-            e.preventDefault();
-            submitForm();
-            });
-
-            document.getElementById('btnTambahMember')?.addEventListener('click', function () {
-                submitForm();
-             });
+    document.addEventListener('DOMContentLoaded', function() {
+        // Event listener untuk form
+        document.getElementById('formTambahMember')?.addEventListener('submit', function (e) {
+        e.preventDefault();
+        submitForm();
         });
-     async function submitForm() {
+
+        document.getElementById('btnTambahMember')?.addEventListener('click', function () {
+            submitForm();
+         });
+    });
+    
+    async function submitForm() {
         if (!validateForm()) return;
 
         const btnTambah = document.getElementById('btnTambahMember');
@@ -584,39 +546,44 @@
         // Toggle dropdown terkait tombol yang diklik
         menu.classList.toggle('hidden');
 
-        // Hitung posisi
+        // Hitung posisi relatif terhadap viewport
         const buttonRect = button.getBoundingClientRect();
         const spaceBelow = window.innerHeight - buttonRect.bottom;
-        const menuHeight = menu.clientHeight || 300;
-
-        // Reset posisi dan margin terlebih dahulu
+        const spaceRight = window.innerWidth - buttonRect.right;
+        const menuHeight = menu.offsetHeight || 176; // Approximate height of the menu
+        const menuWidth = menu.offsetWidth || 160; // Approximate width of the menu
+        
+        // Reset positioning
+        menu.style.position = 'fixed';
         menu.style.top = '';
         menu.style.bottom = '';
-        menu.style.right = '0';
         menu.style.left = '';
-        menu.style.marginTop = '';
-        menu.style.marginBottom = '';
+        menu.style.right = '';
 
-        // Jika ruang di bawah tidak cukup dan ruang di atas lebih banyak
-        if (spaceBelow < menuHeight && buttonRect.top > menuHeight) {
-            // Tampilkan dropdown di atas tombol
-            menu.style.bottom = '100%';
-            menu.style.marginBottom = '5px';
+        // Posisi vertikal
+        if (spaceBelow < menuHeight) {
+            // Jika tidak cukup ruang di bawah, tampilkan di atas
+            menu.style.bottom = `${window.innerHeight - buttonRect.top + 5}px`;
             menu.classList.add('dropdown-animation-up');
             menu.classList.remove('dropdown-animation-down');
         } else {
-            // Tampilkan dropdown di bawah tombol
-            menu.style.top = '100%';
-            menu.style.marginTop = '5px';
+            // Jika cukup ruang di bawah, tampilkan di bawah
+            menu.style.top = `${buttonRect.bottom + 5}px`;
             menu.classList.add('dropdown-animation-down');
             menu.classList.remove('dropdown-animation-up');
         }
 
-        // Periksa juga posisi horizontal untuk memastikan dropdown tetap di dalam viewport
-        const menuRect = menu.getBoundingClientRect();
-        if (menuRect.right > window.innerWidth) {
-            menu.style.right = '0';
-            menu.style.left = 'auto';
+        // Posisi horizontal
+        if (spaceRight < menuWidth) {
+            // Jika tidak cukup ruang di kanan, tampilkan di kiri
+            menu.style.right = `${window.innerWidth - buttonRect.left}px`;
+            menu.classList.add('dropdown-animation-right');
+            menu.classList.remove('dropdown-animation-left');
+        } else {
+            // Jika cukup ruang di kanan, tampilkan di kanan
+            menu.style.left = `${buttonRect.left}px`;
+            menu.classList.add('dropdown-animation-left');
+            menu.classList.remove('dropdown-animation-right');
         }
     }
 
@@ -681,12 +648,9 @@
             });
         }
         
-        currentPage = 1;
-        totalPages = Math.ceil(filteredMembers.length / itemsPerPage);
         renderMembers();
     }
 
-    // Fungsi validasi dan reset form (sesuaikan dengan kebutuhan)
     function validateForm() {
         // Implementasi validasi form
         return true;
@@ -736,13 +700,10 @@
     
     /* Styling untuk dropdown */
     .dropdown-menu {
-        position: absolute;
-        right: 0;
+        position: fixed;
         z-index: 9999;
-        margin-top: 0.25rem;
-        width: 10rem;
+        width: 160px;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        transform-origin: top right;
     }
     
     .relative.inline-block {
@@ -776,12 +737,42 @@
         }
     }
     
+    @keyframes dropdownFadeInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(5px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    @keyframes dropdownFadeInRight {
+        from {
+            opacity: 0;
+            transform: translateX(-5px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
     .dropdown-animation-down {
         animation: dropdownFadeIn 0.2s ease-out forwards;
     }
     
     .dropdown-animation-up {
         animation: dropdownFadeInUp 0.2s ease-out forwards;
+    }
+    
+    .dropdown-animation-left {
+        animation: dropdownFadeInLeft 0.2s ease-out forwards;
+    }
+    
+    .dropdown-animation-right {
+        animation: dropdownFadeInRight 0.2s ease-out forwards;
     }
     
     /* Loading spinner */
@@ -791,6 +782,11 @@
     
     .animate-spin {
         animation: spin 1s linear infinite;
+    }
+
+    /* Style untuk tabel */
+    .table-container {
+        position: relative;
     }
 </style>
 
