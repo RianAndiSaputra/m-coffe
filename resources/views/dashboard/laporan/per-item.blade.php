@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Laporan Per Item')
+@section('title', 'Laporan Penjualan Per Item')
 
 @section('content')
 
@@ -32,8 +32,8 @@
     <div class="mb-3 md:mb-0 flex items-start gap-2">
         <i data-lucide="package" class="w-5 h-5 text-gray-600 mt-1"></i>
         <div>
-            <h4 class="text-lg font-semibold text-gray-800">Menampilkan laporan untuk: Kifa Bakery Pusat</h4>
-            <p class="text-sm text-gray-600">Data yang ditampilkan adalah khusus untuk outlet Kifa Bakery Pusat.</p>
+            <h4 class="text-lg font-semibold text-gray-800">Menampilkan laporan untuk: <span id="outletName">Loading...</span></h4>
+            <p class="text-sm text-gray-600">Data yang ditampilkan adalah khusus untuk outlet <span id="outletNameSub">Loading...</span>.</p>
         </div>
     </div>
 </div>
@@ -44,7 +44,7 @@
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
         <div>
             <h1 class="text-3xl font-bold text-gray-800">Daftar Produk</h1>
-            <p class="text-sm text-gray-600">Daftar produk berdasarkan rentang tanggal untuk Kifa Bakery Pusat</p>
+            <p class="text-sm text-gray-600">Daftar produk berdasarkan rentang tanggal untuk <span id="outletNameHeader">Loading...</span></p>
             
             <!-- Filter + Search -->
             <div class="flex flex-col md:flex-row md:items-end gap-4 mt-3 w-full">
@@ -78,57 +78,60 @@
 
     <!-- Cards Summary -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <!-- Card Template -->
+        <!-- Total Penjualan -->
         <div class="bg-white rounded-lg shadow p-4">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-500">Total Penjualan</p>
-                    <h3 class="text-2xl font-bold text-gray-800">Rp 12.450.000</h3>
+                    <h3 class="text-2xl font-bold text-gray-800" id="totalSales">Loading...</h3>
                 </div>
                 <div class="p-3 rounded-full bg-green-100 text-green-500">
                     <i data-lucide="dollar-sign" class="w-6 h-6"></i>
                 </div>
             </div>
-            <p class="text-xs text-gray-500 mt-2">+15% dari periode sebelumnya</p>
+            <p class="text-xs text-gray-500 mt-2" id="totalSalesComparison">Memuat data perbandingan...</p>
         </div>
 
+        <!-- Total Kuantitas -->
         <div class="bg-white rounded-lg shadow p-4">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-500">Total Kuantitas</p>
-                    <h3 class="text-2xl font-bold text-gray-800">543 item</h3>
+                    <h3 class="text-2xl font-bold text-gray-800" id="totalQuantity">Loading...</h3>
                 </div>
                 <div class="p-3 rounded-full bg-blue-100 text-blue-500">
                     <i data-lucide="package" class="w-6 h-6"></i>
                 </div>
             </div>
-            <p class="text-xs text-gray-500 mt-2">+8% dari periode sebelumnya</p>
+            <p class="text-xs text-gray-500 mt-2" id="totalQuantityComparison">Memuat data perbandingan...</p>
         </div>
 
+        <!-- Total Transaksi -->
         <div class="bg-white rounded-lg shadow p-4">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-500">Total Transaksi</p>
-                    <h3 class="text-2xl font-bold text-gray-800">125</h3>
+                    <h3 class="text-2xl font-bold text-gray-800" id="totalOrders">Loading...</h3>
                 </div>
                 <div class="p-3 rounded-full bg-orange-100 text-orange-500">
                     <i data-lucide="shopping-bag" class="w-6 h-6"></i>
                 </div>
             </div>
-            <p class="text-xs text-gray-500 mt-2">+12% dari periode sebelumnya</p>
+            <p class="text-xs text-gray-500 mt-2" id="totalOrdersComparison">Memuat data perbandingan...</p>
         </div>
 
+        <!-- Rata-rata/Transaksi -->
         <div class="bg-white rounded-lg shadow p-4">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-500">Rata-rata/Transaksi</p>
-                    <h3 class="text-2xl font-bold text-gray-800">Rp 87.840</h3>
+                    <h3 class="text-2xl font-bold text-gray-800" id="averageOrderValue">Loading...</h3>
                 </div>
                 <div class="p-3 rounded-full bg-purple-100 text-purple-500">
                     <i data-lucide="bar-chart-2" class="w-6 h-6"></i>
                 </div>
             </div>
-            <p class="text-xs text-gray-500 mt-2">+3% dari periode sebelumnya</p>
+            <p class="text-xs text-gray-500 mt-2" id="averageOrderValueComparison">Memuat data perbandingan...</p>
         </div>
     </div>
     
@@ -147,59 +150,8 @@
                 </tr>
             </thead>
             <tbody class="text-gray-700 divide-y" id="productTableBody">
-                <!-- Produk 1 -->
                 <tr>
-                    <td class="py-4 font-medium">KB-ROT-001</td>
-                    <td class="py-4">Roti Tawar Gandum</td>
-                    <td class="py-4">Roti</td>
-                    <td class="py-4 text-right">78</td>
-                    <td class="py-4 text-right">156</td>
-                    <td class="py-4 text-right font-bold">Rp 2.340.000</td>
-                    <td class="py-4 text-right">18.8%</td>
-                </tr>
-                
-                <!-- Produk 2 -->
-                <tr>
-                    <td class="py-4 font-medium">KB-KUE-005</td>
-                    <td class="py-4">Brownies Coklat</td>
-                    <td class="py-4">Kue</td>
-                    <td class="py-4 text-right">65</td>
-                    <td class="py-4 text-right">130</td>
-                    <td class="py-4 text-right font-bold">Rp 1.950.000</td>
-                    <td class="py-4 text-right">15.7%</td>
-                </tr>
-                
-                <!-- Produk 3 -->
-                <tr>
-                    <td class="py-4 font-medium">KB-PAS-012</td>
-                    <td class="py-4">Pastel Sayur</td>
-                    <td class="py-4">Pastry</td>
-                    <td class="py-4 text-right">58</td>
-                    <td class="py-4 text-right">116</td>
-                    <td class="py-4 text-right font-bold">Rp 1.740.000</td>
-                    <td class="py-4 text-right">14.0%</td>
-                </tr>
-                
-                <!-- Produk 4 -->
-                <tr>
-                    <td class="py-4 font-medium">KB-KUE-008</td>
-                    <td class="py-4">Donat Glaze</td>
-                    <td class="py-4">Kue</td>
-                    <td class="py-4 text-right">42</td>
-                    <td class="py-4 text-right">84</td>
-                    <td class="py-4 text-right font-bold">Rp 1.260.000</td>
-                    <td class="py-4 text-right">10.1%</td>
-                </tr>
-                
-                <!-- Produk 5 -->
-                <tr>
-                    <td class="py-4 font-medium">KB-ROT-003</td>
-                    <td class="py-4">Roti Sobek Keju</td>
-                    <td class="py-4">Roti</td>
-                    <td class="py-4 text-right">35</td>
-                    <td class="py-4 text-right">70</td>
-                    <td class="py-4 text-right font-bold">Rp 1.050.000</td>
-                    <td class="py-4 text-right">8.4%</td>
+                    <td colspan="7" class="py-4 text-center">Memuat data...</td>
                 </tr>
             </tbody>
         </table>
@@ -211,80 +163,295 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 
 <script>
+    // Global variables
+    let currentStartDate = '2025-05-01';
+    let currentEndDate = '2025-05-13';
+    let outletId = 1;
+    
+    // Format currency to Indonesian Rupiah
+    function formatRupiah(amount) {
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(amount);
+    }
+    
     // Initialize date range picker
-    flatpickr("#dateRange", {
-        mode: "range",
-        dateFormat: "d M Y",
-        defaultDate: ["today", "today"],
-        locale: "id",
-        onChange: function(selectedDates, dateStr) {
-            if (selectedDates.length === 2) {
-                // Automatically filter data when both dates are selected
-                filterData(selectedDates[0], selectedDates[1]);
+    document.addEventListener('DOMContentLoaded', function() {
+        flatpickr("#dateRange", {
+            mode: "range",
+            dateFormat: "d M Y",
+            defaultDate: [new Date(currentStartDate), new Date(currentEndDate)],
+            locale: "id",
+            onChange: function(selectedDates, dateStr) {
+                if (selectedDates.length === 2) {
+                    // Format dates for API call
+                    currentStartDate = selectedDates[0].toISOString().split('T')[0];
+                    currentEndDate = selectedDates[1].toISOString().split('T')[0];
+                    
+                    // Load data with new date range
+                    loadData(outletId, currentStartDate, currentEndDate);
+                }
             }
-        }
+        });
+        
+        // Load initial data
+        loadData(outletId, currentStartDate, currentEndDate);
     });
+    
+    // Load data from API
+    function loadData(outletId, startDate, endDate) {
+        showAlert('info', 'Memuat data laporan...');
+        
+        const url = `http://127.0.0.1:8000/api/reports/monthly-sales/${outletId}?start_date=${startDate}&end_date=${endDate}`;
+        
+        fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Accept': 'application/json'
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status) {
+                    updatePageData(data.data);
+                    showAlert('success', 'Data laporan berhasil dimuat');
+                } else {
+                    showAlert('error', 'Gagal memuat data');
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                showAlert('error', 'Terjadi kesalahan saat memuat data');
+            });
+    }
+    
+    // Update page with data from API
+    function updatePageData(data) {
+        // Update outlet name
+        const outletName = data.outlet;
+        document.getElementById('outletName').textContent = outletName;
+        document.getElementById('outletNameSub').textContent = outletName;
+        document.getElementById('outletNameHeader').textContent = outletName;
+        
+        // Update summary cards
+        document.getElementById('totalSales').textContent = formatRupiah(data.summary.total_sales);
+        document.getElementById('totalQuantity').textContent = data.summary.total_quantity + ' item';
+        document.getElementById('totalOrders').textContent = data.summary.total_orders;
+        document.getElementById('averageOrderValue').textContent = formatRupiah(data.summary.average_order_value);
+        
+        // For now, we don't have comparison data so use placeholder
+        document.getElementById('totalSalesComparison').textContent = 'Data periode saat ini';
+        document.getElementById('totalQuantityComparison').textContent = 'Data periode saat ini';
+        document.getElementById('totalOrdersComparison').textContent = 'Data periode saat ini';
+        document.getElementById('averageOrderValueComparison').textContent = 'Data periode saat ini';
+        
+        // Update product table
+        const tableBody = document.getElementById('productTableBody');
+        tableBody.innerHTML = '';
+        
+        if (data.products.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = `<td colspan="7" class="py-4 text-center">Tidak ada data produk untuk periode ini</td>`;
+            tableBody.appendChild(row);
+        } else {
+            data.products.forEach(product => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="py-4 font-medium">${product.sku}</td>
+                    <td class="py-4">${product.product_name}</td>
+                    <td class="py-4">${product.category_name}</td>
+                    <td class="py-4 text-right">${product.order_count}</td>
+                    <td class="py-4 text-right">${product.total_quantity}</td>
+                    <td class="py-4 text-right font-bold">${formatRupiah(product.total_sales)}</td>
+                    <td class="py-4 text-right">${product.sales_percentage.toFixed(1)}%</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+    }
     
     // Search input handler
     document.getElementById('searchInput').addEventListener('keyup', function(e) {
         const searchTerm = this.value.trim().toLowerCase();
         const rows = document.querySelectorAll('#productTableBody tr');
+        let foundCount = 0;
         
         rows.forEach(row => {
             const text = row.textContent.toLowerCase();
             if (text.includes(searchTerm)) {
                 row.style.display = '';
+                foundCount++;
             } else {
                 row.style.display = 'none';
             }
         });
         
         if (searchTerm) {
-            showAlert('info', `Menampilkan hasil pencarian: ${searchTerm}`);
+            showAlert('info', `Menampilkan ${foundCount} hasil pencarian: "${searchTerm}"`);
         }
     });
-    
-    // Filter data function
-    function filterData(startDate, endDate) {
-        // In a real app, you would make an AJAX request here
-        console.log(`Filter data dari ${startDate} sampai ${endDate}`);
-        showAlert('success', `Menampilkan data dari ${formatDate(startDate)} sampai ${formatDate(endDate)}`);
-        
-        // Simulate loading
-        const rows = document.querySelectorAll('#productTableBody tr');
-        rows.forEach(row => row.style.display = 'none');
-        
-        setTimeout(() => {
-            rows.forEach(row => row.style.display = '');
-        }, 500);
-    }
-    
-    // Format date to Indonesian format
-    function formatDate(date) {
-        const options = { day: 'numeric', month: 'long', year: 'numeric' };
-        return date.toLocaleDateString('id-ID', options);
-    }
     
     // Print report function
     function printReport() {
         showAlert('info', 'Mempersiapkan laporan untuk dicetak...');
-        // In a real app, this would open print dialog or redirect to print page
+
         setTimeout(() => {
-            window.print();
+            const outletName = document.getElementById('outletName').textContent;
+            const dateRange = `${new Date(currentStartDate).toLocaleDateString('id-ID')} - ${new Date(currentEndDate).toLocaleDateString('id-ID')}`;
+            const now = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
+            const summary = {
+                totalSales: document.getElementById('totalSales').textContent,
+                totalQuantity: document.getElementById('totalQuantity').textContent,
+                totalOrders: document.getElementById('totalOrders').textContent,
+                averageOrderValue: document.getElementById('averageOrderValue').textContent
+            };
+
+            const tableRows = document.querySelectorAll('#productTableBody tr');
+
+            let printContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Laporan Penjualan - Kifa Bakery</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+                        h1 { font-size: 18px; margin: 0 0 10px 0; }
+                        .report-header { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
+                        .logo { width: 60px; height: auto; }
+                        .header-info { font-size: 14px; }
+                        .summary { display: flex; flex-wrap: wrap; gap: 10px; max-width: 600px; margin-bottom: 20px; }
+                        .summary-item { flex: 1 1 calc(50% - 10px); background: #f4f4f4; padding: 10px; border-radius: 6px; box-sizing: border-box; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
+                        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+                        th { background-color: #eee; }
+                        .footer { margin-top: 30px; font-size: 12px; text-align: center; }
+                        @media print {
+                            body { padding: 0; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="report-header">
+                        <img src="/images/logo.png" alt="Logo Kifa Bakery" class="logo">
+                        <div>
+                            <h1>LAPORAN PENJUALAN</h1>
+                            <div class="header-info">
+                                Outlet: ${outletName}<br>
+                                Tanggal: ${dateRange}<br>
+                                Dicetak pada: ${now}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="summary">
+                        <div class="summary-item"><strong>Total Penjualan</strong><br>${summary.totalSales}</div>
+                        <div class="summary-item"><strong>Total Order</strong><br>${summary.totalOrders}</div>
+                        <div class="summary-item"><strong>Total Item</strong><br>${summary.totalQuantity}</div>
+                        <div class="summary-item"><strong>Rata-rata Order</strong><br>${summary.averageOrderValue}</div>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>SKU</th>
+                                <th>Nama Produk</th>
+                                <th>Kategori</th>
+                                <th>Jumlah Order</th>
+                                <th>Total Kuantitas</th>
+                                <th>Total Penjualan</th>
+                                <th>Kontribusi (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+
+            tableRows.forEach(row => {
+                if (row.style.display !== 'none') {
+                    const cells = row.querySelectorAll('td');
+                    if (!row.querySelector('td[colspan]')) {
+                        printContent += '<tr>';
+                        cells.forEach(cell => {
+                            printContent += `<td>${cell.textContent}</td>`;
+                        });
+                        printContent += '</tr>';
+                    }
+                }
+            });
+
+            printContent += `
+                        </tbody>
+                    </table>
+
+                    <div class="footer">
+                        Laporan ini dibuat secara otomatis oleh sistem.<br>
+                        © ${new Date().getFullYear()} Kifa Bakery
+                    </div>
+                </body>
+                </html>
+            `;
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.open();
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+
+            printWindow.onload = function () {
+                setTimeout(() => {
+                    printWindow.print();
+                    printWindow.close();
+                }, 500);
+            };
         }, 1000);
     }
-    
+
     // Export report function
     function exportReport() {
         showAlert('info', 'Mempersiapkan laporan untuk diekspor...');
-        // In a real app, this would generate and download a file
+
         setTimeout(() => {
-            const a = document.createElement('a');
-            a.href = 'data:text/csv;charset=utf-8,';
-            a.download = `laporan-peritem-${new Date().toISOString().slice(0,10)}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            const outletName = document.getElementById('outletName').textContent;
+            const formattedStartDate = new Date(currentStartDate).toLocaleDateString('id-ID');
+            const formattedEndDate = new Date(currentEndDate).toLocaleDateString('id-ID');
+            
+            // In a real app, you would generate CSV content from actual data
+            // Here we'll create a basic CSV from the visible table data
+            let csvContent = 'data:text/csv;charset=utf-8,';
+            csvContent += '"SKU","Nama Produk","Kategori","Jumlah Order","Total Kuantitas","Total Penjualan","Kontribusi (%)"\n';
+            
+            const rows = document.querySelectorAll('#productTableBody tr');
+            rows.forEach(row => {
+                // Skip hidden rows (filtered out by search)
+                if (row.style.display !== 'none') {
+                    // Skip rows with colspan (empty state messages)
+                    if (!row.querySelector('td[colspan]')) {
+                        const cells = row.querySelectorAll('td');
+                        let rowData = [];
+                        cells.forEach(cell => {
+                            // Quote the cell data and escape any quotes inside it
+                            rowData.push('"' + cell.innerText.replace(/"/g, '""') + '"');
+                        });
+                        csvContent += rowData.join(',') + '\n';
+                    }
+                }
+            });
+            
+            // Create and trigger download
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', `laporan-peritem-${outletName}-${formattedStartDate}-${formattedEndDate}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        
             showAlert('success', 'Laporan berhasil diekspor');
         }, 1000);
     }
@@ -294,7 +461,7 @@
         const alertContainer = document.getElementById('alertContainer');
         const alert = document.createElement('div');
         alert.className = `px-4 py-3 rounded-lg shadow-md ${type === 'error' ? 'bg-red-100 text-red-700' : 
-                         type === 'success' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`;
+                         type === 'success' ? 'bg-orange-100 text-orange-700' : 'bg-orange-100 text-orange-700'}`;
         alert.innerHTML = `
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
@@ -310,9 +477,16 @@
         `;
         alertContainer.appendChild(alert);
         
+        // Make sure Lucide icons are initialized for the new alert
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+        
         // Auto remove after 5 seconds
         setTimeout(() => {
-            alert.remove();
+            if (alert.parentNode) {
+                alert.remove();
+            }
         }, 5000);
     }
 </script>
