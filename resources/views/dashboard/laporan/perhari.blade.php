@@ -119,25 +119,29 @@
     flatpickr("#dateRange", {
         mode: "range",
         dateFormat: "d M Y",
-        defaultDate: ["today", "today"],
+        defaultDate: [
+            new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+            new Date()
+        ],
         locale: "id",
         onChange: function(selectedDates, dateStr) {
             if (selectedDates.length === 2) {
-                // Format dates for API (YYYY-MM-DD)
                 const dateFrom = formatDateForAPI(selectedDates[0]);
                 const dateTo = formatDateForAPI(selectedDates[1]);
-                
-                // Fetch data with new date range
                 fetchData(currentOutletId, dateFrom, dateTo);
             }
         }
     });
-    
-    // Format date for API (YYYY-MM-DD)
+
+        
+        // Format date for API (YYYY-MM-DD)
     function formatDateForAPI(date) {
-        return date.toISOString().split('T')[0];
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Bulan dimulai dari 0
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     }
-    
+
     // Format date to Indonesian format
     function formatDateToID(dateString) {
         const options = { day: 'numeric', month: 'long', year: 'numeric' };
@@ -212,7 +216,7 @@
     // Fetch data from API
     async function fetchData(outletId, dateFrom, dateTo) {
         try {
-            showAlert('info', 'Memuat data...');
+            // showAlert('info', 'Memuat data laporan...');
             
             const response = await fetch(`http://127.0.0.1:8000/api/orders/history?outlet_id=${outletId}&date_from=${dateFrom}&date_to=${dateTo}`, {
             headers: {
@@ -630,7 +634,6 @@
         }, 1000);
     }
 
-
     // Show transaction detail modal
     function showTransactionDetail(orderId) {
         if (!currentData || !currentData.orders) return;
@@ -700,6 +703,10 @@
             </div>
         `;
         alertContainer.appendChild(alert);
+
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
         
         // Auto remove after 5 seconds
         setTimeout(() => {
@@ -718,5 +725,48 @@
         fetchData(currentOutletId, dateFrom, dateTo);
     });
 </script>
+
+<style>
+    /* Tanggal terpilih: awal & akhir range */
+    .flatpickr-day.selected,
+    .flatpickr-day.startRange,
+    .flatpickr-day.endRange {
+        background-color: #f97316; /* Tailwind orange-500 */
+        color: white;
+        border-color: #f97316;
+    }
+
+    .flatpickr-day.selected:hover,
+    .flatpickr-day.startRange:hover,
+    .flatpickr-day.endRange:hover {
+        background-color: #fb923c; /* Tailwind orange-400 */
+        color: white;
+        border-color: #fb923c;
+    }
+
+    /* Tanggal di antara range */
+    .flatpickr-day.inRange {
+        background-color: #fed7aa; /* Tailwind orange-200 */
+        color: #78350f; /* Tailwind orange-800 */
+    }
+
+    /* Hover efek pada hari */
+    .flatpickr-day:hover {
+        background-color: #fdba74; /* Tailwind orange-300 */
+        color: black;
+    }
+
+    /* Hilangkan outline biru saat klik/tap */
+    .flatpickr-day:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px #fdba74; /* Tailwind orange-300 glow */
+    }
+
+    /* Hari ini */
+    .flatpickr-day.today:not(.selected):not(.inRange) {
+        border: 1px solid #fb923c; /* Tailwind orange-400 */
+        background-color: #fff7ed; /* Tailwind orange-50 */
+    }
+</style>
 
 @endsection

@@ -256,7 +256,7 @@
     // Fetch inventory data from API
     async function fetchInventoryData(startDate = '2025-05-14', endDate = '2025-05-14') {
         try {
-            showAlert('info', 'Memuat data...');
+            // showAlert('info', 'Memuat data...');
             
             const url = `${API_ENDPOINT}?start_date=${startDate}&end_date=${endDate}`;
             const response = await fetch(url, {
@@ -506,7 +506,6 @@
 
         }, 1000);
     }
-
     
     // Export report function
     function exportReport() {
@@ -573,6 +572,10 @@
             </div>
         `;
         alertContainer.appendChild(alert);
+
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
         
         // Auto remove alert after 5 seconds
         setTimeout(() => {
@@ -585,5 +588,34 @@
         fetchInventoryData();
     });
 </script>
+
+<style>
+    /* Tanggal terpilih: awal & akhir range */
+    .flatpickr-day.selected,
+    .flatpickr-day.startRange,
+    .flatpickr-day.endRange {
+        background-color: #f97316; /* Tailwind orange-500 */
+        color: white;
+        border-color: #f97316;
+    }
+
+    /* Tanggal di antara range */
+    .flatpickr-day.inRange {
+        background-color: #fed7aa; /* Tailwind orange-200 */
+        color: #78350f; /* Tailwind orange-800 */
+    }
+
+    /* Hover efek pada hari */
+    .flatpickr-day:hover {
+        background-color: #fdba74; /* Tailwind orange-300 */
+        color: black;
+    }
+
+    /* Hari ini */
+    .flatpickr-day.today:not(.selected):not(.inRange) {
+        border: 1px solid #fb923c; /* Tailwind orange-400 */
+        background-color: #fff7ed; /* Tailwind orange-50 */
+    }
+</style>
 
 @endsection

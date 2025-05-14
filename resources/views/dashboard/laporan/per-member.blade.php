@@ -140,6 +140,18 @@
     let currentEndDate = null;
 
     // Initialize date range picker
+    function formatDateToApi(date) {
+        const year = date.getFullYear();
+        const month = `${date.getMonth() + 1}`.padStart(2, '0');
+        const day = `${date.getDate()}`.padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function formatDate(date) {
+        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+        return date.toLocaleDateString('id-ID', options);
+    }
+
     function getDefaultDateRange() {
         const today = new Date();
         const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -155,42 +167,32 @@
             if (selectedDates.length === 2) {
                 currentStartDate = selectedDates[0];
                 currentEndDate = selectedDates[1];
-                
-                const formattedStart = formatDate(currentStartDate);
-                const formattedEnd = formatDate(currentEndDate);
-                
-                // Update tampilan UI
-                document.getElementById('dateRangeDisplay').textContent = `${formattedStart} - ${formattedEnd}`;
-                
-                // Kirim format yang benar ke API
-                const apiStartDate = currentStartDate.toISOString().split('T')[0];
-                const apiEndDate = currentEndDate.toISOString().split('T')[0];
-                
-                fetchData(apiStartDate, apiEndDate);
+                updateDateDisplay();
+                fetchData(formatDateToApi(currentStartDate), formatDateToApi(currentEndDate));
             }
         },
         onReady: function(selectedDates, dateStr, instance) {
-            // Set tanggal saat pertama kali load
+            // Pastikan tanggal default terkirim saat pertama load
             if (selectedDates.length === 2) {
                 currentStartDate = selectedDates[0];
                 currentEndDate = selectedDates[1];
+                updateDateDisplay();
+                // Panggil fetchData dengan sedikit delay untuk memastikan DOM siap
+                setTimeout(() => {
+                    fetchData(formatDateToApi(currentStartDate), formatDateToApi(currentEndDate));
+                }, 100);
             }
         }
     });
 
-    // Format date to Indonesian format
-    function formatDate(date) {
-        const options = { day: 'numeric', month: 'long', year: 'numeric' };
-        return date.toLocaleDateString('id-ID', options);
+    // Fungsi helper untuk update tampilan tanggal
+    function updateDateDisplay() {
+        if (currentStartDate && currentEndDate) {
+            const formattedStart = formatDate(currentStartDate);
+            const formattedEnd = formatDate(currentEndDate);
+            document.getElementById('dateRangeDisplay').textContent = `${formattedStart} - ${formattedEnd}`;
+        }
     }
-
-    // Search input handler
-    document.getElementById('searchInput').addEventListener('keyup', function(e) {
-        filterData();
-    });
-
-    // Initial fetch
-    fetchData('2025-05-01', '2025-05-14');
 
     // Fetch API data
     async function fetchData(startDate = null, endDate = null) {
@@ -202,14 +204,10 @@
             // If no dates provided, use default (first day of month to today)
             if (!startDate || !endDate) {
                 const defaultRange = getDefaultDateRange();
-                startDate = defaultRange[0].toISOString().split('T')[0];
-                endDate = defaultRange[1].toISOString().split('T')[0];
-                
-                // Update the date picker to show the correct range
-                if (dateRangePicker) {
-                    dateRangePicker.setDate([defaultRange[0], defaultRange[1]]);
-                }
+                startDate = formatDateToApi(defaultRange[0]);
+                endDate = formatDateToApi(defaultRange[1]);
             }
+
             
             const apiUrl = `http://127.0.0.1:8000/api/reports/sales-by-member/${outletId}?start_date=${startDate}&end_date=${endDate}`;
             const response = await fetch(apiUrl, {
@@ -240,6 +238,17 @@
             if (loadingIndicator) loadingIndicator.style.display = 'none';
         }
     }
+
+    // Panggil fetchData saat pertama load (fallback)
+    document.addEventListener('DOMContentLoaded', function() {
+        // Jika belum ada tanggal yang ter-set, gunakan default
+        if (!currentStartDate || !currentEndDate) {
+            const defaultRange = getDefaultDateRange();
+            currentStartDate = defaultRange[0];
+            currentEndDate = defaultRange[1];
+            fetchData(formatDateToApi(currentStartDate), formatDateToApi(currentEndDate));
+        }
+    });
 
     // Update UI with API data
     function updateUI(data) {
@@ -496,7 +505,6 @@
 
     }
 
-    
     // Export report function
     function exportReport() {
         if (!apiData || !apiData.data) {
@@ -570,6 +578,10 @@
             </div>
         `;
         alertContainer.appendChild(alert);
+
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
         
         // Auto remove alert after 5 seconds
         setTimeout(() => {
@@ -577,5 +589,48 @@
         }, 5000);
     }
 </script>
+
+<style>
+    /* Tanggal terpilih: awal & akhir range */
+    .flatpickr-day.selected,
+    .flatpickr-day.startRange,
+    .flatpickr-day.endRange {
+        background-color: #f97316; /* Tailwind orange-500 */
+        color: white;
+        border-color: #f97316;
+    }
+
+    .flatpickr-day.selected:hover,
+    .flatpickr-day.startRange:hover,
+    .flatpickr-day.endRange:hover {
+        background-color: #fb923c; /* Tailwind orange-400 */
+        color: white;
+        border-color: #fb923c;
+    }
+
+    /* Tanggal di antara range */
+    .flatpickr-day.inRange {
+        background-color: #fed7aa; /* Tailwind orange-200 */
+        color: #78350f; /* Tailwind orange-800 */
+    }
+
+    /* Hover efek pada hari */
+    .flatpickr-day:hover {
+        background-color: #fdba74; /* Tailwind orange-300 */
+        color: black;
+    }
+
+    /* Hilangkan outline biru saat klik/tap */
+    .flatpickr-day:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px #fdba74; /* Tailwind orange-300 glow */
+    }
+
+    /* Hari ini */
+    .flatpickr-day.today:not(.selected):not(.inRange) {
+        border: 1px solid #fb923c; /* Tailwind orange-400 */
+        background-color: #fff7ed; /* Tailwind orange-50 */
+    }
+</style>
 
 @endsection

@@ -78,7 +78,7 @@
 
     <!-- No data state -->
     <div id="noDataState" class="py-12 flex flex-col items-center justify-center hidden">
-        <i data-lucide="package-x" class="w-16 h-16 text-gray-400"></i>
+        {{-- <i data-lucide="package-x" class="w-16 h-16 text-gray-400"></i> --}}
         <p class="mt-4 text-gray-600">Tidak ada data untuk periode yang dipilih</p>
     </div>
 
@@ -438,6 +438,7 @@
             stockData = data;
             displayStockData(data);
             showLoading(false);
+            showAlert('success', 'Data laporan berhasil dimuat');
         })
         .catch(error => {
             console.error('Error fetching stock data:', error);
@@ -876,15 +877,58 @@
     }
 
     // Initialize the page
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initial data fetch
-        fetchStockData();
+    // document.addEventListener('DOMContentLoaded', function() {
+    //     // Initial data fetch
+    //     fetchStockData();
         
-        // Initialize Lucide icons
-        if (window.lucide) {
-            lucide.createIcons();
-        }
-    });
+    //     // Initialize Lucide icons
+    //     if (window.lucide) {
+    //         lucide.createIcons();
+    //     }
+    // });
 </script>
+
+<style>
+    /* Tanggal terpilih: awal & akhir range */
+    .flatpickr-day.selected,
+    .flatpickr-day.startRange,
+    .flatpickr-day.endRange {
+        background-color: #f97316; /* Tailwind orange-500 */
+        color: white;
+        border-color: #f97316;
+    }
+
+    .flatpickr-day.selected:hover,
+    .flatpickr-day.startRange:hover,
+    .flatpickr-day.endRange:hover {
+        background-color: #fb923c; /* Tailwind orange-400 */
+        color: white;
+        border-color: #fb923c;
+    }
+
+    /* Tanggal di antara range */
+    .flatpickr-day.inRange {
+        background-color: #fed7aa; /* Tailwind orange-200 */
+        color: #78350f; /* Tailwind orange-800 */
+    }
+
+    /* Hover efek pada hari */
+    .flatpickr-day:hover {
+        background-color: #fdba74; /* Tailwind orange-300 */
+        color: black;
+    }
+
+    /* Hilangkan outline biru saat klik/tap */
+    .flatpickr-day:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px #fdba74; /* Tailwind orange-300 glow */
+    }
+
+    /* Hari ini */
+    .flatpickr-day.today:not(.selected):not(.inRange) {
+        border: 1px solid #fb923c; /* Tailwind orange-400 */
+        background-color: #fff7ed; /* Tailwind orange-50 */
+    }
+</style>
 
 @endsection

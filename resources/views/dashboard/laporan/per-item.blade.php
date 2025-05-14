@@ -164,8 +164,10 @@
 
 <script>
     // Global variables
-    let currentStartDate = '2025-05-01';
-    let currentEndDate = '2025-05-13';
+    const today = new Date();
+    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+    let currentStartDate = formatDateLocal(firstDay);
+    let currentEndDate = formatDateLocal(today);
     let outletId = 1;
     
     // Format currency to Indonesian Rupiah
@@ -179,31 +181,40 @@
     }
     
     // Initialize date range picker
-    document.addEventListener('DOMContentLoaded', function() {
+    function formatDateLocal(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const today = new Date();
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+        let currentStartDate = formatDateLocal(firstDay);
+        let currentEndDate = formatDateLocal(today);
+
         flatpickr("#dateRange", {
             mode: "range",
             dateFormat: "d M Y",
-            defaultDate: [new Date(currentStartDate), new Date(currentEndDate)],
+            defaultDate: [firstDay, today],
             locale: "id",
-            onChange: function(selectedDates, dateStr) {
+            onChange: function (selectedDates, dateStr) {
                 if (selectedDates.length === 2) {
-                    // Format dates for API call
-                    currentStartDate = selectedDates[0].toISOString().split('T')[0];
-                    currentEndDate = selectedDates[1].toISOString().split('T')[0];
-                    
-                    // Load data with new date range
+                    currentStartDate = formatDateLocal(selectedDates[0]);
+                    currentEndDate = formatDateLocal(selectedDates[1]);
                     loadData(outletId, currentStartDate, currentEndDate);
                 }
             }
         });
-        
-        // Load initial data
+
+        // 🚀 Panggil data awal
         loadData(outletId, currentStartDate, currentEndDate);
     });
     
     // Load data from API
     function loadData(outletId, startDate, endDate) {
-        showAlert('info', 'Memuat data laporan...');
+        // showAlert('info', 'Memuat data laporan...');
         
         const url = `http://127.0.0.1:8000/api/reports/monthly-sales/${outletId}?start_date=${startDate}&end_date=${endDate}`;
         
@@ -222,7 +233,7 @@
             .then(data => {
                 if (data.status) {
                     updatePageData(data.data);
-                    showAlert('success', 'Data laporan berhasil dimuat');
+                    showAlert('success', 'Data berhasil dimuat');
                 } else {
                     showAlert('error', 'Gagal memuat data');
                 }
@@ -490,5 +501,48 @@
         }, 5000);
     }
 </script>
+
+<style>
+    /* Tanggal terpilih: awal & akhir range */
+    .flatpickr-day.selected,
+    .flatpickr-day.startRange,
+    .flatpickr-day.endRange {
+        background-color: #f97316; /* Tailwind orange-500 */
+        color: white;
+        border-color: #f97316;
+    }
+
+    .flatpickr-day.selected:hover,
+    .flatpickr-day.startRange:hover,
+    .flatpickr-day.endRange:hover {
+        background-color: #fb923c; /* Tailwind orange-400 */
+        color: white;
+        border-color: #fb923c;
+    }
+
+    /* Tanggal di antara range */
+    .flatpickr-day.inRange {
+        background-color: #fed7aa; /* Tailwind orange-200 */
+        color: #78350f; /* Tailwind orange-800 */
+    }
+
+    /* Hover efek pada hari */
+    .flatpickr-day:hover {
+        background-color: #fdba74; /* Tailwind orange-300 */
+        color: black;
+    }
+
+    /* Hilangkan outline biru saat klik/tap */
+    .flatpickr-day:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px #fdba74; /* Tailwind orange-300 glow */
+    }
+
+    /* Hari ini */
+    .flatpickr-day.today:not(.selected):not(.inRange) {
+        border: 1px solid #fb923c; /* Tailwind orange-400 */
+        background-color: #fff7ed; /* Tailwind orange-50 */
+    }
+</style>
 
 @endsection

@@ -124,118 +124,7 @@
                 </tr>
             </thead>
             <tbody class="text-gray-700 divide-y" id="adjustmentTable">
-                <tr>
-                    <td class="py-4 px-4">09 Mei 2025</td>
-                    <td class="py-4 px-4">2025</td>
-                    <td class="py-4 px-4">Roti Semir Eco</td>
-                    <td class="py-4 px-4 text-center text-green-500">+2</td>
-                    <td class="py-4 px-4">9/5/25</td>
-                    <td class="py-4 px-4">Mona</td>
-                </tr>
-                <tr>
-                    <td class="py-4 px-4">09 Mei 2025</td>
-                    <td class="py-4 px-4">2015</td>
-                    <td class="py-4 px-4">Flos Roll Abon</td>
-                    <td class="py-4 px-4 text-center text-green-500">+1</td>
-                    <td class="py-4 px-4">9/5/25</td>
-                    <td class="py-4 px-4">Mona</td>
-                </tr>
-                <tr>
-                    <td class="py-4 px-4">09 Mei 2025</td>
-                    <td class="py-4 px-4">2029</td>
-                    <td class="py-4 px-4">Roti Unyil</td>
-                    <td class="py-4 px-4 text-center text-green-500">+5</td>
-                    <td class="py-4 px-4">9/5/25</td>
-                    <td class="py-4 px-4">Mona</td>
-                </tr>
-                <tr>
-                    <td class="py-4 px-4">09 Mei 2025</td>
-                    <td class="py-4 px-4">2032</td>
-                    <td class="py-4 px-4">Roti Tawar Original</td>
-                    <td class="py-4 px-4 text-center text-green-500">+2</td>
-                    <td class="py-4 px-4">9/5/25</td>
-                    <td class="py-4 px-4">Mona</td>
-                </tr>
-                <tr>
-                    <td class="py-4 px-4">09 Mei 2025</td>
-                    <td class="py-4 px-4">1113</td>
-                    <td class="py-4 px-4">Bolu Gulung Tiramisu Ekonomis</td>
-                    <td class="py-4 px-4 text-center text-green-500">+2</td>
-                    <td class="py-4 px-4">9/5/25</td>
-                    <td class="py-4 px-4">Mona</td>
-                </tr>
-                <tr>
-                    <td class="py-4 px-4">09 Mei 2025</td>
-                    <td class="py-4 px-4">1110</td>
-                    <td class="py-4 px-4">Bolu Gulung Coklat Ekonomis</td>
-                    <td class="py-4 px-4 text-center text-green-500">+2</td>
-                    <td class="py-4 px-4">9/5/25</td>
-                    <td class="py-4 px-4">Mona</td>
-                </tr>
-                <tr>
-                    <td class="py-4 px-4">09 Mei 2025</td>
-                    <td class="py-4 px-4">1109</td>
-                    <td class="py-4 px-4">Bolu Gulung Pandan Ekonomis</td>
-                    <td class="py-4 px-4 text-center text-green-500">+3</td>
-                    <td class="py-4 px-4">9/5</td>
-                    <td class="py-4 px-4">Mona</td>
-                </tr>
-                <tr>
-                    <td class="py-4 px-4">04 Mei 2025</td>
-                    <td class="py-4 px-4">2032</td>
-                    <td class="py-4 px-4">Roti Tawar Original</td>
-                    <td class="py-4 px-4 text-center text-green-500">+2</td>
-                    <td class="py-4 px-4">4/5/25</td>
-                    <td class="py-4 px-4">Mona</td>
-                </tr>
-                <tr>
-                    <td class="py-4 px-4">04 Mei 2025</td>
-                    <td class="py-4 px-4">1001</td>
-                    <td class="py-4 px-4">Bolu Pisang</td>
-                    <td class="py-4 px-4 text-center text-green-500">+2</td>
-                    <td class="py-4 px-4">4/5/25</td>
-                    <td class="py-4 px-4">Mona</td>
-                </tr>
-                <tr>
-                    <td class="py-4 px-4">04 Mei 2025</td>
-                    <td class="py-4 px-4">1204</td>
-                    <td class="py-4 px-4">Chiffon Keju Reguler</td>
-                    <td class="py-4 px-4 text-center text-green-500">+3</td>
-                    <td class="py-4 px-4">4/5/25</td>
-                    <td class="py-4 px-4">Mona</td>
-                </tr>
-                <tr>
-                    <td class="py-4 px-4">04 Mei 2025</td>
-                    <td class="py-4 px-4">1204</td>
-                    <td class="py-4 px-4">Chiffon Keju Reguler</td>
-                    <td class="py-4 px-4 text-center text-green-500">+3</td>
-                    <td class="py-4 px-4">Kiriman pabrik (4 Mei 2025)</td>
-                    <td class="py-4 px-4">Mona</td>
-                </tr>
-                <tr>
-                    <td class="py-4 px-4">04 Mei 2025</td>
-                    <td class="py-4 px-4">KNS011</td>
-                    <td class="py-4 px-4">Mie Lidi Pacipa</td>
-                    <td class="py-4 px-4 text-center text-green-500">+20</td>
-                    <td class="py-4 px-4">kns pacipa</td>
-                    <td class="py-4 px-4">Kasir</td>
-                </tr>
-                <tr>
-                    <td class="py-4 px-4">04 Mei 2025</td>
-                    <td class="py-4 px-4">M004</td>
-                    <td class="py-4 px-4">Indomilk Coklat 115ml</td>
-                    <td class="py-4 px-4 text-center text-green-500">+5</td>
-                    <td class="py-4 px-4">tgl 3/5</td>
-                    <td class="py-4 px-4">Kasir</td>
-                </tr>
-                <tr>
-                    <td class="py-4 px-4">04 Mei 2025</td>
-                    <td class="py-4 px-4">1002</td>
-                    <td class="py-4 px-4">Bolu Meses</td>
-                    <td class="py-4 px-4 text-center text-green-500">+5</td>
-                    <td class="py-4 px-4">kiriman 4/5</td>
-                    <td class="py-4 px-4">Kasir</td>
-                </tr>
+                
             </tbody>
         </table>
     </div>
@@ -246,45 +135,183 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 
 <script>
-    // Data contoh untuk simulasi
-    const adjustmentData = [
-        { date: '09 Mei 2025', sku: '2025', product: 'Roti Semir Eco', change: '+2', note: '9/5/25', approvedBy: 'Mona', status: 'approved' },
-        { date: '09 Mei 2025', sku: '2015', product: 'Flos Roll Abon', change: '+1', note: '9/5/25', approvedBy: 'Mona', status: 'approved' },
-        { date: '09 Mei 2025', sku: '2029', product: 'Roti Unyil', change: '+5', note: '9/5/25', approvedBy: 'Mona', status: 'approved' },
-        { date: '09 Mei 2025', sku: '2032', product: 'Roti Tawar Original', change: '+2', note: '9/5/25', approvedBy: 'Mona', status: 'approved' },
-        { date: '09 Mei 2025', sku: '1113', product: 'Bolu Gulung Tiramisu Ekonomis', change: '+2', note: '9/5/25', approvedBy: 'Mona', status: 'approved' },
-        { date: '09 Mei 2025', sku: '1110', product: 'Bolu Gulung Coklat Ekonomis', change: '+2', note: '9/5/25', approvedBy: 'Mona', status: 'approved' },
-        { date: '09 Mei 2025', sku: '1109', product: 'Bolu Gulung Pandan Ekonomis', change: '+3', note: '9/5', approvedBy: 'Mona', status: 'approved' },
-        { date: '04 Mei 2025', sku: '2032', product: 'Roti Tawar Original', change: '+2', note: '4/5/25', approvedBy: 'Mona', status: 'approved' },
-        { date: '04 Mei 2025', sku: '1001', product: 'Bolu Pisang', change: '+2', note: '4/5/25', approvedBy: 'Mona', status: 'approved' },
-        { date: '04 Mei 2025', sku: '1204', product: 'Chiffon Keju Reguler', change: '+3', note: '4/5/25', approvedBy: 'Mona', status: 'approved' },
-        { date: '04 Mei 2025', sku: '1204', product: 'Chiffon Keju Reguler', change: '+3', note: 'Kiriman pabrik (4 Mei 2025)', approvedBy: 'Mona', status: 'approved' },
-        { date: '04 Mei 2025', sku: 'KNS011', product: 'Mie Lidi Pacipa', change: '+20', note: 'kns pacipa', approvedBy: 'Kasir', status: 'approved' },
-        { date: '04 Mei 2025', sku: 'M004', product: 'Indomilk Coklat 115ml', change: '+5', note: 'tgl 3/5', approvedBy: 'Kasir', status: 'approved' },
-        { date: '04 Mei 2025', sku: '1002', product: 'Bolu Meses', change: '+5', note: 'kiriman 4/5', approvedBy: 'Kasir', status: 'approved' }
-    ];
+    // Data laporan dari API
+    let reportData = {
+        approved: [],
+        rejected: []
+    };
 
-    // Initialize date range picker
+    // Fungsi untuk memformat tanggal ke format Indonesia
+    function formatDate(date) {
+        if (!date) return '';
+        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+        return new Date(date).toLocaleDateString('id-ID', options);
+    }
+
+    // Fungsi untuk format ISO date ke format API (YYYY-MM-DD)
+    function formatISODate(isoDateString) {
+        if (!isoDateString) return '';
+        const date = new Date(isoDateString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    // Fungsi untuk mendapatkan tanggal awal bulan dan hari ini
+    function getDefaultDateRange() {
+        const today = new Date();
+        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        return {
+            startDate: firstDayOfMonth,
+            endDate: today
+        };
+    }
+
+    // Initialize date range picker dengan default awal bulan sampai hari ini
+    const defaultRange = getDefaultDateRange();
     const dateRangePicker = flatpickr("#dateRange", {
         mode: "range",
-        dateFormat: "d M Y",
-        defaultDate: ["2025-05-01", "2025-05-11"],
+        dateFormat: "Y-m-d",
+        defaultDate: [defaultRange.startDate, defaultRange.endDate],
         locale: "id",
         onChange: function(selectedDates, dateStr) {
             if (selectedDates.length === 2) {
-                const startDate = formatDate(selectedDates[0]);
-                const endDate = formatDate(selectedDates[1]);
-                document.getElementById('dateRangeDisplay').textContent = `${startDate} - ${endDate}`;
-                filterData();
-                showAlert('success', `Menampilkan data dari ${startDate} sampai ${endDate}`);
+                const startDate = formatISODate(selectedDates[0]);
+                const endDate = formatISODate(selectedDates[1]);
+                
+                // Format untuk display
+                const startDateDisplay = formatDate(selectedDates[0]);
+                const endDateDisplay = formatDate(selectedDates[1]);
+                document.getElementById('dateRangeDisplay').textContent = `${startDateDisplay} - ${endDateDisplay}`;
+                
+                // Fetch data dengan tanggal baru
+                fetchReportData(startDate, endDate);
             }
         }
     });
 
-    // Format date to Indonesian format
-    function formatDate(date) {
-        const options = { day: 'numeric', month: 'long', year: 'numeric' };
-        return date.toLocaleDateString('id-ID', options);
+    // Set default tanggal display saat pertama load
+    document.addEventListener('DOMContentLoaded', function() {
+        const defaultRange = getDefaultDateRange();
+        const startDateDisplay = formatDate(defaultRange.startDate);
+        const endDateDisplay = formatDate(defaultRange.endDate);
+        document.getElementById('dateRangeDisplay').textContent = `${startDateDisplay} - ${endDateDisplay}`;
+        
+        // Format untuk API (YYYY-MM-DD)
+        const startDateAPI = formatISODate(defaultRange.startDate);
+        const endDateAPI = formatISODate(defaultRange.endDate);
+        
+        // Fetch data awal
+        fetchReportData(startDateAPI, endDateAPI);
+    });
+
+    // Fungsi untuk fetch data dari API
+    async function fetchReportData(startDate, endDate) {
+        try {
+            // showAlert('info', 'Memuat data laporan...');
+            
+            const outletId = 1; // ID outlet saat ini
+            const response = await fetch(`http://127.0.0.1:8000/api/reports/inventory-approvals/${outletId}?start_date=${startDate}&end_date=${endDate}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Accept': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Gagal mengambil data dari server');
+            }
+            
+            const data = await response.json();
+            reportData = data;
+            
+            // Update UI dengan data baru
+            updateReportUI();
+            showAlert('success', 'Data laporan berhasil dimuat');
+        } catch (error) {
+            console.error('Error fetching report data:', error);
+            showAlert('error', 'Gagal memuat data: ' + error.message);
+        }
+    }
+
+    // Fungsi untuk update tampilan laporan
+    function updateReportUI() {
+        // Update jumlah pada summary cards
+        document.querySelectorAll('.bg-white.rounded-lg.shadow.p-4')[0].querySelector('h3').textContent = 
+            `${reportData.approved.length} penyesuaian`;
+        document.querySelectorAll('.bg-white.rounded-lg.shadow.p-4')[1].querySelector('h3').textContent = 
+            `${reportData.rejected.length} penyesuaian`;
+        
+        // Reset dan filter data berdasarkan pencarian dan status
+        filterData();
+    }
+
+    // Filter data function
+    function filterData() {
+        const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+        const statusFilter = document.getElementById('statusFilter').value;
+        
+        // Gabungkan data approved dan rejected
+        let allData = [];
+        
+        if (statusFilter === 'all' || statusFilter === 'approved') {
+            allData = allData.concat(reportData.approved.map(item => ({...item, status: 'approved'})));
+        }
+        
+        if (statusFilter === 'all' || statusFilter === 'rejected') {
+            allData = allData.concat(reportData.rejected.map(item => ({...item, status: 'rejected'})));
+        }
+        
+        // Filter berdasarkan pencarian
+        const filteredData = allData.filter(item => {
+            return (
+                item.product.sku.toLowerCase().includes(searchTerm) ||
+                item.product.name.toLowerCase().includes(searchTerm) ||
+                (item.notes && item.notes.toLowerCase().includes(searchTerm)) ||
+                item.approver.name.toLowerCase().includes(searchTerm)
+            );
+        });
+        
+        // Update tabel adjustment
+        const adjustmentTable = document.getElementById('adjustmentTable');
+        adjustmentTable.innerHTML = '';
+        
+        if (filteredData.length === 0) {
+            adjustmentTable.innerHTML = `
+                <tr>
+                    <td colspan="6" class="py-4 px-4 text-center text-gray-500">
+                        Tidak ada data yang ditemukan
+                    </td>
+                </tr>
+            `;
+        } else {
+            filteredData.forEach(item => {
+                const change = item.quantity_change > 0 ? '+' + item.quantity_change : item.quantity_change;
+                const changeColor = item.quantity_change >= 0 ? 'text-green-500' : 'text-red-500';
+                const formattedDate = formatISODate(item.created_at);
+                
+                adjustmentTable.innerHTML += `
+                    <tr>
+                        <td class="py-4 px-4">${formattedDate}</td>
+                        <td class="py-4 px-4">${item.product.sku}</td>
+                        <td class="py-4 px-4">${item.product.name}</td>
+                        <td class="py-4 px-4 text-center ${changeColor}">${change}</td>
+                        <td class="py-4 px-4">${item.notes || '-'}</td>
+                        <td class="py-4 px-4">${item.approver.name}</td>
+                    </tr>
+                `;
+            });
+        }
+        
+        // Update jumlah disetujui dan ditolak berdasarkan hasil filter
+        const approvedCount = filteredData.filter(item => item.status === 'approved').length;
+        const rejectedCount = filteredData.filter(item => item.status === 'rejected').length;
+        
+        document.querySelectorAll('.bg-white.rounded-lg.shadow.p-4')[0].querySelector('h3').textContent = 
+            `${approvedCount} penyesuaian`;
+        document.querySelectorAll('.bg-white.rounded-lg.shadow.p-4')[1].querySelector('h3').textContent = 
+            `${rejectedCount} penyesuaian`;
     }
 
     // Search input handler
@@ -297,86 +324,182 @@
         filterData();
     });
 
-    // Filter data function
-    function filterData() {
-        const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
-        const statusFilter = document.getElementById('statusFilter').value;
-        
-        // Filter data berdasarkan pencarian dan status
-        const filteredData = adjustmentData.filter(item => {
-            const matchesSearch = 
-                item.sku.toLowerCase().includes(searchTerm) ||
-                item.product.toLowerCase().includes(searchTerm) ||
-                item.note.toLowerCase().includes(searchTerm) ||
-                item.approvedBy.toLowerCase().includes(searchTerm);
-            
-            const matchesStatus = 
-                statusFilter === 'all' || 
-                (statusFilter === 'approved' && item.status === 'approved') ||
-                (statusFilter === 'rejected' && item.status === 'rejected');
-            
-            return matchesSearch && matchesStatus;
-        });
-        
-        // Update tabel adjustment
-        const adjustmentTable = document.getElementById('adjustmentTable');
-        adjustmentTable.innerHTML = '';
-        filteredData.forEach(item => {
-            const changeColor = item.change.startsWith('+') ? 'text-green-500' : 'text-red-500';
-            adjustmentTable.innerHTML += `
-                <tr>
-                    <td class="py-4 px-4">${item.date}</td>
-                    <td class="py-4 px-4">${item.sku}</td>
-                    <td class="py-4 px-4">${item.product}</td>
-                    <td class="py-4 px-4 text-center ${changeColor}">${item.change}</td>
-                    <td class="py-4 px-4">${item.note}</td>
-                    <td class="py-4 px-4">${item.approvedBy}</td>
-                </tr>
-            `;
-        });
-        
-        // Update summary cards
-        const approvedCount = filteredData.filter(item => item.status === 'approved').length;
-        const rejectedCount = filteredData.filter(item => item.status === 'rejected').length;
-        
-        document.querySelectorAll('.bg-white.rounded-lg.shadow.p-4')[0].querySelector('h3').textContent = `${approvedCount} penyesuaian`;
-        document.querySelectorAll('.bg-white.rounded-lg.shadow.p-4')[1].querySelector('h3').textContent = `${rejectedCount} penyesuaian`;
-    }
-
     // Print report function
     function printReport() {
+        if (!reportData || (!reportData.approved.length && !reportData.rejected.length)) {
+            showAlert('error', 'Tidak ada data untuk dicetak');
+            return;
+        }
+
         showAlert('info', 'Mempersiapkan laporan untuk dicetak...');
+
         setTimeout(() => {
-            window.print();
+            const printWindow = window.open('', '_blank');
+
+            // Ambil tanggal dari date picker (flatpickr)
+            const selectedDates = dateRangePicker.selectedDates;
+            const startDate = selectedDates[0] || new Date();
+            const endDate = selectedDates[1] || new Date();
+
+            const formattedStart = formatDate(startDate);
+            const formattedEnd = formatDate(endDate);
+            const outletName = document.getElementById('outletName')?.textContent || 'Outlet';
+
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Laporan Persetujuan Penyesuaian Stok</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        h1, h2 { color: #333; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f2f2f2; }
+                        .text-right { text-align: right; }
+                        .text-green-500 { color: green; }
+                        .text-red-500 { color: red; }
+                        .report-header {
+                            display: flex;
+                            align-items: center;
+                            gap: 20px;
+                            margin-bottom: 20px;
+                        }
+                        .logo {
+                            width: 60px;
+                            height: auto;
+                        }
+                        .header-info {
+                            margin-bottom: 15px;
+                        }
+                        hr { border: 0; border-top: 1px solid #000; margin: 10px 0; }
+                        .footer { margin-top: 30px; font-size: 0.8em; text-align: center; color: #666; }
+                    </style>
+                </head>
+                <body>
+                    <div class="report-header">
+                        <img src="/images/logo.png" alt="Logo Kifa Bakery" class="logo">
+                        <div>
+                            <h1>LAPORAN PERSETUJUAN PENYESUAIAN STOK</h1>
+                            <div class="header-info">
+                                Outlet: ${outletName}<br>
+                                Periode: ${formattedStart} hingga ${formattedEnd}<br>
+                                Dicetak pada: ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>SKU</th>
+                                <th>Nama Produk</th>
+                                <th class="text-center">Perubahan</th>
+                                <th>Keterangan</th>
+                                <th>Disetujui Oleh</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `);
+
+            const allData = [
+                ...reportData.approved.map(item => ({ ...item, status: 'Disetujui' })),
+                ...reportData.rejected.map(item => ({ ...item, status: 'Ditolak' }))
+            ];
+
+            allData.forEach(item => {
+                const change = item.quantity_change > 0 ? '+' + item.quantity_change : item.quantity_change;
+                const colorClass = item.quantity_change >= 0 ? 'text-green-500' : 'text-red-500';
+                const formattedDate = formatISODate(item.created_at);
+                const notes = item.notes || '-';
+
+                printWindow.document.write(`
+                    <tr>
+                        <td>${formattedDate}</td>
+                        <td>${item.product.sku}</td>
+                        <td>${item.product.name}</td>
+                        <td class="text-center ${colorClass}">${change}</td>
+                        <td>${notes}</td>
+                        <td>${item.approver.name}</td>
+                        <td>${item.status}</td>
+                    </tr>
+                `);
+            });
+
+            printWindow.document.write(`
+                        </tbody>
+                    </table>
+                    <div class="footer">
+                        Laporan ini dicetak secara otomatis oleh sistem.<br>
+                        © ${new Date().getFullYear()} Kifa Bakery
+                    </div>
+                </body>
+                </html>
+            `);
+
+            printWindow.document.close();
+
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 1000);
         }, 1000);
+
     }
-    
+
     // Export report function
     function exportReport() {
         showAlert('info', 'Mempersiapkan laporan untuk diekspor...');
         setTimeout(() => {
-            const a = document.createElement('a');
-            a.href = 'data:text/csv;charset=utf-8,';
-            a.download = `laporan-persetujuan-stok-${new Date().toISOString().slice(0,10)}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            // Persiapkan data CSV
+            let csvContent = 'Tanggal,SKU,Nama Item,Perubahan,Keterangan,Disetujui Oleh,Status\n';
+            
+            // Gabungkan data approved dan rejected
+            const allData = [
+                ...reportData.approved.map(item => ({...item, status: 'approved'})),
+                ...reportData.rejected.map(item => ({...item, status: 'rejected'}))
+            ];
+            
+            // Tambahkan setiap baris data
+            allData.forEach(item => {
+                const date = formatISODate(item.created_at);
+                const change = item.quantity_change > 0 ? '+' + item.quantity_change : item.quantity_change;
+                const notes = item.notes || '-';
+                const status = item.status === 'approved' ? 'Disetujui' : 'Ditolak';
+                
+                csvContent += `${date},${item.product.sku},"${item.product.name}",${change},"${notes}",${item.approver.name},${status}\n`;
+            });
+            
+            // Create and download CSV file
+            const encodedUri = encodeURI('data:text/csv;charset=utf-8,' + csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', `laporan-persetujuan-stok-${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
             showAlert('success', 'Laporan berhasil diekspor');
         }, 1000);
     }
-    
+
     // Show alert function
     function showAlert(type, message) {
         const alertContainer = document.getElementById('alertContainer');
         const alert = document.createElement('div');
-        alert.className = `px-4 py-3 rounded-lg shadow-md ${type === 'error' ? 'bg-red-100 text-red-700' : 
-                         type === 'success' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`;
+        alert.className = `px-4 py-3 rounded-lg shadow-md ${
+            type === 'error' ? 'bg-red-100 text-red-700' : 
+            type === 'success' ? 'bg-orange-100 text-orange-700' : 'bg-orange-100 text-orange-700'
+        }`;
         alert.innerHTML = `
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                    <i data-lucide="${type === 'error' ? 'alert-circle' : 
-                                    type === 'success' ? 'check-circle' : 'info'}" 
-                       class="w-5 h-5"></i>
+                    <i data-lucide="${
+                        type === 'error' ? 'alert-circle' : 
+                        type === 'success' ? 'check-circle' : 'info'
+                    }" class="w-5 h-5"></i>
                     <span>${message}</span>
                 </div>
                 <button onclick="this.parentElement.parentElement.remove()">
@@ -386,13 +509,69 @@
         `;
         alertContainer.appendChild(alert);
         
+        // Refresh Lucide icons
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+        
         setTimeout(() => {
             alert.remove();
         }, 5000);
     }
 
-    // Initial load
-    filterData();
+    // Fetch data awal saat halaman dimuat
+    // document.addEventListener('DOMContentLoaded', function() {
+    //     // Dapatkan tanggal hari ini dalam format yyyy-mm-dd
+    //     const today = new Date().toISOString().split('T')[0];
+    //     fetchReportData(today, today);
+        
+    //     // Set default tanggal display
+    //     const todayFormatted = formatDate(new Date());
+    //     document.getElementById('dateRangeDisplay').textContent = `${todayFormatted} - ${todayFormatted}`;
+    // });
 </script>
+
+<style>
+    /* Tanggal terpilih: awal & akhir range */
+    .flatpickr-day.selected,
+    .flatpickr-day.startRange,
+    .flatpickr-day.endRange {
+        background-color: #f97316; /* Tailwind orange-500 */
+        color: white;
+        border-color: #f97316;
+    }
+
+    .flatpickr-day.selected:hover,
+    .flatpickr-day.startRange:hover,
+    .flatpickr-day.endRange:hover {
+        background-color: #fb923c; /* Tailwind orange-400 */
+        color: white;
+        border-color: #fb923c;
+    }
+
+    /* Tanggal di antara range */
+    .flatpickr-day.inRange {
+        background-color: #fed7aa; /* Tailwind orange-200 */
+        color: #78350f; /* Tailwind orange-800 */
+    }
+
+    /* Hover efek pada hari */
+    .flatpickr-day:hover {
+        background-color: #fdba74; /* Tailwind orange-300 */
+        color: black;
+    }
+
+    /* Hilangkan outline biru saat klik/tap */
+    .flatpickr-day:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px #fdba74; /* Tailwind orange-300 glow */
+    }
+
+    /* Hari ini */
+    .flatpickr-day.today:not(.selected):not(.inRange) {
+        border: 1px solid #fb923c; /* Tailwind orange-400 */
+        background-color: #fff7ed; /* Tailwind orange-50 */
+    }
+</style>
 
 @endsection
