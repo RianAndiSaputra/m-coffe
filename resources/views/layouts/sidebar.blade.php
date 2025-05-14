@@ -66,10 +66,10 @@
     
     <!-- Menu -->
     <nav class="flex-1 overflow-y-auto py-4">
-        <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-link="/dashboard">
-            <a href="/dashboard" class="menu-link flex items-center py-2 transition-all w-full">
-                <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
-                <span class="ml-3">Dashboard</span>
+        <div class="px-4 py-2  group rounded-lg transition-all menu-item">
+           <a href="/dashboard" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
+                <i data-lucide="layout-dashboard" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
+                <span class="sidebar-text">Dashboard</span>
             </a>
         </div>
 
@@ -158,7 +158,7 @@
                     <i data-lucide="user" class="w-4 h-4 mr-3"></i>
                     <span>Member</span>
                 </a>
-                <a href="#" class="menu-subitem flex items-center py-2 transition-all w-full">
+                <a href="/staff" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="users" class="w-4 h-4 mr-3"></i>
                     <span>Staff</span>
                 </a>

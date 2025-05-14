@@ -74,11 +74,11 @@
 
       <!-- Foto Outlet -->
       <div class="p-5 border rounded-lg shadow-sm bg-gray-50">
-        <h3 class="font-semibold mb-4 text-gray-700">Foto Outlet</h3>
+        <h3 class="font-semibold mb-4 text-gray-700">Foto Qris</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
           <!-- Preview Foto -->
           <div>
-            <p class="text-sm text-gray-600 mb-1">Foto saat ini:</p>
+            <p class="text-sm text-gray-600 mb-1">Foto Qris:</p>
             <div class="h-24 w-24 bg-gray-200 rounded flex items-center justify-center overflow-hidden">
               <img id="editCurrentFoto" src="#" alt="Foto Outlet" class="object-cover w-full h-full hidden">
               <i data-lucide="image" class="w-8 h-8 text-gray-400" id="editDefaultIcon"></i>

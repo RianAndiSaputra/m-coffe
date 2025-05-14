@@ -67,16 +67,6 @@
             <p class="text-sm text-gray-600">Kelola semua member Kifa Bakery di sini.</p>
         </div>
     </div>
-
-    <!-- Kanan: Tombol -->
-    {{-- <div class="flex items-center space-x-2">
-        <button class="flex items-center px-4 py-2 text-sm font-medium bg-white border rounded-md shadow hover:bg-gray-50">
-            <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Cetak
-        </button>
-        <button class="flex items-center px-4 py-2 text-sm font-medium bg-white border rounded-md shadow hover:bg-gray-50">
-            <i data-lucide="download" class="w-4 h-4 mr-2"></i> Ekspor
-        </button>
-    </div> --}}
 </div>
 
 <!-- Card: Tabel Member -->
