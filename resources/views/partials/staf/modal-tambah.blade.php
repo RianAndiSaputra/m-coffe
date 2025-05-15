@@ -11,6 +11,7 @@
     <!-- Scrollable Content -->
     <div class="overflow-y-auto p-6 space-y-6 flex-1">
       <div class="space-y-4">
+        
         <!-- Nama Staff -->
         <div>
           <label class="block font-medium mb-1">Nama <span class="text-red-500">*</span></label>
@@ -57,25 +58,26 @@
           </div>
         </div>
 
-        <!-- Outlet -->
+     <!-- Outlet -->
         <div>
           <label class="block font-medium mb-1">Outlet</label>
-          <select id="outletStaff" class="w-full border rounded-lg px-4 py-2 text-sm">
-            <option value="pusat" selected>Kifa Bakery Pusat</option>
-            <option value="cabang1">Kifa Bakery Cabang 1</option>
-            <option value="cabang2">Kifa Bakery Cabang 2</option>
+          <select id="outletStaff" data-url="{{ url('/api/outlets') }}" class="w-full border rounded-lg px-4 py-2 text-sm">
+            <option value="" disabled selected>Memuat outlet...</option>
           </select>
+          <p id="errorOutletStaff" class="text-red-500 text-xs mt-1 hidden">Outlet wajib dipilih</p>
         </div>
+
       </div>
     </div>
 
-     <!-- Footer -->
-        <div class="p-6 border-t flex justify-end gap-3">
-        <button id="btnBatalModalTambahStaff" class="px-4 py-2 border rounded hover:bg-gray-100">Batal</button>
-        <button id="btnTambahStaff" class="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 flex items-center gap-2">
-            <i data-lucide="user-plus" class="w-4 h-4"></i>
-            <span>Simpan</span>
-        </button>
-        </div>
+    <!-- Footer -->
+    <div class="p-6 border-t flex justify-end gap-3">
+      <button id="btnBatalModalTambahStaff" class="px-4 py-2 border rounded hover:bg-gray-100">Batal</button>
+      <button id="btnTambahStaff" class="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 flex items-center gap-2">
+        <i data-lucide="user-plus" class="w-4 h-4"></i>
+        <span>Simpan</span>
+      </button>
     </div>
+
+  </div>
 </div>

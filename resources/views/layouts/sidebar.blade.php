@@ -24,6 +24,7 @@
             <!-- Outlet Dropdown Menu -->
             <div id="outletDropdown" class="hidden absolute left-0 right-0 mt-1 bg-white rounded-lg shadow-lg z-50 border border-gray-200 max-h-60 overflow-y-auto">
                 <!-- Search Box -->
+
                 <div class="p-2 border-b">
                     <div class="relative">
                         <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i>
@@ -32,34 +33,9 @@
                 </div>
                 
                 <!-- Outlet List -->
-                <ul class="py-1">
-                    <li>
-                        <a href="#" class="flex items-center px-4 py-2 hover:bg-gray-100">
-                            <span class="truncate">Kifa Bakery Pusat</span>
-                            <i data-lucide="check" class="w-4 h-4 ml-2 text-black"></i>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="flex items-center px-4 py-2 hover:bg-gray-100">
-                            <span class="truncate">Kifa Bakery Cabang A</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="flex items-center px-4 py-2 hover:bg-gray-100">
-                            <span class="truncate">Kifa Bakery Cabang B</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="flex items-center px-4 py-2 hover:bg-gray-100">
-                            <span class="truncate">Kifa Bakery Cabang C</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="flex items-center px-4 py-2 hover:bg-gray-100">
-                            <span class="truncate">Kifa Bakery Cabang D</span>
-                        </a>
-                    </li>
-                </ul>
+                <div class="p-2">
+                    <ul id="outletListContainer" class="divide-y divide-gray-100"></ul>
+                </div>
             </div>
         </div>
     </div>
@@ -537,5 +513,54 @@
         });
 
         setActiveMenu();
+        loadOutletsFromAPI();
     });
+
+    async function loadOutletsFromAPI() {
+        const outletListContainer = document.getElementById('outletListContainer');
+        const outletNameDisplay = document.querySelector('#outletDropdownButton span');
+
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/outlets', {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+
+            if (!result.success) throw new Error('Gagal memuat outlet');
+
+            // Bersihkan list dulu
+            outletListContainer.innerHTML = '';
+
+            result.data.forEach(outlet => {
+                const li = document.createElement('li');
+                li.className = 'px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm flex items-center gap-2';
+                li.innerHTML = `<i data-lucide="store" class="w-4 h-4 text-orange-500"></i> <span>${outlet.name}</span>`;
+                
+                li.addEventListener('click', () => {
+                    outletNameDisplay.textContent = outlet.name;
+                    outletDropdown.classList.add('hidden');
+                    outletDropdownArrow.classList.remove('rotate-180');
+
+                    // Simpan outlet ID ke localStorage (jika perlu)
+                    localStorage.setItem('selectedOutletId', outlet.id);
+
+                    // Panggil fungsi untuk reload data sesuai outlet
+                    loadProductData(outlet.id); // pastikan fungsi ini tersedia
+                });
+
+                outletListContainer.appendChild(li);
+            });
+
+            lucide.createIcons(); // Render ulang icon Lucide
+        } catch (err) {
+            console.error('Gagal memuat outlet:', err);
+            outletListContainer.innerHTML = '<li class="px-4 py-2 text-sm text-red-500">Gagal memuat outlet</li>';
+        }
+    }
+
+    
 </script>
