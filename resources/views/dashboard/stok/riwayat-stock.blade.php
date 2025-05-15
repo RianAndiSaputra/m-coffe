@@ -30,8 +30,8 @@
     <div class="mb-3 md:mb-0 flex items-start gap-2">
         <i data-lucide="store" class="w-5 h-5 text-gray-600"></i>
         <div>
-            <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">Outlet Aktif: Kifa Bakery Pusat</h2>
-            <p class="text-sm text-gray-600">Data riwayat perubahan stok untuk outlet Kifa Bakery Pusat.</p>
+            <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2 outlet-name">Outlet Aktif: Loading...</h2>
+            <p class="text-sm text-gray-600 outlet-address">Memuat data outlet...</p>
         </div>
     </div>
 </div>
@@ -67,60 +67,19 @@
                     <th class="py-3 font-bold">Catatan</th>
                 </tr>
             </thead>
-            <tbody class="text-gray-700 divide-y">
-                <!-- Riwayat 1 -->
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="py-4">10:30:42</td>
-                    <td class="py-4">
-                        <div class="flex items-center space-x-2">
-                            <img src="https://via.placeholder.com/40" alt="gambar" class="w-8 h-8 bg-gray-100 rounded object-cover" />
-                            <span>Bolu Pisang</span>
-                        </div>
+            <tbody id="historyTableBody" class="text-gray-700 divide-y">
+                <!-- Data akan diisi via JavaScript -->
+                <tr id="loadingRow">
+                    <td colspan="7" class="py-4 text-center text-gray-500">
+                        Memuat data...
                     </td>
-                    <td>25</td>
-                    <td>20</td>
-                    <td class="text-red-500">-5</td>
-                    <td><span class="px-2 py-1 bg-blue-100 text-blue-600 rounded text-xs">Penjualan</span></td>
-                    <td class="text-xs text-gray-500">Pesanan #TRX-001</td>
-                </tr>
-                
-                <!-- Riwayat 2 -->
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="py-3">09:15:22</td>
-                    <td class="py-3">
-                        <div class="flex items-center space-x-2">
-                            <img src="https://via.placeholder.com/40" alt="gambar" class="w-8 h-8 bg-gray-100 rounded object-cover" />
-                            <span>Roti Sobek</span>
-                        </div>
-                    </td>
-                    <td>15</td>
-                    <td>30</td>
-                    <td class="text-green-500">+15</td>
-                    <td><span class="px-2 py-1 bg-green-100 text-green-600 rounded text-xs">Restok</span></td>
-                    <td class="text-xs text-gray-500">Supplier: Mitra Roti</td>
-                </tr>
-                
-                <!-- Riwayat 3 -->
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="py-3">08:05:10</td>
-                    <td class="py-3">
-                        <div class="flex items-center space-x-2">
-                            <img src="https://via.placeholder.com/40" alt="gambar" class="w-8 h-8 bg-gray-100 rounded object-cover" />
-                            <span>Donat Coklat</span>
-                        </div>
-                    </td>
-                    <td>12</td>
-                    <td>10</td>
-                    <td class="text-red-500">-2</td>
-                    <td><span class="px-2 py-1 bg-yellow-100 text-yellow-600 rounded text-xs">Koreksi</span></td>
-                    <td class="text-xs text-gray-500">Stok rusak</td>
                 </tr>
             </tbody>
         </table>
     </div>
 
     <!-- Pagination -->
-    <div class="flex items-center justify-between mt-4">
+    {{-- <div class="flex items-center justify-between mt-4">
         <div class="text-sm text-gray-600">
             Menampilkan 1 sampai 3 dari 15 entri
         </div>
@@ -138,48 +97,152 @@
                 Next
             </button>
         </div>
-    </div>
+    </div> --}}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <script>
-    // Inisialisasi flatpickr
-    flatpickr("#reportDateInput", {
-        dateFormat: "d M Y",
-        defaultDate: "today",
-        onChange: function(selectedDates, dateStr) {
-            updateReportDateRange(dateStr);
-            filterStokByDate(dateStr); // Panggil fungsi filter (kalau ada)
-        },
-        locale: {
-            firstDayOfWeek: 1 // Senin sebagai awal minggu
-        }
-    });
+    // Mapping style untuk tipe stok
+    const typeStyles = {
+        'purchase': { bg: 'bg-green-100', text: 'text-green-600' },
+        'sale': { bg: 'bg-red-100', text: 'text-red-600' },
+        'adjustment': { bg: 'bg-yellow-100', text: 'text-yellow-600' },
+        'other': { bg: 'bg-gray-100', text: 'text-gray-600' },
+        'stocktake': { bg: 'bg-purple-100', text: 'text-purple-600' },
+        'shipment': { bg: 'bg-blue-100', text: 'text-blue-600' },
+        'transfer_in': { bg: 'bg-teal-100', text: 'text-teal-600' },
+        'transfer_out': { bg: 'bg-orange-100', text: 'text-orange-600' }
+    };
 
-    // Ubah tampilan tanggal di bawah judul
-    function updateReportDateRange(dateStr) {
-        const display = document.getElementById('reportDateRange');
-        if (display) {
-            display.textContent = `Menampilkan stok per tanggal ${dateStr}`;
+    // Format waktu dari ISO
+    function formatTime(isoString) {
+        const date = new Date(isoString);
+        return date.toLocaleTimeString('id-ID', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false 
+        });
+    }
+
+    // document.getElementById('searchInput').addEventListener('input', function(e) {
+    //     const searchTerm = e.target.value.toLowerCase();
+    //     const rows = document.querySelectorAll('#historyTableBody tr');
+        
+    //     rows.forEach(row => {
+    //         const productName = row.querySelector('td:nth-child(2) span').textContent.toLowerCase();
+    //         row.style.display = productName.includes(searchTerm) ? '' : 'none';
+    //     });
+    // });
+
+    // Fetch data dari API
+    async function fetchInventoryHistory(date) {
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/api/inventory-histories/outlet/1?date=${date}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Accept': 'application/json'
+                }
+            });
+            const { data, success, message } = await response.json();
+            
+            if (!success) throw new Error(message);
+            
+            return data;
+        } catch (error) {
+            showAlert('error', `Gagal memuat data: ${error.message}`);
+            return [];
         }
     }
 
-    // Panggil fungsi ini saat halaman siap
-    document.addEventListener('DOMContentLoaded', function () {
-        const input = document.getElementById('reportDateInput');
-        if (input) {
-            const flatpickrInstance = input._flatpickr;
-            if (flatpickrInstance) {
-                updateReportDateRange(flatpickrInstance.input.value);
-            }
+    // Update tampilan
+    async function updateHistoryTable(date) {
+        const tbody = document.getElementById('historyTableBody');
+        tbody.innerHTML = `<tr id="loadingRow"><td colspan="7" class="py-4 text-center text-gray-500">Memuat data...</td></tr>`;
+        
+        const data = await fetchInventoryHistory(date);
+        
+        // Update info outlet
+        if (data.length > 0) {
+            document.querySelector('.outlet-name').textContent = `Outlet Aktif: ${data[0].outlet.name}`;
+            document.querySelector('.outlet-address').textContent = data[0].outlet.address;
+        }
+
+        // Update tabel
+        tbody.innerHTML = data.map(history => `
+            <tr class="border-b hover:bg-gray-50">
+                <td class="py-4">${formatTime(history.created_at)}</td>
+                <td class="py-4">
+                    <div class="flex items-center space-x-2">
+                        <img src="https://via.placeholder.com/40" alt="gambar" class="w-8 h-8 bg-gray-100 rounded object-cover" />
+                        <span>${history.product.name}</span>
+                    </div>
+                </td>
+                <td>${history.quantity_before}</td>
+                <td>${history.quantity_after}</td>
+                <td class="${history.quantity_change > 0 ? 'text-green-500' : 'text-red-500'}">
+                    ${history.quantity_change > 0 ? '+' : ''}${history.quantity_change}
+                </td>
+                <td>
+                    <span class="px-2 py-1 ${typeStyles[history.type].bg} ${typeStyles[history.type].text} rounded text-xs capitalize">
+                        ${history.type.replace(/_/g, ' ')}
+                    </span>
+                </td>
+                <td class="text-xs text-gray-500">${history.notes || '-'}</td>
+            </tr>
+        `).join('');
+    }
+
+    // Update filter tanggal
+    flatpickr("#reportDateInput", {
+        dateFormat: "Y-m-d",
+        defaultDate: "today",
+        onChange: async function(selectedDates, dateStr) {
+            await updateHistoryTable(dateStr);
+        },
+        locale: {
+            firstDayOfWeek: 1
         }
     });
 
-    // Placeholder fungsi filter jika belum ada
-    function filterStokByDate(date) {
-        console.log("Filter stok berdasarkan tanggal:", date);
-        // Tambahkan logika filter sesuai kebutuhan di sini
+    // Panggil pertama kali saat halaman load
+    document.addEventListener('DOMContentLoaded', async () => {
+        const initialDate = new Date().toISOString().split('T')[0];
+        await updateHistoryTable(initialDate);
+    });
+
+        function showAlert(type, message) {
+        const alertContainer = document.getElementById('alertContainer');
+        const alert = document.createElement('div');
+        alert.className = `px-4 py-3 rounded-lg shadow-md ${type === 'error' ? 'bg-red-100 text-red-700' : 
+                         type === 'success' ? 'bg-orange-100 text-orange-700' : 'bg-orange-100 text-orange-700'}`;
+        alert.innerHTML = `
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="${type === 'error' ? 'alert-circle' : 
+                                    type === 'success' ? 'check-circle' : 'info'}" 
+                       class="w-5 h-5"></i>
+                    <span>${message}</span>
+                </div>
+                <button onclick="this.parentElement.parentElement.remove()">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+        `;
+        alertContainer.appendChild(alert);
+        
+        // Make sure Lucide icons are initialized for the new alert
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 5000);
     }
 </script>
 

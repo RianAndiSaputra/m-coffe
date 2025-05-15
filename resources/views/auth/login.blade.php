@@ -240,7 +240,11 @@
                     return showError(data.message || 'Login gagal.');
                 }
 
-                localStorage.setItem('token', data.data.token);
+                localStorage.setItem('role', data.data.user.role);
+                localStorage.setItem('user_id', data.data.user.id);
+                localStorage.setItem('name', data.data.user.name);
+                
+
                 const userRole = data.data.user.role;
 
                 if (userRole === 'kasir') {

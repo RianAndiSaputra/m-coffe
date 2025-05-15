@@ -55,11 +55,10 @@
             <select id="tipeAdjust" name="tipeAdjust" 
                 class="w-full border rounded-lg px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent">
                 <option value="">Pilih Tipe Penyesuaian</option>
-                <option value="pembelian">Pembelian</option>
-                <option value="kiriman_pabrik">Kiriman Pabrik</option>
-                <option value="retur">Retur</option>
-                <option value="rusak">Barang Rusak</option>
-                <option value="lainnya">Lainnya</option>
+                <option value="purchase">Pembelian</option>
+                <option value="sale">Penjualan</option>
+                <option value="shipment">Kiriman Pabrik</option>
+                <option value="other">Lainnya</option>
             </select>
         </div>
     </div>
