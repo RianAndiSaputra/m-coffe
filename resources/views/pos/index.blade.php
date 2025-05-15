@@ -299,7 +299,13 @@
                 showNotification('Keranjang belanja kosong', 'warning');
                 return;
             }
-            openModal('paymentModal');
+            // Calculate total from cart items
+            const total = cart.reduce((sum, item) => {
+                const discount = item.discount || 0;
+                return sum + (item.price * item.quantity - discount);
+            }, 0);
+            // Call showPaymentModal to update cartItems and UI
+            showPaymentModal(total);
         });
         
         btnStockModal.addEventListener('click', function() {
