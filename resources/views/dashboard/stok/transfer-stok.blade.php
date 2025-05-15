@@ -20,7 +20,7 @@
         <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
         </span>
-        <input type="text" placeholder="Pencarian..."
+        <input type="text" id="searchInput" placeholder="Pencarian..."
             class="w-full pl-10 pr-4 py-3 border rounded-lg text-base font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" />
     </div>
     </div>
@@ -52,96 +52,14 @@
                     <th class="py-3 font-semibold">Aksi</th>
                 </tr>
             </thead>
-            <tbody class="text-gray-700 divide-y">
-                <!-- Produk 1 -->
+            <tbody id="productTableBody" class="text-gray-700 divide-y">
+                <!-- Data will be loaded dynamically -->
                 <tr>
-                    <td class="py-4 font-medium">KFB-001</td>
-                    <td class="py-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-md bg-orange-100 flex items-center justify-center">
-                                <i data-lucide="croissant" class="w-5 h-5 text-orange-500"></i>
-                            </div>
-                            <span>Roti Coklat Keju</span>
+                    <td colspan="5" class="py-4 text-center text-gray-500">
+                        <div class="flex flex-col items-center justify-center gap-2">
+                            <i data-lucide="loader" class="w-8 h-8 animate-spin"></i>
+                            <span>Memuat data...</span>
                         </div>
-                    </td>
-                    <td class="py-4">Roti Manis</td>
-                    <td class="py-4">
-                        <span class="px-3 py-1.5 text-sm font-medium bg-orange-100 text-orange-700 rounded-full">25</span>
-                    </td>
-                    <td class="py-4">
-                        <button onclick="openModalTransfer('KFB-001', 'Roti Coklat Keju', 'Kifa Bakery Pusat', 25)" 
-                            class="px-3 py-1.5 text-sm font-medium text-white bg-orange-500 rounded-md hover:bg-orange-600 flex items-center gap-2">
-                            <i data-lucide="truck" class="w-4 h-4"></i> Transfer
-                        </button>
-                    </td>
-                </tr>
-
-                <!-- Produk 2 -->
-                <tr>
-                    <td class="py-4 font-medium">KFB-002</td>
-                    <td class="py-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-md bg-orange-100 flex items-center justify-center">
-                                <i data-lucide="cake" class="w-5 h-5 text-orange-500"></i>
-                            </div>
-                            <span>Black Forest</span>
-                        </div>
-                    </td>
-                    <td class="py-4">Kue Ulang Tahun</td>
-                    <td class="py-4">
-                        <span class="px-3 py-1.5 text-sm font-medium bg-orange-100 text-orange-700 rounded-full">12</span>
-                    </td>
-                    <td class="py-4">
-                        <button onclick="openModalTransfer('KFB-002', 'Black Forest', 'Kifa Bakery Cabang 1', 12)" 
-                            class="px-3 py-1.5 text-sm font-medium text-white bg-orange-500 rounded-md hover:bg-orange-600 flex items-center gap-2">
-                            <i data-lucide="truck" class="w-4 h-4"></i> Transfer
-                        </button>
-                    </td>
-                </tr>
-
-                <!-- Produk 3 -->
-                <tr>
-                    <td class="py-4 font-medium">KFB-003</td>
-                    <td class="py-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-md bg-orange-100 flex items-center justify-center">
-                                <i data-lucide="cookie" class="w-5 h-5 text-orange-500"></i>
-                            </div>
-                            <span>Kastengel</span>
-                        </div>
-                    </td>
-                    <td class="py-4">Kue Kering</td>
-                    <td class="py-4">
-                        <span class="px-3 py-1.5 text-sm font-medium bg-red-100 text-red-700 rounded-full">3</span>
-                    </td>
-                    <td class="py-4">
-                        <button onclick="openModalTransfer('KFB-003', 'Kastengel', 'Kifa Bakery Cabang 2', 3)" 
-                            class="px-3 py-1.5 text-sm font-medium text-white bg-orange-500 rounded-md hover:bg-orange-600 flex items-center gap-2">
-                            <i data-lucide="truck" class="w-4 h-4"></i> Transfer
-                        </button>
-                    </td>
-                </tr>
-
-                <!-- Produk 4 -->
-                <tr>
-                    <td class="py-4 font-medium">KFB-004</td>
-                    <td class="py-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-md bg-orange-100 flex items-center justify-center">
-                                <i data-lucide="cupcake" class="w-5 h-5 text-orange-500"></i>
-                            </div>
-                            <span>Donat Coklat</span>
-                        </div>
-                    </td>
-                    <td class="py-4">Donat</td>
-                    <td class="py-4">
-                        <span class="px-3 py-1.5 text-sm font-medium bg-green-100 text-green-700 rounded-full">48</span>
-                    </td>
-                    <td class="py-4">
-                        <button onclick="openModalTransfer('KFB-004', 'Donat Coklat', 'Kifa Bakery Pusat', 48)" 
-                            class="px-3 py-1.5 text-sm font-medium text-white bg-orange-500 rounded-md hover:bg-orange-600 flex items-center gap-2">
-                            <i data-lucide="truck" class="w-4 h-4"></i> Transfer
-                        </button>
                     </td>
                 </tr>
             </tbody>
@@ -212,54 +130,300 @@
         }
     }
 
+    // Fungsi untuk memuat data outlet
+    async function loadOutlets() {
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/outlets', {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Accept': 'application/json'
+                }
+            });
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.message || 'Gagal memuat data outlet');
+            }
+            
+            return result.data;
+        } catch (error) {
+            console.error('Error loading outlets:', error);
+            showAlert('error', 'Gagal memuat data outlet');
+            return [];
+        }
+    }
+
     // Fungsi untuk membuka modal transfer
-    function openModalTransfer(sku, produk, outlet, stok) {
+    async function openModalTransfer(productId, sku, produk, outletId, outletName, stok) {
         const modal = document.getElementById('modalTransferStock');
         
         // Set data ke form
+        document.getElementById('productId').value = productId;
         document.getElementById('transferSku').textContent = sku;
         document.getElementById('transferProduk').textContent = produk;
         document.getElementById('stokTersedia').textContent = stok;
+        document.getElementById('stokTersediaLabel').textContent = stok;
+        document.getElementById('outletAsal').textContent = outletName;
+        document.getElementById('sourceOutletId').value = outletId;
         document.getElementById('jumlahTransfer').max = stok;
         document.getElementById('jumlahTransfer').value = '';
+        document.getElementById('catatanTransfer').value = '';
+        
+        // Load dan isi dropdown outlet tujuan
+        const outlets = await loadOutlets();
+        const outletSelect = document.getElementById('tujuanTransfer');
+        
+        // Kosongkan dropdown kecuali option pertama
+        while (outletSelect.options.length > 1) {
+            outletSelect.remove(1);
+        }
+        
+        // Tambahkan outlet yang tersedia (kecuali outlet asal)
+        outlets.forEach(outlet => {
+            if (outlet.id != outletId) {
+                const option = document.createElement('option');
+                option.value = outlet.id;
+                option.textContent = outlet.name;
+                outletSelect.appendChild(option);
+            }
+        });
         
         // Tampilkan modal
         modal.classList.remove('hidden');
         modal.classList.add('flex');
     }
 
-    // Fungsi untuk menutup modal transfer
     function closeModalTransfer() {
         const modal = document.getElementById('modalTransferStock');
         modal.classList.add('hidden');
         modal.classList.remove('flex');
     }
 
-    // Fungsi untuk submit transfer
-    function submitTransfer() {
-        const jumlah = document.getElementById('jumlahTransfer').value;
-        const tujuan = document.getElementById('tujuanTransfer').value;
+    // Fungsi untuk menutup modal transfer
+    async function submitTransfer() {
+        const productId = document.getElementById('productId').value;
+        const sourceOutletId = document.getElementById('sourceOutletId').value;
+        const targetOutletId = document.getElementById('tujuanTransfer').value;
+        const quantity = document.getElementById('jumlahTransfer').value;
+        const notes = document.getElementById('catatanTransfer').value;
+        const userId = localStorage.getItem('user_id'); // Asumsikan user_id disimpan di localStorage saat login
         
-        if (!jumlah || jumlah <= 0) {
+        if (!quantity || quantity <= 0) {
             showAlert('error', 'Jumlah transfer harus lebih dari 0');
             return;
         }
         
-        if (!tujuan) {
+        if (!targetOutletId) {
             showAlert('error', 'Silakan pilih tujuan transfer');
             return;
         }
         
-        // Simulasi proses transfer
-        setTimeout(() => {
+        if (sourceOutletId === targetOutletId) {
+            showAlert('error', 'Outlet tujuan harus berbeda dengan outlet asal');
+            return;
+        }
+        
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/inventories/transfer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    source_outlet_id: sourceOutletId,
+                    target_outlet_id: targetOutletId,
+                    quantity: quantity,
+                    user_id: userId,
+                    notes: notes
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.message || 'Gagal melakukan transfer');
+            }
+            
             closeModalTransfer();
-            showAlert('success', `Berhasil transfer ${jumlah} stok ke ${tujuan}`);
-        }, 1000);
+            showAlert('success', 'Transfer stok berhasil dilakukan');
+            
+            // Refresh data stok
+            loadProductData();
+        } catch (error) {
+            console.error('Transfer error:', error);
+            showAlert('error', error.message || 'Gagal melakukan transfer');
+        }
+    }
+
+    function validateTransferAmount(input) {
+        const max = parseInt(input.max);
+        const value = parseInt(input.value);
+        
+        if (value > max) {
+            input.value = max;
+            showAlert('warning', `Jumlah transfer melebihi stok tersedia. Diubah menjadi ${max}`);
+        }
+    }
+
+    // Mendapatkan ikon berdasarkan kategori produk
+    function getCategoryIcon(categoryName) {
+        const icons = {
+            'Roti Manis': 'croissant',
+            'Kue Basah': 'cake',
+            'Kue Kering': 'cookie',
+            'Pastry': 'pizza',
+            'Minuman': 'coffee'
+        };
+        
+        return icons[categoryName] || 'package';
+    }
+
+    // Fungsi untuk memuat data dari API
+    async function loadProductData() {
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/products/outlet/1', {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Accept': 'application/json'
+                }
+            });
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.message || 'Gagal memuat data');
+            }
+
+            const outletId = result.outlet_id || 1; // Default ke 1 jika tidak ada
+        const outletName = result.outlet_name || 'Outlet 1'; // Default jika tidak ada
+            
+            renderProductTable(result.data, outletId, outletName);
+        } catch (error) {
+            console.error('Error loading data:', error);
+            document.getElementById('productTableBody').innerHTML = `
+                <tr>
+                    <td colspan="5" class="py-4 text-center text-red-500">
+                        <div class="flex flex-col items-center justify-center gap-2">
+                            <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+                            <span>Gagal memuat data. ${error.message}</span>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+        }
+    }
+
+    // Fungsi untuk menampilkan data produk ke tabel
+    function renderProductTable(products, outletId, outletName) {
+        const tableBody = document.getElementById('productTableBody');
+        
+        if (!products || products.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="py-4 text-center text-gray-500">
+                        <div class="flex flex-col items-center justify-center gap-2">
+                            <i data-lucide="package-x" class="w-8 h-8"></i>
+                            <span>Tidak ada data produk</span>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+            return;
+        }
+        
+        let tableContent = '';
+        
+        products.forEach(product => {
+            // Cek apakah produk aktif
+            if (!product.is_active) return; // Skip produk tidak aktif
+            
+            const categoryIcon = getCategoryIcon(product.category.name);
+            const isLowStock = product.quantity <= product.min_stock;
+            const stockClass = isLowStock ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700';
+            
+            tableContent += `
+                <tr>
+                    <td class="py-4 font-medium">${product.sku}</td>
+                    <td class="py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-md bg-orange-100 flex items-center justify-center">
+                                <i data-lucide="${categoryIcon}" class="w-5 h-5 text-orange-500"></i>
+                            </div>
+                            <span>${product.name}</span>
+                        </div>
+                    </td>
+                    <td class="py-4">${product.category.name}</td>
+                    <td class="py-4">
+                        <div class="flex flex-col">
+                            <span class="px-3 py-1.5 text-sm font-medium ${stockClass} rounded-full w-fit">${product.quantity}</span>
+                            <span class="text-xs text-gray-500 mt-1">Min: ${product.min_stock}</span>
+                        </div>
+                    </td>
+                    <td class="py-4">
+                        <button onclick="openModalTransfer('${product.id}', '${product.sku}', '${product.name}', ${outletId}, '${outletName}', ${product.quantity})" 
+                            class="px-3 py-1.5 text-sm font-medium text-white bg-orange-500 rounded-md hover:bg-orange-600 flex items-center gap-2">
+                            <i data-lucide="truck" class="w-4 h-4"></i> Transfer
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        tableBody.innerHTML = tableContent;
+        
+        // Inisialisasi ikon Lucide
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    }
+
+    // Fungsi pencarian produk
+    function setupSearch() {
+        const searchInput = document.getElementById('searchInput');
+        
+        searchInput.addEventListener('input', async function() {
+            try {
+                const searchTerm = this.value.toLowerCase().trim();
+                const response = await fetch('http://127.0.0.1:8000/api/products/outlet/1');
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.message || 'Gagal memuat data');
+                }
+                
+                // Filter produk berdasarkan pencarian
+                const filteredProducts = result.data.filter(product => 
+                    product.name.toLowerCase().includes(searchTerm) || 
+                    product.sku.toLowerCase().includes(searchTerm) ||
+                    product.category.name.toLowerCase().includes(searchTerm)
+                );
+                
+                renderProductTable(filteredProducts);
+            } catch (error) {
+                console.error('Error searching data:', error);
+                showAlert('error', 'Gagal melakukan pencarian');
+            }
+        });
     }
 
     // Event listener untuk tombol di modal
     document.getElementById('btnBatalTransfer')?.addEventListener('click', closeModalTransfer);
     document.getElementById('btnSubmitTransfer')?.addEventListener('click', submitTransfer);
+    
+    // Load data saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', function() {
+        loadProductData();
+        setupSearch();
+    });
 </script>
 
 <style>

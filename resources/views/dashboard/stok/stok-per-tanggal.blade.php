@@ -4,6 +4,9 @@
 
 @section('content')
 
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
 <!-- Alert Notification -->
 <div id="alertContainer" class="fixed top-4 right-4 z-50 space-y-3 w-80">
     <!-- Alert akan muncul di sini secara dinamis -->
@@ -17,7 +20,7 @@
             <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
             </span>
-            <input type="text" placeholder="Pencarian..."
+            <input type="text" id="searchInput" placeholder="Pencarian..."
                 class="w-full pl-10 pr-4 py-3 border rounded-lg text-base font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" />
         </div>
     </div>
@@ -29,7 +32,7 @@
     <div class="mb-3 md:mb-0 flex items-start gap-2">
         <i data-lucide="package" class="w-5 h-5 text-black mt-1"></i>
         <div>
-            <h2 class="text-lg font-semibold text-gray-800">Menampilkan stok untuk: Kifa Bakery Pusat</h2>
+            <h2 class="text-lg font-semibold text-gray-800" id="outletName">Menampilkan stok untuk: Loading...</h2>
             <p id="reportDate" class="text-sm text-gray-600">Data stok per tanggal <span class="font-medium">{{ date('d M Y') }}</span></p>
         </div>
     </div>
@@ -39,7 +42,7 @@
 <div class="bg-white rounded-lg shadow-lg p-6">
    <div class="mb-4">
     <h1 class="text-xl font-bold text-gray-800">Custom Stok Per Tanggal</h1>
-    <p class="text-sm text-gray-600 mb-2">Lihat stok pada tanggal tertentu untuk Kifa Bakery Pusat</p>
+    <p class="text-sm text-gray-600 mb-2">Lihat stok pada tanggal tertentu</p>
 
     <!-- Filter Tanggal -->
     <div class="mt-2">
@@ -64,151 +67,305 @@
                     <th class="py-3 font-bold">Status</th>
                 </tr>
             </thead>
-            <tbody class="text-gray-700 divide-y">
-                <!-- Produk 1 -->
+            <tbody id="inventoryTableBody" class="text-gray-700 divide-y">
+                <!-- Data akan dirender di sini oleh JavaScript -->
                 <tr>
-                    <td class="py-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-md bg-orange-100 flex items-center justify-center">
-                                <i data-lucide="croissant" class="w-5 h-5 text-orange-500"></i>
-                            </div>
-                            <div>
-                                <span class="font-semibold block">Roti Coklat Keju</span>
-                                <span class="text-xs text-gray-500">KFB-001</span>
-                            </div>
+                    <td colspan="4" class="py-4 text-center text-gray-500">
+                        <!-- Loading indicator -->
+                        <div id="loadingIndicator" class="hidden text-center py-4">
+                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-orange-500 border-t-transparent"></div>
+                            <p class="mt-2 text-orange-600 font-medium">Mengambil data...</p>
                         </div>
-                    </td>
-                    <td class="py-4 font-medium">Roti Manis</td>
-                    <td class="py-4 font-bold text-orange-600">25</td>
-                    <td class="py-4">
-                        <span class="px-3 py-1 text-xs font-bold bg-orange-100 text-orange-700 rounded-full">Aman</span>
-                    </td>
-                </tr>
-
-                <!-- Produk 2 -->
-                <tr>
-                    <td class="py-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-md bg-orange-100 flex items-center justify-center">
-                                <i data-lucide="cake" class="w-5 h-5 text-orange-500"></i>
-                            </div>
-                            <div>
-                                <span class="font-semibold block">Black Forest</span>
-                                <span class="text-xs text-gray-500">KFB-002</span>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="py-4 font-medium">Kue Ulang Tahun</td>
-                    <td class="py-4 font-bold text-orange-600">12</td>
-                    <td class="py-4">
-                        <span class="px-3 py-1 text-xs font-bold bg-orange-100 text-orange-700 rounded-full">Perhatian</span>
-                    </td>
-                </tr>
-
-                <!-- Produk 3 -->
-                <tr>
-                    <td class="py-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-md bg-orange-100 flex items-center justify-center">
-                                <i data-lucide="cookie" class="w-5 h-5 text-orange-500"></i>
-                            </div>
-                            <div>
-                                <span class="font-semibold block">Kastengel</span>
-                                <span class="text-xs text-gray-500">KFB-003</span>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="py-4 font-medium">Kue Kering</td>
-                    <td class="py-4 font-bold text-orange-600">3</td>
-                    <td class="py-4">
-                        <span class="px-3 py-1 text-xs font-bold bg-red-100 text-red-700 rounded-full">Habis</span>
-                    </td>
-                </tr>
-
-                <!-- Produk 4 -->
-                <tr>
-                    <td class="py-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-md bg-orange-100 flex items-center justify-center">
-                                <i data-lucide="cupcake" class="w-5 h-5 text-orange-500"></i>
-                            </div>
-                            <div>
-                                <span class="font-semibold block">Donat Coklat</span>
-                                <span class="text-xs text-gray-500">KFB-004</span>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="py-4 font-medium">Donat</td>
-                    <td class="py-4 font-bold text-orange-600">48</td>
-                    <td class="py-4">
-                        <span class="px-3 py-1 text-xs font-bold bg-orange-100 text-orange-700 rounded-full">Aman</span>
-                    </td>
-                </tr>
-
-                <!-- Produk 5 -->
-                <tr>
-                    <td class="py-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-md bg-orange-100 flex items-center justify-center">
-                                <i data-lucide="bread" class="w-5 h-5 text-orange-500"></i>
-                            </div>
-                            <div>
-                                <span class="font-semibold block">Roti Tawar Gandum</span>
-                                <span class="text-xs text-gray-500">KFB-005</span>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="py-4 font-medium">Roti Tawar</td>
-                    <td class="py-4 font-bold text-orange-600">13</td>
-                    <td class="py-4">
-                        <span class="px-3 py-1 text-xs font-bold bg-orange-100 text-orange-700 rounded-full">Perhatian</span>
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
 </div>
-<!-- Flatpickr JS -->
+
+<!-- Main Script - Moved to bottom of body for better loading -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 <script>
-    // Inisialisasi flatpickr
-    flatpickr("#reportDateInput", {
-        dateFormat: "d M Y",
-        defaultDate: "today",
-        onChange: function(selectedDates, dateStr) {
-            updateReportDateRange(dateStr);
-            filterStokByDate(dateStr); // Panggil fungsi filter (kalau ada)
-        },
-        locale: {
-            firstDayOfWeek: 1 // Senin sebagai awal minggu
-        }
-    });
+    // Variabel global untuk menyimpan data inventory
+    // let inventoryData = [];
+    let inventoryData = [];
 
-    // Ubah tampilan tanggal di bawah judul
-    function updateReportDateRange(dateStr) {
-        const display = document.getElementById('reportDateRange');
-        if (display) {
-            display.textContent = `Menampilkan stok per tanggal ${dateStr}`;
+    // Fungsi untuk mengambil data dari API
+    function fetchInventoryData(date) {
+        console.log("Fetching inventory data for date:", date);
+        
+        // Tampilkan loading indicator
+        document.getElementById('loadingIndicator').classList.remove('hidden');
+        
+        // Default ke tanggal hari ini jika tidak ada tanggal yang dipilih
+        if (!date) {
+            date = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+            console.log("No date provided, using today:", date);
         }
-    }
-
-    // Panggil fungsi ini saat halaman siap
-    document.addEventListener('DOMContentLoaded', function () {
-        const input = document.getElementById('reportDateInput');
-        if (input) {
-            const flatpickrInstance = input._flatpickr;
-            if (flatpickrInstance) {
-                updateReportDateRange(flatpickrInstance.input.value);
+        
+        const apiUrl = `http://127.0.0.1:8000/api/reports/inventory-by-date/1?date=${date}`;
+        console.log("Fetching from:", apiUrl);
+        
+        // Fetch data dari API
+        fetch(apiUrl, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Accept': 'application/json'
             }
-        }
-    });
-
-    // Placeholder fungsi filter jika belum ada
-    function filterStokByDate(date) {
-        console.log("Filter stok berdasarkan tanggal:", date);
-        // Tambahkan logika filter sesuai kebutuhan di sini
+        })
+            .then(response => {
+                console.log("API response status:", response.status);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("API data received:", data);
+                
+                // Sembunyikan loading indicator
+                document.getElementById('loadingIndicator').classList.add('hidden');
+                
+                if (data.success) {
+                    // Simpan data
+                    inventoryData = data.data.inventory_items;
+                    
+                    // Update UI
+                    updateOutletInfo(data.data);
+                    renderInventoryTable(inventoryData);
+                    
+                    // Tampilkan alert sukses
+                    showAlert('success', `Data stok berhasil diperbarui untuk tanggal ${new Date(date).toLocaleDateString('id-ID')}`);
+                } else {
+                    showAlert('error', 'Gagal mengambil data: ' + (data.message || 'Terjadi kesalahan'));
+                }
+            })
+            .catch(error => {
+                // Sembunyikan loading indicator
+                document.getElementById('loadingIndicator').classList.add('hidden');
+                console.error('Error fetching data:', error);
+                showAlert('error', 'Gagal mengambil data: ' + error.message);
+            });
     }
+
+    // Update informasi outlet dan tanggal
+    function updateOutletInfo(data) {
+        document.getElementById('outletName').textContent = `Menampilkan stok untuk: ${data.outlet}`;
+        
+        // Format tanggal menjadi lebih readable
+        const formattedDate = new Date(data.date).toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+        
+        document.getElementById('reportDate').innerHTML = `Data stok per tanggal <span class="font-medium">${formattedDate}</span>`;
+        
+        // Tambahkan indikator real-time jika perlu
+        if (data.is_realtime) {
+            document.getElementById('reportDate').innerHTML += ' <span class="ml-1 px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">Realtime</span>';
+        }
+    }
+
+    // Render tabel inventori
+    function renderInventoryTable(items) {
+        const tableBody = document.getElementById('inventoryTableBody');
+        
+        // Clear existing content
+        tableBody.innerHTML = '';
+        
+        if (items.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="py-4 text-center text-gray-500">
+                        Tidak ada data stok untuk ditampilkan
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        // Render each inventory item
+        items.forEach(item => {
+            // Tentukan status berdasarkan stok
+            let statusClass, statusText;
+            
+            if (item.quantity <= 0) {
+                statusClass = 'bg-red-100 text-red-700';
+                statusText = 'Habis';
+            } else if (item.quantity < 20) {
+                statusClass = 'bg-orange-100 text-orange-700';
+                statusText = 'Stok Rendah';
+            } else {
+                statusClass = 'bg-green-100 text-green-700';
+                statusText = 'Aman';
+            }
+            
+            // Gunakan icon default untuk semua kategori
+            const iconName = 'package';
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="py-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-md bg-orange-100 flex items-center justify-center">
+                            <i data-lucide="${iconName}" class="w-5 h-5 text-orange-500"></i>
+                        </div>
+                        <div>
+                            <span class="font-semibold block">${item.product_name}</span>
+                            <span class="text-xs text-gray-500">${item.sku}</span>
+                        </div>
+                    </div>
+                </td>
+                <td class="py-4 font-medium">${item.category}</td>
+                <td class="py-4 font-bold text-orange-600">${item.quantity}</td>
+                <td class="py-4">
+                    <span class="px-3 py-1 text-xs font-bold ${statusClass} rounded-full">${statusText}</span>
+                </td>
+            `;
+            
+            tableBody.appendChild(row);
+        });
+        
+        // Reinitialize Lucide icons for the new content
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    }
+
+    // Fungsi search/filter
+    function setupSearch() {
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            
+            if (!inventoryData.length) return;
+            
+            if (searchTerm === '') {
+                renderInventoryTable(inventoryData);
+                return;
+            }
+            
+            const filteredItems = inventoryData.filter(item => 
+                item.product_name.toLowerCase().includes(searchTerm) || 
+                item.sku.toLowerCase().includes(searchTerm) ||
+                item.category.toLowerCase().includes(searchTerm)
+            );
+            
+            renderInventoryTable(filteredItems);
+        });
+    }
+
+    // Tampilkan alert/notifikasi
+    function showAlert(type, message) {
+        const alertContainer = document.getElementById('alertContainer');
+        const alertId = 'alert-' + Date.now();
+        
+        const alertTypes = {
+            success: {
+                bgColor: 'bg-orange-100',
+                textColor: 'text-orange-800',
+                icon: 'check-circle'
+            },
+            error: {
+                bgColor: 'bg-red-100',
+                textColor: 'text-red-800',
+                icon: 'x-circle'
+            },
+            warning: {
+                bgColor: 'bg-yellow-100',
+                textColor: 'text-yellow-800',
+                icon: 'alert-circle'
+            },
+            info: {
+                bgColor: 'bg-blue-100',
+                textColor: 'text-blue-800',
+                icon: 'info'
+            }
+        };
+        
+        const alertType = alertTypes[type] || alertTypes.info;
+        
+        const alertHTML = `
+            <div id="${alertId}" class="rounded-lg p-4 ${alertType.bgColor} ${alertType.textColor} flex items-start shadow-md transform transition-all duration-300 ease-in-out opacity-0 translate-x-full">
+                <i data-lucide="${alertType.icon}" class="w-5 h-5 mr-3 mt-0.5 flex-shrink-0"></i>
+                <div class="flex-grow">
+                    <p class="font-medium">${message}</p>
+                </div>
+                <button onclick="this.parentElement.remove()" class="ml-3 flex-shrink-0">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+        `;
+        
+        alertContainer.insertAdjacentHTML('beforeend', alertHTML);
+        
+        // Animate in
+        setTimeout(() => {
+            const alertEl = document.getElementById(alertId);
+            alertEl.classList.remove('opacity-0', 'translate-x-full');
+            
+            // Initialize Lucide icons for the alert
+            if (window.lucide) {
+                window.lucide.createIcons({
+                    attrs: {
+                        class: ["stroke-current"]
+                    }
+                });
+            }
+            
+            // Auto dismiss after 5 seconds
+            setTimeout(() => {
+                if (alertEl && alertEl.parentNode) {
+                    alertEl.classList.add('opacity-0', 'translate-x-full');
+                    setTimeout(() => {
+                        if (alertEl && alertEl.parentNode) {
+                            alertEl.remove();
+                        }
+                    }, 300);
+                }
+            }, 5000);
+        }, 10);
+    }
+
+    // Inisialisasi ketika DOM siap
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("DOM fully loaded");
+        
+        // Pastikan elemen reportDateInput ada
+        const dateInput = document.getElementById('reportDateInput');
+        if (dateInput) {
+            console.log("Date input found:", dateInput);
+            
+            // Inisialisasi flatpickr secara eksplisit
+            const datePicker = flatpickr("#reportDateInput", {
+                dateFormat: "Y-m-d",
+                defaultDate: "today",
+                onChange: function(selectedDates, dateStr) {
+                    console.log("Date changed to:", dateStr);
+                    fetchInventoryData(dateStr);
+                },
+                locale: {
+                    firstDayOfWeek: 1
+                }
+            });
+            
+            console.log("Flatpickr instance:", datePicker);
+            
+            // Ambil tanggal hari ini dalam format yang benar
+            const today = new Date().toISOString().split('T')[0];
+            console.log("Today's date for API:", today);
+            
+            // Fetch data awal dengan tanggal hari ini
+            fetchInventoryData(today);
+        } else {
+            console.error("Date input element not found!");
+        }
+        
+        // Setup search functionality
+        setupSearch();
+    });
 </script>
 
 @endsection

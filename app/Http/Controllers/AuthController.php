@@ -57,68 +57,68 @@ class AuthController extends Controller
      * )
      */
 
-    public function login(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string|min:6',
-        ]);
-
-        if (!Auth::attempt($request->only('email', 'password'))) {
-            return $this->errorResponse('Email or password is incorrect');
-        }
-
-        $user = User::where('email', $request->email)->firstOrFail();
-
-        // Revoke all existing tokens
-        // $user->tokens()->delete();
-
-        $data = [
-            'user' => $user->load(['outlet', 'lastShift']),
-            'token' => $user->createToken('auth_token')->plainTextToken
-        ];
-
-        return $this->successResponse($data, 'Login success');
-    }
-
     // public function login(Request $request)
     // {
-    //     $credentials = $request->validate([
+    //     $request->validate([
     //         'email' => 'required|email',
-    //         'password' => 'required',
+    //         'password' => 'required|string|min:6',
     //     ]);
 
-    //     if (Auth::attempt($credentials, $request->remember)) {
-    //         $user = Auth::user();
-    //         $token = $user->createToken('auth_token')->plainTextToken;
-            
-    //         // Check if user has a valid role
-    //         $validRoles = ['admin', 'manajer', 'kasir'];
-            
-    //         if (!in_array($user->role, $validRoles)) {
-    //             Auth::logout();
-    //             return response()->json([
-    //                 'success' => false,
-    //                 'message' => 'Anda tidak memiliki akses yang diperlukan',
-    //             ], 403);
-    //         }
-            
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Login berhasil',
-    //             'data' => [
-    //                 'token' => $token,
-    //                 'user' => $user,
-    //                 'role' => $user->role
-    //             ]
-    //         ]);
+    //     if (!Auth::attempt($request->only('email', 'password'))) {
+    //         return $this->errorResponse('Email or password is incorrect');
     //     }
 
-    //     return response()->json([
-    //         'success' => false,
-    //         'message' => 'Email atau password salah',
-    //     ], 401);
+    //     $user = User::where('email', $request->email)->firstOrFail();
+
+    //     // Revoke all existing tokens
+    //     // $user->tokens()->delete();
+
+    //     $data = [
+    //         'user' => $user->load(['outlet', 'lastShift']),
+    //         'token' => $user->createToken('auth_token')->plainTextToken
+    //     ];
+
+    //     return $this->successResponse($data, 'Login success');
     // }
+
+    public function login(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        if (Auth::attempt($credentials, $request->remember)) {
+            $user = Auth::user();
+            $token = $user->createToken('auth_token')->plainTextToken;
+            
+            // Check if user has a valid role
+            $validRoles = ['admin', 'manajer', 'kasir'];
+            
+            if (!in_array($user->role, $validRoles)) {
+                Auth::logout();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki akses yang diperlukan',
+                ], 403);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Login berhasil',
+                'data' => [
+                    'token' => $token,
+                    'user' => $user,
+                    'role' => $user->role,
+                ]
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Email atau password salah',
+        ], 401);
+    }
 
     /**
      * Get authenticated user info
