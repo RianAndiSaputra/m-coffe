@@ -244,9 +244,16 @@
                 localStorage.setItem('user_id', data.data.user.id);
                 localStorage.setItem('name', data.data.user.name);
                 localStorage.setItem('outlet_id', data.data.user.outlet_id);
-                
 
                 const userRole = data.data.user.role;
+
+                // Cek dulu outlet_id untuk role yang bukan admin
+                if (userRole !== 'admin' && outletId) {
+                    localStorage.setItem('outlet_id', outletId);
+                } else {
+                    // Jika admin, hapus outlet_id dari localStorage kalau ada
+                    localStorage.removeItem('outlet_id');
+                }
 
                 if (userRole === 'kasir') {
                     showSuccess('Login berhasil! Mengarahkan ke POS...');
