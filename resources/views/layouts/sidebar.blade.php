@@ -16,7 +16,7 @@
             <button id="outletDropdownButton" class="w-full flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
                 <div class="flex items-center">
                     <i data-lucide="store" class="w-5 h-5 text-black"></i>
-                    <span class="ml-3 font-medium truncate">Kifa Bakery Pusat</span>
+                    <span class="ml-3 font-medium truncate">Loading outlets...</span>
                 </div>
                 <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 transition-transform text-black" id="outletDropdownArrow"></i>
             </button>

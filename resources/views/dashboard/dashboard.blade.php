@@ -194,15 +194,34 @@
     document.addEventListener('DOMContentLoaded', function() {
         console.log('DOM fully loaded. Initializing dashboard...');
         
-        // Fetch dashboard data from API
+        // Connect the outlet dropdown to dashboard updates
+        connectOutletDropdownToDashboard();
+        
+        // Also hook into the loadOutletsFromAPI function to ensure it triggers dashboard updates
+        const originalLoadOutletsFromAPI = window.loadOutletsFromAPI;
+        
+        if (typeof originalLoadOutletsFromAPI === 'function') {
+            window.loadOutletsFromAPI = async function() {
+                // Call the original function
+                await originalLoadOutletsFromAPI();
+                
+                // After outlets are loaded, make sure we're looking at the selected outlet
+                fetchDashboardData();
+            };
+        }
+        
+        // Fetch dashboard data with current outlet ID from localStorage
         fetchDashboardData();
         
         // Date Range Picker Functionality
         initDatePicker();
     });
-    
-    // Function to fetch dashboard data
+        
+        // Function to fetch dashboard data
     function fetchDashboardData() {
+        // Get current outlet ID from localStorage (matches your existing implementation)
+        const outletId = getSelectedOutletId();
+        
         // Get current date range from URL or use default
         const urlParams = new URLSearchParams(window.location.search);
         const startDate = urlParams.get('start_date') || '2025-04-30';
@@ -211,12 +230,13 @@
         // Update date display
         updateDateDisplay(startDate, endDate);
         
-        // Make API request
-        fetch(`http://127.0.0.1:8000/api/reports/dashboard-summary/1?start_date=${startDate}&end_date=${endDate}`, {
+        console.log(`Fetching dashboard data for outlet ID: ${outletId}`);
+        
+        // Make API request with dynamic outlet ID
+        fetch(`http://127.0.0.1:8000/api/reports/dashboard-summary/${outletId}?start_date=${startDate}&end_date=${endDate}`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 'Accept': 'application/json'
-                
             }
         })
             .then(response => {
@@ -240,81 +260,76 @@
                 useDummyData();
             });
     }
-    
-    // Function to use dummy data when API is unavailable
-    // function useDummyData() {
-    //     console.log('Using dummy data instead');
         
-    //     // Dummy data matching expected API response format
-    //     const dummyData = {
-    //         "outlet": "Kifa Bakery Pusat",
-    //         "cash": "85413.00",
-    //         "period": {
-    //             "start_date": "2025-04-30",
-    //             "end_date": "2025-05-13"
-    //         },
-    //         "summary": {
-    //             "total_sales": 85413,
-    //             "total_orders": 5,
-    //             "total_items": "20",
-    //             "average_order_value": 42706.5
-    //         },
-    //         "sales": {
-    //             "current_period": 85413,
-    //             "previous_period": 0,
-    //             "change_percentage": 100,
-    //             "this_month": "85413.00",
-    //             "last_month": 0,
-    //             "monthly_change_percentage": 100
-    //         },
-    //         "daily_sales": {
-    //             "2025-04-30": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
-    //             "2025-05-01": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
-    //             "2025-05-02": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
-    //             "2025-05-03": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
-    //             "2025-05-04": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
-    //             "2025-05-05": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
-    //             "2025-05-06": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
-    //             "2025-05-07": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
-    //             "2025-05-08": { "orders": 2, "sales": 85413, "items": 12, "average_order": 42706.5 },
-    //             "2025-05-09": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
-    //             "2025-05-10": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
-    //             "2025-05-11": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
-    //             "2025-05-12": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 },
-    //             "2025-05-13": { "orders": 0, "sales": 0, "items": 0, "average_order": 0 }
-    //         },
-    //         "top_products": [
-    //             {
-    //                 "name": "Roti Unyil",
-    //                 "quantity": "7",
-    //                 "total": "41223.00"
-    //             },
-    //             {
-    //                 "name": "Roti Tawar Original",
-    //                 "quantity": "5",
-    //                 "total": "44190.00"
-    //             },
-    //             {
-    //                 "name": "Bolu Gulung Pandan Ekonomis",
-    //                 "quantity": "3",
-    //                 "total": "45000.00"
-    //             },
-    //             {
-    //                 "name": "Bolu Gulung Coklat Ekonomis",
-    //                 "quantity": "2",
-    //                 "total": "30000.00"
-    //             },
-    //             {
-    //                 "name": "Bolu Gulung Tiramisu Ekonomis",
-    //                 "quantity": "6",
-    //                 "total": "30000.00"
-    //             }
-    //         ]
-    //     };
+    // Function to get the currently selected outlet ID - modified to match your localStorage key
+    function getSelectedOutletId() {
+        // First check if outlet_id is in URL parameters (highest priority)
+        const urlParams = new URLSearchParams(window.location.search);
+        const outletIdFromUrl = urlParams.get('outlet_id');
         
-    //     // Update dashboard with dummy data
-    //     updateDashboard(dummyData);
-    // }
+        if (outletIdFromUrl) {
+            return outletIdFromUrl;
+        }
+        
+        // Then check localStorage for selected outlet - using your existing localStorage key
+        const savedOutletId = localStorage.getItem('selectedOutletId');
+        
+        if (savedOutletId) {
+            return savedOutletId;
+        }
+        
+        // Default to outlet ID 1 if nothing is found
+        return 1;
+    }
+
+    // This function connects your existing outlet dropdown with the dashboard refresh
+    function connectOutletDropdownToDashboard() {
+        // Get the outlet list container and monitor when users click on outlets
+        const outletListContainer = document.getElementById('outletListContainer');
+        
+        if (outletListContainer) {
+            // Use event delegation to catch all outlet item clicks
+            outletListContainer.addEventListener('click', function(event) {
+                // Find the clicked li element (may be the span or icon inside)
+                let targetElement = event.target;
+                while (targetElement && targetElement !== outletListContainer && targetElement.tagName !== 'LI') {
+                    targetElement = targetElement.parentElement;
+                }
+                
+                // If we clicked on an outlet list item
+                if (targetElement && targetElement.tagName === 'LI') {
+                    // Dashboard will be updated by your existing code setting localStorage
+                    // and calling loadProductData, but we'll add an additional hook
+                    
+                    // The dashboard should update after a short delay to allow your
+                    // existing code to complete
+                    setTimeout(() => {
+                        fetchDashboardData();
+                    }, 100);
+                }
+            });
+        }
+        
+        // Also modify your outlet dropdown button behavior if available
+        const outletDropdownButton = document.getElementById('outletDropdownButton');
+        if (outletDropdownButton) {
+            // Ensure the dashboard updates every time the outlet is changed
+            const originalClickHandler = outletDropdownButton.onclick;
+            outletDropdownButton.onclick = function(event) {
+                if (originalClickHandler) {
+                    originalClickHandler.call(this, event);
+                }
+                
+                // Additional hook to make sure dashboard gets updated
+                setTimeout(() => {
+                    const selectedOutletId = localStorage.getItem('selectedOutletId');
+                    if (selectedOutletId) {
+                        fetchDashboardData();
+                    }
+                }, 200);
+            };
+        }
+    }
     
     // Function to update dashboard with API data
     function updateDashboard(data) {

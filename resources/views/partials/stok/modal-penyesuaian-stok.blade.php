@@ -8,13 +8,14 @@
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
         </div>
-        
+        <input type="hidden" id="adjustProductId" name="adjustProductId" value="">
         <!-- Body - Gunakan container dengan max-height dan overflow-auto -->
         <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
             <!-- Informasi Produk - Ubah ke grey -->
             <div class="bg-gray-100 rounded-lg p-4 border border-gray-200">
                 <h4 class="font-medium text-gray-800 mb-3">Informasi Produk</h4>
                 <div class="grid grid-cols-2 gap-4 text-sm">
+                    
                     <div>
                         <div class="text-gray-600 mb-1">SKU</div>
                         <div class="font-medium bg-gray-50 p-2 rounded border border-gray-200" id="adjustSku">-</div>
