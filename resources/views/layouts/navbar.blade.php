@@ -40,8 +40,6 @@
                 
                 <!-- Dropdown menu -->
                 <div class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 py-1 z-50" id="user-dropdown-menu" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button">
-                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-all" role="menuitem">Profil Anda</a>
-                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-all" role="menuitem">Pengaturan</a>
                     <form id="logout-form">
                         @csrf
                         <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-all" role="menuitem">
