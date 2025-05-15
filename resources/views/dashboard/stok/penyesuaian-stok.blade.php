@@ -38,11 +38,6 @@
     </div>
     <!-- Outlet Display + Date Selection -->
     <div class="flex flex-col md:flex-row items-start md:items-center gap-3">
-        <!-- Outlet Display -->
-        <div class="flex items-center gap-2">
-            <span class="text-sm font-medium text-gray-700">Outlet:</span>
-            <span class="font-bold text-orange-600">Kifa Bakery Pusat</span>
-        </div>
         <!-- Date Selection -->
         <div class="flex items-center gap-2">
             <span class="text-sm font-medium text-gray-700">Tanggal:</span>
@@ -313,7 +308,7 @@
             const actionCell = document.createElement('td');
             actionCell.className = 'py-4 text-right';
             actionCell.innerHTML = `
-                <button onclick="openModalAdjust('${item.product.sku}', '${item.product.name}', '${item.outlet.name}', ${item.quantity_after})" 
+                <button onclick="openModalAdjust(${item.product.id}, '${item.product.sku}', '${item.product.name}', '${item.outlet.name}', ${item.quantity_after})" 
                     class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-bold text-white bg-orange-500 rounded-md hover:bg-orange-600">
                     <i data-lucide="clipboard-list" class="w-4 h-4"></i> Sesuaikan
                 </button>
@@ -466,21 +461,38 @@
     }
 
     // Fungsi untuk membuka modal penyesuaian
-    function openModalAdjust(sku, produk, outlet, stok) {
-        const modal = document.getElementById('modalAdjustStock');
-        
-        // Set data ke form
-        document.getElementById('adjustSku').textContent = sku;
-        document.getElementById('adjustProduk').textContent = produk;
-        document.getElementById('adjustOutlet').textContent = outlet;
-        document.getElementById('stokSaatIni').textContent = stok;
-        document.getElementById('jumlahAdjust').value = '';
-        document.getElementById('keteranganAdjust').value = '';
-        
-        // Tampilkan modal
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
+function openModalAdjust(productId, sku, produk, outlet, stok) {
+    // Convert productId to number to ensure it's not a string
+    productId = parseInt(productId);
+    
+    const modal = document.getElementById('modalAdjustStock');
+    
+    // For debugging
+    console.log("Opening modal with product ID:", productId, "type:", typeof productId);
+    
+    // Store product ID in a hidden input
+    // Add this hidden input if you haven't already
+    if (!document.getElementById('adjustProductId')) {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.id = 'adjustProductId';
+        modal.querySelector('.p-6').appendChild(hiddenInput);
     }
+    
+    document.getElementById('adjustProductId').value = productId;
+    
+    // Rest of your existing code
+    document.getElementById('adjustSku').textContent = sku;
+    document.getElementById('adjustProduk').textContent = produk;
+    document.getElementById('adjustOutlet').textContent = outlet;
+    document.getElementById('stokSaatIni').textContent = stok;
+    document.getElementById('jumlahAdjust').value = '';
+    document.getElementById('keteranganAdjust').value = '';
+    
+    // Tampilkan modal
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
 
     // Fungsi untuk menutup modal penyesuaian
     function closeModalAdjust() {
@@ -509,15 +521,25 @@
         
         // Ambil data produk dari form
         const outletId = localStorage.getItem('activeOutlet') || 1;
+        const productId = parseInt(document.getElementById('adjustProductId').value)
         const sku = document.getElementById('adjustSku').textContent;
         const stokSaatIni = parseInt(document.getElementById('stokSaatIni').textContent);
+
+        console.log("Product ID being sent:", productId);
+        console.log("Outlet ID:", outletId);
         
+        // Validate
+        if (isNaN(productId) || productId <= 0) {
+            showAlert('error', 'ID Produk tidak valid');
+            console.error("Invalid product ID:", document.getElementById('adjustProductId').value);
+            return;
+        }
         // Tampilkan loading
         showLoading(true);
         
         // Buat objek data untuk dikirim ke API
         const requestData = {
-            product_sku: sku,
+            product_id: productId,
             outlet_id: outletId, // Gunakan ID outlet yang sedang aktif
             quantity_before: stokSaatIni,
             quantity_after: stokSaatIni + jumlah,
@@ -525,6 +547,8 @@
             type: tipe,
             notes: keterangan
         };
+
+        console.log("Request data:", requestData);
         
         // Kirim data ke API
         fetch('http://127.0.0.1:8000/api/inventory-histories', {

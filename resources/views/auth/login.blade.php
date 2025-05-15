@@ -244,7 +244,7 @@
                 localStorage.setItem('role', data.data.user.role);
                 localStorage.setItem('user_id', data.data.user.id);
                 localStorage.setItem('name', data.data.user.name);
-                localStorage.setItem('outlet_id', data.data.user.outlet_id);
+                // localStorage.setItem('outlet_id', data.data.user.outlet_id);
 
                 const userRole = data.data.user.role;
 

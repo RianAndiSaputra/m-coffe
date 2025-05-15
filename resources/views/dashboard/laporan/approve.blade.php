@@ -120,6 +120,7 @@
                     <th class="py-3 font-bold px-4">Nama Item</th>
                     <th class="py-3 font-bold px-4 text-center">Perubahan</th>
                     <th class="py-3 font-bold px-4">Keterangan</th>
+                    <th class="py-3 font-bold px-4">Status</th>
                     <th class="py-3 font-bold px-4">Disetujui Oleh</th>
                 </tr>
             </thead>
@@ -298,6 +299,7 @@
                         <td class="py-4 px-4">${item.product.name}</td>
                         <td class="py-4 px-4 text-center ${changeColor}">${change}</td>
                         <td class="py-4 px-4">${item.notes || '-'}</td>
+                        <td class="py-4 px-4">${item.status}</td>
                         <td class="py-4 px-4">${item.approver.name}</td>
                     </tr>
                 `;
