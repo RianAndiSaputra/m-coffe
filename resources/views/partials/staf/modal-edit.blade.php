@@ -60,11 +60,10 @@
           <!-- Outlet -->
           <div>
             <label class="block font-medium mb-1">Outlet</label>
-            <select id="editOutletStaff" class="w-full border rounded-lg px-4 py-2 text-sm">
-              <option value="pusat">Kifa Bakery Pusat</option>
-              <option value="cabang1">Kifa Bakery Cabang 1</option>
-              <option value="cabang2">Kifa Bakery Cabang 2</option>
+            <select id="editOutletStaff" data-url="{{ url('/api/outlets') }}" class="w-full border rounded-lg px-4 py-2 text-sm">
+              <option value="" disabled selected>Memuat outlet...</option>
             </select>
+            <p id="errorEditOutletStaff" class="text-red-500 text-xs mt-1 hidden">Outlet wajib dipilih</p>
           </div>
         </div>
       </div>
