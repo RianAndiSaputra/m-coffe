@@ -351,11 +351,18 @@ class ProductController extends Controller
             $isCashier = strtolower($user->role) === 'kasir';
 
             $products = $outlet->products()
-                ->with(['category', 'outlets'])
+                ->with([
+                    'category',
+                    'outlets',
+                    'inventoryHistory' => function ($query) {
+                        $query->select('id', 'product_id', 'quantity_before', 'quantity_after', 'quantity_change', 'type')
+                            ->latest()
+                            ->limit(1); // misal ambil 5 data terakhir
+                    }
+                ])
                 ->when($isCashier, function ($query) {
                     $query->where('is_active', true);
                 })
-                // ->orderBy('name', 'asc')
                 ->get()
                 ->map(function ($product) use ($outlet) {
                     return [
@@ -364,7 +371,6 @@ class ProductController extends Controller
                         'sku' => $product->sku,
                         'description' => $product->description,
                         'price' => $product->price,
-                        // 'image' => asset('storage/' . $product->image),
                         'image_url' => $product->image_url,
                         'is_active' => $product->is_active,
                         'category' => [
@@ -386,6 +392,14 @@ class ProductController extends Controller
                                     'tax' => $o->tax,
                                 ];
                             }),
+                        'inventory_history' => $product->inventoryHistory->map(function ($history) {
+                            return [
+                                'quantity_before' => $history->quantity_before,
+                                'quantity_after' => $history->quantity_after,
+                                'quantity_change' => $history->quantity_change,
+                                'type' => $history->type,
+                            ];
+                        }),
                     ];
                 });
 
@@ -394,7 +408,6 @@ class ProductController extends Controller
             return $this->errorResponse($th->getMessage());
         }
     }
-
     public function getOutletProductsPOS(Request $request, $outletId)
     {
         try {

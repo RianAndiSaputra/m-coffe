@@ -14,21 +14,31 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div>
                     <p class="text-sm text-gray-500">Nomor Invoice</p>
-                    <p class="font-medium">INV-20230511-001</p>
+                    <p id="modalInvoiceNumber" class="font-medium">-</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-500">Tanggal/Waktu</p>
-                    <p class="font-medium">11 Mei 2023, 08:15 WIB</p>
+                    <p id="modalTransactionDate" class="font-medium">-</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-500">Kasir</p>
-                    <p class="font-medium">Ahmad Fauzi</p>
+                    <p id="modalCashierName" class="font-medium">-</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-500">Metode Pembayaran</p>
                     <p class="font-medium">
-                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Tunai</span>
+                        <span id="modalPaymentMethod" class="px-2 py-1 rounded-full text-xs">-</span>
                     </p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Status</p>
+                    <p class="font-medium">
+                        <span id="modalStatus" class="px-2 py-1 rounded-full text-xs">-</span>
+                    </p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Member</p>
+                    <p id="modalMember" class="font-medium">-</p>
                 </div>
             </div>
             
@@ -38,65 +48,15 @@
                     <thead class="bg-gray-100">
                         <tr>
                             <th class="py-3 px-4 text-left">Produk</th>
+                            <th class="py-3 px-4 text-left">SKU</th>
+                            <th class="py-3 px-4 text-center">Qty</th>
                             <th class="py-3 px-4 text-right">Harga</th>
-                            <th class="py-3 px-4 text-right">Qty</th>
+                            <th class="py-3 px-4 text-right">Diskon</th>
                             <th class="py-3 px-4 text-right">Subtotal</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y">
-                        <!-- Item 1 -->
-                        <tr>
-                            <td class="py-3 px-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-md bg-orange-100 flex items-center justify-center">
-                                        <i data-lucide="croissant" class="w-4 h-4 text-orange-500"></i>
-                                    </div>
-                                    <div>
-                                        <span class="font-medium block">Roti Coklat Keju</span>
-                                        <span class="text-xs text-gray-500">KFB-001</span>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="py-3 px-4 text-right">Rp 15.000</td>
-                            <td class="py-3 px-4 text-right">2</td>
-                            <td class="py-3 px-4 text-right font-medium">Rp 30.000</td>
-                        </tr>
-                        
-                        <!-- Item 2 -->
-                        <tr>
-                            <td class="py-3 px-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-md bg-orange-100 flex items-center justify-center">
-                                        <i data-lucide="cake" class="w-4 h-4 text-orange-500"></i>
-                                    </div>
-                                    <div>
-                                        <span class="font-medium block">Black Forest</span>
-                                        <span class="text-xs text-gray-500">KFB-002</span>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="py-3 px-4 text-right">Rp 45.000</td>
-                            <td class="py-3 px-4 text-right">1</td>
-                            <td class="py-3 px-4 text-right font-medium">Rp 45.000</td>
-                        </tr>
-                        
-                        <!-- Item 3 -->
-                        <tr>
-                            <td class="py-3 px-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-md bg-orange-100 flex items-center justify-center">
-                                        <i data-lucide="coffee" class="w-4 h-4 text-orange-500"></i>
-                                    </div>
-                                    <div>
-                                        <span class="font-medium block">Kopi Susu</span>
-                                        <span class="text-xs text-gray-500">KFB-010</span>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="py-3 px-4 text-right">Rp 12.000</td>
-                            <td class="py-3 px-4 text-right">2</td>
-                            <td class="py-3 px-4 text-right font-medium">Rp 24.000</td>
-                        </tr>
+                    <tbody id="modalItemsTableBody" class="divide-y">
+                        <!-- Items will be populated dynamically -->
                     </tbody>
                 </table>
             </div>
@@ -111,19 +71,27 @@
                     <div>
                         <div class="flex justify-between mb-1">
                             <span class="text-gray-600">Subtotal</span>
-                            <span class="font-medium">Rp 99.000</span>
-                        </div>
-                        <div class="flex justify-between mb-1">
-                            <span class="text-gray-600">Diskon</span>
-                            <span class="font-medium">Rp 0</span>
+                            <span id="modalSubtotal" class="font-medium">Rp 0</span>
                         </div>
                         <div class="flex justify-between mb-1">
                             <span class="text-gray-600">Pajak</span>
-                            <span class="font-medium">Rp 0</span>
+                            <span id="modalTax" class="font-medium">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-600">Diskon</span>
+                            <span id="modalDiscount" class="font-medium">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-600">Total Dibayar</span>
+                            <span id="modalTotalPaid" class="font-medium">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-600">Kembalian</span>
+                            <span id="modalChange" class="font-medium">Rp 0</span>
                         </div>
                         <div class="flex justify-between border-t pt-2 mt-2">
                             <span class="text-gray-800 font-bold">Total</span>
-                            <span class="text-orange-600 font-bold">Rp 99.000</span>
+                            <span id="modalTotal" class="text-orange-600 font-bold">Rp 0</span>
                         </div>
                     </div>
                 </div>
@@ -131,7 +99,7 @@
         </div>
         
         <!-- Modal Footer -->
-        <div class="border-t px-6 py-4 flex justify-end gap-3">
+        {{-- <div class="border-t px-6 py-4 flex justify-end gap-3">
             <button onclick="closeModal()" class="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-100">
                 Tutup
             </button>
@@ -139,7 +107,7 @@
                 <i data-lucide="printer" class="w-5 h-5"></i>
                 Cetak Ulang
             </button>
-        </div>
+        </div> --}}
     </div>
 </div>
 

@@ -57,11 +57,13 @@
                             <label for="tujuanTransfer" class="block text-sm font-medium text-gray-700 mb-1">Outlet Tujuan</label>
                             <select id="tujuanTransfer" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent">
                                 <option value="">Pilih Outlet Tujuan</option>
-                                <option value="Kifa Bakery Pusat">Kifa Bakery Pusat</option>
-                                <option value="Kifa Bakery Cabang 1">Kifa Bakery Cabang 1</option>
-                                <option value="Kifa Bakery Cabang 2">Kifa Bakery Cabang 2</option>
+                                <!-- Options akan diisi secara dinamis -->
                             </select>
                         </div>
+
+                        <!-- Tambahkan input hidden untuk menyimpan ID produk dan outlet asal -->
+                        <input type="hidden" id="productId">
+                        <input type="hidden" id="sourceOutletId">
                     </div>
                     
                     <!-- Jumlah Transfer -->

@@ -31,7 +31,7 @@
     <div class="mb-3 md:mb-0 flex items-start gap-2">
         <i data-lucide="store" class="w-5 h-5 text-gray-600 mt-1"></i>
         <div>
-            <h4 class="text-lg font-semibold text-gray-800">Menampilkan laporan untuk: Kifa Bakery Pusat</h4>
+            <h4 class="text-lg font-semibold text-gray-800" id="outletName">Menampilkan laporan untuk: Kifa Bakery Pusat</h4>
             <p class="text-sm text-gray-600">Periode: <span id="dateRangeDisplay">s/d {{ date('d M Y') }}</span></p>
         </div>
     </div>
@@ -41,7 +41,7 @@
 <div class="bg-white rounded-lg shadow p-6 mb-6">
     <div>
         <h1 class="text-3xl font-bold text-gray-800">Laporan Stok</h1>
-        <p class="text-sm text-gray-600">Perubahan stok produk di Kifa Bakery Pusat</p>
+        <p class="text-sm text-gray-600" id="outletSubtitle">Perubahan stok produk di Kifa Bakery Pusat</p>
         
         <!-- Filter + Search -->
         <div class="flex flex-col md:flex-row md:items-end gap-4 mt-3 w-full">
@@ -79,7 +79,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Total Saldo Awal</p>
-                    <h3 class="text-2xl font-bold text-gray-800">0 pcs</h3>
+                    <h3 class="text-2xl font-bold text-gray-800" id="totalSaldoAwal">0 pcs</h3>
                 </div>
                 <div class="p-3 bg-blue-50 rounded-full">
                     <i data-lucide="box" class="w-6 h-6 text-blue-500"></i>
@@ -92,7 +92,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Total Stock Masuk</p>
-                    <h3 class="text-2xl font-bold text-gray-800">0 pcs</h3>
+                    <h3 class="text-2xl font-bold text-gray-800" id="totalStockMasuk">0 pcs</h3>
                 </div>
                 <div class="p-3 bg-green-50 rounded-full">
                     <i data-lucide="arrow-down-circle" class="w-6 h-6 text-green-500"></i>
@@ -105,7 +105,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Total Stock Keluar</p>
-                    <h3 class="text-2xl font-bold text-gray-800">0 pcs</h3>
+                    <h3 class="text-2xl font-bold text-gray-800" id="totalStockKeluar">0 pcs</h3>
                 </div>
                 <div class="p-3 bg-red-50 rounded-full">
                     <i data-lucide="arrow-up-circle" class="w-6 h-6 text-red-500"></i>
@@ -118,13 +118,37 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Total Stock Akhir</p>
-                    <h3 class="text-2xl font-bold text-gray-800">0 pcs</h3>
+                    <h3 class="text-2xl font-bold text-gray-800" id="totalStockAkhir">0 pcs</h3>
                 </div>
                 <div class="p-3 bg-purple-50 rounded-full">
                     <i data-lucide="package-check" class="w-6 h-6 text-purple-500"></i>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Tabel Data Produk -->
+    <h2 class="text-xl font-bold text-gray-800 mt-8 mb-4 flex items-center gap-2">
+        <i data-lucide="database" class="w-5 h-5 text-blue-500"></i>
+        Data Produk
+    </h2>
+    
+    <div class="overflow-x-auto mb-8">
+        <table class="w-full text-sm">
+            <thead class="text-left text-gray-700 bg-gray-50">
+                <tr>
+                    <th class="py-3 font-bold px-4">Produk</th>
+                    <th class="py-3 font-bold px-4">Satuan</th>
+                    <th class="py-3 font-bold px-4 text-right">Saldo Awal</th>
+                    <th class="py-3 font-bold px-4 text-right">Stock Masuk</th>
+                    <th class="py-3 font-bold px-4 text-right">Stock Keluar</th>
+                    <th class="py-3 font-bold px-4 text-right">Stock Akhir</th>
+                </tr>
+            </thead>
+            <tbody class="text-gray-700 divide-y" id="productTable">
+                <!-- Data will be loaded here from the API -->
+            </tbody>
+        </table>
     </div>
 
     <h2 class="text-xl font-bold text-gray-800 mt-8 flex items-center gap-2">
@@ -141,18 +165,7 @@
                 </tr>
             </thead>
             <tbody class="text-gray-700 divide-y" id="stockInTable">
-                <tr>
-                    <td class="py-4 px-4">Roti Tawar Gandum</td>
-                    <td class="py-4 px-4 text-right">120 pcs</td>
-                </tr>
-                <tr>
-                    <td class="py-4 px-4">Brownies Coklat</td>
-                    <td class="py-4 px-4 text-right">95 pcs</td>
-                </tr>
-                <tr>
-                    <td class="py-4 px-4">Donat Glaze</td>
-                    <td class="py-4 px-4 text-right">80 pcs</td>
-                </tr>
+                <!-- Data will be loaded here from the API -->
             </tbody>
         </table>
     </div>
@@ -171,18 +184,7 @@
                 </tr>
             </thead>
             <tbody class="text-gray-700 divide-y" id="stockOutTable">
-                <tr>
-                    <td class="py-4 px-4">Roti Tawar Gandum</td>
-                    <td class="py-4 px-4 text-right">150 pcs</td>
-                </tr>
-                <tr>
-                    <td class="py-4 px-4">Brownies Coklat</td>
-                    <td class="py-4 px-4 text-right">110 pcs</td>
-                </tr>
-                <tr>
-                    <td class="py-4 px-4">Donat Glaze</td>
-                    <td class="py-4 px-4 text-right">90 pcs</td>
-                </tr>
+                <!-- Data will be loaded here from the API -->
             </tbody>
         </table>
     </div>
@@ -193,23 +195,42 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 
 <script>
-    // Data contoh untuk simulasi
-    const stockData = {
-        stockIn: [
-            { product: 'Roti Tawar Gandum', qty: 120 },
-            { product: 'Brownies Coklat', qty: 95 },
-            { product: 'Donat Glaze', qty: 80 },
-            { product: 'Pastel Sayur', qty: 75 },
-            { product: 'Roti Sobek Keju', qty: 60 }
-        ],
-        stockOut: [
-            { product: 'Roti Tawar Gandum', qty: 150 },
-            { product: 'Brownies Coklat', qty: 110 },
-            { product: 'Donat Glaze', qty: 90 },
-            { product: 'Pastel Sayur', qty: 85 },
-            { product: 'Roti Sobek Keju', qty: 70 }
-        ]
+    // API endpoint base
+    const API_ENDPOINT = 'http://127.0.0.1:8000/api/reports/monthly-inventory/1';
+    
+    // Inventory data from API
+    let inventoryData = {
+        outlet: '',
+        periode: {
+            start_date: '',
+            end_date: ''
+        },
+        products: [],
+        summary: {
+            total_saldo_awal: 0,
+            total_stock_masuk: 0,
+            total_stock_keluar: 0,
+            total_stock_akhir: 0,
+            total_selisih: 0,
+            produk_stok_negatif: 0,
+            produk_tidak_sesuai: 0
+        }
     };
+
+    // Format date for API
+    function formatDateForAPI(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    // Format date for display
+    function formatDateForDisplay(dateStr) {
+        const date = new Date(dateStr);
+        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+        return date.toLocaleDateString('id-ID', options);
+    }
 
     // Initialize date range picker
     const dateRangePicker = flatpickr("#dateRange", {
@@ -219,110 +240,330 @@
         locale: "id",
         onChange: function(selectedDates, dateStr) {
             if (selectedDates.length === 2) {
-                const startDate = formatDate(selectedDates[0]);
-                const endDate = formatDate(selectedDates[1]);
-                document.getElementById('dateRangeDisplay').textContent = `${startDate} - ${endDate}`;
-                filterData();
-                showAlert('success', `Menampilkan data dari ${startDate} sampai ${endDate}`);
+                const startDate = formatDateForAPI(selectedDates[0]);
+                const endDate = formatDateForAPI(selectedDates[1]);
+                
+                // Update display
+                document.getElementById('dateRangeDisplay').textContent = 
+                    `${formatDateForDisplay(startDate)} - ${formatDateForDisplay(endDate)}`;
+                
+                // Fetch data with new date range
+                fetchInventoryData(startDate, endDate);
             }
         }
     });
 
-    // Format date to Indonesian format
-    function formatDate(date) {
-        const options = { day: 'numeric', month: 'long', year: 'numeric' };
-        return date.toLocaleDateString('id-ID', options);
+    // Fetch inventory data from API
+    async function fetchInventoryData(startDate = '2025-05-14', endDate = '2025-05-14') {
+        try {
+            // showAlert('info', 'Memuat data...');
+            
+            const url = `${API_ENDPOINT}?start_date=${startDate}&end_date=${endDate}`;
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Accept': 'application/json'
+                }
+            });
+            const result = await response.json();
+            
+            if (result.success) {
+                inventoryData = result.data;
+                updateUI();
+                showAlert('success', 'Data berhasil dimuat');
+            } else {
+                showAlert('error', 'Gagal memuat data');
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            showAlert('error', 'Gagal terhubung ke server');
+        }
+    }
+
+    // Update UI with data
+    function updateUI() {
+        // Update outlet information
+        document.getElementById('outletName').textContent = `Menampilkan laporan untuk: ${inventoryData.outlet}`;
+        document.getElementById('outletSubtitle').textContent = `Perubahan stok produk di ${inventoryData.outlet}`;
+        
+        // Update summary cards
+        document.getElementById('totalSaldoAwal').textContent = `${inventoryData.summary.total_saldo_awal} pcs`;
+        document.getElementById('totalStockMasuk').textContent = `${inventoryData.summary.total_stock_masuk} pcs`;
+        document.getElementById('totalStockKeluar').textContent = `${inventoryData.summary.total_stock_keluar} pcs`;
+        document.getElementById('totalStockAkhir').textContent = `${inventoryData.summary.total_stock_akhir} pcs`;
+        
+        // Update product table
+        updateProductTable();
+        
+        // Update stock in and stock out tables
+        updateStockTables();
+    }
+    
+    // Update main product table
+    function updateProductTable() {
+        const productTable = document.getElementById('productTable');
+        productTable.innerHTML = '';
+        
+        const filteredProducts = filterProducts();
+        
+        filteredProducts.forEach(product => {
+            productTable.innerHTML += `
+                <tr>
+                    <td class="py-4 px-4">${product.product_name}</td>
+                    <td class="py-4 px-4">${product.unit}</td>
+                    <td class="py-4 px-4 text-right">${product.saldo_awal}</td>
+                    <td class="py-4 px-4 text-right">${product.stock_masuk}</td>
+                    <td class="py-4 px-4 text-right">${product.stock_keluar}</td>
+                    <td class="py-4 px-4 text-right">${product.stock_akhir}</td>
+                </tr>
+            `;
+        });
+        
+        if (filteredProducts.length === 0) {
+            productTable.innerHTML = `
+                <tr>
+                    <td colspan="6" class="py-4 px-4 text-center text-gray-500">Tidak ada data produk</td>
+                </tr>
+            `;
+        }
+    }
+    
+    // Update stock in and stock out tables
+    function updateStockTables() {
+        // Get products sorted by stock_masuk (descending)
+        const productsWithStockIn = [...inventoryData.products]
+            .filter(product => product.stock_masuk > 0)
+            .sort((a, b) => b.stock_masuk - a.stock_masuk)
+            .slice(0, 5);
+            
+        // Get products sorted by stock_keluar (descending)
+        const productsWithStockOut = [...inventoryData.products]
+            .filter(product => product.stock_keluar > 0)
+            .sort((a, b) => b.stock_keluar - a.stock_keluar)
+            .slice(0, 5);
+        
+        // Update stock in table
+        const stockInTable = document.getElementById('stockInTable');
+        stockInTable.innerHTML = '';
+        
+        if (productsWithStockIn.length > 0) {
+            productsWithStockIn.forEach(product => {
+                stockInTable.innerHTML += `
+                    <tr>
+                        <td class="py-4 px-4">${product.product_name}</td>
+                        <td class="py-4 px-4 text-right">${product.stock_masuk} ${product.unit}</td>
+                    </tr>
+                `;
+            });
+        } else {
+            stockInTable.innerHTML = `
+                <tr>
+                    <td colspan="2" class="py-4 px-4 text-center text-gray-500">Tidak ada data stock masuk</td>
+                </tr>
+            `;
+        }
+        
+        // Update stock out table
+        const stockOutTable = document.getElementById('stockOutTable');
+        stockOutTable.innerHTML = '';
+        
+        if (productsWithStockOut.length > 0) {
+            productsWithStockOut.forEach(product => {
+                stockOutTable.innerHTML += `
+                    <tr>
+                        <td class="py-4 px-4">${product.product_name}</td>
+                        <td class="py-4 px-4 text-right">${product.stock_keluar} ${product.unit}</td>
+                    </tr>
+                `;
+            });
+        } else {
+            stockOutTable.innerHTML = `
+                <tr>
+                    <td colspan="2" class="py-4 px-4 text-center text-gray-500">Tidak ada data stock keluar</td>
+                </tr>
+            `;
+        }
+    }
+    
+    // Filter products based on search
+    function filterProducts() {
+        const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+        
+        if (!searchTerm) {
+            return inventoryData.products;
+        }
+        
+        return inventoryData.products.filter(product => 
+            product.product_name.toLowerCase().includes(searchTerm) ||
+            product.product_code.toLowerCase().includes(searchTerm)
+        );
     }
 
     // Search input handler
     document.getElementById('searchInput').addEventListener('keyup', function(e) {
-        filterData();
+        updateProductTable();
     });
-
-    // Filter data function
-    function filterData() {
-        const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
-        const selectedDates = dateRangePicker.selectedDates;
-        
-        // Filter data berdasarkan pencarian
-        const filteredStockIn = stockData.stockIn.filter(item => 
-            item.product.toLowerCase().includes(searchTerm)
-        );
-        
-        const filteredStockOut = stockData.stockOut.filter(item => 
-            item.product.toLowerCase().includes(searchTerm)
-        );
-        
-        // Update tabel stock masuk
-        const stockInTable = document.getElementById('stockInTable');
-        stockInTable.innerHTML = '';
-        filteredStockIn.forEach(item => {
-            stockInTable.innerHTML += `
-                <tr>
-                    <td class="py-4 px-4">${item.product}</td>
-                    <td class="py-4 px-4 text-right">${item.qty} pcs</td>
-                </tr>
-            `;
-        });
-        
-        // Update tabel stock keluar
-        const stockOutTable = document.getElementById('stockOutTable');
-        stockOutTable.innerHTML = '';
-        filteredStockOut.forEach(item => {
-            stockOutTable.innerHTML += `
-                <tr>
-                    <td class="py-4 px-4">${item.product}</td>
-                    <td class="py-4 px-4 text-right">${item.qty} pcs</td>
-                </tr>
-            `;
-        });
-        
-        // Update summary cards jika ada filter tanggal
-        if (selectedDates.length === 2) {
-            // Di aplikasi nyata, ini akan diisi dengan data dari API
-            // Contoh simulasi:
-            const totalIn = filteredStockIn.reduce((sum, item) => sum + item.qty, 0);
-            const totalOut = filteredStockOut.reduce((sum, item) => sum + item.qty, 0);
-            
-            document.querySelectorAll('.bg-white.rounded-lg.shadow.p-4')[1].querySelector('h3').textContent = `${totalIn} pcs`;
-            document.querySelectorAll('.bg-white.rounded-lg.shadow.p-4')[2].querySelector('h3').textContent = `${totalOut} pcs`;
-        }
-    }
 
     // Print report function
     function printReport() {
+        if (!inventoryData || inventoryData.products.length === 0) {
+            showAlert('error', 'Tidak ada data untuk dicetak');
+            return;
+        }
+
         showAlert('info', 'Mempersiapkan laporan untuk dicetak...');
+
         setTimeout(() => {
-            window.print();
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Laporan Stok Bulanan</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    h1, h2 { color: #333; }
+                    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                    th { background-color: #f2f2f2; }
+                    .text-right { text-align: right; }
+                    .report-header {
+                        display: flex;
+                        align-items: center;
+                        gap: 20px;
+                        margin-bottom: 20px;
+                    }
+                    .logo {
+                        width: 60px;
+                        height: auto;
+                    }
+                    .header-info {
+                        margin-bottom: 15px;
+                    }
+                    hr { border: 0; border-top: 1px solid #000; margin: 10px 0; }
+                    .footer { margin-top: 30px; font-size: 0.8em; text-align: center; color: #666; }
+                </style>
+            </head>
+            <body>
+                <div class="report-header">
+                    <img src="/images/logo.png" alt="Logo Kifa Bakery" class="logo">
+                    <div>
+                        <h1>LAPORAN STOK BULANAN</h1>
+                        <div class="header-info">
+                            Outlet: ${inventoryData.outlet}<br>
+                            Periode: ${inventoryData.periode.start_date} hingga ${inventoryData.periode.end_date}<br>
+                            Dicetak pada: ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        </div>
+                    </div>
+                </div>
+                <hr>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nama Produk</th>
+                            <th>Satuan</th>
+                            <th class="text-right">Saldo Awal</th>
+                            <th class="text-right">Stok Masuk</th>
+                            <th class="text-right">Stok Keluar</th>
+                            <th class="text-right">Stok Akhir</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `);
+
+        inventoryData.products.forEach(product => {
+            printWindow.document.write(`
+                <tr>
+                    <td>${product.product_name}</td>
+                    <td>${product.unit}</td>
+                    <td class="text-right">${product.saldo_awal}</td>
+                    <td class="text-right">${product.stock_masuk}</td>
+                    <td class="text-right">${product.stock_keluar}</td>
+                    <td class="text-right">${product.stock_akhir}</td>
+                </tr>
+            `);
+        });
+
+        printWindow.document.write(`
+                    </tbody>
+                </table>
+
+                <div class="footer">
+                    Laporan ini dicetak secara otomatis oleh sistem.<br>
+                    © ${new Date().getFullYear()} Kifa Bakery
+                </div>
+            </body>
+            </html>
+        `);
+
+        printWindow.document.close();
+
+        // setTimeout(() => {
+        //     printWindow.print();
+        //     printWindow.close();
+        // }, 1000);
+
         }, 1000);
     }
     
     // Export report function
     function exportReport() {
         showAlert('info', 'Mempersiapkan laporan untuk diekspor...');
+        
         setTimeout(() => {
-            const a = document.createElement('a');
-            a.href = 'data:text/csv;charset=utf-8,';
-            a.download = `laporan-stok-${new Date().toISOString().slice(0,10)}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            showAlert('success', 'Laporan berhasil diekspor');
+            try {
+                // Create CSV content
+                let csvContent = "data:text/csv;charset=utf-8,";
+                
+                // Add headers
+                csvContent += "Produk,Satuan,Saldo Awal,Stock Masuk,Stock Keluar,Stock Akhir\n";
+                
+                // Add data rows
+                inventoryData.products.forEach(product => {
+                    csvContent += `"${product.product_name}",`;
+                    csvContent += `${product.unit},`;
+                    csvContent += `${product.saldo_awal},`;
+                    csvContent += `${product.stock_masuk},`;
+                    csvContent += `${product.stock_keluar},`;
+                    csvContent += `${product.stock_akhir}\n`;
+                });
+                
+                // Create download link
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `laporan-stok-${inventoryData.outlet}-${inventoryData.periode.start_date}.csv`);
+                document.body.appendChild(link);
+                
+                // Download file
+                link.click();
+                document.body.removeChild(link);
+                
+                showAlert('success', 'Laporan berhasil diekspor');
+            } catch (error) {
+                console.error('Error exporting data:', error);
+                showAlert('error', 'Gagal mengekspor data');
+            }
         }, 1000);
+
     }
     
     // Show alert function
     function showAlert(type, message) {
         const alertContainer = document.getElementById('alertContainer');
         const alert = document.createElement('div');
-        alert.className = `px-4 py-3 rounded-lg shadow-md ${type === 'error' ? 'bg-red-100 text-red-700' : 
-                         type === 'success' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`;
+        alert.className = `px-4 py-3 rounded-lg shadow-md ${
+            type === 'error' ? 'bg-red-100 text-red-700' : 
+            type === 'success' ? 'bg-orange-100 text-orange-700' : 'bg-orange-100 text-orange-700'
+        }`;
         alert.innerHTML = `
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                    <i data-lucide="${type === 'error' ? 'alert-circle' : 
-                                    type === 'success' ? 'check-circle' : 'info'}" 
-                       class="w-5 h-5"></i>
+                    <i data-lucide="${
+                        type === 'error' ? 'alert-circle' : 
+                        type === 'success' ? 'check-circle' : 'info'
+                    }" class="w-5 h-5"></i>
                     <span>${message}</span>
                 </div>
                 <button onclick="this.parentElement.parentElement.remove()">
@@ -331,11 +572,50 @@
             </div>
         `;
         alertContainer.appendChild(alert);
+
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
         
+        // Auto remove alert after 5 seconds
         setTimeout(() => {
             alert.remove();
         }, 5000);
     }
+    
+    // Initialize data load
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchInventoryData();
+    });
 </script>
+
+<style>
+    /* Tanggal terpilih: awal & akhir range */
+    .flatpickr-day.selected,
+    .flatpickr-day.startRange,
+    .flatpickr-day.endRange {
+        background-color: #f97316; /* Tailwind orange-500 */
+        color: white;
+        border-color: #f97316;
+    }
+
+    /* Tanggal di antara range */
+    .flatpickr-day.inRange {
+        background-color: #fed7aa; /* Tailwind orange-200 */
+        color: #78350f; /* Tailwind orange-800 */
+    }
+
+    /* Hover efek pada hari */
+    .flatpickr-day:hover {
+        background-color: #fdba74; /* Tailwind orange-300 */
+        color: black;
+    }
+
+    /* Hari ini */
+    .flatpickr-day.today:not(.selected):not(.inRange) {
+        border: 1px solid #fb923c; /* Tailwind orange-400 */
+        background-color: #fff7ed; /* Tailwind orange-50 */
+    }
+</style>
 
 @endsection

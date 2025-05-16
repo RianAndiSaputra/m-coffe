@@ -6,7 +6,7 @@
 
 <!-- Alert Notification -->
 <div id="alertContainer" class="fixed top-4 right-4 z-50 space-y-3 w-80">
-    <!-- Alert akan muncul di sini secara dinamis -->
+    <!-- Alert will appear here dynamically -->
 </div>
 
 <!-- Page Title + Action -->
@@ -19,7 +19,7 @@
                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
                 </span>
-                <input type="text" placeholder="Pencarian...."
+                <input type="text" id="searchInput" placeholder="Pencarian...."
                     class="w-full pl-10 pr-4 py-3 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" />
             </div>
 
@@ -42,16 +42,6 @@
             <p class="text-sm text-gray-600">Kelola staff dan penugasan shift.</p>
         </div>
     </div>
-
-    <!-- Kanan: Tombol -->
-    <div class="flex items-center space-x-2">
-        <button class="flex items-center px-4 py-2 text-sm font-medium bg-white border rounded-md shadow hover:bg-gray-50">
-            <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Cetak
-        </button>
-        <button class="flex items-center px-4 py-2 text-sm font-medium bg-white border rounded-md shadow hover:bg-gray-50">
-            <i data-lucide="download" class="w-4 h-4 mr-2"></i> Ekspor
-        </button>
-    </div>
 </div>
 
 <!-- Card: Tabel Staff -->
@@ -67,111 +57,8 @@
                     <th class="py-3 font-semibold">Aksi</th>
                 </tr>
             </thead>
-            <tbody class="text-gray-700 divide-y">
-                <!-- Staff 1 -->
-                <tr>
-                    <td class="py-4">
-                        <div class="flex items-center gap-4">
-                            <div class="bg-orange-100 p-2 rounded-full">
-                                <i data-lucide="user" class="w-6 h-6 text-orange-500"></i>
-                            </div>
-                            <div>
-                                <div class="font-semibold text-base text-gray-900">Mona</div>
-                                <div class="text-sm text-gray-500">mona@example.com</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="py-4">
-                        <span class="px-3 py-1.5 text-sm font-medium bg-blue-100 text-blue-700 rounded-full">Kasir</span>
-                    </td>
-                    <td class="py-4">07:45:00 - 07:45:00</td>
-                    <td class="py-4 relative">
-                        <div class="relative inline-block">
-                            <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded-lg">
-                                <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
-                            </button>
-                            <!-- Dropdown -->
-                            <div class="dropdown-menu hidden absolute right-0 z-20 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-base">
-                                <button onclick="editStaff(1)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left rounded-t-lg">
-                                    <i data-lucide="pencil" class="w-5 h-5 mr-3 text-gray-500"></i> Edit
-                                </button>
-                                <button onclick="showConfirmDelete(1)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left text-red-600 rounded-b-lg">
-                                    <i data-lucide="trash-2" class="w-5 h-5 mr-3"></i> Hapus
-                                </button>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-
-                <!-- Staff 2 -->
-                <tr>
-                    <td class="py-4">
-                        <div class="flex items-center gap-4">
-                            <div class="bg-orange-100 p-2 rounded-full">
-                                <i data-lucide="user" class="w-6 h-6 text-orange-500"></i>
-                            </div>
-                            <div>
-                                <div class="font-semibold text-base text-gray-900">Pusat</div>
-                                <div class="text-sm text-gray-500">pusat@example.com</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="py-4">
-                        <span class="px-3 py-1.5 text-sm font-medium bg-purple-100 text-purple-700 rounded-full">Supervisor</span>
-                    </td>
-                    <td class="py-4">07:48:00 - 07:48:00</td>
-                    <td class="py-4 relative">
-                        <div class="relative inline-block">
-                            <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded-lg">
-                                <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
-                            </button>
-                            <!-- Dropdown -->
-                            <div class="dropdown-menu hidden absolute right-0 z-20 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-base">
-                                <button onclick="editStaff(2)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left rounded-t-lg">
-                                    <i data-lucide="pencil" class="w-5 h-5 mr-3 text-gray-500"></i> Edit
-                                </button>
-                                <button onclick="showConfirmDelete(2)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left text-red-600 rounded-b-lg">
-                                    <i data-lucide="trash-2" class="w-5 h-5 mr-3"></i> Hapus
-                                </button>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-
-                <!-- Staff 3 -->
-                <tr>
-                    <td class="py-4">
-                        <div class="flex items-center gap-4">
-                            <div class="bg-orange-100 p-2 rounded-full">
-                                <i data-lucide="user" class="w-6 h-6 text-orange-500"></i>
-                            </div>
-                            <div>
-                                <div class="font-semibold text-base text-gray-900">Pak Agung</div>
-                                <div class="text-sm text-gray-500">agung@example.com</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="py-4">
-                        <span class="px-3 py-1.5 text-sm font-medium bg-green-100 text-green-700 rounded-full">Admin</span>
-                    </td>
-                    <td class="py-4">09:00:00 - 09:00:00</td>
-                    <td class="py-4 relative">
-                        <div class="relative inline-block">
-                            <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded-lg">
-                                <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
-                            </button>
-                            <!-- Dropdown -->
-                            <div class="dropdown-menu hidden absolute right-0 z-20 bottom-full mb-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-base">
-                                <button onclick="editStaff(3)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left rounded-t-lg">
-                                    <i data-lucide="pencil" class="w-5 h-5 mr-3 text-gray-500"></i> Edit
-                                </button>
-                                <button onclick="showConfirmDelete(3)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left text-red-600 rounded-b-lg">
-                                    <i data-lucide="trash-2" class="w-5 h-5 mr-3"></i> Hapus
-                                </button>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
+            <tbody id="staffTableBody" class="text-gray-700 divide-y">
+                <!-- Staff data will be loaded here -->
             </tbody>
         </table>
     </div>
@@ -202,227 +89,171 @@
     </div>
 </div>
 
-<!-- Modal Tambah Staff -->
-<div id="modalTambahStaff" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center" onclick="closeModalTambahStaff()">
-  <div class="bg-white w-full max-w-2xl rounded-xl shadow-lg max-h-screen flex flex-col" onclick="event.stopPropagation()">
-    
-    <!-- Header -->
-    <div class="p-6 border-b">
-      <h2 class="text-xl font-semibold">Tambah Staff Baru</h2>
-      <p class="text-sm text-gray-500">Tambahkan staff baru dengan mengisi detail di bawah ini.</p>
-    </div>
-
-    <!-- Scrollable Content -->
-    <div class="overflow-y-auto p-6 space-y-6 flex-1">
-      <div class="space-y-4">
-        <!-- Nama Staff -->
-        <div>
-          <label class="block font-medium mb-1">Nama <span class="text-red-500">*</span></label>
-          <input type="text" id="namaStaff" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Nama staff" required>
-          <p id="errorNamaStaff" class="text-red-500 text-xs mt-1 hidden">Nama staff wajib diisi</p>
-        </div>
-
-        <!-- Email Staff -->
-        <div>
-          <label class="block font-medium mb-1">Email <span class="text-red-500">*</span></label>
-          <input type="email" id="emailStaff" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Email staff" required>
-          <p id="errorEmailStaff" class="text-red-500 text-xs mt-1 hidden">Email wajib diisi dan valid</p>
-        </div>
-
-        <!-- Password -->
-        <div>
-          <label class="block font-medium mb-1">Password <span class="text-red-500">*</span></label>
-          <input type="password" id="passwordStaff" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Password" required>
-          <p id="errorPasswordStaff" class="text-red-500 text-xs mt-1 hidden">Password wajib diisi (min. 8 karakter)</p>
-        </div>
-
-        <!-- Peran -->
-        <div>
-          <label class="block font-medium mb-1">Peran <span class="text-red-500">*</span></label>
-          <select id="peranStaff" class="w-full border rounded-lg px-4 py-2 text-sm" required>
-            <option value="" disabled selected>Pilih peran</option>
-            <option value="kasir">Kasir</option>
-            <option value="supervisor">Supervisor</option>
-            <option value="admin">Admin</option>
-            <option value="manajer">Manajer</option>
-          </select>
-          <p id="errorPeranStaff" class="text-red-500 text-xs mt-1 hidden">Peran wajib dipilih</p>
-        </div>
-
-        <!-- Shift -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block font-medium mb-1">Waktu Mulai</label>
-            <input type="time" id="waktuMulai" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="--.--">
-          </div>
-          <div>
-            <label class="block font-medium mb-1">Waktu Selesai</label>
-            <input type="time" id="waktuSelesai" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="--.--">
-          </div>
-        </div>
-
-        <!-- Outlet -->
-        <div>
-          <label class="block font-medium mb-1">Outlet</label>
-          <select id="outletStaff" class="w-full border rounded-lg px-4 py-2 text-sm">
-            <option value="pusat" selected>Kifa Bakery Pusat</option>
-            <option value="cabang1">Kifa Bakery Cabang 1</option>
-            <option value="cabang2">Kifa Bakery Cabang 2</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <!-- Footer -->
-    <div class="p-6 border-t flex justify-end gap-3">
-      <button id="btnBatalModalTambahStaff" class="px-4 py-2 border rounded hover:bg-gray-100">Batal</button>
-      <button id="btnTambahStaff" class="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 flex items-center gap-2">
-        <i data-lucide="user-plus" class="w-4 h-4"></i>
-        <span>Simpan</span>
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Edit Staff -->
-<div id="modalEditStaff" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center" onclick="closeModalEditStaff()">
-    <div class="bg-white w-full max-w-2xl rounded-xl shadow-lg max-h-screen flex flex-col" onclick="event.stopPropagation()">
-      
-      <!-- Header -->
-      <div class="p-6 border-b">
-        <h2 class="text-xl font-semibold">Edit Staff</h2>
-        <p class="text-sm text-gray-500">Edit informasi staff</p>
-      </div>
-  
-      <!-- Scrollable Content -->
-      <div class="overflow-y-auto p-6 space-y-6 flex-1">
-        <div class="space-y-4">
-          <!-- Nama Staff -->
-          <div>
-            <label class="block font-medium mb-1">Nama <span class="text-red-500">*</span></label>
-            <input type="text" id="editNamaStaff" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Nama staff" required>
-            <p id="errorEditNamaStaff" class="text-red-500 text-xs mt-1 hidden">Nama staff wajib diisi</p>
-          </div>
-  
-          <!-- Email Staff -->
-          <div>
-            <label class="block font-medium mb-1">Email <span class="text-red-500">*</span></label>
-            <input type="email" id="editEmailStaff" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Email staff" required>
-            <p id="errorEditEmailStaff" class="text-red-500 text-xs mt-1 hidden">Email wajib diisi dan valid</p>
-          </div>
-  
-          <!-- Password -->
-          <div>
-            <label class="block font-medium mb-1">Password</label>
-            <input type="password" id="editPasswordStaff" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Kosongkan jika tidak ingin mengubah">
-            <p id="errorEditPasswordStaff" class="text-red-500 text-xs mt-1 hidden">Password minimal 8 karakter</p>
-          </div>
-  
-          <!-- Peran -->
-          <div>
-            <label class="block font-medium mb-1">Peran <span class="text-red-500">*</span></label>
-            <select id="editPeranStaff" class="w-full border rounded-lg px-4 py-2 text-sm" required>
-              <option value="" disabled>Pilih peran</option>
-              <option value="kasir">Kasir</option>
-              <option value="supervisor">Supervisor</option>
-              <option value="admin">Admin</option>
-              <option value="manajer">Manajer</option>
-            </select>
-            <p id="errorEditPeranStaff" class="text-red-500 text-xs mt-1 hidden">Peran wajib dipilih</p>
-          </div>
-  
-          <!-- Shift -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block font-medium mb-1">Waktu Mulai</label>
-              <input type="time" id="editWaktuMulai" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="--.--">
-            </div>
-            <div>
-              <label class="block font-medium mb-1">Waktu Selesai</label>
-              <input type="time" id="editWaktuSelesai" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="--.--">
-            </div>
-          </div>
-  
-          <!-- Outlet -->
-          <div>
-            <label class="block font-medium mb-1">Outlet</label>
-            <select id="editOutletStaff" class="w-full border rounded-lg px-4 py-2 text-sm">
-              <option value="pusat">Kifa Bakery Pusat</option>
-              <option value="cabang1">Kifa Bakery Cabang 1</option>
-              <option value="cabang2">Kifa Bakery Cabang 2</option>
-            </select>
-          </div>
-        </div>
-      </div>
-  
-      <!-- Footer -->
-      <div class="p-6 border-t flex justify-end gap-3">
-        <button id="btnBatalModalEditStaff" class="px-4 py-2 border rounded hover:bg-gray-100">Batal</button>
-        <button id="btnSimpanEditStaff" class="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 flex items-center gap-2">
-          <i data-lucide="save" class="w-4 h-4"></i>
-          <span>Simpan Perubahan</span>
-        </button>
-      </div>
-    </div>
-  </div>
+@include('partials.staf.modal-tambah')
+@include('partials.staf.modal-edit')
 
 <script>
+// Global variables
+let currentOutletId = 1; // Default outlet ID, adjust as needed
+let staffIdToDelete = null;
+let currentEditStaffId = null;
 
-// Fungsi untuk menampilkan search
-function setupRealTimeSearch() {
-    const searchInput = document.querySelector('input[type="text"][placeholder="Pencarian...."]');
-    
-    if (searchInput) {
-        // Tambahkan event listener untuk input
-        searchInput.addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const rows = document.querySelectorAll('tbody tr');
-            
-            rows.forEach(row => {
-                const nama = row.querySelector('td:first-child .font-semibold').textContent.toLowerCase();
-                const email = row.querySelector('td:first-child .text-sm').textContent.toLowerCase();
-                const peran = row.querySelector('td:nth-child(2) span').textContent.toLowerCase();
-                const shift = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
-                
-                if (nama.includes(searchTerm) || 
-                    email.includes(searchTerm) || 
-                    peran.includes(searchTerm) || 
-                    shift.includes(searchTerm)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        });
-        
-        // Tambahkan debounce untuk optimasi performa
-        function debounce(func, timeout = 300) {
-            let timer;
-            return (...args) => {
-                clearTimeout(timer);
-                timer = setTimeout(() => { func.apply(this, args); }, timeout);
-            };
-        }
-        
-        const processChange = debounce((e) => {
-            // Logika pencarian sudah di atas
-        });
-        
-        searchInput.addEventListener('input', processChange);
-    }
-}
+// DOM Elements
+const modalHapusStaff = document.getElementById('modalHapusStaff');
+const batalBtnHapusStaff = document.getElementById('btnBatalHapusStaff');
+const konfirmasiBtnHapusStaff = document.getElementById('btnKonfirmasiHapusStaff');
+const staffTableBody = document.getElementById('staffTableBody');
+const searchInput = document.getElementById('searchInput');
 
-// Panggil fungsi setup saat dokumen siap
+// Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
-    setupRealTimeSearch();
+    // Load staff data
+    loadStaffData();
     
-    // Inisialisasi Lucide Icons
+    // Initialize Lucide Icons
     if (window.lucide) {
         window.lucide.createIcons();
     }
+    
+    // Setup event listeners
+    setupEventListeners();
+    setupRealTimeSearch();
 });
 
-// Fungsi untuk menampilkan alert
+// Setup event listeners
+function setupEventListeners() {
+    // Delete confirmation modal
+    batalBtnHapusStaff.addEventListener('click', closeConfirmDeleteStaff);
+    konfirmasiBtnHapusStaff.addEventListener('click', hapusStaff);
+    
+    // Add staff form submission
+    document.getElementById('btnTambahStaff').addEventListener('click', tambahStaff);
+    
+    // Edit staff form submission
+    document.getElementById('btnSimpanEditStaff').addEventListener('click', updateStaff);
+}
+
+// Load staff data from API
+function loadStaffData() {
+    fetch(`/api/user/all/${currentOutletId}`, {
+        headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            renderStaffTable(data.data);
+        } else {
+            showAlert('error', 'Gagal memuat data staff');
+        }
+    })
+    .catch(error => {
+        console.error('Error loading staff data:', error);
+        showAlert('error', 'Gagal memuat data staff');
+    });
+}
+
+// Render staff table
+function renderStaffTable(staffList) {
+    staffTableBody.innerHTML = '';
+    
+    if (staffList.length === 0) {
+        staffTableBody.innerHTML = `
+            <tr>
+                <td colspan="4" class="py-4 text-center text-gray-500">
+                    Tidak ada data staff
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    staffList.forEach(staff => {
+        const roleClass = {
+            'admin': 'bg-green-100 text-green-700',
+            'kasir': 'bg-blue-100 text-blue-700',
+            'supervisor': 'bg-purple-100 text-purple-700'
+        }[staff.role] || 'bg-gray-100 text-gray-700';
+        
+        const shiftTime = staff.last_shift ? 
+            `${staff.last_shift.start_time || '--:--'} - ${staff.last_shift.end_time || '--:--'}` : 
+            '--:-- - --:--';
+        
+        staffTableBody.innerHTML += `
+            <tr data-id="${staff.id}">
+                <td class="py-4">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-orange-100 p-2 rounded-full">
+                            <i data-lucide="user" class="w-6 h-6 text-orange-500"></i>
+                        </div>
+                        <div>
+                            <div class="font-semibold text-base text-gray-900">${staff.name}</div>
+                            <div class="text-sm text-gray-500">${staff.email}</div>
+                        </div>
+                    </div>
+                </td>
+                <td class="py-4">
+                    <span class="px-3 py-1.5 text-sm font-medium ${roleClass} rounded-full capitalize">${staff.role}</span>
+                </td>
+                <td class="py-4">${shiftTime}</td>
+                <td class="py-4 relative">
+                    <div class="relative inline-block">
+                        <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded-lg">
+                            <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
+                        </button>
+                        <!-- Dropdown -->
+                        <div class="dropdown-menu hidden absolute right-0 z-20 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-base">
+                            <button onclick="editStaff(${staff.id})" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left rounded-t-lg">
+                                <i data-lucide="pencil" class="w-5 h-5 mr-3 text-gray-500"></i> Edit
+                            </button>
+                            <button onclick="showConfirmDelete(${staff.id})" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left text-red-600 rounded-b-lg">
+                                <i data-lucide="trash-2" class="w-5 h-5 mr-3"></i> Hapus
+                            </button>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+    
+    // Refresh Lucide icons
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
+}
+
+// Setup real-time search
+function setupRealTimeSearch() {
+    searchInput.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#staffTableBody tr');
+        
+        rows.forEach(row => {
+            const nama = row.querySelector('td:first-child .font-semibold').textContent.toLowerCase();
+            const email = row.querySelector('td:first-child .text-sm').textContent.toLowerCase();
+            const peran = row.querySelector('td:nth-child(2) span').textContent.toLowerCase();
+            const shift = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+            
+            if (nama.includes(searchTerm) || 
+                email.includes(searchTerm) || 
+                peran.includes(searchTerm) || 
+                shift.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+}
+
+// Show alert
 function showAlert(type, message) {
     const alertContainer = document.getElementById('alertContainer');
     const alertId = 'alert-' + Date.now();
@@ -470,7 +301,7 @@ function showAlert(type, message) {
     }, 5000);
 }
 
-// Fungsi untuk menutup alert
+// Close alert
 function closeAlert(id) {
     const alert = document.getElementById(id);
     if (alert) {
@@ -481,7 +312,7 @@ function closeAlert(id) {
     }
 }
 
-// Fungsi untuk toggle dropdown
+// Toggle dropdown
 function toggleDropdown(button) {
     const menu = button.nextElementSibling;
 
@@ -508,7 +339,7 @@ function toggleDropdown(button) {
     }
 }
 
-// Tutup dropdown jika klik di luar
+// Close dropdown when clicking outside
 document.addEventListener('click', function (e) {
     if (!e.target.closest('.relative.inline-block')) {
         document.querySelectorAll('.dropdown-menu').forEach(menu => {
@@ -519,196 +350,77 @@ document.addEventListener('click', function (e) {
     }
 });
 
-// Modal Edit Staff
-const modalEditStaff = document.getElementById('modalEditStaff');
-const batalBtnEditStaff = document.getElementById('btnBatalModalEditStaff');
-let currentEditStaffId = null;
+// Modal functions
+function openModalTambahStaff() {
+    document.getElementById('modalTambahStaff').classList.remove('hidden');
+    document.getElementById('modalTambahStaff').classList.add('flex');
+}
+
+function closeModalTambahStaff() {
+    document.getElementById('modalTambahStaff').classList.add('hidden');
+    document.getElementById('modalTambahStaff').classList.remove('flex');
+    resetTambahStaffForm();
+}
+
+function resetTambahStaffForm() {
+    document.getElementById('namaStaff').value = '';
+    document.getElementById('emailStaff').value = '';
+    document.getElementById('passwordStaff').value = '';
+    document.getElementById('peranStaff').value = 'kasir';
+    document.getElementById('waktuMulai').value = '';
+    document.getElementById('waktuSelesai').value = '';
+    
+    // Clear error messages
+    document.querySelectorAll('[id^="error"]').forEach(el => {
+        el.classList.add('hidden');
+    });
+    
+    // Remove error borders
+    document.querySelectorAll('.border-red-500').forEach(el => {
+        el.classList.remove('border-red-500');
+    });
+}
 
 function openModalEditStaff(id) {
     currentEditStaffId = id;
     
-    // In a real application, you would fetch the staff data from your backend
-    // Here we're just simulating with dummy data
-    const dummyStaffData = {
-        1: {
-            nama: 'Mona',
-            email: 'mona@example.com',
-            peran: 'kasir',
-            waktuMulai: '07:45',
-            waktuSelesai: '07:45',
-            outlet: 'pusat'
-        },
-        2: {
-            nama: 'Pusat',
-            email: 'pusat@example.com',
-            peran: 'supervisor',
-            waktuMulai: '07:48',
-            waktuSelesai: '07:48',
-            outlet: 'pusat'
-        },
-        3: {
-            nama: 'Pak Agung',
-            email: 'agung@example.com',
-            peran: 'admin',
-            waktuMulai: '09:00',
-            waktuSelesai: '09:00',
-            outlet: 'pusat'
+    // Fetch staff data
+    fetch(`/api/user/all/${currentOutletId}`, {
+        headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
-    };
-    
-    const staffData = dummyStaffData[id] || dummyStaffData[1];
-    
-    // Fill the form with staff data
-    document.getElementById('editNamaStaff').value = staffData.nama;
-    document.getElementById('editEmailStaff').value = staffData.email;
-    document.getElementById('editPeranStaff').value = staffData.peran;
-    document.getElementById('editWaktuMulai').value = staffData.waktuMulai;
-    document.getElementById('editWaktuSelesai').value = staffData.waktuSelesai;
-    document.getElementById('editOutletStaff').value = staffData.outlet;
-    
-    modalEditStaff.classList.remove('hidden');
-    modalEditStaff.classList.add('flex');
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const staff = data.data.find(s => s.id == id);
+            if (staff) {
+                document.getElementById('editNamaStaff').value = staff.name;
+                document.getElementById('editEmailStaff').value = staff.email;
+                document.getElementById('editPeranStaff').value = staff.role;
+                
+                if (staff.last_shift) {
+                    document.getElementById('editWaktuMulai').value = staff.last_shift.start_time || '';
+                    document.getElementById('editWaktuSelesai').value = staff.last_shift.end_time || '';
+                }
+                
+                document.getElementById('modalEditStaff').classList.remove('hidden');
+                document.getElementById('modalEditStaff').classList.add('flex');
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching staff data:', error);
+        showAlert('error', 'Gagal memuat data staff');
+    });
 }
 
 function closeModalEditStaff() {
-    modalEditStaff.classList.add('hidden');
-    modalEditStaff.classList.remove('flex');
+    document.getElementById('modalEditStaff').classList.add('hidden');
+    document.getElementById('modalEditStaff').classList.remove('flex');
     currentEditStaffId = null;
 }
-
-batalBtnEditStaff.addEventListener('click', closeModalEditStaff);
-
-// Fungsi edit staff - PENTING: Hanya definisikan SATU kali
-function editStaff(id) {
-    openModalEditStaff(id);
-}
-
-// Validasi form edit staff
-function validateEditFormStaff() {
-    let isValid = true;
-    
-    // Validasi nama
-    const namaStaff = document.getElementById('editNamaStaff');
-    const errorNamaStaff = document.getElementById('errorEditNamaStaff');
-    if (!namaStaff.value.trim()) {
-        errorNamaStaff.classList.remove('hidden');
-        namaStaff.classList.add('border-red-500');
-        isValid = false;
-    } else {
-        errorNamaStaff.classList.add('hidden');
-        namaStaff.classList.remove('border-red-500');
-    }
-    
-    // Validasi email
-    const emailStaff = document.getElementById('editEmailStaff');
-    const errorEmailStaff = document.getElementById('errorEditEmailStaff');
-    if (!emailStaff.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailStaff.value)) {
-        errorEmailStaff.classList.remove('hidden');
-        emailStaff.classList.add('border-red-500');
-        isValid = false;
-    } else {
-        errorEmailStaff.classList.add('hidden');
-        emailStaff.classList.remove('border-red-500');
-    }
-    
-    // Validasi password (optional)
-    const passwordStaff = document.getElementById('editPasswordStaff');
-    const errorPasswordStaff = document.getElementById('errorEditPasswordStaff');
-    if (passwordStaff.value.trim() && passwordStaff.value.length < 8) {
-        errorPasswordStaff.classList.remove('hidden');
-        passwordStaff.classList.add('border-red-500');
-        isValid = false;
-    } else {
-        errorPasswordStaff.classList.add('hidden');
-        passwordStaff.classList.remove('border-red-500');
-    }
-    
-    // Validasi peran
-    const peranStaff = document.getElementById('editPeranStaff');
-    const errorPeranStaff = document.getElementById('errorEditPeranStaff');
-    if (!peranStaff.value) {
-        errorPeranStaff.classList.remove('hidden');
-        peranStaff.classList.add('border-red-500');
-        isValid = false;
-    } else {
-        errorPeranStaff.classList.add('hidden');
-        peranStaff.classList.remove('border-red-500');
-    }
-    
-    return isValid;
-}
-
-// Submit form edit staff
-document.getElementById('btnSimpanEditStaff').addEventListener('click', function() {
-    if (validateEditFormStaff()) {
-        // Simulasi loading
-        const btnEdit = this;
-        const originalText = btnEdit.innerHTML;
-        btnEdit.innerHTML = `
-            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Menyimpan...
-        `;
-        btnEdit.disabled = true;
-        
-        // Simulasi AJAX request
-        setTimeout(() => {
-            const formData = {
-                id: currentEditStaffId,
-                nama: document.getElementById('editNamaStaff').value,
-                email: document.getElementById('editEmailStaff').value,
-                peran: document.getElementById('editPeranStaff').value,
-                shift: {
-                    mulai: document.getElementById('editWaktuMulai').value,
-                    selesai: document.getElementById('editWaktuSelesai').value
-                },
-                outlet: document.getElementById('editOutletStaff').value
-            };
-            
-            if (document.getElementById('editPasswordStaff').value.trim()) {
-                formData.password = document.getElementById('editPasswordStaff').value;
-            }
-            
-            console.log('Data staff yang akan diupdate:', formData);
-            
-            // Tutup modal
-            closeModalEditStaff();
-            
-            // Tampilkan alert sukses
-            showAlert('success', 'Data staff berhasil diperbarui!');
-            
-            // Kembalikan tombol ke state semula
-            btnEdit.innerHTML = originalText;
-            btnEdit.disabled = false;
-            
-            // In a real app, you would update the table here
-        }, 1500);
-    }
-});
-
-// Modal Tambah Staff
-const modalTambahStaff = document.getElementById('modalTambahStaff');
-const batalBtnTambahStaff = document.getElementById('btnBatalModalTambahStaff');
-
-function openModalTambahStaff() {
-    modalTambahStaff.classList.remove('hidden');
-    modalTambahStaff.classList.add('flex');
-}
-
-function closeModalTambahStaff() {
-    modalTambahStaff.classList.add('hidden');
-    modalTambahStaff.classList.remove('flex');
-}
-
-batalBtnTambahStaff.addEventListener('click', closeModalTambahStaff);
-
-// Modal Hapus Staff
-const modalHapusStaff = document.getElementById('modalHapusStaff');
-const batalBtnHapusStaff = document.getElementById('btnBatalHapusStaff');
-const konfirmasiBtnHapusStaff = document.getElementById('btnKonfirmasiHapusStaff');
-let staffIdToDelete = null;
 
 function showConfirmDelete(id) {
     staffIdToDelete = id;
@@ -722,22 +434,11 @@ function closeConfirmDeleteStaff() {
     staffIdToDelete = null;
 }
 
-function hapusStaff() {
-    if (staffIdToDelete) {
-        console.log('Menghapus staff ID:', staffIdToDelete);
-        showAlert('success', 'Staff berhasil dihapus!');
-        closeConfirmDeleteStaff();
-    }
-}
-
-batalBtnHapusStaff.addEventListener('click', closeConfirmDeleteStaff);
-konfirmasiBtnHapusStaff.addEventListener('click', hapusStaff);
-
-// Validasi form tambah staff
+// Form validation
 function validateFormStaff() {
     let isValid = true;
     
-    // Validasi nama
+    // Validate name
     const namaStaff = document.getElementById('namaStaff');
     const errorNamaStaff = document.getElementById('errorNamaStaff');
     if (!namaStaff.value.trim()) {
@@ -749,7 +450,7 @@ function validateFormStaff() {
         namaStaff.classList.remove('border-red-500');
     }
     
-    // Validasi email
+    // Validate email
     const emailStaff = document.getElementById('emailStaff');
     const errorEmailStaff = document.getElementById('errorEmailStaff');
     if (!emailStaff.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailStaff.value)) {
@@ -761,10 +462,10 @@ function validateFormStaff() {
         emailStaff.classList.remove('border-red-500');
     }
     
-    // Validasi password
+    // Validate password
     const passwordStaff = document.getElementById('passwordStaff');
     const errorPasswordStaff = document.getElementById('errorPasswordStaff');
-    if (!passwordStaff.value.trim() || passwordStaff.value.length < 8) {
+    if (!passwordStaff.value.trim() || passwordStaff.value.length < 6) {
         errorPasswordStaff.classList.remove('hidden');
         passwordStaff.classList.add('border-red-500');
         isValid = false;
@@ -773,7 +474,7 @@ function validateFormStaff() {
         passwordStaff.classList.remove('border-red-500');
     }
     
-    // Validasi peran
+    // Validate role
     const peranStaff = document.getElementById('peranStaff');
     const errorPeranStaff = document.getElementById('errorPeranStaff');
     if (!peranStaff.value) {
@@ -788,60 +489,227 @@ function validateFormStaff() {
     return isValid;
 }
 
-// Submit form tambah staff
-document.getElementById('btnTambahStaff').addEventListener('click', function() {
-    if (validateFormStaff()) {
-        // Simulasi loading
-        const btnTambah = this;
-        const originalText = btnTambah.innerHTML;
-        btnTambah.innerHTML = `
-            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Menyimpan...
-        `;
-        btnTambah.disabled = true;
-        
-        // Simulasi AJAX request
-        setTimeout(() => {
-            const formData = {
-                nama: document.getElementById('namaStaff').value,
-                email: document.getElementById('emailStaff').value,
-                peran: document.getElementById('peranStaff').value,
-                shift: {
-                    mulai: document.getElementById('waktuMulai').value,
-                    selesai: document.getElementById('waktuSelesai').value
-                },
-                outlet: document.getElementById('outletStaff').value
-            };
-            
-            console.log('Data staff yang akan dikirim:', formData);
-            
-            // Reset form
-            document.getElementById('namaStaff').value = '';
-            document.getElementById('emailStaff').value = '';
-            document.getElementById('passwordStaff').value = '';
-            document.getElementById('peranStaff').value = '';
-            document.getElementById('waktuMulai').value = '';
-            document.getElementById('waktuSelesai').value = '';
-            document.getElementById('outletStaff').value = 'pusat';
-            
-            // Tutup modal
-            closeModalTambahStaff();
-            
-            // Tampilkan alert sukses
-            showAlert('success', 'Staff baru berhasil ditambahkan!');
-            
-            // Kembalikan tombol ke state semula
-            btnTambah.innerHTML = originalText;
-            btnTambah.disabled = false;
-        }, 1500);
+function validateEditFormStaff() {
+    let isValid = true;
+    
+    // Validate name
+    const namaStaff = document.getElementById('editNamaStaff');
+    const errorNamaStaff = document.getElementById('errorEditNamaStaff');
+    if (!namaStaff.value.trim()) {
+        errorNamaStaff.classList.remove('hidden');
+        namaStaff.classList.add('border-red-500');
+        isValid = false;
+    } else {
+        errorNamaStaff.classList.add('hidden');
+        namaStaff.classList.remove('border-red-500');
     }
-});
-</script>
+    
+    // Validate email
+    const emailStaff = document.getElementById('editEmailStaff');
+    const errorEmailStaff = document.getElementById('errorEditEmailStaff');
+    if (!emailStaff.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailStaff.value)) {
+        errorEmailStaff.classList.remove('hidden');
+        emailStaff.classList.add('border-red-500');
+        isValid = false;
+    } else {
+        errorEmailStaff.classList.add('hidden');
+        emailStaff.classList.remove('border-red-500');
+    }
+    
+    // Validate password (optional)
+    const passwordStaff = document.getElementById('editPasswordStaff');
+    const errorPasswordStaff = document.getElementById('errorEditPasswordStaff');
+    if (passwordStaff.value.trim() && passwordStaff.value.length < 6) {
+        errorPasswordStaff.classList.remove('hidden');
+        passwordStaff.classList.add('border-red-500');
+        isValid = false;
+    } else {
+        errorPasswordStaff.classList.add('hidden');
+        passwordStaff.classList.remove('border-red-500');
+    }
+    
+    // Validate role
+    const peranStaff = document.getElementById('editPeranStaff');
+    const errorPeranStaff = document.getElementById('errorEditPeranStaff');
+    if (!peranStaff.value) {
+        errorPeranStaff.classList.remove('hidden');
+        peranStaff.classList.add('border-red-500');
+        isValid = false;
+    } else {
+        errorPeranStaff.classList.add('hidden');
+        peranStaff.classList.remove('border-red-500');
+    }
+    
+    return isValid;
+}
 
-<style>
+// CRUD Operations
+function tambahStaff() {
+    if (!validateFormStaff()) return;
+
+    const btnTambah = document.getElementById('btnTambahStaff');
+    const originalText = btnTambah.innerHTML;
+    
+    // Show loading state
+    btnTambah.innerHTML = `
+        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Menyimpan...
+    `;
+    btnTambah.disabled = true;
+
+    const formData = {
+        name: document.getElementById('namaStaff').value,
+        email: document.getElementById('emailStaff').value,
+        password: document.getElementById('passwordStaff').value,
+        role: document.getElementById('peranStaff').value,
+        outlet_id: currentOutletId,
+        start_time: document.getElementById('waktuMulai').value,
+        end_time: document.getElementById('waktuSelesai').value
+    };
+
+    fetch('/api/user/register', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', 'Staff berhasil ditambahkan!');
+            closeModalTambahStaff();
+            loadStaffData();
+        } else {
+            showAlert('error', data.message || 'Gagal menambahkan staff');
+        }
+    })
+    .catch(error => {
+        console.error('Error adding staff:', error);
+        showAlert('error', 'Terjadi kesalahan saat menambahkan staff');
+    })
+    .finally(() => {
+        btnTambah.innerHTML = originalText;
+        btnTambah.disabled = false;
+    });
+}
+
+function updateStaff() {
+    if (!validateEditFormStaff() || !currentEditStaffId) return;
+
+    const btnEdit = document.getElementById('btnSimpanEditStaff');
+    const originalText = btnEdit.innerHTML;
+    
+    // Show loading state
+    btnEdit.innerHTML = `
+        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Menyimpan...
+    `;
+    btnEdit.disabled = true;
+
+    const formData = {
+        name: document.getElementById('editNamaStaff').value,
+        email: document.getElementById('editEmailStaff').value,
+        role: document.getElementById('editPeranStaff').value,
+        outlet_id: currentOutletId,
+        start_time: document.getElementById('editWaktuMulai').value,
+        end_time: document.getElementById('editWaktuSelesai').value
+    };
+
+    // Only include password if it's not empty
+    const password = document.getElementById('editPasswordStaff').value;
+    if (password.trim()) {
+        formData.password = password;
+    }
+
+    fetch(`/api/user/update/${currentEditStaffId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', 'Data staff berhasil diperbarui!');
+            closeModalEditStaff();
+            loadStaffData();
+        } else {
+            showAlert('error', data.message || 'Gagal memperbarui data staff');
+        }
+    })
+    .catch(error => {
+        console.error('Error updating staff:', error);
+        showAlert('error', 'Terjadi kesalahan saat memperbarui staff');
+    })
+    .finally(() => {
+        btnEdit.innerHTML = originalText;
+        btnEdit.disabled = false;
+    });
+}
+
+function hapusStaff() {
+    if (!staffIdToDelete) return;
+
+    const btnHapus = document.getElementById('btnKonfirmasiHapusStaff');
+    const originalText = btnHapus.innerHTML;
+    
+    // Show loading state
+    btnHapus.innerHTML = `
+        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Menghapus...
+    `;
+    btnHapus.disabled = true;
+
+    fetch(`/api/user/delete/${staffIdToDelete}`, {
+        method: 'DELETE',
+        headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', 'Staff berhasil dihapus!');
+            closeConfirmDeleteStaff();
+            loadStaffData();
+        } else {
+            showAlert('error', data.message || 'Gagal menghapus staff');
+        }
+    })
+    .catch(error => {
+        console.error('Error deleting staff:', error);
+        showAlert('error', 'Terjadi kesalahan saat menghapus staff');
+    })
+    .finally(() => {
+        btnHapus.innerHTML = originalText;
+        btnHapus.disabled = false;
+    });
+}
+
+// Helper functions
+function editStaff(id) {
+    openModalEditStaff(id);
+}
+
+// Styles for animations
+const styleElement = document.createElement('style');
+styleElement.textContent = `
     /* Animasi untuk alert */
     @keyframes fadeInUp {
         from {
@@ -885,6 +753,8 @@ document.getElementById('btnTambahStaff').addEventListener('click', function() {
         bottom: auto;
         margin-top: 5px;
     }
-</style>
+`;
+document.head.appendChild(styleElement);
+</script>
 
 @endsection

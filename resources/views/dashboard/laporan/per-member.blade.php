@@ -31,14 +31,14 @@
     <div class="mb-3 md:mb-0 flex items-start gap-2">
         <i data-lucide="store" class="w-5 h-5 text-gray-600 mt-1"></i>
         <div>
-            <h4 class="text-lg font-semibold text-gray-800">Menampilkan laporan untuk: Kifa Bakery Pusat</h4>
-            <p class="text-sm text-gray-600">Periode: <span id="dateRangeDisplay">01 Mei 2025 - 11 Mei 2025</span></p>
+            <h4 class="text-lg font-semibold text-gray-800" id="outletName">Memuat data outlet...</h4>
+            <p class="text-sm text-gray-600">Periode: <span id="dateRangeDisplay">Memuat...</span></p>
         </div>
     </div>
-    <div class="text-right">
+    {{-- <div class="text-right">
         <p class="text-sm font-medium text-gray-600">Total Member</p>
-        <h4 class="text-xl font-bold text-gray-800" id="totalMembers">3 member</h4>
-    </div>
+        <h4 class="text-xl font-bold text-gray-800" id="totalMembers">Memuat...</h4>
+    </div> --}}
 </div>
 
 <!-- Laporan Penjualan per Member -->
@@ -83,7 +83,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Total Transaksi</p>
-                    <h3 class="text-2xl font-bold text-gray-800" id="totalTransactions">5 transaksi</h3>
+                    <h3 class="text-2xl font-bold text-gray-800" id="totalTransactions">Memuat...</h3>
                 </div>
                 <div class="p-3 bg-blue-50 rounded-full">
                     <i data-lucide="shopping-bag" class="w-6 h-6 text-blue-500"></i>
@@ -96,7 +96,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Total Produk Terjual</p>
-                    <h3 class="text-2xl font-bold text-gray-800" id="totalProductsSold">24 produk</h3>
+                    <h3 class="text-2xl font-bold text-gray-800" id="totalProductsSold">Memuat...</h3>
                 </div>
                 <div class="p-3 bg-green-50 rounded-full">
                     <i data-lucide="package" class="w-6 h-6 text-green-500"></i>
@@ -109,7 +109,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Total Pendapatan</p>
-                    <h3 class="text-2xl font-bold text-gray-800" id="totalRevenue">Rp 1.250.000</h3>
+                    <h3 class="text-2xl font-bold text-gray-800" id="totalRevenue">Memuat...</h3>
                 </div>
                 <div class="p-3 bg-purple-50 rounded-full">
                     <i data-lucide="dollar-sign" class="w-6 h-6 text-purple-500"></i>
@@ -121,6 +121,9 @@
     <!-- Member Tables Section -->
     <div id="memberTablesContainer" class="mt-8 space-y-8">
         <!-- Tables will be generated here dynamically -->
+        <div id="loadingIndicator" style="display: none;" style="display: none;" class="text-center py-8">
+            <p class="text-gray-600">Memuat data laporan...</p>
+        </div>
     </div>
 </div>
 
@@ -129,157 +132,189 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 
 <script>
-    // Sample data for demonstration
-    const memberData = [
-        {
-            id: 'M001',
-            name: 'Budi Santoso',
-            phone: '081234567890',
-            joinDate: '15 Jan 2023',
-            totalSpent: 'Rp 750.000',
-            transactions: [
-                {
-                    date: '10 Mei 2025',
-                    invoice: 'INV-20250510-001',
-                    items: [
-                        { product: 'Roti Tawar Gandum', qty: 2, price: 'Rp 25.000', total: 'Rp 50.000' },
-                        { product: 'Brownies Coklat', qty: 3, price: 'Rp 15.000', total: 'Rp 45.000' },
-                        { product: 'Donat Glaze', qty: 5, price: 'Rp 10.000', total: 'Rp 50.000' }
-                    ],
-                    subtotal: 'Rp 145.000',
-                    discount: 'Rp 5.000',
-                    total: 'Rp 140.000'
-                },
-                {
-                    date: '05 Mei 2025',
-                    invoice: 'INV-20250505-003',
-                    items: [
-                        { product: 'Pastel Sayur', qty: 4, price: 'Rp 12.000', total: 'Rp 48.000' },
-                        { product: 'Roti Sobek Keju', qty: 2, price: 'Rp 18.000', total: 'Rp 36.000' }
-                    ],
-                    subtotal: 'Rp 84.000',
-                    discount: 'Rp 4.000',
-                    total: 'Rp 80.000'
-                }
-            ]
-        },
-        {
-            id: 'M002',
-            name: 'Ani Wijaya',
-            phone: '082345678901',
-            joinDate: '20 Mar 2024',
-            totalSpent: 'Rp 350.000',
-            transactions: [
-                {
-                    date: '08 Mei 2025',
-                    invoice: 'INV-20250508-002',
-                    items: [
-                        { product: 'Bolu Gulung', qty: 1, price: 'Rp 75.000', total: 'Rp 75.000' },
-                        { product: 'Chiffon Cake', qty: 1, price: 'Rp 65.000', total: 'Rp 65.000' }
-                    ],
-                    subtotal: 'Rp 140.000',
-                    discount: 'Rp 10.000',
-                    total: 'Rp 130.000'
-                },
-                {
-                    date: '03 Mei 2025',
-                    invoice: 'INV-20250503-001',
-                    items: [
-                        { product: 'Roti Tawar Original', qty: 3, price: 'Rp 20.000', total: 'Rp 60.000' },
-                        { product: 'Pizza Mini', qty: 2, price: 'Rp 25.000', total: 'Rp 50.000' }
-                    ],
-                    subtotal: 'Rp 110.000',
-                    discount: 'Rp 10.000',
-                    total: 'Rp 100.000'
-                }
-            ]
-        },
-        {
-            id: 'M003',
-            name: 'Citra Dewi',
-            phone: '083456789012',
-            joinDate: '05 Feb 2025',
-            totalSpent: 'Rp 150.000',
-            transactions: [
-                {
-                    date: '02 Mei 2025',
-                    invoice: 'INV-20250502-001',
-                    items: [
-                        { product: 'Croissant', qty: 2, price: 'Rp 25.000', total: 'Rp 50.000' },
-                        { product: 'Bagel', qty: 3, price: 'Rp 20.000', total: 'Rp 60.000' }
-                    ],
-                    subtotal: 'Rp 110.000',
-                    discount: 'Rp 10.000',
-                    total: 'Rp 100.000'
-                }
-            ]
-        }
-    ];
+    // Global variables
+    let apiData = null;
+    let filteredMembers = [];
+    const outletId = 1;
+    let currentStartDate = null;
+    let currentEndDate = null;
 
     // Initialize date range picker
-    const dateRangePicker = flatpickr("#dateRange", {
-        mode: "range",
-        dateFormat: "d M Y",
-        defaultDate: ["2025-05-01", "2025-05-11"],
-        locale: "id",
-        onChange: function(selectedDates, dateStr) {
-            if (selectedDates.length === 2) {
-                const startDate = formatDate(selectedDates[0]);
-                const endDate = formatDate(selectedDates[1]);
-                document.getElementById('dateRangeDisplay').textContent = `${startDate} - ${endDate}`;
-                filterData();
-                showAlert('success', `Menampilkan data dari ${startDate} sampai ${endDate}`);
-            }
-        }
-    });
+    function formatDateToApi(date) {
+        const year = date.getFullYear();
+        const month = `${date.getMonth() + 1}`.padStart(2, '0');
+        const day = `${date.getDate()}`.padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
 
-    // Format date to Indonesian format
     function formatDate(date) {
         const options = { day: 'numeric', month: 'long', year: 'numeric' };
         return date.toLocaleDateString('id-ID', options);
     }
 
-    // Search input handler
-    document.getElementById('searchInput').addEventListener('keyup', function(e) {
-        filterData();
+    function getDefaultDateRange() {
+        const today = new Date();
+        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        return [firstDayOfMonth, today];
+    }
+
+    const dateRangePicker = flatpickr("#dateRange", {
+        mode: "range",
+        dateFormat: "d M Y",
+        defaultDate: getDefaultDateRange(),
+        locale: "id",
+        onChange: function(selectedDates, dateStr) {
+            if (selectedDates.length === 2) {
+                currentStartDate = selectedDates[0];
+                currentEndDate = selectedDates[1];
+                updateDateDisplay();
+                fetchData(formatDateToApi(currentStartDate), formatDateToApi(currentEndDate));
+            }
+        },
+        onReady: function(selectedDates, dateStr, instance) {
+            // Pastikan tanggal default terkirim saat pertama load
+            if (selectedDates.length === 2) {
+                currentStartDate = selectedDates[0];
+                currentEndDate = selectedDates[1];
+                updateDateDisplay();
+                // Panggil fetchData dengan sedikit delay untuk memastikan DOM siap
+                setTimeout(() => {
+                    fetchData(formatDateToApi(currentStartDate), formatDateToApi(currentEndDate));
+                }, 100);
+            }
+        }
     });
+
+    // Fungsi helper untuk update tampilan tanggal
+    function updateDateDisplay() {
+        if (currentStartDate && currentEndDate) {
+            const formattedStart = formatDate(currentStartDate);
+            const formattedEnd = formatDate(currentEndDate);
+            document.getElementById('dateRangeDisplay').textContent = `${formattedStart} - ${formattedEnd}`;
+        }
+    }
+
+    // Fetch API data
+    async function fetchData(startDate = null, endDate = null) {
+        try {
+            // Get loading indicator element safely
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            if (loadingIndicator) loadingIndicator.style.display = 'block';
+            
+            // If no dates provided, use default (first day of month to today)
+            if (!startDate || !endDate) {
+                const defaultRange = getDefaultDateRange();
+                startDate = formatDateToApi(defaultRange[0]);
+                endDate = formatDateToApi(defaultRange[1]);
+            }
+
+            
+            const apiUrl = `http://127.0.0.1:8000/api/reports/sales-by-member/${outletId}?start_date=${startDate}&end_date=${endDate}`;
+            const response = await fetch(apiUrl, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Accept': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + response.statusText);
+            }
+            
+            apiData = await response.json();
+            
+            if (apiData.status === true) {
+                updateUI(apiData.data);
+                filterData();
+                showAlert('success', 'Data berhasil dimuat');
+            } else {
+                showAlert('error', 'Terjadi kesalahan saat memuat data');
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            showAlert('error', 'Gagal memuat data: ' + error.message);
+        } finally {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            if (loadingIndicator) loadingIndicator.style.display = 'none';
+        }
+    }
+
+    // Panggil fetchData saat pertama load (fallback)
+    document.addEventListener('DOMContentLoaded', function() {
+        // Jika belum ada tanggal yang ter-set, gunakan default
+        if (!currentStartDate || !currentEndDate) {
+            const defaultRange = getDefaultDateRange();
+            currentStartDate = defaultRange[0];
+            currentEndDate = defaultRange[1];
+            fetchData(formatDateToApi(currentStartDate), formatDateToApi(currentEndDate));
+        }
+    });
+
+    // Update UI with API data
+    function updateUI(data) {
+        // Update outlet info
+        document.getElementById('outletName').textContent = `Menampilkan laporan untuk: ${data.outlet}`;
+        
+        // Update date range
+        const startDate = new Date(data.date_range.start_date);
+        const endDate = new Date(data.date_range.end_date);
+        document.getElementById('dateRangeDisplay').textContent = `${formatDate(startDate)} - ${formatDate(endDate)}`;
+        
+        // Update summary cards
+        // document.getElementById('totalMembers').textContent = `${data.summary.total_members} member`;
+        document.getElementById('totalTransactions').textContent = `${data.summary.total_orders} transaksi`;
+        
+        // Calculate total product count
+        let totalProducts = 0;
+        data.members.forEach(member => {
+            member.products.forEach(product => {
+                totalProducts += parseInt(product.quantity);
+            });
+        });
+        
+        document.getElementById('totalProductsSold').textContent = `${totalProducts} produk`;
+        document.getElementById('totalRevenue').textContent = `Rp ${formatNumber(data.summary.total_sales)}`;
+    }
 
     // Filter data function
     function filterData() {
+        if (!apiData || !apiData.data) return;
+        
         const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+        const data = apiData.data;
         
         // Filter members based on search term
-        const filteredMembers = memberData.filter(member => 
-            member.name.toLowerCase().includes(searchTerm) ||
-            member.phone.includes(searchTerm) ||
-            member.id.toLowerCase().includes(searchTerm)
+        filteredMembers = data.members.filter(member => 
+            (member.member_name && member.member_name.toLowerCase().includes(searchTerm))
         );
         
         // Update member tables
         const container = document.getElementById('memberTablesContainer');
         container.innerHTML = '';
         
-        let totalTransactions = 0;
-        let totalProducts = 0;
-        let totalRevenue = 0;
+        if (filteredMembers.length === 0) {
+            container.innerHTML = '<div class="text-center py-8"><p class="text-gray-600">Tidak ada data member yang sesuai dengan pencarian</p></div>';
+            return;
+        }
         
         filteredMembers.forEach(member => {
             // Create member card
             const memberCard = document.createElement('div');
             memberCard.className = 'bg-gray-50 rounded-lg p-4 mb-4';
+            
+            // Display member info
+            const memberName = member.member_name || 'Member Umum';
             memberCard.innerHTML = `
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between">
                     <div>
-                        <h3 class="text-xl font-bold text-gray-800">${member.name}</h3>
+                        <h3 class="text-xl font-bold text-gray-800">${memberName}</h3>
                         <div class="flex flex-wrap gap-x-4 gap-y-1 mt-1">
-                            <p class="text-sm text-gray-600">ID: ${member.id}</p>
-                            <p class="text-sm text-gray-600">Telp: ${member.phone}</p>
-                            <p class="text-sm text-gray-600">Bergabung: ${member.joinDate}</p>
-                            <p class="text-sm text-gray-600">Total Belanja: <span class="font-semibold">${member.totalSpent}</span></p>
+                            ${member.member_id ? `<p class="text-sm text-gray-600">ID: ${member.member_id}</p>` : ''}
+                            <p class="text-sm text-gray-600">Total Belanja: <span class="font-semibold">Rp ${formatNumber(member.total_spent)}</span></p>
                         </div>
                     </div>
                     <div class="mt-2 md:mt-0">
-                        <p class="text-sm text-gray-600">Total Transaksi: <span class="font-semibold">${member.transactions.length}</span></p>
+                        <p class="text-sm text-gray-600">Total Transaksi: <span class="font-semibold">${member.total_orders}</span></p>
                     </div>
                 </div>
             `;
@@ -292,124 +327,234 @@
                 <table class="w-full text-sm">
                     <thead class="text-left text-gray-700 bg-gray-100">
                         <tr>
-                            <th class="py-3 font-bold px-4">Tanggal</th>
-                            <th class="py-3 font-bold px-4">Invoice</th>
                             <th class="py-3 font-bold px-4">Produk</th>
+                            <th class="py-3 font-bold px-4">SKU</th>
+                            <th class="py-3 font-bold px-4">Kategori</th>
                             <th class="py-3 font-bold px-4 text-right">Qty</th>
-                            <th class="py-3 font-bold px-4 text-right">Harga</th>
                             <th class="py-3 font-bold px-4 text-right">Total</th>
                         </tr>
                     </thead>
-                    <tbody class="text-gray-700 divide-y" id="transactions-${member.id}">
-                        <!-- Transactions will be inserted here -->
+                    <tbody class="text-gray-700 divide-y" id="products-${member.member_id || 'umum'}">
+                        <!-- Products will be inserted here -->
                     </tbody>
                 </table>
             `;
             container.appendChild(tableDiv);
             
-            // Add transactions for this member
-            const tbody = document.getElementById(`transactions-${member.id}`);
+            // Add products for this member
+            const tbody = document.getElementById(`products-${member.member_id || 'umum'}`);
             
-            member.transactions.forEach((trans, index) => {
-                // Add transaction row
-                trans.items.forEach((item, itemIndex) => {
-                    const row = document.createElement('tr');
-                    if (itemIndex === 0) {
-                        // First item shows transaction date and invoice
-                        row.innerHTML = `
-                            <td class="py-4 px-4" rowspan="${trans.items.length}">${trans.date}</td>
-                            <td class="py-4 px-4" rowspan="${trans.items.length}">${trans.invoice}</td>
-                            <td class="py-4 px-4">${item.product}</td>
-                            <td class="py-4 px-4 text-right">${item.qty}</td>
-                            <td class="py-4 px-4 text-right">${item.price}</td>
-                            <td class="py-4 px-4 text-right">${item.total}</td>
-                        `;
-                    } else {
-                        // Subsequent items only show product details
-                        row.innerHTML = `
-                            <td class="py-4 px-4">${item.product}</td>
-                            <td class="py-4 px-4 text-right">${item.qty}</td>
-                            <td class="py-4 px-4 text-right">${item.price}</td>
-                            <td class="py-4 px-4 text-right">${item.total}</td>
-                        `;
-                    }
-                    tbody.appendChild(row);
-                    
-                    // Update totals
-                    totalProducts += item.qty;
-                });
-                
-                // Add transaction summary row
-                const summaryRow = document.createElement('tr');
-                summaryRow.className = 'bg-gray-50 font-semibold';
-                summaryRow.innerHTML = `
-                    <td class="py-3 px-4 text-right" colspan="4">Subtotal</td>
-                    <td class="py-3 px-4 text-right">${trans.subtotal}</td>
-                    <td class="py-3 px-4"></td>
+            let memberTotalQty = 0;
+            let memberTotalSpent = 0;
+            
+            member.products.forEach(product => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="py-4 px-4">${product.product_name}</td>
+                    <td class="py-4 px-4">${product.sku}</td>
+                    <td class="py-4 px-4">${product.category}</td>
+                    <td class="py-4 px-4 text-right">${product.quantity}</td>
+                    <td class="py-4 px-4 text-right">Rp ${formatNumber(product.total_spent)}</td>
                 `;
-                tbody.appendChild(summaryRow);
+                tbody.appendChild(row);
                 
-                const discountRow = document.createElement('tr');
-                discountRow.className = 'bg-gray-50 font-semibold';
-                discountRow.innerHTML = `
-                    <td class="py-3 px-4 text-right" colspan="4">Diskon</td>
-                    <td class="py-3 px-4 text-right text-red-500">-${trans.discount}</td>
-                    <td class="py-3 px-4"></td>
-                `;
-                tbody.appendChild(discountRow);
-                
-                const totalRow = document.createElement('tr');
-                totalRow.className = 'bg-gray-100 font-bold';
-                totalRow.innerHTML = `
-                    <td class="py-3 px-4 text-right" colspan="4">Total</td>
-                    <td class="py-3 px-4 text-right">${trans.total}</td>
-                    <td class="py-3 px-4"></td>
-                `;
-                tbody.appendChild(totalRow);
-                
-                // Add spacer row
-                const spacerRow = document.createElement('tr');
-                spacerRow.innerHTML = '<td class="py-2" colspan="6"></td>';
-                tbody.appendChild(spacerRow);
-                
-                // Update transaction count
-                totalTransactions++;
-                // Update revenue (remove 'Rp ' and convert to number)
-                totalRevenue += parseInt(trans.total.replace('Rp ', '').replace(/\./g, ''));
+                memberTotalQty += parseInt(product.quantity);
+                memberTotalSpent += parseFloat(product.total_spent);
             });
+            
+            // Add summary row
+            const totalRow = document.createElement('tr');
+            totalRow.className = 'bg-gray-100 font-bold';
+            totalRow.innerHTML = `
+                <td class="py-3 px-4" colspan="3">Total</td>
+                <td class="py-3 px-4 text-right">${memberTotalQty}</td>
+                <td class="py-3 px-4 text-right">Rp ${formatNumber(memberTotalSpent)}</td>
+            `;
+            tbody.appendChild(totalRow);
         });
-        
-        // Update summary cards
-        document.getElementById('totalMembers').textContent = `${filteredMembers.length} member`;
-        document.getElementById('totalTransactions').textContent = `${totalTransactions} transaksi`;
-        document.getElementById('totalProductsSold').textContent = `${totalProducts} produk`;
-        document.getElementById('totalRevenue').textContent = `Rp ${formatNumber(totalRevenue)}`;
     }
 
     // Format number with thousand separators
     function formatNumber(num) {
-        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        return parseFloat(num).toLocaleString('id-ID');
     }
 
     // Print report function
     function printReport() {
+        if (!apiData || !apiData.data) {
+            showAlert('error', 'Tidak ada data untuk dicetak');
+            return;
+        }
+
         showAlert('info', 'Mempersiapkan laporan untuk dicetak...');
+
         setTimeout(() => {
-            window.print();
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Laporan Penjualan per Member</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    h1, h2 { color: #333; }
+                    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                    th { background-color: #f2f2f2; }
+                    .text-right { text-align: right; }
+                    .report-header {
+                        display: flex;
+                        align-items: center;
+                        gap: 20px;
+                        margin-bottom: 20px;
+                    }
+                    .logo {
+                        width: 60px;
+                        height: auto;
+                    }
+                    .header-info {
+                        margin-bottom: 15px;
+                    }
+                    hr { border: 0; border-top: 1px solid #000; margin: 10px 0; }
+                    .footer { margin-top: 30px; font-size: 0.8em; text-align: center; color: #666; }
+                </style>
+            </head>
+            <body>
+                <div class="report-header">
+                    <img src="/images/logo.png" alt="Logo Kifa Bakery" class="logo">
+                    <div>
+                        <h1>LAPORAN PENJUALAN PER MEMBER</h1>
+                        <div class="header-info">
+                            Outlet: ${apiData.data.outlet}<br>
+                            Periode: ${apiData.data.date_range.start_date} hingga ${apiData.data.date_range.end_date}<br>
+                            Dicetak pada: ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        </div>
+                    </div>
+                </div>
+                <hr>
+        `);
+
+        // Tambahkan data per member
+        apiData.data.members.forEach(member => {
+            const memberName = member.member_name || 'Member Umum';
+
+            printWindow.document.write(`
+                <h2>${memberName}</h2>
+                <p><strong>Total Transaksi:</strong> ${member.total_orders}</p>
+                <p><strong>Total Pembelanjaan:</strong> Rp ${formatNumber(member.total_spent)}</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Produk</th>
+                            <th>SKU</th>
+                            <th>Kategori</th>
+                            <th class="text-right">Qty</th>
+                            <th class="text-right">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `);
+
+            let totalQty = 0;
+            let totalSpent = 0;
+
+            member.products.forEach(product => {
+                totalQty += parseInt(product.quantity);
+                totalSpent += parseFloat(product.total_spent);
+
+                printWindow.document.write(`
+                    <tr>
+                        <td>${product.product_name}</td>
+                        <td>${product.sku}</td>
+                        <td>${product.category}</td>
+                        <td class="text-right">${product.quantity}</td>
+                        <td class="text-right">Rp ${formatNumber(product.total_spent)}</td>
+                    </tr>
+                `);
+            });
+
+            printWindow.document.write(`
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3"><strong>Total</strong></td>
+                            <td class="text-right"><strong>${totalQty}</strong></td>
+                            <td class="text-right"><strong>Rp ${formatNumber(totalSpent)}</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            `);
+        });
+
+        printWindow.document.write(`
+                <div class="footer">
+                    Laporan ini dicetak secara otomatis oleh sistem.<br>
+                    © ${new Date().getFullYear()} Kifa Bakery
+                </div>
+            </body>
+            </html>
+        `);
+
+        printWindow.document.close();
+
+        setTimeout(() => {
+            printWindow.print();
+            printWindow.close();
         }, 1000);
+        }, 1000);
+
     }
-    
+
     // Export report function
     function exportReport() {
+        if (!apiData || !apiData.data) {
+            showAlert('error', 'Tidak ada data untuk diekspor');
+            return;
+        }
+        
         showAlert('info', 'Mempersiapkan laporan untuk diekspor...');
+
         setTimeout(() => {
-            const a = document.createElement('a');
-            a.href = 'data:text/csv;charset=utf-8,';
-            a.download = `laporan-penjualan-member-${new Date().toISOString().slice(0,10)}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            showAlert('success', 'Laporan berhasil diekspor');
+            try {
+                // Create CSV content
+                let csvContent = "data:text/csv;charset=utf-8,";
+                
+                // Add header
+                csvContent += "Laporan Penjualan per Member\n";
+                csvContent += `Outlet: ${apiData.data.outlet}\n`;
+                csvContent += `Periode: ${apiData.data.date_range.start_date} s/d ${apiData.data.date_range.end_date}\n\n`;
+                
+                // For each member
+                apiData.data.members.forEach(member => {
+                    csvContent += `Member: ${member.member_name || 'Member Umum'}\n`;
+                    csvContent += "Produk,SKU,Kategori,Quantity,Total\n";
+                    
+                    // Add products
+                    member.products.forEach(product => {
+                        csvContent += `"${product.product_name}","${product.sku}","${product.category}",${product.quantity},${product.total_spent}\n`;
+                    });
+                    
+                    csvContent += `\nTotal Transaksi: ${member.total_orders}\n`;
+                    csvContent += `Total Pembelanjaan: Rp ${member.total_spent}\n\n`;
+                });
+                
+                // Create download link
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `laporan-penjualan-member-${new Date().toISOString().slice(0,10)}.csv`);
+                document.body.appendChild(link);
+                
+                // Trigger download
+                link.click();
+                document.body.removeChild(link);
+                
+                showAlert('success', 'Laporan berhasil diekspor');
+            } catch (error) {
+                console.error('Error exporting report:', error);
+                showAlert('error', 'Gagal mengekspor laporan: ' + error.message);
+            }
+            
         }, 1000);
     }
     
@@ -418,7 +563,7 @@
         const alertContainer = document.getElementById('alertContainer');
         const alert = document.createElement('div');
         alert.className = `px-4 py-3 rounded-lg shadow-md ${type === 'error' ? 'bg-red-100 text-red-700' : 
-                         type === 'success' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`;
+                         type === 'success' ? 'bg-orange-100 text-orange-700' : 'bg-orange-100 text-orange-700'}`;
         alert.innerHTML = `
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
@@ -433,14 +578,59 @@
             </div>
         `;
         alertContainer.appendChild(alert);
+
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
         
+        // Auto remove alert after 5 seconds
         setTimeout(() => {
             alert.remove();
         }, 5000);
     }
-
-    // Initial load
-    filterData();
 </script>
+
+<style>
+    /* Tanggal terpilih: awal & akhir range */
+    .flatpickr-day.selected,
+    .flatpickr-day.startRange,
+    .flatpickr-day.endRange {
+        background-color: #f97316; /* Tailwind orange-500 */
+        color: white;
+        border-color: #f97316;
+    }
+
+    .flatpickr-day.selected:hover,
+    .flatpickr-day.startRange:hover,
+    .flatpickr-day.endRange:hover {
+        background-color: #fb923c; /* Tailwind orange-400 */
+        color: white;
+        border-color: #fb923c;
+    }
+
+    /* Tanggal di antara range */
+    .flatpickr-day.inRange {
+        background-color: #fed7aa; /* Tailwind orange-200 */
+        color: #78350f; /* Tailwind orange-800 */
+    }
+
+    /* Hover efek pada hari */
+    .flatpickr-day:hover {
+        background-color: #fdba74; /* Tailwind orange-300 */
+        color: black;
+    }
+
+    /* Hilangkan outline biru saat klik/tap */
+    .flatpickr-day:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px #fdba74; /* Tailwind orange-300 glow */
+    }
+
+    /* Hari ini */
+    .flatpickr-day.today:not(.selected):not(.inRange) {
+        border: 1px solid #fb923c; /* Tailwind orange-400 */
+        background-color: #fff7ed; /* Tailwind orange-50 */
+    }
+</style>
 
 @endsection

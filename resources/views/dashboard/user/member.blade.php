@@ -49,10 +49,10 @@
           </div>
 
             <!-- Tombol Tambah Member -->
-            <a href="#" onclick="openModalTambah()"
+            <button onclick="openModalTambah()"
                 class="px-5 py-3 text-base font-medium text-white bg-orange-500 rounded-lg hover:bg-orange-600 shadow">
                 + Tambah Member
-            </a>
+            </button>
         </div>
     </div>
 </div>
@@ -67,16 +67,6 @@
             <p class="text-sm text-gray-600">Kelola semua member Kifa Bakery di sini.</p>
         </div>
     </div>
-
-    <!-- Kanan: Tombol -->
-    {{-- <div class="flex items-center space-x-2">
-        <button class="flex items-center px-4 py-2 text-sm font-medium bg-white border rounded-md shadow hover:bg-gray-50">
-            <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Cetak
-        </button>
-        <button class="flex items-center px-4 py-2 text-sm font-medium bg-white border rounded-md shadow hover:bg-gray-50">
-            <i data-lucide="download" class="w-4 h-4 mr-2"></i> Ekspor
-        </button>
-    </div> --}}
 </div>
 
 <!-- Card: Tabel Member -->
@@ -96,131 +86,15 @@
                     <th class="py-3 font-semibold">Aksi</th>
                 </tr>
             </thead>
-            <tbody class="text-gray-700 divide-y">
-                <!-- Member 1 -->
-                <tr>
-                    <td class="py-4">1</td>
-                    <td class="py-4">
-                        <div class="flex items-center gap-4">
-                            <div class="bg-orange-100 p-2 rounded-full">
-                                <i data-lucide="user" class="w-6 h-6 text-orange-500"></i>
-                            </div>
-                            <div>
-                                <div class="font-semibold text-base text-gray-900">Agen July</div>
-                                <div class="text-sm text-gray-500">0812-3456-7890</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="py-4">0000001</td>
-                    <td class="py-4">-</td>
-                    <td class="py-4">Klaten</td>
-                    <td class="py-4">Laki-laki</td>
-                    <td class="py-4">5</td>
-                    <td class="py-4 relative">
-                        <div class="relative inline-block">
-                            <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded-lg">
-                                <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
-                            </button>
-                            <!-- Dropdown -->
-                            <div class="dropdown-menu hidden absolute right-0 z-20 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-base">
-                                <div class="px-4 py-2 font-bold text-left border-b">Aksi</div>
-                                <button onclick="history(1)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left">
-                                    <i data-lucide="history" class="w-5 h-5 mr-3 text-gray-500"></i> History
-                                </button>
-                                <button onclick="editMember(1)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left">
-                                    <i data-lucide="pencil" class="w-5 h-5 mr-3 text-gray-500"></i> Edit
-                                </button>
-                                <button onclick="showConfirmDelete(1)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left text-red-600">
-                                    <i data-lucide="trash-2" class="w-5 h-5 mr-3"></i> Hapus
-                                </button>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-
-                <!-- Member 2 -->
-                <tr>
-                    <td class="py-4">2</td>
-                    <td class="py-4">
-                        <div class="flex items-center gap-4">
-                            <div class="bg-orange-100 p-2 rounded-full">
-                                <i data-lucide="user" class="w-6 h-6 text-orange-500"></i>
-                            </div>
-                            <div>
-                                <div class="font-semibold text-base text-gray-900">Agen Sarah</div>
-                                <div class="text-sm text-gray-500">0812-9876-5432</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="py-4">0000002</td>
-                    <td class="py-4">sarah@example.com</td>
-                    <td class="py-4">Yogyakarta</td>
-                    <td class="py-4">Perempuan</td>
-                    <td class="py-4">12</td>
-                    <td class="py-4 relative">
-                        <div class="relative inline-block">
-                            <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded-lg">
-                                <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
-                            </button>
-                            <!-- Dropdown -->
-                            <div class="dropdown-menu hidden absolute right-0 z-20 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-base">
-                                <div class="px-4 py-2 font-bold text-left border-b">Aksi</div>
-                                <button onclick="history(2)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left">
-                                    <i data-lucide="history" class="w-5 h-5 mr-3 text-gray-500"></i> History
-                                </button>
-                                <button onclick="editMember(2)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left">
-                                    <i data-lucide="pencil" class="w-5 h-5 mr-3 text-gray-500"></i> Edit
-                                </button>
-                                <button onclick="showConfirmDelete(2)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left text-red-600">
-                                    <i data-lucide="trash-2" class="w-5 h-5 mr-3"></i> Hapus
-                                </button>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-
-                <!-- Member 3 -->
-                <tr>
-                    <td class="py-4">3</td>
-                    <td class="py-4">
-                        <div class="flex items-center gap-4">
-                            <div class="bg-orange-100 p-2 rounded-full">
-                                <i data-lucide="user" class="w-6 h-6 text-orange-500"></i>
-                            </div>
-                            <div>
-                                <div class="font-semibold text-base text-gray-900">Agen Budi</div>
-                                <div class="text-sm text-gray-500">0812-8765-4321</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="py-4">0000003</td>
-                    <td class="py-4">budi@example.com</td>
-                    <td class="py-4">Solo</td>
-                    <td class="py-4">Laki-laki</td>
-                    <td class="py-4">8</td>
-                    <td class="py-4 relative">
-                        <div class="relative inline-block">
-                            <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded-lg">
-                                <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
-                            </button>
-                            <!-- Dropdown -->
-                            <div class="dropdown-menu hidden absolute right-0 z-20 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-base">
-                                <div class="px-4 py-2 font-bold text-left border-b">Aksi</div>
-                                <button onclick="history(3)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left">
-                                    <i data-lucide="history" class="w-5 h-5 mr-3 text-gray-500"></i> History
-                                </button>
-                                <button onclick="editMember(3)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left">
-                                    <i data-lucide="pencil" class="w-5 h-5 mr-3 text-gray-500"></i> Edit
-                                </button>
-                                <button onclick="showConfirmDelete(3)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left text-red-600">
-                                    <i data-lucide="trash-2" class="w-5 h-5 mr-3"></i> Hapus
-                                </button>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
+            <tbody id="memberTableBody" class="text-gray-700 divide-y">
+                <!-- Data akan diisi secara dinamis -->
             </tbody>
         </table>
+        
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="flex justify-center items-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+        </div>
     </div>
 </div>
 
@@ -228,15 +102,88 @@
 @include('partials.member.edit-member')
 
 <script>
-    // Variabel global untuk menyimpan ID member yang akan dihapus
+    // Variabel global
     let memberIdToDelete = null;
+    let allMembers = [];
+    let filteredMembers = [];
+    let debounceTimer;
+    let alertTimeout;
 
-    // Fungsi untuk menampilkan alert
+    // Inisialisasi saat DOM siap
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeLucide();
+        initializeEventListeners();
+        loadMembers();
+    });
+
+    function initializeLucide() {
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    }
+
+    function initializeEventListeners() {
+        // Event listener untuk modal hapus
+        const btnBatalHapus = document.getElementById('btnBatalHapus');
+        const btnKonfirmasiHapus = document.getElementById('btnKonfirmasiHapus');
+        if (btnBatalHapus) btnBatalHapus.addEventListener('click', closeConfirmDelete);
+        if (btnKonfirmasiHapus) btnKonfirmasiHapus.addEventListener('click', hapusMember);
+
+        // Event listener untuk modal tambah/edit
+        const batalTambah = document.getElementById('btnBatalModalTambah');
+        const batalEdit = document.getElementById('btnBatalModalEdit');
+        if (batalTambah) batalTambah.addEventListener('click', closeModalTambah);
+        if (batalEdit) batalEdit.addEventListener('click', closeModalEdit);
+
+        // Event listener untuk form
+        const formTambah = document.getElementById('formTambahMember');
+        const formEdit = document.getElementById('formEditMember');
+        if (formTambah) formTambah.addEventListener('submit', handleFormSubmit);
+        if (formEdit) formEdit.addEventListener('submit', handleEditSubmit);
+
+        // Event listener untuk pencarian
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', handleSearchInput);
+            searchInput.addEventListener('keypress', handleSearchEnter);
+        }
+    }
+
+    function handleFormSubmit(e) {
+        e.preventDefault();
+        submitForm();
+    }
+
+    function handleEditSubmit(e) {
+        e.preventDefault();
+        submitEditMember(e);
+    }
+
+    function handleSearchInput() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(searchMembers, 300);
+    }
+
+    function handleSearchEnter(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            clearTimeout(debounceTimer);
+            searchMembers();
+        }
+    }
+
     function showAlert(type, message) {
-        const alertContainer = document.getElementById('alertContainer');
-        const alertId = 'alert-' + Date.now();
+        // Hapus alert yang sedang aktif
+        clearExistingAlerts();
         
-        // Warna dan ikon berdasarkan jenis alert
+        // Hapus timeout sebelumnya jika ada
+        if (alertTimeout) {
+            clearTimeout(alertTimeout);
+        }
+
+        const alertContainer = document.getElementById('alertContainer');
+        if (!alertContainer) return;
+
         const alertConfig = {
             success: {
                 bgColor: 'bg-orange-50',
@@ -253,92 +200,341 @@
                 iconColor: 'text-red-500'
             }
         };
-        
+
         const config = alertConfig[type] || alertConfig.success;
-        
+        const alertId = 'alert-' + Date.now();
+
         const alertElement = document.createElement('div');
         alertElement.id = alertId;
         alertElement.className = `p-4 border rounded-lg shadow-sm ${config.bgColor} ${config.borderColor} ${config.textColor} flex items-start gap-3 animate-fade-in-up`;
         alertElement.innerHTML = `
             <i data-lucide="${config.icon}" class="w-5 h-5 mt-0.5 ${config.iconColor}"></i>
-            <div class="flex-1">
-                <p class="text-sm font-medium">${message}</p>
-            </div>
+            <div class="flex-1"><p class="text-sm font-medium">${message}</p></div>
             <button onclick="closeAlert('${alertId}')" class="p-1 rounded-full hover:bg-gray-100">
                 <i data-lucide="x" class="w-4 h-4"></i>
             </button>
         `;
-        
+
         alertContainer.prepend(alertElement);
+        if (window.lucide) window.lucide.createIcons();
         
-        // Inisialisasi ikon Lucide
-        if (window.lucide) {
-            window.lucide.createIcons();
-        }
-        
-        // Auto close setelah 5 detik
-        setTimeout(() => {
-            closeAlert(alertId);
-        }, 5000);
+        // Set timeout untuk auto close
+        alertTimeout = setTimeout(() => closeAlert(alertId), 5000);
     }
 
-    // Fungsi untuk menutup alert
+    function clearExistingAlerts() {
+        const alertContainer = document.getElementById('alertContainer');
+        if (!alertContainer) return;
+        
+        const alerts = alertContainer.querySelectorAll('[id^="alert-"]');
+        alerts.forEach(alert => {
+            alert.remove();
+        });
+    }
+
     function closeAlert(id) {
         const alert = document.getElementById(id);
         if (alert) {
             alert.classList.add('animate-fade-out');
             setTimeout(() => {
-                alert.remove();
+                if (alert && alert.parentNode) {
+                    alert.remove();
+                }
             }, 300);
         }
     }
 
-    // Fungsi untuk menampilkan modal konfirmasi hapus
-    function showConfirmDelete(id) {
-        memberIdToDelete = id;
-        const modal = document.getElementById('modalHapusMember');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
+    async function loadMembers() {
+        try {
+            const token = localStorage.getItem('token');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const memberTableBody = document.getElementById('memberTableBody');
+            
+            if (loadingIndicator) loadingIndicator.classList.remove('hidden');
+            if (memberTableBody) memberTableBody.innerHTML = '';
 
-    // Fungsi untuk menutup modal konfirmasi hapus
-    function closeConfirmDelete() {
-        const modal = document.getElementById('modalHapusMember');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-        memberIdToDelete = null;
-    }
+            const response = await fetch('http://127.0.0.1:8000/api/members', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
 
-    // Fungsi untuk menghapus member
-    function hapusMember() {
-        if (memberIdToDelete) {
-            console.log('Menghapus member ID:', memberIdToDelete);
-            // Di sini Anda bisa menambahkan AJAX request untuk menghapus data
-            
-            // Tampilkan alert sukses
-            showAlert('success', 'Member berhasil dihapus!');
-            
-            // Tutup modal konfirmasi
-            closeConfirmDelete();
-            
-            // Di production, Anda mungkin perlu me-refresh data atau menghapus baris dari tabel
+            const data = await response.json();
+
+            if (response.ok) {
+                allMembers = data.data || [];
+                filteredMembers = [...allMembers];
+                renderMembers();
+            } else {
+                throw new Error(data.message || 'Gagal memuat data member');
+            }
+        } catch (error) {
+            console.error('Error loading members:', error);
+            showAlert('error', error.message);
+        } finally {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            if (loadingIndicator) loadingIndicator.classList.add('hidden');
         }
     }
 
-    // Fungsi untuk menampilkan history member
-    function history(id) {
+    function renderMembers() {
+        const tableBody = document.getElementById('memberTableBody');
+        if (!tableBody) return;
+        
+        tableBody.innerHTML = '';
+
+        if (filteredMembers.length === 0) {
+            tableBody.innerHTML = `
+                <tr id="noResultsMessage">
+                    <td colspan="8" class="py-8 text-center">
+                        <div class="flex flex-col items-center justify-center gap-2">
+                            <i data-lucide="search-x" class="w-8 h-8 text-gray-400"></i>
+                            <p class="text-gray-500 font-medium">Tidak ada member yang ditemukan</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            if (window.lucide) window.lucide.createIcons();
+            return;
+        }
+
+        filteredMembers.forEach((member, index) => {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-gray-50';
+            row.innerHTML = `
+                <td class="py-4">${index + 1}</td>
+                <td class="py-4">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-orange-100 p-2 rounded-full">
+                            <i data-lucide="user" class="w-6 h-6 text-orange-500"></i>
+                        </div>
+                        <div>
+                            <div class="font-semibold text-base text-gray-900">${member.name}</div>
+                            <div class="text-sm text-gray-500">${member.phone || '-'}</div>
+                        </div>
+                    </div>
+                </td>
+                <td class="py-4">${member.member_code}</td>
+                <td class="py-4">${member.email || '-'}</td>
+                <td class="py-4">${member.address || '-'}</td>
+                <td class="py-4">${member.gender === 'male' ? 'Laki-laki' : member.gender === 'female' ? 'Perempuan' : '-'}</td>
+                <td class="py-4">${member.orders_count || 0}</td>
+                <td class="py-4 relative">
+                    <div class="relative inline-block">
+                        <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded-lg">
+                            <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
+                        </button>
+                        <div class="dropdown-menu hidden absolute right-0 z-50 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-base">
+                            <div class="px-4 py-2 font-bold text-left border-b">Aksi</div>
+                            <button onclick="historyMember(${member.id})" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left">
+                                <i data-lucide="history" class="w-5 h-5 mr-3 text-gray-500"></i> History
+                            </button>
+                            <button onclick="editMember(${member.id})" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left">
+                                <i data-lucide="pencil" class="w-5 h-5 mr-3 text-gray-500"></i> Edit
+                            </button>
+                            <button onclick="showConfirmDelete(${member.id})" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left text-red-600">
+                                <i data-lucide="trash-2" class="w-5 h-5 mr-3"></i> Hapus
+                            </button>
+                        </div>
+                    </div>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+
+        if (window.lucide) window.lucide.createIcons();
+    }
+
+    function showConfirmDelete(id) {
+        memberIdToDelete = id;
+        const modal = document.getElementById('modalHapusMember');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+    }
+
+    function closeConfirmDelete() {
+        const modal = document.getElementById('modalHapusMember');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+        memberIdToDelete = null;
+    }
+
+    async function hapusMember() {
+        if (!memberIdToDelete) return;
+        
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://127.0.0.1:8000/api/members/${memberIdToDelete}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showAlert('success', 'Member berhasil dihapus!');
+                loadMembers();
+            } else {
+                throw new Error(data.message || 'Gagal menghapus member');
+            }
+        } catch (error) {
+            console.error('Error deleting member:', error);
+            showAlert('error', error.message);
+        } finally {
+            closeConfirmDelete();
+        }
+    }
+
+    function historyMember(id) {
         console.log('Melihat history member ID:', id);
-        // Implementasi untuk menampilkan history member
         showAlert('success', `Melihat history member ID: ${id}`);
     }
 
-    // Event listener untuk modal konfirmasi hapus
-    document.getElementById('btnBatalHapus').addEventListener('click', closeConfirmDelete);
-    document.getElementById('btnKonfirmasiHapus').addEventListener('click', hapusMember);
+    function editMember(id) {
+        const member = allMembers.find(m => m.id === id);
+        if (!member) return;
+        
+        const editNama = document.getElementById('editNamaMember');
+        const editTelepon = document.getElementById('editTeleponMember');
+        const editEmail = document.getElementById('editEmailMember');
+        const editAlamat = document.getElementById('editAlamatMember');
+        const editGender = document.getElementById('editJenisKelamin');
+        const editId = document.getElementById('memberIdToEdit');
+        
+        if (editNama) editNama.value = member.name;
+        if (editTelepon) editTelepon.value = member.phone || '';
+        if (editEmail) editEmail.value = member.email || '';
+        if (editAlamat) editAlamat.value = member.address || '';
+        if (editGender) editGender.value = member.gender || '';
+        if (editId) editId.value = member.id;
+        
+        openModalEdit();
+    }
 
-    // Fungsi toggle dropdown yang diperbarui
+    async function submitEditMember(e) {
+        e.preventDefault();
+        
+        if (!validateEditForm()) {
+            return;
+        }
+        
+        const btnEdit = document.getElementById('btnEditMember');
+        if (!btnEdit) return;
+        
+        const originalText = btnEdit.innerHTML;
+        btnEdit.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Menyimpan...`;
+        btnEdit.disabled = true;
+        
+        const memberId = document.getElementById('memberIdToEdit')?.value;
+        const token = localStorage.getItem('token');
+        
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/api/members/${memberId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    name: document.getElementById('editNamaMember')?.value,
+                    phone: document.getElementById('editTeleponMember')?.value,
+                    email: document.getElementById('editEmailMember')?.value,
+                    address: document.getElementById('editAlamatMember')?.value,
+                    gender: document.getElementById('editJenisKelamin')?.value
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                showAlert('success', 'Data member berhasil diperbarui!');
+                loadMembers();
+                closeModalEdit();
+            } else {
+                throw new Error(data.message || 'Gagal memperbarui member');
+            }
+        } catch (error) {
+            console.error('Error updating member:', error);
+            showAlert('error', error.message);
+        } finally {
+            btnEdit.innerHTML = originalText;
+            btnEdit.disabled = false;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Event listener untuk form
+        document.getElementById('formTambahMember')?.addEventListener('submit', function (e) {
+        e.preventDefault();
+        submitForm();
+        });
+
+        document.getElementById('btnTambahMember')?.addEventListener('click', function () {
+            submitForm();
+         });
+    });
+    
+    async function submitForm() {
+        if (!validateForm()) return;
+
+        const btnTambah = document.getElementById('btnTambahMember');
+        if (!btnTambah) return;
+        
+        const originalText = btnTambah.innerHTML;
+        btnTambah.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Menyimpan...`;
+        btnTambah.disabled = true;
+
+        const token = localStorage.getItem('token');
+
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/members', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    name: document.getElementById('namaMember')?.value,
+                    phone: document.getElementById('teleponMember')?.value,
+                    email: document.getElementById('emailMember')?.value,
+                    address: document.getElementById('alamatMember')?.value,
+                    gender: document.getElementById('jenisKelamin')?.value
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                showAlert('success', 'Member baru berhasil ditambahkan!');
+                resetForm();
+                closeModalTambah();
+                loadMembers();
+            } else {
+                throw new Error(result.message || 'Gagal menambahkan member');
+            }
+        } catch (error) {
+            console.error('Error adding member:', error);
+            showAlert('error', error.message);
+        } finally {
+            btnTambah.innerHTML = originalText;
+            btnTambah.disabled = false;
+        }
+    }
+
     function toggleDropdown(button) {
         const menu = button.nextElementSibling;
+        if (!menu) return;
 
         // Tutup semua dropdown lain
         document.querySelectorAll('.dropdown-menu').forEach(m => {
@@ -347,228 +543,127 @@
             }
         });
 
-         // Toggle dropdown terkait tombol yang diklik
-    menu.classList.toggle('hidden');
+        // Toggle dropdown terkait tombol yang diklik
+        menu.classList.toggle('hidden');
 
-        // Hitung posisi
+        // Hitung posisi relatif terhadap viewport
         const buttonRect = button.getBoundingClientRect();
-    const spaceBelow = window.innerHeight - buttonRect.bottom;
+        const spaceBelow = window.innerHeight - buttonRect.bottom;
+        const spaceRight = window.innerWidth - buttonRect.right;
+        const menuHeight = menu.offsetHeight || 176; // Approximate height of the menu
+        const menuWidth = menu.offsetWidth || 160; // Approximate width of the menu
+        
+        // Reset positioning
+        menu.style.position = 'fixed';
+        menu.style.top = '';
+        menu.style.bottom = '';
+        menu.style.left = '';
+        menu.style.right = '';
 
-// Jika menu sedang ditampilkan, posisikan dengan benar
-if (!menu.classList.contains('hidden')) {
-    // Dapatkan koordinat dari button dan window
-    const buttonRect = button.getBoundingClientRect();
-    const spaceBelow = window.innerHeight - buttonRect.bottom;
-    const menuHeight = menu.clientHeight || 300; // Perkiraan tinggi jika belum dirender
+        // Posisi vertikal
+        if (spaceBelow < menuHeight) {
+            // Jika tidak cukup ruang di bawah, tampilkan di atas
+            menu.style.bottom = `${window.innerHeight - buttonRect.top + 5}px`;
+            menu.classList.add('dropdown-animation-up');
+            menu.classList.remove('dropdown-animation-down');
+        } else {
+            // Jika cukup ruang di bawah, tampilkan di bawah
+            menu.style.top = `${buttonRect.bottom + 5}px`;
+            menu.classList.add('dropdown-animation-down');
+            menu.classList.remove('dropdown-animation-up');
+        }
 
-    // Reset posisi dan margin terlebih dahulu
-    menu.style.top = '';
-    menu.style.bottom = '';
-    menu.style.right = '0';
-    menu.style.left = '';
-    menu.style.marginTop = '';
-    menu.style.marginBottom = '';
-
-    // Jika ruang di bawah tidak cukup dan ruang di atas lebih banyak
-    if (spaceBelow < menuHeight && buttonRect.top > menuHeight) {
-        // Tampilkan dropdown di atas tombol
-        menu.style.bottom = '100%';
-        menu.style.marginBottom = '5px';
-    } else {
-        // Tampilkan dropdown di bawah tombol
-        menu.style.top = '100%';
-        menu.style.marginTop = '5px';
+        // Posisi horizontal
+        if (spaceRight < menuWidth) {
+            // Jika tidak cukup ruang di kanan, tampilkan di kiri
+            menu.style.right = `${window.innerWidth - buttonRect.left}px`;
+            menu.classList.add('dropdown-animation-right');
+            menu.classList.remove('dropdown-animation-left');
+        } else {
+            // Jika cukup ruang di kanan, tampilkan di kanan
+            menu.style.left = `${buttonRect.left}px`;
+            menu.classList.add('dropdown-animation-left');
+            menu.classList.remove('dropdown-animation-right');
+        }
     }
 
-    // Periksa juga posisi horizontal untuk memastikan dropdown tetap di dalam viewport
-    const menuRect = menu.getBoundingClientRect();
-    if (menuRect.right > window.innerWidth) {
-        // Jika terlalu ke kanan, sesuaikan posisi ke kiri
-        menu.style.right = '0';
-        menu.style.left = 'auto';
-    }
-}
-}
-
-// Tutup semua dropdown jika klik di luar
-document.addEventListener('click', function(e) {
-if (!e.target.closest('.relative.inline-block')) {
-    document.querySelectorAll('.dropdown-menu').forEach(menu => {
-        menu.classList.add('hidden');
+    // Tutup semua dropdown jika klik di luar
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.relative.inline-block')) {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.add('hidden');
+            });
+        }
     });
-}
-});
-
-    // Fungsi untuk modal tambah dan edit
-    const modalTambah = document.getElementById('modalTambahMember');
-    const modalEdit = document.getElementById('modalEditMember');
-    const batalBtnTambah = document.getElementById('btnBatalModalTambah');
-    const batalBtnEdit = document.getElementById('btnBatalModalEdit');
 
     function openModalTambah() {
-        modalTambah.classList.remove('hidden');
-        modalTambah.classList.add('flex');
+        const modal = document.getElementById('modalTambahMember');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
     }
 
     function closeModalTambah() {
-        modalTambah.classList.add('hidden');
-        modalTambah.classList.remove('flex');
+        const modal = document.getElementById('modalTambahMember');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
     }
     
     function openModalEdit() {
-        modalEdit.classList.remove('hidden');
-        modalEdit.classList.add('flex');
+        const modal = document.getElementById('modalEditMember');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
     }
     
     function closeModalEdit() {
-        modalEdit.classList.add('hidden');
-        modalEdit.classList.remove('flex');
-    }
-
-    // Klik batal untuk modal tambah
-    batalBtnTambah?.addEventListener('click', () => {
-        closeModalTambah();
-    });
-    
-    // Klik batal untuk modal edit
-    batalBtnEdit?.addEventListener('click', () => {
-        closeModalEdit();
-    });
-
-    function editMember(id) {
-        console.log('Edit member ID:', id);
-        openModalEdit();
-        
-        const memberData = {
-            1: {
-                nama: 'Agen July',
-                telepon: '0812-3456-7890',
-                email: '',
-                alamat: 'Klaten',
-                jenis_kelamin: 'Laki-laki'
-            },
-            2: {
-                nama: 'Agen Sarah',
-                telepon: '0812-9876-5432',
-                email: 'sarah@example.com',
-                alamat: 'Yogyakarta',
-                jenis_kelamin: 'Perempuan'
-            },
-            3: {
-                nama: 'Agen Budi',
-                telepon: '0812-8765-4321',
-                email: 'budi@example.com',
-                alamat: 'Solo',
-                jenis_kelamin: 'Laki-laki'
-            }
-        };
-        
-        if (memberData[id]) {
-            document.getElementById('editNamaMember').value = memberData[id].nama;
-            document.getElementById('editTeleponMember').value = memberData[id].telepon;
-            document.getElementById('editEmailMember').value = memberData[id].email;
-            document.getElementById('editAlamatMember').value = memberData[id].alamat;
-            document.getElementById('editJenisKelamin').value = memberData[id].jenis_kelamin;
-            document.getElementById('memberIdToEdit').value = id;
+        const modal = document.getElementById('modalEditMember');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
         }
     }
 
-    // Simulasi aksi form
-    document.getElementById('formTambahMember')?.addEventListener('submit', function(e) {
-        e.preventDefault();
-        closeModalTambah();
-        showAlert('success', 'Member baru berhasil ditambahkan!');
-    });
-
-    document.getElementById('formEditMember')?.addEventListener('submit', function(e) {
-        e.preventDefault();
-        closeModalEdit();
-        showAlert('success', 'Data member berhasil diperbarui!');
-    });
-
-    // Fungsi untuk melakukan pencarian member
     function searchMembers() {
-        const searchInput = document.getElementById('searchInput').value.toLowerCase();
-        const tableRows = document.querySelectorAll('#memberTable tbody tr:not(#noResultsMessage)');
-        let found = false;
+        const searchInput = document.getElementById('searchInput');
+        if (!searchInput) return;
         
-        // Loop melalui semua baris dalam tabel
-        tableRows.forEach(row => {
-            // Jangan proses jika ini adalah baris pesan "tidak ada hasil"
-            if (row.id === 'noResultsMessage') return;
-            
-            // Ambil data yang akan dicari
-            const nama = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-            const telepon = row.querySelector('td:nth-child(2) .text-sm').textContent.toLowerCase();
-            const kodeMember = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
-            const email = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
-            const alamat = row.querySelector('td:nth-child(5)').textContent.toLowerCase();
-            
-            // Cek apakah kata kunci pencarian ada di salah satu kolom
-            if (nama.includes(searchInput) || 
-                telepon.includes(searchInput) || 
-                kodeMember.includes(searchInput) || 
-                email.includes(searchInput) || 
-                alamat.includes(searchInput)) {
-                row.classList.remove('hidden');
-                found = true;
-            } else {
-                row.classList.add('hidden');
-            }
-        });
+        const searchTerm = searchInput.value.toLowerCase();
         
-        // Hapus pesan "tidak ada hasil" yang sudah ada
-        const existingNoResults = document.getElementById('noResultsMessage');
-        if (existingNoResults) {
-            existingNoResults.remove();
+        if (searchTerm.trim() === '') {
+            filteredMembers = [...allMembers];
+        } else {
+            filteredMembers = allMembers.filter(member => {
+                return (
+                    member.name.toLowerCase().includes(searchTerm) ||
+                    (member.phone && member.phone.toLowerCase().includes(searchTerm)) ||
+                    (member.member_code && member.member_code.toLowerCase().includes(searchTerm)) ||
+                    (member.email && member.email.toLowerCase().includes(searchTerm)) ||
+                    (member.address && member.address.toLowerCase().includes(searchTerm))
+                );
+            });
         }
         
-        // Jika tidak ada hasil dan input tidak kosong, tampilkan pesan
-        if (!found && searchInput !== '') {
-            const tbody = document.querySelector('#memberTable tbody');
-            const noResults = document.createElement('tr');
-            noResults.id = 'noResultsMessage';
-            noResults.innerHTML = `
-                <td colspan="8" class="py-8 text-center">
-                    <div class="flex flex-col items-center justify-center gap-2">
-                        <i data-lucide="search-x" class="w-8 h-8 text-gray-400"></i>
-                        <p class="text-gray-500 font-medium">Tidak ada member yang ditemukan</p>
-                        <p class="text-gray-400 text-sm">Coba gunakan kata kunci lain</p>
-                    </div>
-                </td>
-            `;
-            tbody.appendChild(noResults);
-            if (window.lucide) {
-                window.lucide.createIcons();
-            }
-        }
+        renderMembers();
     }
 
-    // Event listener untuk input pencarian dengan debounce
-    let debounceTimer;
-    document.getElementById('searchInput')?.addEventListener('input', function() {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            searchMembers();
-        }, 300); // Delay 300ms setelah user selesai mengetik
-    });
+    function validateForm() {
+        // Implementasi validasi form
+        return true;
+    }
 
-    // Event listener untuk enter key pada input pencarian
-    document.getElementById('searchInput')?.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            clearTimeout(debounceTimer);
-            searchMembers();
-        }
-    });
+    function validateEditForm() {
+        // Implementasi validasi form edit
+        return true;
+    }
 
-    // Inisialisasi saat halaman dimuat
-    document.addEventListener('DOMContentLoaded', function() {
-        // Inisialisasi Lucide icons jika tersedia
-        if (window.lucide) {
-            window.lucide.createIcons();
-        }
-    });
+    function resetForm() {
+        // Implementasi reset form
+    }
 </script>
 
 <style>
@@ -605,50 +700,94 @@ if (!e.target.closest('.relative.inline-block')) {
     
     /* Styling untuk dropdown */
     .dropdown-menu {
-        position: absolute;
-        right: 0;
-        z-index: 9999; /* Nilai sangat tinggi */
-        margin-top: 0.25rem;
-        width: 10rem;
+        position: fixed;
+        z-index: 9999;
+        width: 160px;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        transform-origin: top right;
     }
-.relative.inline-block {
+    
+    .relative.inline-block {
         position: relative;
     }
+    
     td {
         overflow: visible !important;
     }
-/* Animasi untuk dropdowns */
-@keyframes dropdownFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-5px);
+    
+    /* Animasi untuk dropdowns */
+    @keyframes dropdownFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-5px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
-    to {
-        opacity: 1;
-        transform: translateY(0);
+    
+    @keyframes dropdownFadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(5px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
-}
+    
+    @keyframes dropdownFadeInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(5px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    @keyframes dropdownFadeInRight {
+        from {
+            opacity: 0;
+            transform: translateX(-5px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    .dropdown-animation-down {
+        animation: dropdownFadeIn 0.2s ease-out forwards;
+    }
+    
+    .dropdown-animation-up {
+        animation: dropdownFadeInUp 0.2s ease-out forwards;
+    }
+    
+    .dropdown-animation-left {
+        animation: dropdownFadeInLeft 0.2s ease-out forwards;
+    }
+    
+    .dropdown-animation-right {
+        animation: dropdownFadeInRight 0.2s ease-out forwards;
+    }
+    
+    /* Loading spinner */
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    .animate-spin {
+        animation: spin 1s linear infinite;
+    }
 
-@keyframes dropdownFadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(5px);
+    /* Style untuk tabel */
+    .table-container {
+        position: relative;
     }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.dropdown-animation-down {
-    animation: dropdownFadeIn 0.2s ease-out forwards;
-}
-
-.dropdown-animation-up {
-    animation: dropdownFadeInUp 0.2s ease-out forwards;
-}
 </style>
 
 @endsection

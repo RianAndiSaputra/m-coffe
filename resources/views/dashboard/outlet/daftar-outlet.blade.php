@@ -44,7 +44,7 @@
                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
                 </span>
-                <input type="text" placeholder="Pencarian...."
+                <input type="text" id="searchInput" placeholder="Pencarian...."
                     class="w-full pl-10 pr-4 py-3 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" />
             </div>
 
@@ -66,16 +66,6 @@
             <p class="text-sm text-gray-600">Kelola semua outlet Kifa Bakery di sini.</p>
         </div>
     </div>
-
-    <!-- Kanan: Tombol -->
-    <div class="flex items-center space-x-2">
-        <button class="flex items-center px-4 py-2 text-sm font-medium bg-white border rounded-md shadow hover:bg-gray-50">
-            <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Cetak
-        </button>
-        <button class="flex items-center px-4 py-2 text-sm font-medium bg-white border rounded-md shadow hover:bg-gray-50">
-            <i data-lucide="download" class="w-4 h-4 mr-2"></i> Ekspor
-        </button>
-    </div>
 </div>
 
 <!-- Card: Tabel Outlet -->
@@ -94,120 +84,8 @@
                     <th class="py-3 font-semibold">Aksi</th>
                 </tr>
             </thead>
-            <tbody class="text-gray-700 divide-y">
-                <!-- Outlet 1 -->
-                <tr>
-                    <td class="py-4">1</td>
-                    <td class="py-4">
-                        <div class="flex items-center gap-4">
-                            <div class="bg-orange-100 p-2 rounded-full">
-                                <i data-lucide="map-pin" class="w-6 h-6 text-orange-500"></i>
-                            </div>
-                            <div>
-                                <div class="font-semibold text-base text-gray-900">Kifa Bakery Pusat</div>
-                                <div class="text-sm text-gray-500">outlet1@example.com</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="py-4">Jl. Merdeka No. 1, Jakarta Pusat</td>
-                    <td class="py-4">0812-3456-7890</td>
-                    <td class="py-4">12.345.678.9-012.345</td>
-                    <td class="py-4">
-                        <span class="px-3 py-1.5 text-sm font-medium bg-green-100 text-green-700 rounded-full">Aktif</span>
-                    </td>
-                    <td class="py-4 relative">
-                        <div class="relative inline-block">
-                            <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded-lg">
-                                <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
-                            </button>
-                            <!-- Dropdown -->
-                            <div class="dropdown-menu hidden absolute right-0 z-20 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-base">
-                                <button onclick="editOutlet(1)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left rounded-t-lg">
-                                    <i data-lucide="pencil" class="w-5 h-5 mr-3 text-gray-500"></i> Edit
-                                </button>
-                                <button onclick="showConfirmDelete(1)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left text-red-600 rounded-b-lg">
-                                    <i data-lucide="trash-2" class="w-5 h-5 mr-3"></i> Hapus
-                                </button>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-
-                <!-- Outlet 2 -->
-                <tr>
-                    <td class="py-4">2</td>
-                    <td class="py-4">
-                        <div class="flex items-center gap-4">
-                            <div class="bg-orange-100 p-2 rounded-full">
-                                <i data-lucide="map-pin" class="w-6 h-6 text-orange-500"></i>
-                            </div>
-                            <div>
-                                <div class="font-semibold text-base text-gray-900">Kifa Bakery Cabang 1</div>
-                                <div class="text-sm text-gray-500">kifacbg1@example.com</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="py-4">Jl. Mangga No. 12, Jakarta Selatan</td>
-                    <td class="py-4">0812-9876-5432</td>
-                    <td class="py-4">98.765.432.1-098.765</td>
-                    <td class="py-4">
-                        <span class="px-3 py-1.5 text-sm font-medium bg-green-100 text-green-700 rounded-full">Aktif</span>
-                    </td>
-                    <td class="py-4 relative">
-                        <div class="relative inline-block">
-                            <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded-lg">
-                                <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
-                            </button>
-                            <!-- Dropdown -->
-                            <div class="dropdown-menu hidden absolute right-0 z-20 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-base">
-                                <button onclick="editOutlet(2)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left rounded-t-lg">
-                                    <i data-lucide="pencil" class="w-5 h-5 mr-3 text-gray-500"></i> Edit
-                                </button>
-                                <button onclick="showConfirmDelete(2)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left text-red-600 rounded-b-lg">
-                                    <i data-lucide="trash-2" class="w-5 h-5 mr-3"></i> Hapus
-                                </button>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-
-                <!-- Outlet 3 -->
-                <tr>
-                    <td class="py-4">3</td>
-                    <td class="py-4">
-                        <div class="flex items-center gap-4">
-                            <div class="bg-orange-100 p-2 rounded-full">
-                                <i data-lucide="map-pin" class="w-6 h-6 text-orange-500"></i>
-                            </div>
-                            <div>
-                                <div class="font-semibold text-base text-gray-900">Kifa Bakery Cabang 2</div>
-                                <div class="text-sm text-gray-500">kifacbg2@example.com</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="py-4">Jl. Kenanga No. 25, Jakarta Timur</td>
-                    <td class="py-4">0812-8765-4321</td>
-                    <td class="py-4">87.654.321.0-987.654</td>
-                    <td class="py-4">
-                        <span class="px-3 py-1.5 text-sm font-medium bg-yellow-100 text-yellow-700 rounded-full">Renovasi</span>
-                    </td>
-                    <td class="py-4 relative">
-                        <div class="relative inline-block">
-                            <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded-lg">
-                                <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
-                            </button>
-                            <!-- Dropdown -->
-                            <div class="dropdown-menu hidden absolute right-0 z-20 bottom-full mb-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-base">
-                                <button onclick="editOutlet(3)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left rounded-t-lg">
-                                    <i data-lucide="pencil" class="w-5 h-5 mr-3 text-gray-500"></i> Edit
-                                </button>
-                                <button onclick="showConfirmDelete(3)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left text-red-600 rounded-b-lg">
-                                    <i data-lucide="trash-2" class="w-5 h-5 mr-3"></i> Hapus
-                                </button>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
+            <tbody id="outletTableBody" class="text-gray-700 divide-y">
+                <!-- Data outlet akan dimuat secara dinamis di sini -->
             </tbody>
         </table>
     </div>
@@ -217,243 +95,693 @@
 @include('partials.outlet.modal-edit-outlet')
 
 <script>
-    // Variabel global untuk menyimpan ID outlet yang akan dihapus
-    let outletIdToDelete = null;
+   // Variabel global
+        let outletIdToDelete = null;
+        let allOutlets = [];
 
-    // Fungsi untuk menampilkan alert
-    function showAlert(type, message) {
-        const alertContainer = document.getElementById('alertContainer');
-        const alertId = 'alert-' + Date.now();
-        
-        // Warna dan ikon berdasarkan jenis alert
-        const alertConfig = {
-            success: {
-                bgColor: 'bg-orange-50',
-                borderColor: 'border-orange-200',
-                textColor: 'text-orange-800',
-                icon: 'check-circle',
-                iconColor: 'text-orange-500'
-            },
-            error: {
-                bgColor: 'bg-red-50',
-                borderColor: 'border-red-200',
-                textColor: 'text-red-800',
-                icon: 'alert-circle',
-                iconColor: 'text-red-500'
+        // Fungsi untuk mendapatkan CSRF token
+        function getCSRFToken() {
+            // Cari meta tag dengan name="csrf-token"
+            const metaTag = document.querySelector('meta[name="csrf-token"]');
+            if (metaTag) {
+                return metaTag.getAttribute('content');
             }
-        };
-        
-        const config = alertConfig[type] || alertConfig.success;
-        
-        const alertElement = document.createElement('div');
-        alertElement.id = alertId;
-        alertElement.className = `p-4 border rounded-lg shadow-sm ${config.bgColor} ${config.borderColor} ${config.textColor} flex items-start gap-3 animate-fade-in-up`;
-        alertElement.innerHTML = `
-            <i data-lucide="${config.icon}" class="w-5 h-5 mt-0.5 ${config.iconColor}"></i>
-            <div class="flex-1">
-                <p class="text-sm font-medium">${message}</p>
-            </div>
-            <button onclick="closeAlert('${alertId}')" class="p-1 rounded-full hover:bg-gray-100">
-                <i data-lucide="x" class="w-4 h-4"></i>
-            </button>
-        `;
-        
-        alertContainer.prepend(alertElement);
-        
-        // Inisialisasi ikon Lucide
-        if (window.lucide) {
-            window.lucide.createIcons();
+            return null;
         }
-        
-        // Auto close setelah 5 detik
-        setTimeout(() => {
-            closeAlert(alertId);
-        }, 5000);
-    }
 
-    // Fungsi untuk menutup alert
-    function closeAlert(id) {
-        const alert = document.getElementById(id);
-        if (alert) {
-            alert.classList.add('animate-fade-out');
+        // Fungsi untuk memuat data outlet dari API
+        async function loadOutlets() {
+            try {
+                const token = localStorage.getItem('token');
+                
+                const response = await fetch('http://127.0.0.1:8000/api/outlets', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                // Cek jika diarahkan ke halaman login
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return;
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    allOutlets = data.data;
+                    renderOutlets(allOutlets);
+                } else {
+                    showAlert('error', 'Gagal memuat data outlet');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('error', 'Terjadi kesalahan saat memuat data');
+            }
+        }
+
+        // Fungsi untuk menampilkan data outlet di tabel
+        function renderOutlets(outlets) {
+            const tableBody = document.getElementById('outletTableBody');
+            tableBody.innerHTML = '';
+
+            outlets.forEach((outlet, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="py-4">${index + 1}</td>
+                    <td class="py-4">
+                        <div class="flex items-center gap-4">
+                            <div class="bg-orange-100 p-2 rounded-full">
+                                <i data-lucide="map-pin" class="w-6 h-6 text-orange-500"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-base text-gray-900">${outlet.name}</div>
+                                <div class="text-sm text-gray-500">${outlet.email}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-4">${outlet.address}</td>
+                    <td class="py-4">${outlet.phone}</td>
+                    <td class="py-4">${outlet.tax}%</td>
+                    <td class="py-4">
+                        <span class="px-3 py-1.5 text-sm font-medium ${outlet.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'} rounded-full">
+                            ${outlet.is_active ? 'Aktif' : 'Tidak Aktif'}
+                        </span>
+                    </td>
+                    <td class="py-4 relative">
+                        <div class="relative inline-block">
+                            <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded-lg">
+                                <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
+                            </button>
+                            <!-- Dropdown -->
+                            <div class="dropdown-menu hidden absolute right-0 z-20 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-base">
+                                <button onclick="editOutlet(${outlet.id})" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left rounded-t-lg">
+                                    <i data-lucide="pencil" class="w-5 h-5 mr-3 text-gray-500"></i> Edit
+                                </button>
+                                <button onclick="showConfirmDelete(${outlet.id})" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left text-red-600 rounded-b-lg">
+                                    <i data-lucide="trash-2" class="w-5 h-5 mr-3"></i> Hapus
+                                </button>
+                            </div>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            // Inisialisasi ikon Lucide
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+        }
+
+        // Fungsi untuk menampilkan alert
+        function showAlert(type, message) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertId = 'alert-' + Date.now();
+            
+            const alertConfig = {
+                success: {
+                    bgColor: 'bg-orange-50',
+                    borderColor: 'border-orange-200',
+                    textColor: 'text-orange-800',
+                    icon: 'check-circle',
+                    iconColor: 'text-orange-500'
+                },
+                error: {
+                    bgColor: 'bg-red-50',
+                    borderColor: 'border-red-200',
+                    textColor: 'text-red-800',
+                    icon: 'alert-circle',
+                    iconColor: 'text-red-500'
+                }
+            };
+            
+            const config = alertConfig[type] || alertConfig.success;
+            
+            const alertElement = document.createElement('div');
+            alertElement.id = alertId;
+            alertElement.className = `p-4 border rounded-lg shadow-sm ${config.bgColor} ${config.borderColor} ${config.textColor} flex items-start gap-3 animate-fade-in-up`;
+            alertElement.innerHTML = `
+                <i data-lucide="${config.icon}" class="w-5 h-5 mt-0.5 ${config.iconColor}"></i>
+                <div class="flex-1">
+                    <p class="text-sm font-medium">${message}</p>
+                </div>
+                <button onclick="closeAlert('${alertId}')" class="p-1 rounded-full hover:bg-gray-100">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            `;
+            
+            alertContainer.prepend(alertElement);
+            
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+            
             setTimeout(() => {
-                alert.remove();
-            }, 300);
+                closeAlert(alertId);
+            }, 5000);
+        }
+
+        // Fungsi untuk menutup alert
+        function closeAlert(id) {
+            const alert = document.getElementById(id);
+            if (alert) {
+                alert.classList.add('animate-fade-out');
+                setTimeout(() => {
+                    alert.remove();
+                }, 300);
+            }
+        }
+
+        // Fungsi untuk menampilkan modal konfirmasi hapus
+        function showConfirmDelete(id) {
+            outletIdToDelete = id;
+            const modal = document.getElementById('modalHapusOutlet');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        // Fungsi untuk menutup modal konfirmasi hapus
+        function closeConfirmDelete() {
+            const modal = document.getElementById('modalHapusOutlet');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            outletIdToDelete = null;
+        }
+            //fungsi delete
+        async function hapusOutlet() {
+            if (!outletIdToDelete) return;
+            
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+            const token = localStorage.getItem('token');
+            
+            try {
+                const response = await fetch(`/api/outlets/${outletIdToDelete}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || 'Gagal menghapus outlet');
+                }
+                
+                showAlert('success', data.message || 'Outlet berhasil dihapus');
+                allOutlets = allOutlets.filter(outlet => outlet.id !== outletIdToDelete);
+                renderOutlets(allOutlets);
+            } catch (error) {
+                console.error('Delete error:', error);
+                showAlert('error', error.message);
+            } finally {
+                closeConfirmDelete();
+            }
+        }
+        // Fungsi untuk menambahkan outlet baru
+        async function tambahOutlet() {
+            // Validasi form sebelum submit
+            if (!validateForm()) {
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('name', document.getElementById('namaOutlet').value);
+            formData.append('phone', document.getElementById('teleponOutlet').value);
+            formData.append('address', document.getElementById('alamatOutlet').value);
+            formData.append('email', document.getElementById('emailOutlet').value);
+            formData.append('tax', document.getElementById('pajakOutlet').value || '0.00');
+            formData.append('nomor_transaksi_bank', document.getElementById('nomorTransaksi').value);
+            formData.append('nama_bank', document.getElementById('namaBank').value);
+            formData.append('atas_nama_bank', document.getElementById('atasNama').value);
+            formData.append('is_active', document.getElementById('statusAktif').checked ? '1' : '0');
+            
+            const fileInput = document.getElementById('fotoOutlet');
+            if (fileInput.files[0]) {
+                formData.append('qris', fileInput.files[0]);
+            }
+
+            // Tambahkan CSRF token
+            const csrfToken = getCSRFToken();
+            if (csrfToken) {
+                formData.append('_token', csrfToken);
+            }
+
+            // Tampilkan loading state
+            const btnTambah = document.getElementById('btnTambahOutlet');
+            const originalText = btnTambah.innerHTML;
+            btnTambah.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Menyimpan...
+            `;
+            btnTambah.disabled = true;
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('http://127.0.0.1:8000/api/outlets', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                // Cek jika diarahkan ke halaman login
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('success', 'Outlet berhasil ditambahkan!');
+                    closeModalTambah();
+                    loadOutlets(); // Memuat ulang data
+                    resetForm();
+                } else {
+                    showAlert('error', data.message || 'Gagal menambahkan outlet');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('error', 'Terjadi kesalahan saat menambahkan outlet');
+            } finally {
+                // Kembalikan ke state semula
+                btnTambah.innerHTML = originalText;
+                btnTambah.disabled = false;
+            }
+        }
+
+            async function updateOutlet() {
+        // Validasi form (tetap gunakan kode validasi yang ada)
+        if (!validateEditForm()) {
+            return;
+        }
+
+        const outletId = document.getElementById('outletIdToEdit').value;
+        if (!outletId) return;
+
+        // Siapkan data form
+        const formData = new FormData();
+        formData.append('name', document.getElementById('editNamaOutlet').value);
+        formData.append('phone', document.getElementById('editNomorTelepon').value);
+        formData.append('address', document.getElementById('editAlamatLengkap').value);
+        formData.append('email', document.getElementById('editEmail').value);
+        formData.append('tax', document.getElementById('editPersentasePajak').value || '0.00');
+        formData.append('nomor_transaksi_bank', document.getElementById('editNoTransaksi').value);
+        formData.append('nama_bank', document.getElementById('editNamaBank').value);
+        formData.append('atas_nama_bank', document.getElementById('editAtasNama').value);
+        formData.append('is_active', document.getElementById('editStatusAktif').checked ? '1' : '0');
+        
+        // Tambahkan file jika ada
+        const fileInput = document.getElementById('editFotoOutlet');
+        if (fileInput.files[0]) {
+            formData.append('qris', fileInput.files[0]);
+        }
+
+        // Dapatkan token CSRF
+        const csrfToken = getCSRFToken();
+        if (csrfToken) {
+            formData.append('_token', csrfToken);
+        }
+
+        // Tampilkan loading
+        const btnSimpan = document.getElementById('btnSimpanPerubahan');
+        const originalText = btnSimpan.innerHTML;
+        btnSimpan.innerHTML = `
+            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Menyimpan...
+        `;
+        btnSimpan.disabled = true;
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://127.0.0.1:8000/api/outlets/${outletId}`, {
+                method: 'POST', // Tetap gunakan POST karena Laravel menerima _method
+                body: formData,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (response.redirected) {
+                window.location.href = response.url;
+                return;
+            }
+
+            const data = await response.json();
+
+            if (data.success) {
+                showAlert('success', 'Outlet berhasil diperbarui!');
+                closeModalEdit();
+                loadOutlets(); // Muat ulang data
+            } else {
+                showAlert('error', data.message || 'Gagal memperbarui outlet');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('error', 'Terjadi kesalahan saat memperbarui outlet');
+        } finally {
+            // Kembalikan tombol ke state semula
+            btnSimpan.innerHTML = originalText;
+            btnSimpan.disabled = false;
         }
     }
 
-    // Fungsi untuk menampilkan modal konfirmasi hapus
-    function showConfirmDelete(id) {
-        outletIdToDelete = id;
-        const modal = document.getElementById('modalHapusOutlet');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
+        // Fungsi untuk mengisi form edit dengan data outlet
+        function editOutlet(id) {
+            const outlet = allOutlets.find(o => o.id == id);
+            if (!outlet) return;
 
-    // Fungsi untuk menutup modal konfirmasi hapus
-    function closeConfirmDelete() {
-        const modal = document.getElementById('modalHapusOutlet');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-        outletIdToDelete = null;
-    }
+            document.getElementById('outletIdToEdit').value = outlet.id;
+            document.getElementById('editNamaOutlet').value = outlet.name;
+            document.getElementById('editNomorTelepon').value = outlet.phone;
+            document.getElementById('editAlamatLengkap').value = outlet.address;
+            document.getElementById('editEmail').value = outlet.email;
+            document.getElementById('editPersentasePajak').value = outlet.tax;
+            document.getElementById('editNoTransaksi').value = outlet.nomor_transaksi_bank || '';
+            document.getElementById('editNamaBank').value = outlet.nama_bank || '';
+            document.getElementById('editAtasNama').value = outlet.atas_nama_bank || '';
+            document.getElementById('editStatusAktif').checked = outlet.is_active;
 
-    // Fungsi untuk menghapus outlet
-    function hapusOutlet() {
-        if (outletIdToDelete) {
-            console.log('Menghapus outlet ID:', outletIdToDelete);
-            // Di sini Anda bisa menambahkan AJAX request untuk menghapus data
-            
-            // Tampilkan alert sukses
-            showAlert('success', 'Outlet berhasil dihapus!');
-            
-            // Tutup modal konfirmasi
-            closeConfirmDelete();
-            
-            // Di production, Anda mungkin perlu me-refresh data atau menghapus baris dari tabel
+            // Set preview foto
+            const preview = document.getElementById('editCurrentFoto');
+            const icon = document.getElementById('editDefaultIcon');
+            if (outlet.qris_url) {
+                preview.src = outlet.qris_url;
+                preview.classList.remove('hidden');
+                icon.classList.add('hidden');
+            } else {
+                preview.classList.add('hidden');
+                icon.classList.remove('hidden');
+            }
+
+            openModalEdit();
         }
-    }
 
-    // Event listener untuk modal konfirmasi hapus
-    document.getElementById('btnBatalHapus').addEventListener('click', closeConfirmDelete);
-    document.getElementById('btnKonfirmasiHapus').addEventListener('click', hapusOutlet);
+        // Fungsi untuk toggle dropdown
+        function toggleDropdown(button) {
+            const menu = button.nextElementSibling;
 
-    // Fungsi toggle dropdown (sama seperti sebelumnya)
-    function toggleDropdown(button) {
-        const menu = button.nextElementSibling;
+            document.querySelectorAll('.dropdown-menu').forEach(m => {
+                if (m !== menu) {
+                    m.classList.add('hidden');
+                    m.classList.remove('dropdown-up');
+                    m.classList.remove('dropdown-down');
+                }
+            });
 
-        // Tutup semua dropdown lain
-        document.querySelectorAll('.dropdown-menu').forEach(m => {
-            if (m !== menu) {
-                m.classList.add('hidden');
-                m.classList.remove('dropdown-up');
-                m.classList.remove('dropdown-down');
+            menu.classList.toggle('hidden');
+            menu.classList.remove('dropdown-up', 'dropdown-down');
+
+            const menuRect = menu.getBoundingClientRect();
+            const buttonRect = button.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - buttonRect.bottom;
+            const spaceAbove = buttonRect.top;
+
+            if (spaceBelow < menuRect.height && spaceAbove > menuRect.height) {
+                menu.classList.add('dropdown-up');
+            } else {
+                menu.classList.add('dropdown-down');
+            }
+        }
+
+        // Fungsi untuk validasi form tambah
+        function validateForm() {
+            let isValid = true;
+            
+            const namaOutlet = document.getElementById('namaOutlet');
+            const errorNama = document.getElementById('errorNama');
+            if (!namaOutlet.value.trim()) {
+                errorNama.classList.remove('hidden');
+                namaOutlet.classList.add('border-red-500');
+                isValid = false;
+            } else {
+                errorNama.classList.add('hidden');
+                namaOutlet.classList.remove('border-red-500');
+            }
+            
+            const teleponOutlet = document.getElementById('teleponOutlet');
+            const errorTelepon = document.getElementById('errorTelepon');
+            if (!teleponOutlet.value.trim()) {
+                errorTelepon.classList.remove('hidden');
+                teleponOutlet.classList.add('border-red-500');
+                isValid = false;
+            } else {
+                errorTelepon.classList.add('hidden');
+                teleponOutlet.classList.remove('border-red-500');
+            }
+            
+            const alamatOutlet = document.getElementById('alamatOutlet');
+            const errorAlamat = document.getElementById('errorAlamat');
+            if (!alamatOutlet.value.trim()) {
+                errorAlamat.classList.remove('hidden');
+                alamatOutlet.classList.add('border-red-500');
+                isValid = false;
+            } else {
+                errorAlamat.classList.add('hidden');
+                alamatOutlet.classList.remove('border-red-500');
+            }
+            
+            const emailOutlet = document.getElementById('emailOutlet');
+            const errorEmail = document.getElementById('errorEmail');
+            if (emailOutlet.value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailOutlet.value)) {
+                errorEmail.classList.remove('hidden');
+                emailOutlet.classList.add('border-red-500');
+                isValid = false;
+            } else {
+                errorEmail.classList.add('hidden');
+                emailOutlet.classList.remove('border-red-500');
+            }
+            
+            return isValid;
+        }
+
+        // Fungsi untuk validasi form edit
+        function validateEditForm() {
+            let isValid = true;
+            
+            const namaOutlet = document.getElementById('editNamaOutlet');
+            const errorNama = document.getElementById('errorEditNama');
+            if (!namaOutlet.value.trim()) {
+                errorNama.classList.remove('hidden');
+                namaOutlet.classList.add('border-red-500');
+                isValid = false;
+            } else {
+                errorNama.classList.add('hidden');
+                namaOutlet.classList.remove('border-red-500');
+            }
+            
+            const teleponOutlet = document.getElementById('editNomorTelepon');
+            const errorTelepon = document.getElementById('errorEditTelepon');
+            if (!teleponOutlet.value.trim()) {
+                errorTelepon.classList.remove('hidden');
+                teleponOutlet.classList.add('border-red-500');
+                isValid = false;
+            } else {
+                errorTelepon.classList.add('hidden');
+                teleponOutlet.classList.remove('border-red-500');
+            }
+            
+            const alamatOutlet = document.getElementById('editAlamatLengkap');
+            const errorAlamat = document.getElementById('errorEditAlamat');
+            if (!alamatOutlet.value.trim()) {
+                errorAlamat.classList.remove('hidden');
+                alamatOutlet.classList.add('border-red-500');
+                isValid = false;
+            } else {
+                errorAlamat.classList.add('hidden');
+                alamatOutlet.classList.remove('border-red-500');
+            }
+            
+            const emailOutlet = document.getElementById('editEmail');
+            const errorEmail = document.getElementById('errorEditEmail');
+            if (emailOutlet.value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailOutlet.value)) {
+                errorEmail.classList.remove('hidden');
+                emailOutlet.classList.add('border-red-500');
+                isValid = false;
+            } else {
+                errorEmail.classList.add('hidden');
+                emailOutlet.classList.remove('border-red-500');
+            }
+            
+            return isValid;
+        }
+
+        // Fungsi untuk reset form tambah
+        function resetForm() {
+            document.getElementById('namaOutlet').value = '';
+            document.getElementById('teleponOutlet').value = '';
+            document.getElementById('alamatOutlet').value = '';
+            document.getElementById('emailOutlet').value = '';
+            document.getElementById('pajakOutlet').value = '';
+            document.getElementById('nomorTransaksi').value = '';
+            document.getElementById('namaBank').value = '';
+            document.getElementById('atasNama').value = '';
+            document.getElementById('fotoOutlet').value = '';
+            document.getElementById('statusAktif').checked = true;
+            
+            document.getElementById('currentFotoOutlet').src = '#';
+            document.getElementById('currentFotoOutlet').classList.add('hidden');
+            document.getElementById('defaultIcon').classList.remove('hidden');
+            
+            document.querySelectorAll('[id^="error"]').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.border-red-500').forEach(el => el.classList.remove('border-red-500'));
+        }
+
+        // Fungsi untuk pencarian
+        document.getElementById('searchInput').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const filteredOutlets = allOutlets.filter(outlet => 
+                outlet.name.toLowerCase().includes(searchTerm) || 
+                outlet.address.toLowerCase().includes(searchTerm) ||
+                outlet.phone.toLowerCase().includes(searchTerm) ||
+                outlet.email.toLowerCase().includes(searchTerm));
+            
+            renderOutlets(filteredOutlets);
+        });
+
+        // Tutup semua dropdown jika klik di luar
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.relative.inline-block')) {
+                document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                    menu.classList.add('hidden');
+                    menu.classList.remove('dropdown-up');
+                    menu.classList.remove('dropdown-down');
+                });
             }
         });
 
-        // Toggle dropdown terkait tombol yang diklik
-        menu.classList.toggle('hidden');
-
-        // Reset posisi
-        menu.classList.remove('dropdown-up', 'dropdown-down');
-
-        // Cek ruang yang tersedia
-        const menuRect = menu.getBoundingClientRect();
-        const buttonRect = button.getBoundingClientRect();
-        const spaceBelow = window.innerHeight - buttonRect.bottom;
-        const spaceAbove = buttonRect.top;
-
-        // Atur arah dropdown
-        if (spaceBelow < menuRect.height && spaceAbove > menuRect.height) {
-            // Tampilkan ke atas
-            menu.classList.add('dropdown-up');
-        } else {
-            // Tampilkan ke bawah
-            menu.classList.add('dropdown-down');
+        // Modal functions
+        function openModalTambah() {
+            document.getElementById('modalTambahOutlet').classList.remove('hidden');
+            document.getElementById('modalTambahOutlet').classList.add('flex');
         }
-    }
 
-    // Tutup semua dropdown jika klik di luar
-    document.addEventListener('click', function (e) {
-        if (!e.target.closest('.relative.inline-block')) {
-            document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                menu.classList.add('hidden');
-                menu.classList.remove('dropdown-up');
-                menu.classList.remove('dropdown-down');
-            });
+        function closeModalTambah() {
+            document.getElementById('modalTambahOutlet').classList.add('hidden');
+            document.getElementById('modalTambahOutlet').classList.remove('flex');
         }
-    });
 
-    // Fungsi untuk modal tambah dan edit (sama seperti sebelumnya)
-    const modalTambah = document.getElementById('modalTambahOutlet');
-    const modalEdit = document.getElementById('modalEditOutlet');
-    const batalBtnTambah = document.getElementById('btnBatalModalTambah');
-    const batalBtnEdit = document.getElementById('btnBatalModalEdit');
+        function openModalEdit() {
+            document.getElementById('modalEditOutlet').classList.remove('hidden');
+            document.getElementById('modalEditOutlet').classList.add('flex');
+        }
 
-    function openModalTambah() {
-        modalTambah.classList.remove('hidden');
-        modalTambah.classList.add('flex');
-    }
+        function closeModalEdit() {
+            document.getElementById('modalEditOutlet').classList.add('hidden');
+            document.getElementById('modalEditOutlet').classList.remove('flex');
+        }
 
-    function closeModalTambah() {
-        modalTambah.classList.add('hidden');
-        modalTambah.classList.remove('flex');
-    }
-    
-    function openModalEdit() {
-        modalEdit.classList.remove('hidden');
-        modalEdit.classList.add('flex');
-    }
-    
-    function closeModalEdit() {
-        modalEdit.classList.add('hidden');
-        modalEdit.classList.remove('flex');
-    }
-
-    // Klik batal untuk modal tambah
-    batalBtnTambah.addEventListener('click', () => {
-        closeModalTambah();
-    });
-    
-    // Klik batal untuk modal edit
-    batalBtnEdit.addEventListener('click', () => {
-        closeModalEdit();
-    });
-
-    function editOutlet(id) {
-        console.log('Edit outlet ID:', id);
-        openModalEdit();
-        
-        const outletData = {
-            1: {
-                nama: 'Kifa Bakery Pusat',
-                alamat: 'Jl. Merdeka No. 1, Jakarta Pusat',
-                kontak: '0812-3456-7890',
-                ppn: '12.345.678.9-012.345',
-                status: 'Aktif'
-            },
-            2: {
-                nama: 'Kifa Bakery Cabang 1',
-                alamat: 'Jl. Mangga No. 12, Jakarta Selatan',
-                kontak: '0812-9876-5432',
-                ppn: '98.765.432.1-098.765',
-                status: 'Aktif'
-            },
-            3: {
-                nama: 'Kifa Bakery Cabang 2',
-                alamat: 'Jl. Kenanga No. 25, Jakarta Timur',
-                kontak: '0812-8765-4321',
-                ppn: '87.654.321.0-987.654',
-                status: 'Renovasi'
+        // Fungsi untuk preview foto outlet
+        function previewFotoOutlet(input) {
+            const preview = document.getElementById('currentFotoOutlet');
+            const icon = document.getElementById('defaultIcon');
+            const errorFoto = document.getElementById('errorFoto');
+            
+            errorFoto.classList.add('hidden');
+            
+            if (input.files && input.files[0]) {
+                if (input.files[0].size > 2 * 1024 * 1024) {
+                    errorFoto.classList.remove('hidden');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = e => {
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                    icon.classList.add('hidden');
+                };
+                reader.readAsDataURL(input.files[0]);
             }
-        };
-        
-        if (outletData[id]) {
-            document.getElementById('editNamaOutlet').value = outletData[id].nama;
-            document.getElementById('editAlamatOutlet').value = outletData[id].alamat;
-            document.getElementById('editKontakOutlet').value = outletData[id].kontak;
-            document.getElementById('editPpnOutlet').value = outletData[id].ppn;
-            document.getElementById('editStatusOutlet').value = outletData[id].status;
-            document.getElementById('outletIdToEdit').value = id;
         }
-    }
 
-    // Simulasi aksi form
-    document.getElementById('formTambahOutlet')?.addEventListener('submit', function(e) {
-        e.preventDefault();
-        closeModalTambah();
-        showAlert('success', 'Outlet baru berhasil ditambahkan!');
-    });
+        // Fungsi untuk preview foto outlet di modal edit
+        function previewEditFoto(input) {
+            const preview = document.getElementById('editCurrentFoto');
+            const icon = document.getElementById('editDefaultIcon');
+            const errorFoto = document.getElementById('errorEditFoto');
+            
+            errorFoto.classList.add('hidden');
+            
+            if (input.files && input.files[0]) {
+                if (input.files[0].size > 2 * 1024 * 1024) {
+                    errorFoto.classList.remove('hidden');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = e => {
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                    icon.classList.add('hidden');
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
 
-    document.getElementById('formEditOutlet')?.addEventListener('submit', function(e) {
-        e.preventDefault();
-        closeModalEdit();
-        showAlert('success', 'Data outlet berhasil diperbarui!');
-    });
+        // Event listener untuk modal konfirmasi hapus
+        document.getElementById('btnBatalHapus').addEventListener('click', closeConfirmDelete);
+        document.getElementById('btnKonfirmasiHapus').addEventListener('click', hapusOutlet);
+
+        // Event listener untuk form tambah outlet
+        document.getElementById('btnTambahOutlet').addEventListener('click', function(e) {
+            e.preventDefault();
+            tambahOutlet();
+        });
+
+        // Event listener untuk form edit outlet
+        document.getElementById('btnSimpanPerubahan').addEventListener('click', function(e) {
+            e.preventDefault();
+            updateOutlet();
+        });
+
+        // Event listener untuk input enter di form
+        document.querySelectorAll('#modalTambahOutlet input, #modalEditOutlet input').forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (this.closest('#modalTambahOutlet')) {
+                        tambahOutlet();
+                    } else if (this.closest('#modalEditOutlet')) {
+                        updateOutlet();
+                    }
+                }
+            });
+        });
+
+        // Memuat data saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            loadOutlets();
+            
+            // Inisialisasi event listener untuk modal
+            document.getElementById('btnBatalModalTambah').addEventListener('click', closeModalTambah);
+            document.getElementById('btnBatalModalEdit').addEventListener('click', closeModalEdit);
+        });
 </script>
 
 <style>
-    /* Animasi untuk alert */
     @keyframes fadeInUp {
         from {
             opacity: 0;
