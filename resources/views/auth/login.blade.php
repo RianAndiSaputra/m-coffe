@@ -244,7 +244,13 @@
                 localStorage.setItem('role', data.data.user.role);
                 localStorage.setItem('user_id', data.data.user.id);
                 localStorage.setItem('name', data.data.user.name);
-                // localStorage.setItem('outlet_id', data.data.user.outlet_id);
+                localStorage.setItem('outlet_id', data.data.user.outlet_id);
+
+                if (data.data.shift) {
+                    localStorage.setItem('shift_id', data.data.shift.id); // Simpan shift_id
+                    // Jika shift memiliki data tambahan, simpan sebagai JSON
+                    localStorage.setItem('shift_data', JSON.stringify(data.data.shift));
+                }
 
                 const userRole = data.data.user.role;
 

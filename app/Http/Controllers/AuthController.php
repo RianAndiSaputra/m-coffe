@@ -111,6 +111,7 @@ class AuthController extends Controller
                     'user' => $user,
                     'role' => $user->role,
                     'outlet' => $user->outlet_id,
+                    'shift' => $user->lastShift,
                 ]
             ]);
         }
