@@ -6,7 +6,7 @@
 
 <!-- Alert Notification -->
 <div id="alertContainer" class="fixed top-4 right-4 z-50 space-y-3 w-80">
-    <!-- Alert akan muncul di sini secara dinamis -->
+    <!-- Alert will appear here dynamically -->
 </div>
 
 @include('partials.kategori.modal-konfirmasi-hapus')
@@ -18,7 +18,6 @@
         <div class="flex items-center gap-2">
             <div class="relative">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-                    <!-- Heroicons search icon -->
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 103.5 3.5a7.5 7.5 0 0013.65 13.65z" />
                     </svg>
@@ -71,78 +70,8 @@
                     <th class="py-2 font-semibold">Aksi</th>
                 </tr>
             </thead>
-            <tbody class="text-gray-700">
-                <!-- Kategori 1 -->
-                <tr class="border-b">
-                    <td class="py-3">1</td>
-                    <td class="py-3 font-medium">Kue</td>
-                    <td class="py-3">Berbagai macam jenis kue</td>
-                    <td class="py-3">15 produk</td>
-                    <td class="py-3 relative">
-                        <div class="relative inline-block">
-                            <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded">
-                                <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
-                            </button>
-
-                            <!-- Dropdown -->
-                            <div class="dropdown-menu hidden absolute right-0 z-10 mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-xl text-sm">
-                                <button onclick="openEditModal(1)" class="flex items-center w-full px-3 py-2.5 hover:bg-gray-100 text-left rounded-t-lg">
-                                    <i data-lucide="pencil" class="w-4 h-4 mr-2 text-gray-500"></i> Edit
-                                </button>
-                                <button onclick="hapusKategori(1)" class="flex items-center w-full px-3 py-2.5 hover:bg-gray-100 text-left text-red-600 rounded-b-lg">
-                                    <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i> Hapus
-                                </button>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-
-                <!-- Kategori 2 -->
-                <tr class="border-b">
-                    <td class="py-3">2</td>
-                    <td class="py-3 font-medium">Roti</td>
-                    <td class="py-3">Roti segar dan roti tawar</td>
-                    <td class="py-3">8 produk</td>
-                    <td class="py-3 relative">
-                        <div class="relative inline-block">
-                            <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded">
-                                <i data-lucide="more-vertical" class="w-4 h-4 text-gray-500"></i>
-                            </button>
-                            <div class="dropdown-menu hidden absolute right-0 z-10 mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-xl text-sm">
-                                <button onclick="openEditModal(2)" class="flex items-center w-full px-3 py-2.5 hover:bg-gray-100 text-left rounded-t-lg">
-                                    <i data-lucide="pencil" class="w-4 h-4 mr-2 text-gray-500"></i> Edit
-                                </button>
-                                <button onclick="hapusKategori(2)" class="flex items-center w-full px-3 py-2.5 hover:bg-gray-100 text-left text-red-600 rounded-b-lg">
-                                    <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i> Hapus
-                                </button>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-
-                <!-- Kategori 3 -->
-                <tr class="border-b">
-                    <td class="py-4">3</td>
-                    <td class="py-4 font-medium">Minuman</td>
-                    <td class="py-4">Minuman segar dan jus</td>
-                    <td class="py-4">5 produk</td>
-                    <td class="py-4 relative">
-                        <div class="relative inline-block">
-                            <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded-lg">
-                                <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
-                            </button>
-                            <!-- Dropdown -->
-                            <div class="dropdown-menu hidden absolute right-0 z-20 bottom-full mb-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-base">
-                                <button onclick="openEditModal(3)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left rounded-t-lg">
-                                    <i data-lucide="pencil" class="w-5 h-5 mr-3 text-gray-500"></i> Edit
-                                </button>
-                                <button onclick="hapusKategori(3)" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left text-red-600 rounded-b-lg">
-                                    <i data-lucide="trash-2" class="w-5 h-5 mr-3"></i> Hapus
-                                </button>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
+            <tbody class="text-gray-700" id="kategoriTableBody">
+                <!-- Data will be loaded dynamically -->
             </tbody>
         </table>
     </div>
@@ -152,14 +81,79 @@
 @include('partials.kategori.modal-edit-kategori')
 
 <script>
-    // Variabel untuk menyimpan ID kategori yang akan dihapus
+    // Global variables
     let kategoriHapusId = null;
-    // Fungsi untuk menampilkan alert
+    
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        setupModals();
+        createAuthInterceptor();
+        loadKategories();
+        setupEventListeners();
+        
+        // Initialize Lucide icons
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    });
+
+    // Setup all modals
+    function setupModals() {
+        setupModal('modalTambahKategori');
+        setupModal('modalEditKategori');
+        setupModal('modalKonfirmasiHapus');
+    }
+
+    // Setup individual modal
+    function setupModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeModal(modalId);
+            }
+        });
+
+        const modalContent = modal.querySelector('div[onclick]');
+        if (modalContent) {
+            modalContent.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        }
+    }
+
+    // Create fetch interceptor for authentication
+    function createAuthInterceptor() {
+        const originalFetch = window.fetch;
+        
+        window.fetch = async function(resource, options = {}) {
+            const token = localStorage.getItem('token');
+            if (token) {
+                options.headers = options.headers || {};
+                options.headers.Authorization = `Bearer ${token}`;
+                options.headers.Accept = 'application/json';
+                options.headers['Content-Type'] = 'application/json';
+                options.headers['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').content;
+            }
+            
+            const response = await originalFetch(resource, options);
+            
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const textResponse = await response.text();
+                throw new Error(`Invalid response format: ${textResponse.substring(0, 100)}`);
+            }
+            
+            return response;
+        };
+    }
+
+    // Show alert notification
     function showAlert(type, message) {
         const alertContainer = document.getElementById('alertContainer');
         const alertId = 'alert-' + Date.now();
         
-        // Warna dan ikon berdasarkan jenis alert
         const alertConfig = {
             success: {
                 bgColor: 'bg-orange-50',
@@ -194,18 +188,16 @@
         
         alertContainer.prepend(alertElement);
         
-        // Inisialisasi ikon Lucide
         if (window.lucide) {
             window.lucide.createIcons();
         }
         
-        // Auto close setelah 5 detik
         setTimeout(() => {
             closeAlert(alertId);
         }, 5000);
     }
 
-    // Fungsi untuk menutup alert
+    // Close alert
     function closeAlert(id) {
         const alert = document.getElementById(id);
         if (alert) {
@@ -216,81 +208,92 @@
         }
     }
 
-    // Modal Functions
+    // Modal functions
     function openModal(modalId) {
-        document.getElementById(modalId).classList.remove('hidden');
-        document.getElementById(modalId).classList.add('flex');
+        document.querySelectorAll('[id^="modal"]').forEach(modal => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        });
+        
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
     }
 
     function closeModal(modalId) {
-        document.getElementById(modalId).classList.add('hidden');
-        document.getElementById(modalId).classList.remove('flex');
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
     }
 
-    // Event listeners untuk tombol batal
-    document.addEventListener('DOMContentLoaded', function() {
-        // Tombol batal modal tambah
-        const btnBatalTambah = document.getElementById('btnBatalModalKategori');
-        if (btnBatalTambah) {
-            btnBatalTambah.addEventListener('click', function() {
-                closeModal('modalTambahKategori');
-            });
-        }
+    // Setup event listeners
+    function setupEventListeners() {
+        // Form submission
+        document.querySelector('#modalTambahKategori form')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            tambahKategori();
+        });
+        
+        document.querySelector('#modalEditKategori form')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            simpanPerubahanKategori();
+        });
 
-        // Tombol batal modal edit
-        const btnBatalEdit = document.getElementById('btnBatalEditKategori');
-        if (btnBatalEdit) {
-            btnBatalEdit.addEventListener('click', function() {
-                closeModal('modalEditKategori');
-            });
-        }
-    });
+        // Cancel buttons
+        document.getElementById('btnBatalModalKategori')?.addEventListener('click', function() {
+            closeModal('modalTambahKategori');
+        });
 
-    // Close modal when clicking outside
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('fixed') && e.target.classList.contains('inset-0')) {
-            const openModals = document.querySelectorAll('.fixed.inset-0.flex');
-            openModals.forEach(modal => {
-                closeModal(modal.id);
-            });
-        }
-    });
+        document.getElementById('btnBatalEditKategori')?.addEventListener('click', function() {
+            closeModal('modalEditKategori');
+        });
 
-    // Dropdown Functions - Updated to be dynamic like manajemen outlet
+        document.getElementById('btnBatalHapus')?.addEventListener('click', function() {
+            closeModal('modalKonfirmasiHapus');
+            kategoriHapusId = null;
+        });
+        
+        // Confirm delete button
+        document.getElementById('btnKonfirmasiHapus')?.addEventListener('click', konfirmasiHapusKategori);
+
+        // Search input
+        document.getElementById('searchKategori')?.addEventListener('input', function(e) {
+            filterKategories(e.target.value.toLowerCase());
+        });
+    }
+
+    // Toggle dropdown menu
     function toggleDropdown(button) {
         const menu = button.nextElementSibling;
 
-        // Tutup semua dropdown lain
         document.querySelectorAll('.dropdown-menu').forEach(m => {
             if (m !== menu) {
                 m.classList.add('hidden');
-                m.classList.remove('dropdown-up');
-                m.classList.remove('dropdown-down');
+                m.classList.remove('dropdown-up', 'dropdown-down');
             }
         });
 
-        // Toggle dropdown terkait tombol yang diklik
         menu.classList.toggle('hidden');
-
-        // Reset posisi
         menu.classList.remove('dropdown-up', 'dropdown-down');
 
-        // Cek ruang yang tersedia
         const menuRect = menu.getBoundingClientRect();
         const buttonRect = button.getBoundingClientRect();
         const spaceBelow = window.innerHeight - buttonRect.bottom;
         const spaceAbove = buttonRect.top;
 
-        // Atur arah dropdown
         if (spaceBelow < menuRect.height && spaceAbove > menuRect.height) {
-            // Tampilkan ke atas
             menu.classList.add('dropdown-up');
             menu.style.bottom = "100%";
             menu.style.marginBottom = "0.25rem";
             menu.style.top = "auto";
             menu.style.marginTop = "0";
         } else {
-            // Tampilkan ke bawah
             menu.classList.add('dropdown-down');
             menu.style.top = "100%";
             menu.style.marginTop = "0.25rem";
@@ -299,103 +302,350 @@
         }
     }
 
-    // Close all dropdowns when clicking outside
+    // Close dropdowns when clicking outside
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.relative.inline-block')) {
             document.querySelectorAll('.dropdown-menu').forEach(menu => {
                 menu.classList.add('hidden');
-                menu.classList.remove('dropdown-up');
-                menu.classList.remove('dropdown-down');
+                menu.classList.remove('dropdown-up', 'dropdown-down');
             });
         }
     });
 
-    // Edit Kategori Function
-    function openEditModal(kategoriId) {
-        // In a real app, you would fetch the kategori data from your backend
-        const kategoriData = getKategoriData(kategoriId); // Mock function
+    // Load categories from API
+    async function loadKategories() {
+    try {
+        showLoading(true); // Tambahkan indikator loading
         
-        // Fill the edit form
-        document.getElementById('editKategoriId').textContent = kategoriData.id;
-        document.getElementById('editNamaKategori').value = kategoriData.nama;
-        document.getElementById('editDeskripsiKategori').value = kategoriData.deskripsi;
-        
-        openModal('modalEditKategori');
-    }
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
 
-    // Mock function to get kategori data - replace with actual API call
-    function getKategoriData(kategoriId) {
-        const kategories = {
-            1: {
-                id: 1,
-                nama: "Kue",
-                deskripsi: "Berbagai macam jenis kue"
-            },
-            2: {
-                id: 2,
-                nama: "Roti",
-                deskripsi: "Roti segar dan roti tawar"
-            },
-            3: {
-                id: 3,
-                nama: "Minuman",
-                deskripsi: "Minuman segar dan jus"
+        const response = await fetch('/api/categories', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
             }
-        };
-        return kategories[kategoriId];
+        });
+
+        // Handle response error
+        if (!response.ok) {
+            const error = await response.json().catch(() => null);
+            throw new Error(error?.message || `HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+            throw new Error(result.message || 'Invalid response format');
+        }
+
+        renderKategories(result);
+        
+    } catch (error) {
+        console.error('Load Categories Error:', error);
+        showAlert('error', `Gagal memuat kategori: ${error.message}`);
+        
+        // Jika error 401/403, redirect ke login
+        if (error.message.includes('401') || error.message.includes('403')) {
+            window.location.href = '/login';
+        }
+    } finally {
+        showLoading(false); // Sembunyikan indikator loading
+    }
+}
+
+// Fungsi bantu untuk loading indicator
+function showLoading(show) {
+    const loader = document.getElementById('loadingIndicator');
+    if (loader) loader.style.display = show ? 'block' : 'none';
+}
+
+    // Render categories to table
+    function renderKategories(responseData) {
+        const tbody = document.getElementById('kategoriTableBody');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+
+        const kategories = responseData?.data || [];
+    
+    if (kategories.length === 0) {
+        tbody.innerHTML = `
+            <tr class="border-b">
+                <td colspan="5" class="py-4 text-center text-gray-500">
+                    Tidak ada data kategori
+                </td>
+            </tr>
+        `;
+        return;
     }
 
-    // Delete Kategori Function (Updated)
-    function hapusKategori(id) {
-        // Dapatkan data kategori
-        const kategoriData = getKategoriData(id);
-        
-        // Set ID kategori yang akan dihapus
-        kategoriHapusId = id;
-        
-        // Update nama kategori di modal konfirmasi
-        document.getElementById('hapusNamaKategori').textContent = kategoriData.nama;
-        
-        // Tampilkan modal konfirmasi
-        openModal('modalKonfirmasiHapus');
+        kategories.forEach((kategori, index) => {
+            const row = document.createElement('tr');
+            row.className = 'border-b';
+            row.innerHTML = `
+                <td class="py-3">${index + 1}</td>
+                <td class="py-3 font-medium">${kategori.name || '-'}</td>
+                <td class="py-3">${kategori.description || '-'}</td>
+                <td class="py-3">${kategori.total_inventory_quantity || 0} stok</td>
+                <td class="py-3 relative">
+                    <div class="relative inline-block">
+                        <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded">
+                            <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
+                        </button>
+                        <div class="dropdown-menu hidden absolute right-0 z-10 mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-xl text-sm">
+                            <button onclick="openEditModal(${kategori.id})" class="flex items-center w-full px-3 py-2.5 hover:bg-gray-100 text-left rounded-t-lg">
+                                <i data-lucide="pencil" class="w-4 h-4 mr-2 text-gray-500"></i> Edit
+                            </button>
+                            <button onclick="hapusKategori(${kategori.id})" class="flex items-center w-full px-3 py-2.5 hover:bg-gray-100 text-left text-red-600 rounded-b-lg">
+                                <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i> Hapus
+                            </button>
+                        </div>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
     }
-    // Event listeners untuk modal konfirmasi hapus
-    document.addEventListener('DOMContentLoaded', function() {
-        // Tombol batal hapus
-        const btnBatalHapus = document.getElementById('btnBatalHapus');
-        if (btnBatalHapus) {
-            btnBatalHapus.addEventListener('click', function() {
-                closeModal('modalKonfirmasiHapus');
-                kategoriHapusId = null; // Reset ID kategori
+
+    // Filter categories by search term
+    async function filterKategories(searchTerm) {
+        try {
+            const response = await fetch('/api/categories');
+            if (!response.ok) throw new Error('Gagal memuat data kategori');
+            
+            const { data: kategories } = await response.json();
+            
+            const filtered = kategories.filter(kategori => 
+                kategori.name.toLowerCase().includes(searchTerm) || 
+                kategori.description.toLowerCase().includes(searchTerm)
+            );
+            
+            renderKategories({ data: filtered });
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('error', error.message);
+        }
+    }
+
+    // Add new category
+    async function tambahKategori() {
+        try {
+            const nama = document.getElementById('namaKategori').value;
+            const deskripsi = document.getElementById('deskripsiKategori').value;
+            
+            if (!nama) {
+                showAlert('error', 'Nama kategori harus diisi');
+                return;
+            }
+            
+            const response = await fetch('/api/categories', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    name: nama,
+                    description: deskripsi
+                })
             });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Gagal menambahkan kategori');
+            }
+            
+            await response.json();
+            showAlert('success', 'Kategori berhasil ditambahkan');
+            closeModal('modalTambahKategori');
+            loadKategories();
+            
+            document.getElementById('namaKategori').value = '';
+            document.getElementById('deskripsiKategori').value = '';
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('error', error.message);
+        }
+    }
+
+    // Open edit modal with category data
+    async function openEditModal(kategoriId) {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Token tidak ditemukan');
+            }
+
+            const response = await fetch(`/api/categories/${kategoriId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            });
+
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const textResponse = await response.text();
+                throw new Error(`Response bukan JSON: ${textResponse.substring(0, 100)}`);
+            }
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Gagal memuat data kategori');
+            }
+
+            document.getElementById('editKategoriId').value = data.data.id;
+            document.getElementById('editNamaKategori').value = data.data.name;
+            document.getElementById('editDeskripsiKategori').value = data.data.description;
+            
+            openModal('modalEditKategori');
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('error', `Gagal memuat kategori: ${error.message}`);
+            
+            if (error.message.includes('token') || error.message.includes('401')) {
+                window.location.href = '/login';
+            }
+        }
+    }
+
+    // Save category changes
+    async function simpanPerubahanKategori() {
+        const id = document.getElementById('editKategoriId').value;
+        const nama = document.getElementById('editNamaKategori').value;
+        const deskripsi = document.getElementById('editDeskripsiKategori').value;
+        
+        if (!nama || !deskripsi) {
+            showAlert('error', 'Nama dan deskripsi kategori harus diisi');
+            return;
         }
         
-        // Tombol konfirmasi hapus
-        const btnKonfirmasiHapus = document.getElementById('btnKonfirmasiHapus');
-        if (btnKonfirmasiHapus) {
-            btnKonfirmasiHapus.addEventListener('click', function() {
-                // Di sini Anda akan melakukan penghapusan kategori
-                // Misalnya dengan AJAX call ke backend
-                console.log('Menghapus kategori ID:', kategoriHapusId);
-                
-                // Simulasi sukses (ganti dengan kode nyata)
-                setTimeout(() => {
-                    closeModal('modalKonfirmasiHapus');
-                    showAlert('success', 'Kategori berhasil dihapus!');
-                    
-                    // Di aplikasi nyata, Anda mungkin perlu me-refresh data
-                    // atau menghapus baris dari tabel
-                    
-                    // Reset ID kategori
-                    kategoriHapusId = null;
-                }, 500);
+        try {
+            const response = await fetch(`/api/categories/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    name: nama,
+                    description: deskripsi
+                })
             });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Gagal mengupdate kategori');
+            }
+            
+            await response.json();
+            showAlert('success', 'Kategori berhasil diperbarui');
+            closeModal('modalEditKategori');
+            loadKategories();
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('error', error.message);
         }
-    });
+    }
+
+    // Prepare delete confirmation
+    async function hapusKategori(id) {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Token tidak ditemukan');
+            }
+
+            const response = await fetch(`/api/categories/${id}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            });
+
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const textResponse = await response.text();
+                throw new Error(`Response bukan JSON: ${textResponse.substring(0, 100)}`);
+            }
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Gagal memuat data kategori');
+            }
+
+            kategoriHapusId = id;
+            document.getElementById('hapusNamaKategori').textContent = data.data.name;
+            openModal('modalKonfirmasiHapus');
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('error', `Gagal memuat kategori: ${error.message}`);
+            
+            if (error.message.includes('token') || error.message.includes('401')) {
+                window.location.href = '/login';
+            }
+        }
+    }
+
+    // Confirm category deletion
+    async function konfirmasiHapusKategori() {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Token tidak ditemukan');
+            }
+
+            const response = await fetch(`/api/categories/${kategoriHapusId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            });
+
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const textResponse = await response.text();
+                throw new Error(`Response bukan JSON: ${textResponse.substring(0, 100)}`);
+            }
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Gagal menghapus kategori');
+            }
+
+            showAlert('success', 'Kategori berhasil dihapus');
+            closeModal('modalKonfirmasiHapus');
+            loadKategories();
+            kategoriHapusId = null;
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('error', `Gagal menghapus kategori: ${error.message}`);
+        }
+    }
 </script>
 
 <style>
-    /* Animasi untuk alert */
+    /* Animations for alerts */
     @keyframes fadeInUp {
         from {
             opacity: 0;

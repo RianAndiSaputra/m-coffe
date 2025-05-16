@@ -7,8 +7,10 @@ use App\Models\InventoryHistory;
 use App\Models\Outlet;
 use App\Models\Product;
 use App\Traits\ApiResponse;
+use Illuminate\Container\Attributes\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log as FacadesLog;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
@@ -17,7 +19,7 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function indexOld()
     {
         try {
             $products = Product::with('outlets')->get();
@@ -27,10 +29,33 @@ class ProductController extends Controller
         }
     }
 
+    public function index()
+    {
+        try {
+            $products = Product::with([
+                'category:id,name', // Ambil kategori
+                'inventory', // Ambil relasi hasOne inventory
+                'inventory.outlet:id,name' // Ambil outlet terkait inventory
+            ])->get();
+    
+            return response()->json([
+                'status' => true,
+                'message' => 'Daftar produk dengan kategori dan inventory',
+                'data' => $products
+            ]);
+        } catch (\Throwable $th) {
+            \Log::error('Product index error: '.$th->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'Terjadi kesalahan saat memuat data produk'
+            ], 500);
+        }
+    }
+
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function storeOld(Request $request)
     {
 
         if ($request->has('image') && $request->image === null) {
@@ -97,6 +122,91 @@ class ProductController extends Controller
             return $this->successResponse($product, 'Product created successfully');
         } catch (\Throwable $th) {
             DB::rollBack();
+            return $this->errorResponse($th->getMessage());
+        // } catch (\Illuminate\Validation\ValidationException $e) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Validasi gagal',
+        //         'errors' => collect($e->errors())->map(function ($messages, $field) {
+        //             return [
+        //                 'field' => $field,
+        //                 'messages' => $messages
+        //             ];
+        //         })->values()->all()
+        //     ], 422);
+        }
+    }
+
+    public function store(Request $request)
+    {
+
+        if ($request->has('image') && $request->image === null) {
+            $request->request->remove('image');
+        }
+
+        // dd($request->all);
+
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'sku' => 'required|string|max:255',
+                'description' => 'nullable|string|max:255',
+                'price' => 'required|numeric',
+                'category_id' => 'required|exists:categories,id',
+                'image' => 'nullable|sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'is_active' => 'required|boolean',
+                'outlet_ids' => 'required|array',
+                'outlet_ids.*' => 'exists:outlets,id',
+                'quantity' => 'required|numeric',
+                'min_stock' => 'required|numeric',
+            ]);
+
+            DB::beginTransaction();
+            if ($request->hasFile('image')) {
+                $path = $request->file('image')->store('products', 'uploads');
+                $imagePath = $path;
+            } else {
+                $imagePath = null;
+            }
+
+            $product = Product::create([
+                'name' => $request->name,
+                'sku' => $request->sku,
+                'description' => $request->description,
+                'price' => $request->price,
+                'category_id' => $request->category_id,
+                'image' => $imagePath,
+                'is_active' => $request->is_active,
+            ]);
+
+            foreach ($request->outlet_ids as $outletId) {
+                Inventory::create([
+                    'product_id' => $product->id,
+                    'outlet_id' => $outletId,
+                    'quantity' => $request->quantity,
+                    'min_stock' => $request->min_stock,
+                ]);
+                
+                InventoryHistory::create([
+                    'product_id' => $product->id,
+                    'outlet_id' => $outletId,
+                    'quantity_change' => $request->quantity,
+                    'quantity_before' => 0,
+                    'quantity_after' => $request->quantity,
+                    'type' => 'adjustment',
+                    'notes' => 'Stok awal produk baru',
+                    'user_id' => $request->user()->id,
+                ]);
+            }
+
+            DB::commit();
+
+            return $this->successResponse($product, 'Product created successfully');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            if ($th instanceof \Illuminate\Validation\ValidationException) {
+                return $this->errorResponse($th->errors(), 'Validation failed', 422);
+            }
             return $this->errorResponse($th->getMessage());
         // } catch (\Illuminate\Validation\ValidationException $e) {
         //     return response()->json([

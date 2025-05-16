@@ -17,15 +17,21 @@ Route::post('/login', [AuthController::class, 'login']);
         Route::get('/dashboard', function () {
             return view('dashboard.dashboard');
         })->name('dashboard')->middleware('role:admin,manajer');
+
+        Route::get('/per-kategori', function () {
+            return view('dashboard.laporan.per-kategori');
+        })->name('per-kategori')->middleware('role:admin,manajer');
+
+        Route::get('/list-produk', function () {
+            return view('dashboard.produk.produk');
+        })->name('list.produk')->middleware('role:admin,manajer');
     });
 
 Route::get('/outlet', function () {
     return view('dashboard.outlet.daftar-outlet');
 })->name('outlet');
 
-Route::get('/list-produk', function () {
-    return view('dashboard.produk.produk');
-})->name('list.produk');
+
 
 Route::get('/member', function () {
     return view('dashboard.user.member');
@@ -62,10 +68,6 @@ Route::get('/perhari', function () {
 Route::get('/per-item', function () {
     return view('dashboard.laporan.per-item');
 })->name('per-item');
-
-Route::get('/per-kategori', function () {
-    return view('dashboard.laporan.per-kategori');
-})->name('per-kategori');
 
 Route::get('/per-member', function () {
     return view('dashboard.laporan.per-member');
