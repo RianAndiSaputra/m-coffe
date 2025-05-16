@@ -1,22 +1,29 @@
-<!-- History Modal -->
 <div id="historyModal" class="fixed inset-0 z-50 hidden">
+    <!-- Overlay -->
     <div class="absolute w-full h-full bg-gray-900 opacity-50" onclick="tutupModal('historyModal')"></div>
-    <div class="bg-white w-11/12 md:max-w-6xl mx-auto rounded shadow-lg z-50 overflow-y-auto relative top-1/2 transform -translate-y-1/2">
-        <div class="p-8 text-[16px]">
-            <!-- Header -->
-            <div class="flex justify-between items-center mb-6">
-                <div>
-                    <h2 class="text-2xl font-bold">Riwayat Transaksi</h2>
-                    <p class="text-base text-gray-600">Lihat riwayat transaksi berdasarkan tanggal</p>
-                </div>
-                <button onclick="tutupModal('historyModal')" class="text-gray-500 hover:text-red-500 text-2xl">✕</button>
-            </div>
 
+    <!-- Modal Box -->
+    <div class="bg-white w-[95%] md:w-11/12 md:max-w-6xl mx-auto rounded shadow-lg z-50 relative mt-10 mb-10 max-h-[90vh] flex flex-col">
+        
+        <!-- Header (Fixed inside modal) -->
+        <div class="p-4 md:p-6 border-b sticky top-0 bg-white z-10">
+            <div class="flex justify-between items-start md:items-center flex-col md:flex-row gap-2">
+                <div>
+                    <h2 class="text-xl md:text-2xl font-bold">Riwayat Transaksi</h2>
+                    <p class="text-sm md:text-base text-gray-600">Lihat riwayat transaksi berdasarkan tanggal</p>
+                </div>
+                <button onclick="tutupModal('historyModal')" class="text-gray-500 hover:text-red-500 text-xl md:text-2xl">✕</button>
+            </div>
+        </div>
+
+        <!-- Body Scrollable -->
+        <div class="overflow-y-auto px-4 md:px-8 py-6 flex-1">
             <!-- Date Range & Search -->
             <div class="flex flex-col md:flex-row justify-between gap-4 mb-6">
                 <div class="relative w-full md:w-1/2">
                     <input id="dateRange" type="text" class="border p-3 rounded w-full pl-12 text-base" placeholder="Pilih rentang tanggal" readonly />
                     <div class="absolute left-4 top-3.5 text-gray-400">
+                        <!-- Calendar Icon -->
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
@@ -32,6 +39,7 @@
                         oninput="filterTransaksi()"
                     />
                     <div class="absolute left-4 top-3.5 text-gray-400">
+                        <!-- Search Icon -->
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
@@ -39,8 +47,8 @@
                 </div>
             </div>
 
-            <!-- Total Summary -->
-            <div class="bg-orange-50 p-4 rounded mb-6 flex justify-between items-center text-base">
+            <!-- Summary -->
+            <div class="bg-orange-50 p-4 rounded mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
                 <div id="summaryText">
                     <span class="font-semibold text-lg">Total Transaksi</span><br>
                     <span class="text-gray-500 text-sm">Memuat data...</span>
@@ -48,9 +56,9 @@
                 <div class="text-orange-600 font-bold text-2xl" id="totalAmount">Rp 0</div>
             </div>
 
-            <!-- Transaction Table -->
+            <!-- Table -->
             <div class="overflow-auto border border-gray-200 rounded-md">
-                <table class="w-full text-base text-left">
+                <table class="w-full text-sm md:text-base text-left">
                     <thead class="bg-gray-100 text-gray-700">
                         <tr>
                             <th class="p-3">No</th>
@@ -70,15 +78,16 @@
                     </tbody>
                 </table>
             </div>
+        </div>
 
-            <!-- Close Button -->
-            <div class="flex justify-end pt-6">
+        <!-- Footer (Fixed inside modal) -->
+        <div class="border-t p-4 md:p-6 bg-white sticky bottom-0 z-10">
+            <div class="flex justify-end">
                 <button onclick="tutupModal('historyModal')" class="px-5 py-3 text-base bg-orange-500 text-white rounded hover:bg-orange-600 transition">Tutup</button>
             </div>
-
-            @include('partials.pos.modal.modal-history-transaksi')
-        
         </div>
+
+        @include('partials.pos.modal.modal-history-transaksi')
     </div>
 </div>
 
