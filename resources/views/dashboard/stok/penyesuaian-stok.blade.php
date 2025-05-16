@@ -91,31 +91,124 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Set default date in the date picker to today
+        // Set default date
         const today = new Date();
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
-        document.getElementById('dateSelector').value = `${year}-${month}-${day}`;
-        
-        // Load inventory data for outlet ID 1 by default
-        fetchInventoryHistory(1);
-        
-        // Add event listener to date selector
-        document.getElementById('dateSelector').addEventListener('change', function() {
-            fetchInventoryHistory(1);
-        });
-        
-        // Add event listener to search input
-        document.getElementById('searchInput').addEventListener('input', function() {
-            filterInventoryTable(this.value);
-        });
+        document.getElementById('dateSelector').value = today.toISOString().split('T')[0];
+
+        // Fetch pertama kali dengan outlet terpilih
+        fetchInventoryHistory(getSelectedOutletId());
+
+        // Jika user ganti tanggal
+        document.getElementById('dateSelector')
+            .addEventListener('change', () => fetchInventoryHistory(getSelectedOutletId()));
+
+        // Jika ada kotak pencarian
+        document.getElementById('searchInput')
+            .addEventListener('input', function() {
+                filterInventoryTable(this.value);
+            });
+
+        // Hubungkan perubahan outlet
+        connectOutletSelectionToInventory();
     });
-    
+
+    async function loadProductData(outletId) {
+        try {
+            // Sembunyikan dropdown outlet setelah memilih
+            const outletDropdown = document.getElementById('outletDropdown');
+            if (outletDropdown) outletDropdown.classList.add('hidden');
+            
+            // Ensure we have a valid numeric outletId
+            outletId = parseInt(outletId, 10);
+            if (isNaN(outletId) || outletId <= 0) {
+                console.error('Invalid outlet ID:', outletId);
+                showAlert('error', 'ID Outlet tidak valid');
+                return;
+            }
+            
+            // Save the outlet ID to localStorage
+            localStorage.setItem('selectedOutletId', outletId.toString());
+            
+            // Fetch inventory data for this outlet
+            fetchInventoryHistory(outletId);
+            
+        } catch (error) {
+            console.error('Error loading product data:', error);
+            showAlert('error', 'Gagal memuat data produk');
+        }
+    }
+
+    function connectOutletSelectionToInventory() {
+        // Jika ada dropdown daftar outlet
+        const list = document.getElementById('outletListContainer');
+        if (list) {
+            list.addEventListener('click', e => {
+                let li = e.target;
+                while (li && li.tagName !== 'LI') li = li.parentElement;
+                if (!li) return;
+                
+                // Make sure we're getting a numeric value
+                const newId = parseInt(li.getAttribute('data-outlet-id'), 10);
+                
+                // Verify we have a valid number before saving to localStorage
+                if (!isNaN(newId) && newId > 0) {
+                    localStorage.setItem('selectedOutletId', newId.toString());
+                    
+                    // Log for debugging
+                    console.log('Selected outlet ID:', newId);
+                    
+                    // beri sedikit delay kalau ada animasi dropdown
+                    setTimeout(() => {
+                        fetchInventoryHistory(newId); // Pass the ID directly
+                    }, 100);
+                } else {
+                    console.error('Invalid outlet ID:', li.getAttribute('data-outlet-id'));
+                }
+            });
+        }
+
+        // Kalau outlet berubah di tab lain
+        window.addEventListener('storage', e => {
+            if (e.key === 'selectedOutletId') {
+                fetchInventoryHistory(getSelectedOutletId());
+            }
+        });
+    }
+
+    function getSelectedOutletId() {
+        // Cek URL parameter dulu
+        const urlParams = new URLSearchParams(window.location.search);
+        const outletIdFromUrl = urlParams.get('outlet_id');
+        
+        if (outletIdFromUrl) {
+            const parsed = parseInt(outletIdFromUrl, 10);
+            if (!isNaN(parsed)) return parsed;
+        }
+
+        // Kalau tidak ada, ambil dari localStorage
+        const saved = localStorage.getItem('selectedOutletId');
+        if (saved) {
+            const parsed = parseInt(saved, 10);
+            if (!isNaN(parsed)) return parsed;
+        }
+
+        // Default outlet 1
+        return 1;
+    }
+
     //Function to fetch inventory history for a specific outlet
     function fetchInventoryHistory(outletId) {
         showLoading(true);
         clearInventoryTable();
+        
+        // Ensure outletId is a valid number
+        outletId = parseInt(outletId, 10);
+        if (!outletId || isNaN(outletId) || outletId <= 0) {
+            console.error('Invalid outlet ID for API request:', outletId);
+            showAlert('error', 'ID Outlet tidak valid');
+            showLoading(false);
+            return;
+        }
         
         // Get selected date from the date picker
         const selectedDate = document.getElementById('dateSelector').value;
@@ -123,7 +216,11 @@
         // Tampilkan nama outlet di UI
         document.getElementById('outletName').textContent = `Menampilkan stok untuk : Outlet ${outletId}`;
         
-        fetch(`/api/products/outlet/${outletId}?date=${selectedDate}`, {
+        // Fix the URL format - ensure outletId parameter is separate from the date
+        const apiUrl = `/api/products/outlet/${outletId}?date=${selectedDate}`;
+        console.log('Fetching from URL:', apiUrl);
+        
+        fetch(apiUrl, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 'Accept': 'application/json'
@@ -131,7 +228,7 @@
         })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
                 }
                 return response.json();
             })
@@ -162,6 +259,7 @@
 
     // Format data dari API ke format yang dibutuhkan untuk tabel
     function formatInventoryData(products, outletId) {
+        outletId = parseInt(outletId, 10);
         let inventoryRecords = [];
         
         products.forEach(product => {
@@ -323,13 +421,13 @@
             window.lucide.createIcons();
         }
     }
-    
+
     // Function to clear inventory table
     function clearInventoryTable() {
         const tableBody = document.getElementById('inventoryTableBody');
         tableBody.innerHTML = '';
     }
-    
+
     // Function to show a message when no data is available
     function showNoDataMessage() {
         const tableBody = document.getElementById('inventoryTableBody');
@@ -341,7 +439,7 @@
             </tr>
         `;
     }
-    
+
     // Function to toggle loading indicator
     function showLoading(isLoading) {
         const loading = document.getElementById('loading');
@@ -351,7 +449,7 @@
             loading.classList.add('hidden');
         }
     }
-    
+
     // Function to filter inventory table based on search term
     function filterInventoryTable(searchTerm) {
         searchTerm = searchTerm.toLowerCase().trim();
@@ -461,38 +559,38 @@
     }
 
     // Fungsi untuk membuka modal penyesuaian
-function openModalAdjust(productId, sku, produk, outlet, stok) {
-    // Convert productId to number to ensure it's not a string
-    productId = parseInt(productId);
-    
-    const modal = document.getElementById('modalAdjustStock');
-    
-    // For debugging
-    console.log("Opening modal with product ID:", productId, "type:", typeof productId);
-    
-    // Store product ID in a hidden input
-    // Add this hidden input if you haven't already
-    if (!document.getElementById('adjustProductId')) {
-        const hiddenInput = document.createElement('input');
-        hiddenInput.type = 'hidden';
-        hiddenInput.id = 'adjustProductId';
-        modal.querySelector('.p-6').appendChild(hiddenInput);
+    function openModalAdjust(productId, sku, produk, outlet, stok) {
+        // Convert productId to number to ensure it's not a string
+        productId = parseInt(productId, 10);
+        
+        const modal = document.getElementById('modalAdjustStock');
+        
+        // For debugging
+        console.log("Opening modal with product ID:", productId, "type:", typeof productId);
+        
+        // Store product ID in a hidden input
+        // Add this hidden input if you haven't already
+        if (!document.getElementById('adjustProductId')) {
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.id = 'adjustProductId';
+            modal.querySelector('.p-6').appendChild(hiddenInput);
+        }
+        
+        document.getElementById('adjustProductId').value = productId;
+        
+        // Rest of your existing code
+        document.getElementById('adjustSku').textContent = sku;
+        document.getElementById('adjustProduk').textContent = produk;
+        document.getElementById('adjustOutlet').textContent = outlet;
+        document.getElementById('stokSaatIni').textContent = stok;
+        document.getElementById('jumlahAdjust').value = '';
+        document.getElementById('keteranganAdjust').value = '';
+        
+        // Tampilkan modal
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
     }
-    
-    document.getElementById('adjustProductId').value = productId;
-    
-    // Rest of your existing code
-    document.getElementById('adjustSku').textContent = sku;
-    document.getElementById('adjustProduk').textContent = produk;
-    document.getElementById('adjustOutlet').textContent = outlet;
-    document.getElementById('stokSaatIni').textContent = stok;
-    document.getElementById('jumlahAdjust').value = '';
-    document.getElementById('keteranganAdjust').value = '';
-    
-    // Tampilkan modal
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-}
 
     // Fungsi untuk menutup modal penyesuaian
     function closeModalAdjust() {
@@ -520,10 +618,10 @@ function openModalAdjust(productId, sku, produk, outlet, stok) {
         }
         
         // Ambil data produk dari form
-        const outletId = localStorage.getItem('activeOutlet') || 1;
-        const productId = parseInt(document.getElementById('adjustProductId').value)
+        const outletId = getSelectedOutletId(); // Use the reliable getSelectedOutletId function
+        const productId = parseInt(document.getElementById('adjustProductId').value, 10);
         const sku = document.getElementById('adjustSku').textContent;
-        const stokSaatIni = parseInt(document.getElementById('stokSaatIni').textContent);
+        const stokSaatIni = parseInt(document.getElementById('stokSaatIni').textContent, 10);
 
         console.log("Product ID being sent:", productId);
         console.log("Outlet ID:", outletId);
@@ -534,13 +632,20 @@ function openModalAdjust(productId, sku, produk, outlet, stok) {
             console.error("Invalid product ID:", document.getElementById('adjustProductId').value);
             return;
         }
+        
+        if (isNaN(outletId) || outletId <= 0) {
+            showAlert('error', 'ID Outlet tidak valid');
+            console.error("Invalid outlet ID:", outletId);
+            return;
+        }
+        
         // Tampilkan loading
         showLoading(true);
         
         // Buat objek data untuk dikirim ke API
         const requestData = {
             product_id: productId,
-            outlet_id: outletId, // Gunakan ID outlet yang sedang aktif
+            outlet_id: outletId,
             quantity_before: stokSaatIni,
             quantity_after: stokSaatIni + jumlah,
             quantity_change: jumlah,
@@ -562,7 +667,7 @@ function openModalAdjust(productId, sku, produk, outlet, stok) {
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
             }
             return response.json();
         })
@@ -576,7 +681,6 @@ function openModalAdjust(productId, sku, produk, outlet, stok) {
                 showAlert('success', `Berhasil ${action} stok sebesar ${Math.abs(jumlah)}`);
                 
                 // Refresh data inventori
-                const outletId = 1; // Gunakan ID outlet yang sedang aktif
                 fetchInventoryHistory(outletId);
             } else {
                 showAlert('error', data.message || 'Gagal menyimpan penyesuaian stok');

@@ -133,6 +133,159 @@
     let currentOutletName = '';
     let currentDate = '{{ date("Y-m-d") }}';
 
+    async function loadProductData(outletId) {
+        try {
+            // Sembunyikan dropdown outlet setelah memilih
+            const outletDropdown = document.getElementById('outletDropdown');
+            if (outletDropdown) outletDropdown.classList.add('hidden');
+            
+            // Ambil tanggal terpilih atau gunakan hari ini
+            const datePicker = document.getElementById('reportDateInput');
+            const selectedDate = datePicker ? datePicker.value : new Date().toISOString().split('T')[0];
+            
+            // Panggil fungsi yang sudah ada untuk memuat data inventory
+            fetchInventoryData(selectedDate);
+            
+            // Jika perlu menyimpan outlet yang dipilih
+            localStorage.setItem('selectedOutletId', outletId);
+            currentOutletId = outletId;
+            
+        } catch (error) {
+            console.error('Error loading product data:', error);
+            showAlert('error', 'Gagal memuat data produk');
+        }
+    }
+
+    // Fungsi standar untuk mendapatkan ID outlet yang dipilih (mirip dengan script riwayat stok)
+    function getSelectedOutletId() {
+        // Periksa URL parameters terlebih dahulu
+        const urlParams = new URLSearchParams(window.location.search);
+        const outletIdFromUrl = urlParams.get('outlet_id');
+        
+        if (outletIdFromUrl) {
+            return outletIdFromUrl;
+        }
+        
+        // Kemudian periksa localStorage
+        const savedOutletId = localStorage.getItem('selectedOutletId');
+        
+        if (savedOutletId) {
+            return savedOutletId;
+        }
+        
+        // Default ke outlet ID 1 jika tidak ditemukan
+        return 1;
+    }
+
+    function connectOutletSelectionToApproval() {
+    // Mendengarkan perubahan pada localStorage
+    window.addEventListener('storage', function(event) {
+        if (event.key === 'selectedOutletId') {
+            // Perbarui ID outlet saat ini
+            const newOutletId = event.newValue || 1;
+            currentOutletId = newOutletId;
+            
+            // Perbarui nama outlet jika perlu
+            updateOutletNameDisplay(newOutletId);
+            
+            // Muat ulang data
+            fetchInventoryData();
+        }
+    });
+    
+    // Mendengarkan klik pada elemen outlet di dropdown
+    const outletListContainer = document.getElementById('outletListContainer');
+    if (outletListContainer) {
+        outletListContainer.addEventListener('click', function(event) {
+            // Cari elemen li yang diklik
+            let targetElement = event.target;
+            while (targetElement && targetElement !== outletListContainer && targetElement.tagName !== 'LI') {
+                targetElement = targetElement.parentElement;
+            }
+            
+            // Jika kita mengklik item daftar outlet
+            if (targetElement && targetElement.tagName === 'LI') {
+                // Perbarui setelah penundaan singkat untuk memungkinkan kode yang ada selesai
+                setTimeout(() => {
+                    const newOutletId = getSelectedOutletId();
+                    currentOutletId = newOutletId;
+                    
+                    // Perbarui nama outlet jika perlu
+                    updateOutletNameDisplay(newOutletId);
+                    
+                    // Muat ulang data
+                    fetchInventoryData();
+                }, 100);
+            }
+        });
+    }
+    
+    // Tetap gunakan event outletChanged yang sudah ada sebagai metode ketiga untuk deteksi
+    window.addEventListener('outletChanged', function(e) {
+        console.log('Outlet changed event received in approval page:', e.detail);
+        if (e.detail && e.detail.outletId) {
+            // Perbarui outlet saat ini
+            currentOutletId = e.detail.outletId;
+            currentOutletName = e.detail.outletName;
+            
+            // Perbarui URL tanpa reload halaman
+            const url = new URL(window.location.href);
+            url.searchParams.set('outlet_id', currentOutletId);
+            url.searchParams.set('outlet_name', currentOutletName);
+            window.history.pushState({}, '', url);
+            
+            // Perbarui UI
+            document.getElementById('outletName').textContent = currentOutletName;
+            
+            // Ambil data baru
+            fetchInventoryData();
+        }
+    });
+}
+
+// Fungsi untuk memperbarui tampilan nama outlet
+async function updateOutletNameDisplay(outletId) {
+    try {
+        // Coba dapatkan nama outlet dari event atau localStorage dulu
+        const storedOutlet = localStorage.getItem('activeOutlet');
+        if (storedOutlet) {
+            try {
+                const parsed = JSON.parse(storedOutlet);
+                if (parsed.id == outletId) {
+                    currentOutletName = parsed.name;
+                    document.getElementById('outletName').textContent = currentOutletName;
+                    return;
+                }
+            } catch (e) {
+                console.error('Error parsing stored outlet', e);
+            }
+        }
+        
+        // Jika gagal, ambil dari API
+        const response = await fetch(`http://127.0.0.1:8000/api/outlets/${outletId}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Accept': 'application/json'
+            }
+        });
+        
+        const { data, success } = await response.json();
+        
+        if (success && data) {
+            currentOutletName = data.name;
+            document.getElementById('outletName').textContent = currentOutletName;
+            
+            // Perbarui localStorage dengan informasi terbaru
+            localStorage.setItem('activeOutlet', JSON.stringify({
+                id: outletId,
+                name: data.name
+            }));
+        }
+    } catch (error) {
+        console.error('Failed to fetch outlet details:', error);
+    }
+}
+
     function getOutletFromURL() {
         const urlParams = new URLSearchParams(window.location.search);
         const outletId = urlParams.get('outlet_id');
@@ -176,9 +329,19 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         // Inisialisasi outlet dari URL atau localStorage
-        const outlet = getActiveOutlet();
-        currentOutletId = outlet.id;
-        currentOutletName = outlet.name;
+        const outletId = getSelectedOutletId();
+        currentOutletId = outletId;
+
+        updateOutletNameDisplay(outletId);
+
+        document.getElementById('modalCancel').addEventListener('click', hideConfirmationModal);
+    
+    document.getElementById('modalConfirm').addEventListener('click', function() {
+        hideConfirmationModal();
+        if (currentApprovalId !== null && currentApprovalAction !== null) {
+            processApproval(currentApprovalId, currentApprovalAction);
+        }
+    });
         
         // Update UI dengan outlet yang dipilih
         document.getElementById('outletName').textContent = currentOutletName;
@@ -202,6 +365,8 @@
                 
                 // Update UI
                 document.getElementById('outletName').textContent = currentOutletName;
+
+                connectOutletSelectionToApproval();
                 
                 // Fetch data baru
                 fetchInventoryData();
@@ -404,12 +569,12 @@
     // Fetch inventory adjustment data from API
     async function fetchInventoryData() {
         // Get active outlet from localStorage first
-        const outlet = getActiveOutlet();
-        currentOutletId = outlet.id;
-        currentOutletName = outlet.name;
+        currentOutletId = getSelectedOutletId();
         
         // Update outlet name display
-        document.getElementById('outletName').textContent = currentOutletName;
+        // document.getElementById('outletName').textContent = currentOutletName;
+        updateOutletNameDisplay(currentOutletId);
+
         
         // Show loading state
         document.getElementById('loadingState').classList.remove('hidden');
