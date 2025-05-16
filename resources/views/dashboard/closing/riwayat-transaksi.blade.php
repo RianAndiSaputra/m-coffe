@@ -223,48 +223,63 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Fungsi untuk fetch data transaksi
 async function fetchTransactionHistory(date = null) {
-    try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            window.location.href = '/login';
-            return;
-        }
-
-        let url = '/api/orders/history';
-        if (date) {
-            url += `?date=${date}`;
-        }
-
-        const response = await fetch(url, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Accept': 'application/json'
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login';
+                return;
             }
-        });
 
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || 'Gagal memuat riwayat transaksi');
+            // Format parameter tanggal seperti di versi lama
+            const params = new URLSearchParams();
+            if (date) {
+                // Gunakan tanggal yang sama untuk date_from dan date_to
+                // untuk menampilkan transaksi pada hari yang dipilih saja
+                params.append('date_from', date);
+                params.append('date_to', date);
+            }
+            
+            // Fetch data dari endpoint dengan token authorization
+            const response = await fetch(`/api/orders/history?${params.toString()}`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (!response.ok) {
+                if (response.status === 401) {
+                    // Jika unauthorized, redirect ke login
+                    window.location.href = '/login';
+                    return;
+                }
+                throw new Error('Gagal mengambil data');
+            }
+            
+            const result = await response.json();
+            
+            // Pastikan kita mengakses data.orders dari response
+            if (result.data && Array.isArray(result.data.orders)) {
+                // Store in global cache
+                transactionsCache = result.data.orders;
+                renderTransactionData(result.data.orders);
+            } else if (result.orders) {
+                // Alternatif jika struktur data berbeda
+                transactionsCache = result.orders;
+                renderTransactionData(result.orders);
+            } else {
+                // Jika tidak ada data
+                transactionsCache = [];
+                renderTransactionData([]);
+            }
+            
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('error', error.message);
         }
-
-        const result = await response.json();
-        
-        // Pastikan kita mengakses data.orders dari response
-        if (result.data && Array.isArray(result.data.orders)) {
-            // Store in global cache
-            transactionsCache = result.data.orders;
-            renderTransactionData(result.data.orders);
-        } else {
-            // Jika tidak ada data
-            transactionsCache = [];
-            renderTransactionData([]);
-        }
-        
-    } catch (error) {
-        console.error('Error:', error);
-        showAlert('error', error.message);
     }
-}
+
 
 // Fungsi untuk render data ke tabel
 function renderTransactionData(transactions) {
