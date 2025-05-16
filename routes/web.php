@@ -11,7 +11,7 @@ Route::get('/', function () {
     return view('auth.login');
 })->name('login');
 
-Route::post('/login', [AuthController::class, 'login']);
+// Route::post('/login', [AuthController::class, 'login']);
     
     Route::middleware('auth')->group(function(){
         Route::get('/dashboard', function () {

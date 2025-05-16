@@ -110,7 +110,8 @@ class AuthController extends Controller
                     'token' => $token,
                     'user' => $user,
                     'role' => $user->role,
-                    'outlet' => $user->outlet_id,
+                    'outlet' => $user->outlet,
+                    'shift' => $user->lastShift,
                 ]
             ]);
         }

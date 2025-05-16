@@ -209,50 +209,122 @@
     </div>
 
     <script>
-        // Global variables to store cart data
-        let cartItems = [];
+        // Global variables
         let selectedMemberId = null;
         let outletId = null;
         let shiftId = null;
         let currentTotal = 0;
+
+        // Initialize cart if not present
+        if (!window.cart) {
+            window.cart = [];
+        }
 
         // Initialize when document is ready
         document.addEventListener("DOMContentLoaded", () => {
             loadMembers();
         });
 
-        // Function to show payment modal with order data
-        function showPaymentModal(total) {
+        // Function to add item to cart
+        function addToCart(product) {
+            const existingItem = window.cart.find(item => item.id === product.id);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                window.cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    quantity: 1,
+                    discount: 0
+                });
+            }
+            updateCartUI();
+        }
+
+        // Function to update item quantity in cart
+        function updateCartItem(productId, quantity) {
+            const item = window.cart.find(item => item.id === productId);
+            if (item) {
+                item.quantity = quantity;
+                if (item.quantity <= 0) {
+                    removeCartItem(productId);
+                }
+            }
+            updateCartUI();
+        }
+
+        // Function to remove item from cart
+        function removeCartItem(productId) {
+            window.cart = window.cart.filter(item => item.id !== productId);
+            updateCartUI();
+        }
+
+        // Function to clear the cart
+        function clearCart() {
+            window.cart = [];
+            updateCartUI();
+        }
+
+        // Function to update cart UI (you can customize this to update cart display)
+        function updateCartUI() {
+            // Example: update total and item count in payment modal if open
+            const total = window.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            const itemCount = window.cart.reduce((sum, item) => sum + item.quantity, 0);
             currentTotal = total;
 
-            // Get cart data from the POS system
-            const cart = window.cart || [];
-            const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+            // Update payment modal if visible
+            const paymentModal = document.getElementById("paymentModal");
+            if (paymentModal && !paymentModal.classList.contains("hidden")) {
+                document.getElementById("paymentTotal").textContent = formatRupiah(total);
+                document.getElementById("itemCount").textContent = `${itemCount} item dalam transaksi`;
+            }
 
+            // You can also update cart display elsewhere if needed
+        }
+
+        // Function to validate cart before payment
+        function validateCart() {
+            if (!window.cart || window.cart.length === 0) {
+                Swal.fire({
+                    position: "top-end",
+                    icon: "error",
+                    title: "Keranjang belanja kosong",
+                    text: "Silakan tambahkan produk sebelum melakukan pembayaran",
+                    showConfirmButton: false,
+                    timer: 3000,
+                    toast: true
+                });
+                return false;
+            }
+            return true;
+        }
+
+               // Function untuk menampilkan modal pembayaran
+        function showPaymentModal(total) {
+            currentTotal = total;
+            
+            // Ambil data keranjang dari window.cart yang ada di POS utama
+            const cart = window.cart || [];
+            
+            // Hitung total item
+            const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+            
             // Update UI
             document.getElementById("paymentTotal").textContent = formatRupiah(total);
             document.getElementById("itemCount").textContent = `${itemCount} item dalam transaksi`;
-
-            // Store cart items for processing
-            cartItems = cart.map((item) => ({
-                product_id: item.id,
-                quantity: item.quantity,
-                price: item.price,
-                discount: item.discount || 0,
-            }));
-
+            
             // Reset form
             document.getElementById("cashReceived").value = "";
             document.getElementById("selectedMemberText").textContent = "Pilih Member";
             document.getElementById("orderNotes").value = "";
             selectedMemberId = null;
-
-            // Show modal
+            
+            // Tampilkan modal
             document.getElementById("paymentModal").classList.remove("hidden");
-
-            // Initialize the cash input section
             toggleCashInput();
         }
+
 
         // Function to load members from API
         function loadMembers() {
@@ -285,9 +357,9 @@
                         noMemberItem.className = "px-3 py-2 hover:bg-orange-50 cursor-pointer";
                         noMemberItem.onclick = () => selectMember(null, "Tanpa Member");
                         noMemberItem.innerHTML = `
-                    <p class="font-medium">Tanpa Member</p>
-                    <p class="text-xs text-gray-500">Tidak menggunakan member</p>
-                `;
+                            <p class="font-medium">Tanpa Member</p>
+                            <p class="text-xs text-gray-500">Tidak menggunakan member</p>
+                        `;
                         memberList.appendChild(noMemberItem);
 
                         // Add all members from API
@@ -296,9 +368,9 @@
                             item.className = "px-3 py-2 hover:bg-orange-50 cursor-pointer";
                             item.onclick = () => selectMember(member.id, member.name);
                             item.innerHTML = `
-                        <p class="font-medium">${member.name}</p>
-                        <p class="text-xs text-gray-500">${member.member_code || member.phone || ""}</p>
-                    `;
+                                <p class="font-medium">${member.name}</p>
+                                <p class="text-xs text-gray-500">${member.member_code || member.phone || ""}</p>
+                            `;
                             memberList.appendChild(item);
                         });
                     }
@@ -308,19 +380,19 @@
                     // Fallback with sample data if API fails
                     const memberList = document.getElementById("memberList");
                     memberList.innerHTML = `
-                <li onclick="selectMember(null, 'Tanpa Member')" class="px-3 py-2 hover:bg-orange-50 cursor-pointer">
-                    <p class="font-medium">Tanpa Member</p>
-                    <p class="text-xs text-gray-500">Tidak menggunakan member</p>
-                </li>
-                <li onclick="selectMember(1, 'Andi Pratama')" class="px-3 py-2 hover:bg-orange-50 cursor-pointer">
-                    <p class="font-medium">Andi Pratama</p>
-                    <p class="text-xs text-gray-500">M001</p>
-                </li>
-                <li onclick="selectMember(2, 'Budi Santoso')" class="px-3 py-2 hover:bg-orange-50 cursor-pointer">
-                    <p class="font-medium">Budi Santoso</p>
-                    <p class="text-xs text-gray-500">M002</p>
-                </li>
-            `;
+                        <li onclick="selectMember(null, 'Tanpa Member')" class="px-3 py-2 hover:bg-orange-50 cursor-pointer">
+                            <p class="font-medium">Tanpa Member</p>
+                            <p class="text-xs text-gray-500">Tidak menggunakan member</p>
+                        </li>
+                        <li onclick="selectMember(1, 'Andi Pratama')" class="px-3 py-2 hover:bg-orange-50 cursor-pointer">
+                            <p class="font-medium">Andi Pratama</p>
+                            <p class="text-xs text-gray-500">M001</p>
+                        </li>
+                        <li onclick="selectMember(2, 'Budi Santoso')" class="px-3 py-2 hover:bg-orange-50 cursor-pointer">
+                            <p class="font-medium">Budi Santoso</p>
+                            <p class="text-xs text-gray-500">M002</p>
+                        </li>
+                    `;
                 });
         }
 
@@ -380,138 +452,95 @@
             }
         }
 
-        // Process payment
-        function processPayment() {
-            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-            let totalPaid = currentTotal; // Default for QRIS and transfer
-
-            // Re-sync cartItems from current window.cart to ensure latest cart state
-            const currentCart = window.cart || [];
-            cartItems = currentCart.map((item) => ({
-                product_id: item.id,
-                quantity: item.quantity,
-                price: item.price,
-                discount: item.discount !== undefined ? item.discount : 0,
-            }));
-
-            // Validate cart items before proceeding
-            if (!cartItems || cartItems.length === 0) {
-                showErrorAlert("Keranjang belanja kosong, silakan tambahkan produk sebelum melakukan pembayaran");
-                return;
-            }
-
-            // Validate cash payment
-            if (paymentMethod === "cash") {
-                const cashReceived = parseInt(document.getElementById("cashReceived").value) || 0;
-                if (cashReceived < currentTotal) {
-                    showErrorAlert("Jumlah uang tidak mencukupi");
-                    return;
+        // Function untuk memproses pembayaran
+        async function processPayment() {
+            try {
+                const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+                let totalPaid = currentTotal;
+                
+                // Validasi metode tunai
+                if (paymentMethod === "cash") {
+                    const cashReceived = parseInt(document.getElementById("cashReceived").value) || 0;
+                    if (cashReceived < currentTotal) {
+                        throw new Error("Jumlah uang tidak mencukupi");
+                    }
+                    totalPaid = cashReceived;
                 }
-                totalPaid = cashReceived;
-            }
-
-            // Get outlet and shift ID (you may need to get these dynamically)
-            outletId = 1;
-            shiftId = 1;
-
-            // Prepare order data
-            const orderData = {
-                outlet_id: outletId,
-                shift_id: shiftId,
-                items: cartItems,
-                payment_method: paymentMethod,
-                notes: document.getElementById("orderNotes").value,
-                total_paid: totalPaid,
-                total_amount: currentTotal,
-                tax: 0,
-                discount: 0,
-                member_id: selectedMemberId,
-            };
-
-            console.log("Order data to be sent:", orderData);
-
-            // Call API to create order
-            const token = localStorage.getItem("token");
-            if (!token) {
-                showErrorAlert("Token tidak ditemukan, silakan login kembali");
-                return;
-            }
-
-            fetch("/api/orders", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                    Accept: "application/json",
-                },
-                body: JSON.stringify(orderData),
-            })
-                .then(async (response) => {
-                    // First check if response is HTML (likely error page)
-                    const contentType = response.headers.get("content-type");
-                    if (contentType && contentType.indexOf("application/json") === -1) {
-                        const text = await response.text();
-                        if (text.startsWith("<!DOCTYPE html>")) {
-                            throw new Error("Server returned HTML instead of JSON");
-                        }
-                        throw new Error("Invalid response format");
-                    }
-
-                    return response.json();
-                })
-                .then((data) => {
-                    if (data.success) {
-                        // Hide payment modal
-                        closeModal("paymentModal");
-
-                        // Set invoice number in success modal
-                        document.getElementById("invoiceNumber").textContent = `Invoice: ${
-                            data.data.order_number || data.data.invoice_number || ""
-                        }`;
-
-                        // Show success modal
-                        document.getElementById("successModal").classList.remove("hidden");
-
-                        // Show success alert
-                        Swal.fire({
-                            position: "top-end",
-                            icon: "success",
-                            title: "Pembayaran Berhasil",
-                            showConfirmButton: false,
-                            timer: 3000,
-                            background: "#FFA500",
-                            iconColor: "#fff",
-                            toast: true,
-                        });
-                    } else {
-                        // Show error message
-                        showErrorAlert(data.message || "Terjadi kesalahan saat memproses pembayaran");
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error processing payment:", error);
-                    showErrorAlert("Terjadi kesalahan saat memproses pembayaran");
+                
+                // Ambil data keranjang terbaru
+                const currentCart = window.cart || [];
+                if (currentCart.length === 0) {
+                    throw new Error("Keranjang belanja kosong");
+                }
+                
+                // Siapkan data untuk dikirim ke backend
+                const orderData = {
+                    outlet_id: outletId,
+                    shift_id: shiftId,
+                    payment_method: paymentMethod,
+                    notes: document.getElementById("orderNotes").value,
+                    total_paid: totalPaid,
+                    total_amount: currentTotal,
+                    tax: 0, // Sesuaikan jika ada pajak
+                    discount: 0, // Sesuaikan jika ada diskon global
+                    member_id: selectedMemberId,
+                    items: currentCart.map(item => ({
+                        product_id: item.id,
+                        quantity: item.quantity,
+                        price: item.price,
+                        discount: item.discount || 0,
+                    }))
+                };
+                
+                // Kirim data ke backend
+                const token = localStorage.getItem("token");
+                if (!token) {
+                    throw new Error("Token tidak ditemukan");
+                }
+                
+                const response = await fetch("/api/orders", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify(orderData)
                 });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || "Gagal memproses pembayaran");
+                }
+                
+                // Tampilkan modal sukses
+                document.getElementById("invoiceNumber").textContent = `Invoice: ${data.data.order_number || data.data.invoice_number || ""}`;
+                document.getElementById("paymentModal").classList.add("hidden");
+                document.getElementById("successModal").classList.remove("hidden");
+                
+                // Kosongkan keranjang
+                if (typeof window.clearCart === "function") {
+                    window.clearCart();
+                }
+                
+            } catch (error) {
+                Swal.fire({
+                    position: "top-end",
+                    icon: "error",
+                    title: "Error",
+                    text: error.message,
+                    showConfirmButton: false,
+                    timer: 3000,
+                    toast: true
+                });
+                console.error("Payment error:", error);
+            }
         }
 
         // Function to print receipt
         function printReceipt() {
             // Implement receipt printing logic here
             console.log("Printing receipt...");
-        }
-
-        // Show error alert
-        function showErrorAlert(message) {
-            Swal.fire({
-                position: "top-end",
-                icon: "error",
-                title: message,
-                showConfirmButton: false,
-                timer: 3000,
-                background: "#FF0000",
-                iconColor: "#fff",
-                toast: true,
-            });
         }
 
         // Toggle member dropdown
