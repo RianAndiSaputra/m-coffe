@@ -4,9 +4,15 @@
 
 @section('content')
 
+<!-- Hidden Input for Outlet ID -->
+<input type="hidden" id="outletId" value="1">
+
+<!-- CSRF Token -->
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
 <!-- Alert Notification -->
 <div id="alertContainer" class="fixed top-4 right-4 z-50 space-y-3 w-80">
-    <!-- Alert will appear here dynamically -->
+    <!-- Alert akan muncul di sini -->
 </div>
 
 <!-- Page Title + Action -->
@@ -189,6 +195,166 @@
             reader.readAsDataURL(file);
         }
     });
+
+    // Load template data from API
+    async function loadTemplate() {
+        try {
+            // Mengambil ID outlet dari elemen input hidden yang kita tambahkan
+            const outletId = document.getElementById('outletId').value;
+            console.log('Loading template for outlet ID:', outletId);
+            
+            // Tambahkan parameter ke URL untuk mencegah cache
+            const response = await fetch(`/api/print-template/${outletId}?_=${Date.now()}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Accept': 'application/json'
+                }
+            });
+            
+            // Periksa apakah request berhasil
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            // Periksa apakah data berhasil dimuat
+            console.log('Data loaded:', data);
+            
+            if (data && data.data) {
+                const template = data.data;
+                
+                // Isi form dengan data dari API
+                document.getElementById('companyName').value = template.company_name || 'KIFA BAKERY';
+                document.getElementById('printCompanyName').textContent = template.company_name || 'KIFA BAKERY';
+                
+                document.getElementById('companySlogan').value = template.company_slogan || 'Rajanya Roti Hajatan';
+                document.getElementById('printCompanySlogan').textContent = template.company_slogan || 'Rajanya Roti Hajatan';
+                
+                document.getElementById('footerMessage').value = template.footer_message || 'Terima kasih sudah berbelanja';
+                document.getElementById('printFooterMessage').textContent = template.footer_message || 'Terima kasih sudah berbelanja';
+                
+                // Set logo jika ada
+                if (template.logo) {
+                    const logoUrl = `/uploads/${template.logo}`;
+                    document.getElementById('logoPreview').src = logoUrl;
+                    document.getElementById('printLogoPreview').src = logoUrl;
+                }
+            } else {
+                console.log('No template data found, using defaults');
+            }
+        } catch (error) {
+            console.error('Gagal memuat template:', error);
+            showAlert('error', 'Gagal memuat template dari server. Cek console untuk detail.');
+        }
+    }
+
+    // Fungsi simpan template
+    async function saveTemplate() {
+        try {
+            // Hard-code outlet_id untuk memastikan nilainya selalu ada
+            const outletId = document.getElementById('outletId')?.value || '1';
+            const formData = new FormData();
+            
+            // Debug untuk melihat outlet_id
+            console.log('Debug - outlet_id yang akan dikirim:', outletId);
+            
+            // Ambil CSRF token dari meta tag
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            if (!csrfToken) {
+                throw new Error("CSRF token tidak ditemukan. Pastikan meta tag csrf-token ada di halaman.");
+            }
+            
+            // Tambahkan data ke FormData - PENTING: pastikan outlet_id ditambahkan dengan benar
+            formData.append('outlet_id', outletId);
+            
+            // Log FormData untuk debugging
+            console.log('Debug - FormData setelah append outlet_id:', formData.get('outlet_id'));
+            
+            formData.append('company_name', document.getElementById('companyName').value);
+            formData.append('company_slogan', document.getElementById('companySlogan').value);
+            formData.append('footer_message', document.getElementById('footerMessage').value);
+            
+            // Tambahkan file logo jika ada
+            const logoUploadEl = document.getElementById('logoUpload');
+            const logoFile = logoUploadEl && logoUploadEl.files.length > 0 ? logoUploadEl.files[0] : null;
+            if (logoFile) {
+                formData.append('logo', logoFile);
+            }
+
+            // Log semua data yang akan dikirim
+            console.log('Sending data to server:', {
+                outlet_id: formData.get('outlet_id'),
+                company_name: formData.get('company_name'),
+                company_slogan: formData.get('company_slogan'),
+                footer_message: formData.get('footer_message'),
+                logo: logoFile ? logoFile.name : 'No new logo'
+            });
+
+            // Alternatif 1: Kirim dengan FormData
+            // const response = await fetch('/api/print-template', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            //         'Accept': 'application/json'
+            //     }
+            //     // body: formData
+            // });
+
+            // Alternatif 2: Kirim dengan JSON jika diperlukan
+            const jsonData = {
+                outlet_id: outletId,
+                company_name: document.getElementById('companyName').value,
+                company_slogan: document.getElementById('companySlogan').value,
+                footer_message: document.getElementById('footerMessage').value
+            };
+            
+            const response = await fetch('/api/print-template', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(jsonData)
+            });
+
+            // Log respons mentah untuk debugging
+            console.log('Raw response:', response);
+            
+            // Periksa apakah request berhasil
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ message: 'Tidak dapat memproses respons dari server' }));
+                console.error('Server error:', errorData);
+                
+                // Handle error validasi
+                if (errorData.errors || errorData.data) {
+                    // Handle validation errors that might be in errorData.errors or errorData.data
+                    const validationErrors = errorData.errors || errorData.data || {};
+                    Object.entries(validationErrors).forEach(([field, errors]) => {
+                        if (Array.isArray(errors)) {
+                            errors.forEach(error => showAlert('error', `${field}: ${error}`));
+                        } else {
+                            showAlert('error', `${field}: ${errors}`);
+                        }
+                    });
+                } else {
+                    throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
+                }
+                return;
+            }
+
+            const result = await response.json().catch(() => ({ message: 'Template berhasil disimpan, tetapi respons tidak valid' }));
+            console.log('Success response:', result);
+
+            // Update preview dan tampilkan pesan sukses
+            showAlert('success', result.message || 'Template berhasil disimpan');
+            
+        } catch (error) {
+            console.error('Error saving template:', error);
+            showAlert('error', `Gagal menyimpan template: ${error.message}`);
+        }
+    }
     
     // Remove logo
     function removeLogo() {
@@ -197,23 +363,14 @@
         document.getElementById('logoUpload').value = '';
     }
     
-    // Reset form
-    function resetForm() {
-        document.getElementById('companyName').value = 'KIFA BAKERY';
-        document.getElementById('companySlogan').value = 'Rajanya Roti Hajatan';
-        document.getElementById('footerMessage').value = 'Terima kasih sudah berbelanja';
-        removeLogo();
-        updatePreview();
-        showAlert('info', 'Form telah direset ke nilai default');
+    // Fungsi reset form
+    async function resetForm() {
+        // Reset ke nilai default dari database
+        await loadTemplate();
+        showAlert('info', 'Form telah direset ke nilai terakhir yang disimpan');
     }
     
-    // Save template
-    function saveTemplate() {
-        // In a real app, this would send data to server
-        showAlert('success', 'Template print berhasil disimpan');
-    }
-    
-    // Update preview in real-time
+    // Event listener untuk input real-time
     document.getElementById('companyName').addEventListener('input', function() {
         document.getElementById('printCompanyName').textContent = this.value;
     });
@@ -224,6 +381,17 @@
     
     document.getElementById('footerMessage').addEventListener('input', function() {
         document.getElementById('printFooterMessage').textContent = this.value;
+    });
+
+    // Panggil loadTemplate saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', function() {
+        // Pastikan semua elemen DOM sudah ter-load
+        loadTemplate();
+        
+        // Tambahkan debug info untuk mengecek elemen-elemen kunci
+        console.log('Outlet ID element exists:', !!document.getElementById('outletId'));
+        console.log('Outlet ID value:', document.getElementById('outletId').value);
+        console.log('CSRF token exists:', !!document.querySelector('meta[name="csrf-token"]'));
     });
     
     // Show alert function
@@ -246,6 +414,11 @@
             </div>
         `;
         alertContainer.appendChild(alert);
+        
+        // Pastikan ikon Lucide dirender
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
         
         setTimeout(() => {
             alert.remove();

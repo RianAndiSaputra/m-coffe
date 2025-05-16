@@ -141,6 +141,50 @@ class PrintTemplateController extends Controller
         }
     }
 
+    // public function show($outlet_id)
+    // {
+    //     try {
+    //         // Validasi outlet_id
+    //         if ($outlet_id === 'undefined' || !is_numeric($outlet_id)) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Outlet ID tidak valid'
+    //             ], 400);
+    //         }
+
+    //         $printTemplate = PrintTemplate::with('outlet')
+    //             ->where('outlet_id', $outlet_id)
+    //             ->first();
+
+    //         // Jika tidak ada template, kembalikan default
+    //         if (!$printTemplate) {
+    //             return response()->json([
+    //                 'success' => true,
+    //                 'data' => [
+    //                     'company_name' => config('app.name'),
+    //                     'footer_message' => 'Terima kasih telah berbelanja',
+    //                     'logo_url' => null,
+    //                     'outlet' => null
+    //                 ],
+    //                 'message' => 'Menggunakan template default'
+    //             ]);
+    //         }
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'data' => $printTemplate,
+    //             'message' => 'Template berhasil diambil'
+    //         ]);
+
+    //     } catch (\Throwable $th) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Terjadi kesalahan',
+    //             'error' => $th->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
     /**
      * Show the form for editing the specified resource.
      */

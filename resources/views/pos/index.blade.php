@@ -466,20 +466,27 @@
     @include('partials.pos.stock')
 
 <script>
+    
+    let processPaymentHandler;
+    // let cart = [];
+    // let products = [];
+    // let categories = [];
+
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize Lucide icons
         lucide.createIcons();
+
         
         // Initialize cart and product data
         let cart = [];
         let products = [];
         let categories = [];
         let outletInfo = {
-            id: 1, // Default outlet ID
+            id: parseInt(localStorage.getItem('outlet_id')) || 1,
             tax: 0,
             qris: null,
             bank_account: null,
-            shift_id: null
+            shift_id: parseInt(localStorage.getItem('shift_id')) || null
         };
         let selectedMember = null;
         
@@ -599,43 +606,43 @@
         }
         
         // Fetch outlet information
-        async function fetchOutletInfo() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/outlets/1`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${API_TOKEN}`,
-                        'Accept': 'application/json'
-                    },
-                    credentials: 'include'
-                });
+        // async function fetchOutletInfo() {
+        //     try {
+        //         const response = await fetch(`${API_BASE_URL}/outlets/1`, {
+        //             method: 'GET',
+        //             headers: {
+        //                 'Content-Type': 'application/json',
+        //                 'Authorization': `Bearer ${API_TOKEN}`,
+        //                 'Accept': 'application/json'
+        //             },
+        //             credentials: 'include'
+        //         });
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
+        //         if (!response.ok) {
+        //             throw new Error(`HTTP error! Status: ${response.status}`);
+        //         }
                 
-                const data = await response.json();
+        //         const data = await response.json();
                 
-                if (data.success) {
-                    outletInfo.tax = data.data.tax || 0;
-                    outletInfo.qris = data.data.qris;
-                    outletInfo.bank_account = {
-                        atas_nama: data.data.atas_nama_bank,
-                        bank: data.data.nama_bank,
-                        nomor: data.data.nomor_transaksi_bank
-                    };
+        //         if (data.success) {
+        //             outletInfo.tax = data.data.tax || 0;
+        //             outletInfo.qris = data.data.qris;
+        //             outletInfo.bank_account = {
+        //                 atas_nama: data.data.atas_nama_bank,
+        //                 bank: data.data.nama_bank,
+        //                 nomor: data.data.nomor_transaksi_bank
+        //             };
                     
-                    // Update tax display
-                    taxAmountElement.textContent = `Pajak (${outletInfo.tax}%)`;
+        //             // Update tax display
+        //             taxAmountElement.textContent = `Pajak (${outletInfo.tax}%)`;
                     
-                    // Get current shift
-                    await fetchCurrentShift();
-                }
-            } catch (error) {
-                console.error('Error fetching outlet info:', error);
-            }
-        }
+        //             // Get current shift
+        //             await fetchCurrentShift();
+        //         }
+        //     } catch (error) {
+        //         console.error('Error fetching outlet info:', error);
+        //     }
+        // }
         
         // Fetch current shift
         async function fetchCurrentShift() {
@@ -1192,6 +1199,15 @@
             
             lucide.createIcons();
         }
+
+        function setupPaymentButton() {
+            // Remove old event listener if it exists
+            const btn = document.getElementById('btnProcessPayment');
+            btn.removeEventListener('click', processPaymentHandler);
+            
+            // Add new event listener
+            btn.addEventListener('click', processPaymentHandler);
+        }
         
         // Show payment modal
         function showPaymentModal() {
@@ -1233,7 +1249,12 @@
                 }
             });
             
-            // Add event listener for process payment button
+            // CRITICAL FIX: Clone and replace the payment button to remove all event listeners
+            const oldButton = document.getElementById('btnProcessPayment');
+            const newButton = oldButton.cloneNode(true);
+            oldButton.parentNode.replaceChild(newButton, oldButton);
+            
+            // Add the event listener to the fresh button
             document.getElementById('btnProcessPayment').addEventListener('click', function() {
                 processPayment(grandTotal);
             });
@@ -1316,6 +1337,8 @@
                 console.error('Error processing payment:', error);
                 showNotification('Gagal memproses pembayaran', 'error');
             }
+
+            closeModal('paymentModal');
         }
         
         // Show invoice
@@ -1399,7 +1422,7 @@
         };
         
         // Load data
-        fetchOutletInfo();
+        // fetchOutletInfo();
         updateCart();
         loadProductsFromLocalStorage();
         fetchProducts();
@@ -1429,6 +1452,26 @@
             console.error('Logout error:', err);
             showNotification('Gagal logout!', 'error');
         });
+    });
+
+    document.getElementById('btnHistoryModal').addEventListener('click', function() {
+        openModal('historyModal');
+        
+    });
+
+    document.getElementById('btnStockModal').addEventListener('click', function() {
+        openModal('stockModal');
+        
+    });
+
+    document.getElementById('btnIncomeModal').addEventListener('click', function() {
+        openModal('incomeModal');
+        
+    });
+
+    document.getElementById('btnCashierModal').addEventListener('click', function() {
+        openModal('cashierModal');
+        
     });
 
     // Load user data

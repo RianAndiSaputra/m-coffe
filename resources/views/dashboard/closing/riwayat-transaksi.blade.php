@@ -69,22 +69,10 @@
                 </tr>
             </thead>
             <tbody class="text-gray-700 divide-y">
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="py-4">INV-1746777071-5RTRZ8</td>
-                    <td class="py-4">09/05/2025 14:51</td>
-                    <td class="py-4">Admin</td>
-                    <td class="py-4"><span class="px-2 py-1 bg-green-200 text-green-800 font-semibold rounded-full text-xs">Tunai</span></td>
-                    <td class="py-4"><span class="px-2 py-1 text-green-600 font-bold text-xs">Selesai</span></td>
-                    <td class="py-4 font-semibold">Rp 4.000,00</td>
-                    <td class="flex py-4 text-center space-x-2">
-                        <!-- Detail -->
-                        <a href="#" onclick="openDetailModal()" class="text-gray-600 hover:text-orange-600">
-                            <i data-lucide="eye" class="w-5 h-5"></i>
-                        </a>
-                        <!-- Refund -->
-                        <a href="#" onclick="openRefundModal('INV-1746777071-5RTRZ8')" class="text-gray-600 hover:text-red-600">
-                            <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
-                        </a>
+                <!-- Data akan diisi secara dinamis -->
+                <tr>
+                    <td colspan="7" class="py-4 text-center text-gray-500">
+                        Memuat data transaksi...
                     </td>
                 </tr>
             </tbody>
@@ -93,59 +81,65 @@
 </div>
 
 <!-- Modal Detail Transaksi -->
-<div id="modalDetail" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-lg shadow-lg max-w-md w-full p-6 relative">
-        <button onclick="closeDetailModal()" class="absolute top-3 right-3 text-orange-600 hover:text-orange-800">
-            <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-        <h2 class="text-lg font-bold mb-2">Detail Transaksi</h2>
-        <p class="text-sm text-gray-600 mb-1">Invoice: <span class="font-semibold">INV-1746777071-5RTRZ8</span></p>
-        <div class="flex justify-between text-sm text-gray-700 mb-4">
-            <span>09/05/2025 14:51</span>
-            <span><span class="px-2 py-0.5 bg-orange-100 text-orange-600 rounded text-xs">Selesai</span></span>
-        </div>
-
-        <!-- Tabel Produk -->
-        <div class="border rounded overflow-hidden mb-4">
-            <table class="w-full text-sm">
-                <thead class="bg-gray-50 text-left border-b">
-                    <tr>
-                        <th class="p-2">Produk</th>
-                        <th class="p-2">Qty</th>
-                        <th class="p-2">Harga</th>
-                        <th class="p-2">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="p-2">Roti Semir Eco</td>
-                        <td class="p-2">x2</td>
-                        <td class="p-2">Rp 2.000,00</td>
-                        <td class="p-2 font-semibold">Rp 4.000,00</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Ringkasan -->
-        <div class="text-sm text-gray-700 space-y-1 mb-4">
-            <div class="flex justify-between">
-                <span>Subtotal</span><span>Rp 4.000,00</span>
+<div id="modalDetail" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Detail Transaksi</h3>
+                <button onclick="closeDetailModal()" class="text-gray-500 hover:text-gray-700">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
             </div>
-            <div class="flex justify-between">
-                <span>Pajak:</span><span>Rp 0,00</span>
+            
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <p class="text-gray-500">No. Invoice</p>
+                    <p id="detailInvoice" class="font-medium"></p>
+                </div>
+                <div>
+                    <p class="text-gray-500">Tanggal/Waktu</p>
+                    <p id="detailDateTime" class="font-medium"></p>
+                </div>
+                <div>
+                    <p class="text-gray-500">Metode Pembayaran</p>
+                    <p id="detailPaymentMethod" class="font-medium"></p>
+                </div>
+                <div>
+                    <p class="text-gray-500">Status</p>
+                    <p id="detailStatus" class="font-medium"></p>
+                </div>
             </div>
-            <div class="flex justify-between">
-                <span>Diskon:</span><span>Rp 0,00</span>
+            
+            <div class="mb-4">
+                <h4 class="font-medium mb-2">Item Pembelian</h4>
+                <div id="detailItems"></div>
             </div>
-            <div class="flex justify-between font-semibold">
-                <span>Total</span><span>Rp 4.000,00</span>
-            </div>
-            <div class="flex justify-between text-orange-600 font-semibold">
-                <span>Total Bayar</span><span>Rp 4.000,00</span>
-            </div>
-            <div class="flex justify-between text-green-600">
-                <span>Kembalian</span><span>Rp 0,00</span>
+            
+            <div class="border-t pt-4 space-y-2">
+                <div class="flex justify-between">
+                    <span>Subtotal</span>
+                    <span id="detailSubtotal" class="font-medium"></span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Pajak</span>
+                    <span id="detailTax" class="font-medium"></span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Diskon</span>
+                    <span id="detailDiscount" class="font-medium"></span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Total Dibayar</span>
+                    <span id="detailTotalPaid" class="font-medium"></span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Kembalian</span>
+                    <span id="detailChange" class="font-medium"></span>
+                </div>
+                <div class="flex justify-between border-t pt-2 font-bold text-lg">
+                    <span>Total</span>
+                    <span id="detailTotal" class="text-orange-600"></span>
+                </div>
             </div>
         </div>
     </div>
@@ -159,7 +153,7 @@
                 <i data-lucide="alert-triangle" class="w-6 h-6 text-red-600"></i>
             </div>
             <div class="flex-1">
-                <h3 class="text-lg font-semibold text-gray-900">Konfirmasi Refund</h3>
+                <h3 id="modalRefundTitle" class="text-lg font-semibold text-gray-900">Konfirmasi Refund</h3>
                 <div class="mt-2">
                     <p class="text-sm text-gray-600">Anda yakin ingin melakukan refund untuk transaksi ini?</p>
                     <p id="refundInvoiceText" class="text-sm font-medium mt-1"></p>
@@ -181,136 +175,444 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 <script>
-    // Inisialisasi date picker
+    let transactionsCache = [];
+// Script utama untuk halaman Riwayat Transaksi
+document.addEventListener('DOMContentLoaded', () => {
+    // Cek jika token ada di localStorage
+    if (!localStorage.getItem('token')) {
+        window.location.href = '/login';
+        return;
+    }
+
+    // Inisialisasi flatpickr untuk filter tanggal
     flatpickr("#transDateInput", {
-        dateFormat: "d M Y",
-        defaultDate: "today"
+        dateFormat: "d/m/Y",
+        maxDate: "today",
+        locale: "id",
+        onChange: function(selectedDates, dateStr) {
+            if (selectedDates.length > 0) {
+                // Pastikan tanggal dikirim dalam format YYYY-MM-DD dengan timezone yang benar
+                const date = formatDateForAPI(selectedDates[0]);
+                fetchTransactionHistory(date);
+            } else {
+                // Jika tidak ada tanggal terpilih, tampilkan semua transaksi
+                fetchTransactionHistory(null);
+            }
+        }
     });
 
-    // Fungsi untuk modal detail
-    function openDetailModal() {
-        document.getElementById('modalDetail').classList.remove('hidden');
-        document.getElementById('modalDetail').classList.add('flex');
-    }
-
-    function closeDetailModal() {
-        document.getElementById('modalDetail').classList.add('hidden');
-        document.getElementById('modalDetail').classList.remove('flex');
-    }
-
-    // Fungsi untuk modal refund
-    let currentInvoiceId = '';
+    // Load data awal
+    fetchTransactionHistory();
     
-    function openRefundModal(invoiceId) {
-        currentInvoiceId = invoiceId;
-        document.getElementById('refundInvoiceText').textContent = `Invoice: ${invoiceId}`;
-        document.getElementById('modalRefund').classList.remove('hidden');
-    }
-
-    function closeRefundModal() {
-        document.getElementById('modalRefund').classList.add('hidden');
-    }
-
-    function processRefund() {
-        // Implementasi AJAX untuk refund
-        console.log(`Memproses refund untuk invoice: ${currentInvoiceId}`);
+    // Pencarian
+    document.getElementById('searchInvoice').addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('tbody tr');
         
-        // Contoh AJAX (gunakan sesuai framework Anda)
-        /*
-        fetch('/transactions/refund', {
-            method: 'POST',
+        rows.forEach(row => {
+            const invoice = row.cells[0]?.textContent?.toLowerCase() || '';
+            row.style.display = invoice.includes(searchTerm) ? '' : 'none';
+        });
+    });
+
+    // Refresh Lucide icons
+    if (window.lucide) window.lucide.createIcons();
+});
+
+// Fungsi untuk fetch data transaksi
+async function fetchTransactionHistory(date = null) {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+
+        let url = '/api/orders/history';
+        if (date) {
+            url += `?date=${date}`;
+        }
+
+        const response = await fetch(url, {
             headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify({ invoice_id: currentInvoiceId })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if(data.success) {
-                showAlert('success', 'Refund berhasil diproses!');
-                // Refresh halaman atau update UI
-                setTimeout(() => {
-                    window.location.reload();
-                }, 2000);
-            } else {
-                showAlert('error', 'Gagal memproses refund: ' + data.message);
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json'
             }
         });
-        */
-        
-        // Untuk contoh, kita tampilkan notifikasi success
-        closeRefundModal();
-        showAlert('success', `Refund untuk invoice ${currentInvoiceId} berhasil diproses!`);
-        
-        // Simulasi refresh data setelah 2 detik
-        setTimeout(() => {
-            // window.location.reload(); // Uncomment ini di implementasi nyata
-        }, 2000);
-    }
 
-    // Fungsi untuk menampilkan notifikasi
-    function showAlert(type, message) {
-        const alertContainer = document.getElementById('alertContainer');
-        const alertId = 'alert-' + Date.now();
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Gagal memuat riwayat transaksi');
+        }
+
+        const result = await response.json();
         
-        // Warna dan ikon berdasarkan jenis alert
-        const alertConfig = {
-            success: {
-                bgColor: 'bg-orange-50',
-                borderColor: 'border-orange-200',
-                textColor: 'text-orange-800',
-                icon: 'check-circle',
-                iconColor: 'text-orange-500'
-            },
-            error: {
-                bgColor: 'bg-red-50',
-                borderColor: 'border-red-200',
-                textColor: 'text-red-800',
-                icon: 'alert-circle',
-                iconColor: 'text-red-500'
-            }
-        };
+        // Pastikan kita mengakses data.orders dari response
+        if (result.data && Array.isArray(result.data.orders)) {
+            // Store in global cache
+            transactionsCache = result.data.orders;
+            renderTransactionData(result.data.orders);
+        } else {
+            // Jika tidak ada data
+            transactionsCache = [];
+            renderTransactionData([]);
+        }
         
-        const config = alertConfig[type] || alertConfig.success;
-        
-        const alertElement = document.createElement('div');
-        alertElement.id = alertId;
-        alertElement.className = `p-4 border rounded-lg shadow-sm ${config.bgColor} ${config.borderColor} ${config.textColor} flex items-start gap-3 animate-fade-in-up`;
-        alertElement.innerHTML = `
-            <i data-lucide="${config.icon}" class="w-5 h-5 mt-0.5 ${config.iconColor}"></i>
-            <div class="flex-1">
-                <p class="text-sm font-medium">${message}</p>
-            </div>
-            <button onclick="closeAlert('${alertId}')" class="p-1 rounded-full hover:bg-gray-100">
-                <i data-lucide="x" class="w-4 h-4"></i>
-            </button>
+    } catch (error) {
+        console.error('Error:', error);
+        showAlert('error', error.message);
+    }
+}
+
+// Fungsi untuk render data ke tabel
+function renderTransactionData(transactions) {
+    const tbody = document.querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    console.log("Data transaksi untuk dirender:", transactions); // Untuk debugging
+    
+    if (!transactions || transactions.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="py-4 text-center text-gray-500">
+                    Tidak ada transaksi pada tanggal ini.
+                </td>
+            </tr>
         `;
+        return;
+    }
+    
+    transactions.forEach(transaction => {
+        const row = document.createElement('tr');
+        row.className = 'border-b hover:bg-gray-50';
+        row.innerHTML = `
+            <td class="py-4">${transaction.order_number}</td>
+            <td class="py-4">${formatDateTime(transaction.created_at)}</td>
+            <td class="py-4">${transaction.user || 'Kasir'}</td>
+            <td class="py-4">
+                <span class="px-2 py-1 ${getPaymentBadgeClass(transaction.payment_method)} rounded-full text-xs">
+                    ${getPaymentMethodText(transaction.payment_method)}
+                </span>
+            </td>
+            <td class="py-4">
+                <span class="px-2 py-1 ${transaction.status === 'completed' ? 'text-green-600' : 'text-red-500'} font-bold text-xs">
+                    ${transaction.status === 'completed' ? 'Selesai' : 'Dibatalkan'}
+                </span>
+            </td>
+            <td class="py-4 font-semibold">${formatCurrency(transaction.total)}</td>
+            <td class="py-4 flex space-x-2">
+                <a href="#" onclick="openDetailModal('${transaction.id}')" class="text-gray-600 hover:text-orange-600">
+                    <i data-lucide="eye" class="w-5 h-5"></i>
+                </a>
+                ${transaction.status === 'completed' ? `
+                <a href="#" onclick="openRefundModal('${transaction.order_number}', '${transaction.id}')" class="text-gray-600 hover:text-red-600">
+                    <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+                </a>
+                ` : ''}
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+    
+    if (window.lucide) window.lucide.createIcons();
+}
+
+// Fungsi untuk fetch detail transaksi
+function getTransactionDetail(orderId) {
+    // Find order in cached data
+    const detail = transactionsCache.find(order => order.id == orderId);
+    
+    if (!detail) {
+        return null;
+    }
+    
+    return detail;
+}
+
+// Fungsi untuk modal detail
+async function openDetailModal(orderId) {
+    try {
+        console.log(`Opening detail modal for order ID: ${orderId}`);
         
-        alertContainer.prepend(alertElement);
+        const transaction = transactionsCache.find(t => t.id == orderId);
+        if (!transaction) {
+            showAlert('error', 'Detail transaksi tidak ditemukan');
+            return;
+        }
+
+        // Daftar element yang diperlukan
+        const elements = {
+            invoice: document.getElementById('detailInvoice'),
+            dateTime: document.getElementById('detailDateTime'),
+            paymentMethod: document.getElementById('detailPaymentMethod'),
+            status: document.getElementById('detailStatus'),
+            total: document.getElementById('detailTotal'),
+            subtotal: document.getElementById('detailSubtotal'),
+            tax: document.getElementById('detailTax'),
+            discount: document.getElementById('detailDiscount'),
+            totalPaid: document.getElementById('detailTotalPaid'),
+            change: document.getElementById('detailChange'),
+            items: document.getElementById('detailItems')
+        };
+
+        // Validasi element
+        for (const [key, element] of Object.entries(elements)) {
+            if (!element) {
+                console.error(`Element not found: ${key}`);
+                throw new Error(`Element ${key} tidak ditemukan`);
+            }
+        }
+
+        // Isi data
+        elements.invoice.textContent = transaction.order_number;
+        elements.dateTime.textContent = formatDateTime(transaction.created_at);
+        elements.paymentMethod.textContent = getPaymentMethodText(transaction.payment_method);
+        elements.status.textContent = transaction.status === 'completed' ? 'Selesai' : 'Dibatalkan';
+        elements.total.textContent = formatCurrency(transaction.total);
+        elements.subtotal.textContent = formatCurrency(transaction.subtotal);
+        elements.tax.textContent = formatCurrency(transaction.tax);
+        elements.discount.textContent = formatCurrency(transaction.discount);
+        elements.totalPaid.textContent = formatCurrency(transaction.total_paid);
+        elements.change.textContent = formatCurrency(transaction.change);
+
+        // Isi items
+        elements.items.innerHTML = '';
+        if (transaction.items?.length > 0) {
+            transaction.items.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'border-b py-2';
+                itemElement.innerHTML = `
+                    <div class="flex justify-between">
+                        <div>
+                            <p class="font-medium">${item.product}</p>
+                            <p class="text-sm text-gray-500">${item.quantity} × ${formatCurrency(item.price)}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-medium">${formatCurrency(item.total)}</p>
+                            ${item.discount > 0 ? `<p class="text-sm text-red-500">Diskon: ${formatCurrency(item.discount)}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+                elements.items.appendChild(itemElement);
+            });
+        } else {
+            elements.items.innerHTML = '<p class="text-gray-500 py-4">Tidak ada item</p>';
+        }
+
+        // Tampilkan modal
+        const modal = document.getElementById('modalDetail');
+        if (!modal) {
+            throw new Error('Modal detail tidak ditemukan');
+        }
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
         
-        // Inisialisasi ikon Lucide
         if (window.lucide) {
             window.lucide.createIcons();
         }
-        
-        // Auto close setelah 5 detik
-        setTimeout(() => {
-            closeAlert(alertId);
-        }, 5000);
-    }
 
-    // Fungsi untuk menutup alert
-    function closeAlert(id) {
-        const alert = document.getElementById(id);
-        if (alert) {
-            alert.classList.add('animate-fade-out');
+    } catch (error) {
+        console.error('Error in openDetailModal:', error);
+        showAlert('error', 'Gagal memuat detail transaksi: ' + error.message);
+    }
+}
+
+// Fungsi untuk menutup modal detail
+function closeDetailModal() {
+    const modal = document.getElementById('modalDetail');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+// Fungsi untuk modal refund (ubah teks menjadi pembatalan)
+function openRefundModal(invoiceNumber, orderId) {
+    try {
+        // Pastikan modal dan elemen-elemennya ada
+        const modal = document.getElementById('modalRefund');
+        const invoiceTextEl = document.getElementById('refundInvoiceText');
+        const modalTitleEl = document.getElementById('modalRefundTitle');
+        const confirmButton = modal?.querySelector('button:last-child');
+        
+        if (!modal || !invoiceTextEl || !modalTitleEl || !confirmButton) {
+            throw new Error('Elemen modal tidak ditemukan. Pastikan struktur HTML benar.');
+        }
+
+        // Isi data ke modal
+        invoiceTextEl.textContent = `Invoice: ${invoiceNumber}`;
+        modalTitleEl.textContent = 'Konfirmasi Pembatalan Order';
+        
+        // Simpan orderId di data attribute
+        modal.dataset.orderId = orderId;
+        
+        // Ubah teks tombol konfirmasi
+        confirmButton.textContent = 'Konfirmasi Pembatalan';
+        
+        // Tampilkan modal
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        
+    } catch (error) {
+        console.error('Error in openRefundModal:', error);
+        showAlert('error', 'Gagal membuka modal pembatalan: ' + error.message);
+    }
+}
+
+function closeRefundModal() {
+    document.getElementById('modalRefund').classList.add('hidden');
+    document.getElementById('modalRefund').classList.remove('flex');
+}
+
+async function processRefund() {
+    const orderId = document.getElementById('modalRefund').dataset.orderId;
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+
+        // Tampilkan loading state
+        const confirmButton = document.querySelector('#modalRefund button:last-child');
+        const originalButtonText = confirmButton.innerHTML;
+        confirmButton.innerHTML = `
+            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Memproses...
+        `;
+        confirmButton.disabled = true;
+
+        // Menggunakan endpoint cancelOrder yang sudah ada
+        const response = await fetch(`/api/orders/cancel/${orderId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || `Gagal memproses pembatalan (Status: ${response.status})`);
+        }
+
+        const result = await response.json();
+        showAlert('success', 'Pembatalan berhasil diproses');
+        closeRefundModal();
+        fetchTransactionHistory(); // Refresh data
+    } catch (error) {
+        console.error('Error:', error);
+        showAlert('error', error.message);
+    } finally {
+        // Kembalikan tombol ke state awal
+        const confirmButton = document.querySelector('#modalRefund button:last-child');
+        confirmButton.innerHTML = 'Konfirmasi Pembatalan';
+        confirmButton.disabled = false;
+    }
+}
+
+// Fungsi untuk menampilkan alert
+function showAlert(type, message) {
+    const alertContainer = document.getElementById('alertContainer');
+    const alertId = 'alert-' + Date.now();
+    const alert = document.createElement('div');
+    alert.id = alertId;
+    alert.className = `p-4 rounded-md shadow-md animate-fade-in-up ${type === 'error' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`;
+    alert.innerHTML = `
+        <div class="flex items-center gap-2">
+            <i data-lucide="${type === 'error' ? 'alert-circle' : 'check-circle'}" class="w-5 h-5"></i>
+            <span>${message}</span>
+            <button onclick="document.getElementById('${alertId}').classList.add('animate-fade-out'); setTimeout(() => document.getElementById('${alertId}').remove(), 300)" class="ml-auto">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+    `;
+    alertContainer.appendChild(alert);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (document.getElementById(alertId)) {
+            document.getElementById(alertId).classList.add('animate-fade-out');
             setTimeout(() => {
-                alert.remove();
+                if (document.getElementById(alertId)) {
+                    document.getElementById(alertId).remove();
+                }
             }, 300);
         }
+    }, 5000);
+    
+    // Refresh ikon Lucide
+    if (window.lucide) window.lucide.createIcons();
+}
+
+// Helper untuk format tanggal
+function formatDateTime(dateString) {
+    if (!dateString) return '-';
+    
+    // Jika format sudah "DD/MM/YYYY HH:mm" seperti dari API
+    if (dateString.match(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/)) {
+        return dateString; // Return langsung karena format sudah sesuai
     }
+    
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('id-ID', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        }).replace(',', '');
+    } catch (error) {
+        console.error('Error formatting date:', error);
+        return dateString;
+    }
+}
+
+// Helper untuk format mata uang
+function formatCurrency(amount) {
+    try {
+        return 'Rp ' + Number(amount || 0).toLocaleString('id-ID');
+    } catch (error) {
+        console.error('Error formatting currency:', error);
+        return 'Rp 0';
+    }
+}
+
+// Helper untuk tampilan payment method
+function getPaymentMethodText(method) {
+    const methods = {
+        'cash': 'Tunai',
+        'qris': 'QRIS',
+        'transfer': 'Transfer'
+    };
+    return methods[method] || method || 'Tidak diketahui';
+}
+
+function getPaymentBadgeClass(method) {
+    const classes = {
+        'cash': 'bg-green-100 text-green-800 border-green-200',
+        'qris': 'bg-orange-100 text-orange-800 border-orange-200',
+        'transfer': 'bg-purple-100 text-purple-800 border-purple-200'
+    };
+    return classes[method] || 'bg-gray-100 text-gray-800';
+}
+
+// Format tanggal untuk API (YYYY-MM-DD)
+function formatDateForAPI(date) {
+    // Ambil tanggal dalam timezone lokal user
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    
+    // Format dalam YYYY-MM-DD
+    return `${year}-${month}-${day}`;
+}
 </script>
 
 <style>

@@ -11,7 +11,7 @@ Route::get('/', function () {
     return view('auth.login');
 })->name('login');
 
-Route::post('/login', [AuthController::class, 'login']);
+// Route::post('/login', [AuthController::class, 'login']);
     
     Route::middleware('auth')->group(function(){
         Route::get('/dashboard', function () {
@@ -28,6 +28,9 @@ Route::post('/login', [AuthController::class, 'login']);
         Route::get('/pos', function () {
             return view('pos.index');
         })->name('index')->middleware('role:kasir');
+        Route::get('/riwayat-kas', function () {
+            return view('dashboard.closing.riwayat-kas');
+        })->name('riwayat-closing');
     });
 
 Route::get('/outlet', function () {
@@ -76,9 +79,7 @@ Route::get('/per-member', function () {
     return view('dashboard.laporan.per-member');
 })->name('per-member');
 
-Route::get('/riwayat-kas', function () {
-    return view('dashboard.closing.riwayat-kas');
-})->name('riwayat-closing');
+
 
 Route::get('/riwayat-transaksi', function () {
     return view('dashboard.closing.riwayat-transaksi');

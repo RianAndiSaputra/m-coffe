@@ -15,7 +15,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShiftController;
 use Illuminate\Support\Facades\Route;
 
-
+Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     
     Route::controller(AuthController::class)->group(function () {
@@ -166,5 +166,20 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/add-cash', 'addCash');
             Route::post('/subtract-cash', 'subtractCash');
         });
+    });
+
+    Route::get('/print-template', function () {
+        $outlet = auth()->user()->outlet; // Asumsi user terkait dengan outlet
+        $template = [
+            'company_name' => config('app.name'),
+            'company_slogan' => 'Pelayanan Terbaik untuk Anda',
+            'logo_url' => $outlet->logo_url ?? asset('images/logo.png'),
+            'footer_message' => 'Barang yang sudah dibeli tidak dapat ditukar atau dikembalikan',
+        ];
+        
+        return response()->json([
+            'success' => true,
+            'data' => $template
+        ]);
     });
 });
