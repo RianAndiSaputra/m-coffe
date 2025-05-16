@@ -126,20 +126,36 @@
         });
     }
 
-    // document.getElementById('searchInput').addEventListener('input', function(e) {
-    //     const searchTerm = e.target.value.toLowerCase();
-    //     const rows = document.querySelectorAll('#historyTableBody tr');
+    // Function to get currently selected outlet ID
+    function getSelectedOutletId() {
+        // First check URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const outletIdFromUrl = urlParams.get('outlet_id');
         
-    //     rows.forEach(row => {
-    //         const productName = row.querySelector('td:nth-child(2) span').textContent.toLowerCase();
-    //         row.style.display = productName.includes(searchTerm) ? '' : 'none';
-    //     });
-    // });
+        if (outletIdFromUrl) {
+            return outletIdFromUrl;
+        }
+        
+        // Then check localStorage
+        const savedOutletId = localStorage.getItem('selectedOutletId');
+        
+        if (savedOutletId) {
+            return savedOutletId;
+        }
+        
+        // Default to outlet ID 1 if nothing is found
+        return 1;
+    }
 
-    // Fetch data dari API
+    // Fetch data dari API dengan outlet ID dinamis
     async function fetchInventoryHistory(date) {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/api/inventory-histories/outlet/1?date=${date}`, {
+            // Get dynamic outlet ID
+            const outletId = getSelectedOutletId();
+            
+            console.log(`Fetching inventory history for outlet ID: ${outletId} on date: ${date}`);
+            
+            const response = await fetch(`http://127.0.0.1:8000/api/inventory-histories/outlet/${outletId}?date=${date}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
                     'Accept': 'application/json'
@@ -165,64 +181,150 @@
         
         // Update info outlet
         if (data.length > 0) {
-            document.querySelector('.outlet-name').textContent = `Outlet Aktif: ${data[0].outlet.name}`;
-            document.querySelector('.outlet-address').textContent = data[0].outlet.address;
+            const outletElements = document.querySelectorAll('.outlet-name');
+            outletElements.forEach(el => {
+                el.textContent = `Outlet Aktif: ${data[0].outlet.name}`;
+            });
+            
+            const addressElements = document.querySelectorAll('.outlet-address');
+            addressElements.forEach(el => {
+                el.textContent = data[0].outlet.address;
+            });
+        } else {
+            // No data available, still update outlet name based on selected outlet
+            updateOutletInfoFromSelection();
         }
 
         // Update tabel
-        tbody.innerHTML = data.map(history => `
-            <tr class="border-b hover:bg-gray-50">
-                <td class="py-4">${formatTime(history.created_at)}</td>
-                <td class="py-4">
-                    <div class="flex items-center space-x-2">
-                        <img src="https://via.placeholder.com/40" alt="gambar" class="w-8 h-8 bg-gray-100 rounded object-cover" />
-                        <span>${history.product.name}</span>
-                    </div>
-                </td>
-                <td>${history.quantity_before}</td>
-                <td>${history.quantity_after}</td>
-                <td class="${history.quantity_change > 0 ? 'text-green-500' : 'text-red-500'}">
-                    ${history.quantity_change > 0 ? '+' : ''}${history.quantity_change}
-                </td>
-                <td>
-                    <span class="px-2 py-1 ${typeStyles[history.type].bg} ${typeStyles[history.type].text} rounded text-xs capitalize">
-                        ${history.type.replace(/_/g, ' ')}
-                    </span>
-                </td>
-                <td class="text-xs text-gray-500">${history.notes || '-'}</td>
-            </tr>
-        `).join('');
+        if (data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-gray-500">Tidak ada riwayat inventori pada tanggal ini</td></tr>`;
+        } else {
+            tbody.innerHTML = data.map(history => `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="py-4">${formatTime(history.created_at)}</td>
+                    <td class="py-4">
+                        <div class="flex items-center space-x-2">
+                            <img src="https://via.placeholder.com/40" alt="gambar" class="w-8 h-8 bg-gray-100 rounded object-cover" />
+                            <span>${history.product.name}</span>
+                        </div>
+                    </td>
+                    <td>${history.quantity_before}</td>
+                    <td>${history.quantity_after}</td>
+                    <td class="${history.quantity_change > 0 ? 'text-green-500' : 'text-red-500'}">
+                        ${history.quantity_change > 0 ? '+' : ''}${history.quantity_change}
+                    </td>
+                    <td>
+                        <span class="px-2 py-1 ${typeStyles[history.type].bg} ${typeStyles[history.type].text} rounded text-xs capitalize">
+                            ${history.type.replace(/_/g, ' ')}
+                        </span>
+                    </td>
+                    <td class="text-xs text-gray-500">${history.notes || '-'}</td>
+                </tr>
+            `).join('');
+        }
+    }
+
+    // Update outlet info when no data is available
+    async function updateOutletInfoFromSelection() {
+        try {
+            const outletId = getSelectedOutletId();
+            const response = await fetch(`http://127.0.0.1:8000/api/outlets/${outletId}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Accept': 'application/json'
+                }
+            });
+            
+            const { data, success } = await response.json();
+            
+            if (success && data) {
+                const outletElements = document.querySelectorAll('.outlet-name');
+                outletElements.forEach(el => {
+                    el.textContent = `Outlet Aktif: ${data.name}`;
+                });
+                
+                const addressElements = document.querySelectorAll('.outlet-address');
+                addressElements.forEach(el => {
+                    el.textContent = data.address || '';
+                });
+            }
+        } catch (error) {
+            console.error('Failed to fetch outlet details:', error);
+        }
+    }
+
+    // Connect to outlet selection dropdown
+    function connectOutletSelectionToHistory() {
+        // Listen for outlet changes in localStorage
+        window.addEventListener('storage', function(event) {
+            if (event.key === 'selectedOutletId') {
+                // Get current date
+                const datePicker = document.getElementById('reportDateInput');
+                const currentDate = datePicker?._flatpickr?.selectedDates[0] || new Date();
+                const formattedDate = currentDate.toISOString().split('T')[0];
+                
+                // Reload history with new outlet
+                updateHistoryTable(formattedDate);
+            }
+        });
+        
+        // Also watch for clicks on outlet items in dropdown
+        const outletListContainer = document.getElementById('outletListContainer');
+        if (outletListContainer) {
+            outletListContainer.addEventListener('click', function(event) {
+                // Find the clicked li element
+                let targetElement = event.target;
+                while (targetElement && targetElement !== outletListContainer && targetElement.tagName !== 'LI') {
+                    targetElement = targetElement.parentElement;
+                }
+                
+                // If we clicked on an outlet list item
+                if (targetElement && targetElement.tagName === 'LI') {
+                    // Update history after a short delay to allow your existing code to complete
+                    setTimeout(() => {
+                        const datePicker = document.getElementById('reportDateInput');
+                        const currentDate = datePicker?._flatpickr?.selectedDates[0] || new Date();
+                        const formattedDate = currentDate.toISOString().split('T')[0];
+                        
+                        updateHistoryTable(formattedDate);
+                    }, 100);
+                }
+            });
+        }
     }
 
     // Update filter tanggal
-    flatpickr("#reportDateInput", {
-        dateFormat: "Y-m-d",
-        defaultDate: "today",
-        onChange: async function(selectedDates, dateStr) {
-            await updateHistoryTable(dateStr);
-        },
-        locale: {
-            firstDayOfWeek: 1
-        }
-    });
-
-    // Panggil pertama kali saat halaman load
     document.addEventListener('DOMContentLoaded', async () => {
+        flatpickr("#reportDateInput", {
+            dateFormat: "Y-m-d",
+            defaultDate: "today",
+            onChange: async function(selectedDates, dateStr) {
+                await updateHistoryTable(dateStr);
+            },
+            locale: {
+                firstDayOfWeek: 1
+            }
+        });
+
+        // Initialize with current date
         const initialDate = new Date().toISOString().split('T')[0];
         await updateHistoryTable(initialDate);
+        
+        // Connect outlet selection to history updates
+        connectOutletSelectionToHistory();
     });
 
-        function showAlert(type, message) {
+    function showAlert(type, message) {
         const alertContainer = document.getElementById('alertContainer');
         const alert = document.createElement('div');
         alert.className = `px-4 py-3 rounded-lg shadow-md ${type === 'error' ? 'bg-red-100 text-red-700' : 
-                         type === 'success' ? 'bg-orange-100 text-orange-700' : 'bg-orange-100 text-orange-700'}`;
+                        type === 'success' ? 'bg-orange-100 text-orange-700' : 'bg-orange-100 text-orange-700'}`;
         alert.innerHTML = `
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <i data-lucide="${type === 'error' ? 'alert-circle' : 
                                     type === 'success' ? 'check-circle' : 'info'}" 
-                       class="w-5 h-5"></i>
+                    class="w-5 h-5"></i>
                     <span>${message}</span>
                 </div>
                 <button onclick="this.parentElement.parentElement.remove()">

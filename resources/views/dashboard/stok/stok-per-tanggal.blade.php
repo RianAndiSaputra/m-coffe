@@ -88,70 +88,200 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 <script>
     // Variabel global untuk menyimpan data inventory
-    // let inventoryData = [];
     let inventoryData = [];
+    let currentOutletId = null;
+    let currentDate = null;
+
+    async function loadProductData(outletId) {
+        try {
+            // Sembunyikan dropdown outlet setelah memilih
+            const outletDropdown = document.getElementById('outletDropdown');
+            if (outletDropdown) outletDropdown.classList.add('hidden');
+            
+            // Ambil tanggal terpilih atau gunakan hari ini
+            const datePicker = document.getElementById('reportDateInput');
+            const selectedDate = datePicker ? datePicker.value : new Date().toISOString().split('T')[0];
+            
+            // Panggil fungsi yang sudah ada untuk memuat data inventory
+            fetchInventoryData(selectedDate);
+            
+            // Jika perlu menyimpan outlet yang dipilih
+            localStorage.setItem('selectedOutletId', outletId);
+            currentOutletId = outletId;
+            
+        } catch (error) {
+            console.error('Error loading product data:', error);
+            showAlert('error', 'Gagal memuat data produk');
+        }
+    }
+
+    function getSelectedOutletId() {
+        // Cek URL parameter terlebih dahulu
+        const urlParams = new URLSearchParams(window.location.search);
+        const outletIdFromUrl = urlParams.get('outlet_id');
+        if (outletIdFromUrl) {
+            localStorage.setItem('selectedOutletId', outletIdFromUrl);
+            return outletIdFromUrl;
+        }
+        
+        // Jika tidak ada di URL, ambil dari localStorage
+        const savedOutletId = localStorage.getItem('selectedOutletId');
+        if (savedOutletId) return savedOutletId;
+        
+        // Jika tidak ada keduanya, gunakan default
+        return 1; // Default outlet
+    }
+
+    const datePicker = flatpickr("#reportDateInput", {
+        dateFormat: "Y-m-d",
+        defaultDate: "today",
+        onChange: function(selectedDates, dateStr) {
+            fetchInventoryData(dateStr); // Selalu panggil fetch dengan tanggal baru
+        }
+    });
+
+    // Fungsi untuk mengambil data outlet dari API
+    function fetchOutlets() {
+        console.log("Fetching available outlets");
+        
+        fetch('http://127.0.0.1:8000/api/outlets', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                renderOutletSelector(data.data);
+            } else {
+                showAlert('error', 'Gagal mengambil daftar outlet: ' + (data.message || 'Terjadi kesalahan'));
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching outlets:', error);
+            showAlert('error', 'Gagal mengambil daftar outlet: ' + error.message);
+        });
+    }
+
+    function handleOutletChange() {
+        const outletId = getSelectedOutletId();
+        const datePicker = document.getElementById('reportDateInput');
+        const date = datePicker ? datePicker.value : new Date().toISOString().split('T')[0];
+        
+        // Jika outlet berubah, fetch data baru
+        if (outletId !== currentOutletId) {
+            currentOutletId = outletId;
+            fetchInventoryData(date);
+        }
+    }
+
+    // Render selector outlet
+    function renderOutletSelector(outlets) {
+        const selectorContainer = document.getElementById('outletSelectorContainer');
+        if (!selectorContainer) return;
+        
+        const currentOutletId = getSelectedOutletId();
+        
+        // Buat dropdown
+        const select = document.createElement('select');
+        select.id = 'outletSelector';
+        select.className = 'block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500';
+        
+        outlets.forEach(outlet => {
+            const option = document.createElement('option');
+            option.value = outlet.id;
+            option.textContent = outlet.name;
+            option.selected = outlet.id.toString() === currentOutletId.toString();
+            select.appendChild(option);
+        });
+        
+        // Clear dan tambahkan elemen baru
+        selectorContainer.innerHTML = '';
+        selectorContainer.appendChild(select);
+        
+        // Tambahkan event listener untuk perubahan outlet
+        select.addEventListener('change', function() {
+            const selectedOutletId = this.value;
+            localStorage.setItem('selectedOutletId', selectedOutletId);
+            
+            // Refetch data inventory dengan outlet baru
+            const datePicker = document.getElementById('reportDateInput');
+            const currentDate = datePicker ? datePicker.value : new Date().toISOString().split('T')[0];
+            console.log('Current date:', currentDate, 'New date:', date);
+            fetchInventoryData(currentDate);
+                        // Broadcast change event untuk komponen lain
+            const event = new Event('outletChanged');
+            window.dispatchEvent(event);
+        });
+    }
 
     // Fungsi untuk mengambil data dari API
     function fetchInventoryData(date) {
         console.log("Fetching inventory data for date:", date);
         
-        // Tampilkan loading indicator
-        document.getElementById('loadingIndicator').classList.remove('hidden');
+        // Pastikan date selalu ada nilainya
+        date = date || new Date().toISOString().split('T')[0];
+        const outletId = getSelectedOutletId();
         
-        // Default ke tanggal hari ini jika tidak ada tanggal yang dipilih
-        if (!date) {
-            date = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
-            console.log("No date provided, using today:", date);
+        // Update state terbaru
+        currentDate = date;
+        currentOutletId = outletId;
+        
+        // Handle loading indicator lebih aman
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        if (loadingIndicator) {
+            loadingIndicator.classList.remove('hidden');
         }
         
-        const apiUrl = `http://127.0.0.1:8000/api/reports/inventory-by-date/1?date=${date}`;
-        console.log("Fetching from:", apiUrl);
+        const apiUrl = `http://127.0.0.1:8000/api/reports/inventory-by-date/${outletId}?date=${date}`;
+        console.log('API URL:', apiUrl);
         
-        // Fetch data dari API
         fetch(apiUrl, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 'Accept': 'application/json'
             }
         })
-            .then(response => {
-                console.log("API response status:", response.status);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log("API data received:", data);
-                
-                // Sembunyikan loading indicator
-                document.getElementById('loadingIndicator').classList.add('hidden');
-                
-                if (data.success) {
-                    // Simpan data
-                    inventoryData = data.data.inventory_items;
-                    
-                    // Update UI
-                    updateOutletInfo(data.data);
-                    renderInventoryTable(inventoryData);
-                    
-                    // Tampilkan alert sukses
-                    showAlert('success', `Data stok berhasil diperbarui untuk tanggal ${new Date(date).toLocaleDateString('id-ID')}`);
-                } else {
-                    showAlert('error', 'Gagal mengambil data: ' + (data.message || 'Terjadi kesalahan'));
-                }
-            })
-            .catch(error => {
-                // Sembunyikan loading indicator
-                document.getElementById('loadingIndicator').classList.add('hidden');
-                console.error('Error fetching data:', error);
-                showAlert('error', 'Gagal mengambil data: ' + error.message);
-            });
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
+        .then(data => {
+            // Sembunyikan loading indicator jika ada
+            if (loadingIndicator) {
+                loadingIndicator.classList.add('hidden');
+            }
+            
+            if (data.success) {
+                inventoryData = data.data.inventory_items;
+                updateOutletInfo(data.data);
+                renderInventoryTable(inventoryData);
+                showAlert('success', `Data stok berhasil diperbarui`);
+            } else {
+                showAlert('error', 'Gagal mengambil data: ' + (data.message || 'Terjadi kesalahan'));
+            }
+        })
+        .catch(error => {
+            // Sembunyikan loading indicator jika ada
+            if (loadingIndicator) {
+                loadingIndicator.classList.add('hidden');
+            }
+            console.error('Error fetching data:', error);
+            showAlert('error', 'Gagal mengambil data: ' + error.message);
+        });
     }
 
     // Update informasi outlet dan tanggal
     function updateOutletInfo(data) {
-        document.getElementById('outletName').textContent = `Menampilkan stok untuk: ${data.outlet}`;
+        const outletId = getSelectedOutletId();
+        const outletName = data.outlet_name || `Outlet ${outletId}`;
+        document.getElementById('outletName').textContent = `Menampilkan stok untuk: ${outletName}`;
         
         // Format tanggal menjadi lebih readable
         const formattedDate = new Date(data.date).toLocaleDateString('id-ID', {
@@ -166,6 +296,25 @@
         if (data.is_realtime) {
             document.getElementById('reportDate').innerHTML += ' <span class="ml-1 px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">Realtime</span>';
         }
+    }
+
+    // Fungsi untuk mendengarkan perubahan outlet
+    function connectOutletSelectionToInventory() {
+        // Listen for custom event
+        window.addEventListener('outletChanged', function() {
+            const datePicker = document.getElementById('reportDateInput');
+            const currentDate = datePicker ? datePicker.value : new Date().toISOString().split('T')[0];
+            fetchInventoryData(currentDate);
+        });
+        
+        // Listen for localStorage changes (for multi-tab support)
+        window.addEventListener('storage', function(event) {
+            if (event.key === 'selectedOutletId') {
+                const datePicker = document.getElementById('reportDateInput');
+                const currentDate = datePicker ? datePicker.value : new Date().toISOString().split('T')[0];
+                fetchInventoryData(currentDate);
+            }
+        });
     }
 
     // Render tabel inventori
@@ -237,6 +386,8 @@
     // Fungsi search/filter
     function setupSearch() {
         const searchInput = document.getElementById('searchInput');
+        if (!searchInput) return;
+        
         searchInput.addEventListener('input', function() {
             const searchTerm = this.value.toLowerCase().trim();
             
@@ -260,6 +411,11 @@
     // Tampilkan alert/notifikasi
     function showAlert(type, message) {
         const alertContainer = document.getElementById('alertContainer');
+        if (!alertContainer) {
+            console.error('Alert container not found!');
+            return;
+        }
+        
         const alertId = 'alert-' + Date.now();
         
         const alertTypes = {
@@ -333,6 +489,11 @@
     document.addEventListener('DOMContentLoaded', function() {
         console.log("DOM fully loaded");
         
+        // Fetch daftar outlet
+        fetchOutlets();
+
+        document.getElementById('outletSelector')?.addEventListener('change', handleOutletChange);
+        
         // Pastikan elemen reportDateInput ada
         const dateInput = document.getElementById('reportDateInput');
         if (dateInput) {
@@ -365,6 +526,19 @@
         
         // Setup search functionality
         setupSearch();
+        connectOutletSelectionToInventory();
+        
+        // Check URL for outlet_id parameter on load
+        const urlParams = new URLSearchParams(window.location.search);
+        const outletIdFromUrl = urlParams.get('outlet_id');
+        if (outletIdFromUrl) {
+            console.log("Found outlet_id in URL:", outletIdFromUrl);
+            localStorage.setItem('selectedOutletId', outletIdFromUrl);
+            
+            // Trigger event for other components
+            const event = new Event('outletChanged');
+            window.dispatchEvent(event);
+        }
     });
 </script>
 

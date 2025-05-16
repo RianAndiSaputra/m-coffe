@@ -67,7 +67,16 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 <script>
+    // Mapping style untuk status stok
+    const stockStyles = {
+        'normal': { bg: 'bg-green-100', text: 'text-green-700' },
+        'low': { bg: 'bg-yellow-100', text: 'text-yellow-700' },
+        'critical': { bg: 'bg-red-100', text: 'text-red-700' }
+    };
+
     // Fungsi untuk menampilkan alert
     function showAlert(type, message) {
         const alertContainer = document.getElementById('alertContainer');
@@ -88,6 +97,13 @@
                 textColor: 'text-red-800',
                 icon: 'alert-circle',
                 iconColor: 'text-red-500'
+            },
+            warning: {
+                bgColor: 'bg-yellow-50',
+                borderColor: 'border-yellow-200',
+                textColor: 'text-yellow-800',
+                icon: 'alert-triangle',
+                iconColor: 'text-yellow-500'
             }
         };
         
@@ -130,6 +146,27 @@
         }
     }
 
+    // Function to get currently selected outlet ID
+    function getSelectedOutletId() {
+        // First check URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const outletIdFromUrl = urlParams.get('outlet_id');
+        
+        if (outletIdFromUrl) {
+            return outletIdFromUrl;
+        }
+        
+        // Then check localStorage
+        const savedOutletId = localStorage.getItem('selectedOutletId');
+        
+        if (savedOutletId) {
+            return savedOutletId;
+        }
+        
+        // Default to outlet ID 1 if nothing is found
+        return 1;
+    }
+
     // Fungsi untuk memuat data outlet
     async function loadOutlets() {
         try {
@@ -151,6 +188,19 @@
             showAlert('error', 'Gagal memuat data outlet');
             return [];
         }
+    }
+    
+    // Fungsi untuk mendapatkan ikon berdasarkan kategori produk
+    function getCategoryIcon(categoryName) {
+        const icons = {
+            'Roti Manis': 'croissant',
+            'Kue Basah': 'cake',
+            'Kue Kering': 'cookie',
+            'Pastry': 'pizza',
+            'Minuman': 'coffee'
+        };
+        
+        return icons[categoryName] || 'package';
     }
 
     // Fungsi untuk membuka modal transfer
@@ -199,7 +249,7 @@
         modal.classList.remove('flex');
     }
 
-    // Fungsi untuk menutup modal transfer
+    // Fungsi untuk mengirim data transfer
     async function submitTransfer() {
         const productId = document.getElementById('productId').value;
         const sourceOutletId = document.getElementById('sourceOutletId').value;
@@ -236,7 +286,8 @@
                     target_outlet_id: targetOutletId,
                     quantity: quantity,
                     user_id: userId,
-                    notes: notes
+                    notes: notes,
+                    date: document.getElementById('reportDateInput').value // Tambahkan tanggal transfer
                 })
             });
             
@@ -249,8 +300,9 @@
             closeModalTransfer();
             showAlert('success', 'Transfer stok berhasil dilakukan');
             
-            // Refresh data stok
-            loadProductData();
+            // Refresh data stok dengan tanggal dan outlet yang sedang dipilih
+            const currentDate = document.getElementById('reportDateInput').value;
+            loadProductData(currentDate);
         } catch (error) {
             console.error('Transfer error:', error);
             showAlert('error', error.message || 'Gagal melakukan transfer');
@@ -267,46 +319,57 @@
         }
     }
 
-    // Mendapatkan ikon berdasarkan kategori produk
-    function getCategoryIcon(categoryName) {
-        const icons = {
-            'Roti Manis': 'croissant',
-            'Kue Basah': 'cake',
-            'Kue Kering': 'cookie',
-            'Pastry': 'pizza',
-            'Minuman': 'coffee'
-        };
-        
-        return icons[categoryName] || 'package';
-    }
-
-    // Fungsi untuk memuat data dari API
-    async function loadProductData() {
+    // Fungsi untuk memuat data produk berdasarkan outlet dan tanggal
+    async function loadProductData(date) {
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/products/outlet/1', {
+            // Tampilkan loading state
+            const tableBody = document.getElementById('productTableBody');
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="py-8 text-center text-gray-500">
+                        <div class="flex flex-col items-center justify-center gap-3">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                            <span>Memuat data...</span>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            
+            // Get dynamic outlet ID
+            const outletId = getSelectedOutletId();
+            
+            console.log(`Fetching product data for outlet ID: ${outletId} on date: ${date}`);
+            
+            // Fetch data dari API dengan parameter outlet dan tanggal
+            const response = await fetch(`http://127.0.0.1:8000/api/products/outlet/${outletId}?date=${date}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
                     'Accept': 'application/json'
                 }
             });
+            
             const result = await response.json();
             
             if (!result.success) {
                 throw new Error(result.message || 'Gagal memuat data');
             }
 
-            const outletId = result.outlet_id || 1; // Default ke 1 jika tidak ada
-        const outletName = result.outlet_name || 'Outlet 1'; // Default jika tidak ada
+            // Update informasi outlet
+            updateOutletInfo(result.outlet || {});
             
-            renderProductTable(result.data, outletId, outletName);
+            // Render tabel produk
+            renderProductTable(result.data, outletId, result.outlet?.name || 'Outlet');
         } catch (error) {
             console.error('Error loading data:', error);
             document.getElementById('productTableBody').innerHTML = `
                 <tr>
-                    <td colspan="5" class="py-4 text-center text-red-500">
+                    <td colspan="5" class="py-6 text-center text-red-500">
                         <div class="flex flex-col items-center justify-center gap-2">
                             <i data-lucide="alert-triangle" class="w-8 h-8"></i>
                             <span>Gagal memuat data. ${error.message}</span>
+                            <button onclick="retryLoadData()" class="mt-2 px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600">
+                                Coba Lagi
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -318,17 +381,41 @@
         }
     }
 
-    // Fungsi untuk menampilkan data produk ke tabel
+    // Fungsi untuk update informasi outlet
+    function updateOutletInfo(outlet) {
+        // Update elemen yang menampilkan nama outlet
+        const outletNameElements = document.querySelectorAll('.outlet-name');
+        outletNameElements.forEach(el => {
+            el.textContent = `Outlet Aktif: ${outlet.name || 'Tidak diketahui'}`;
+        });
+        
+        // Update elemen yang menampilkan alamat outlet
+        const outletAddressElements = document.querySelectorAll('.outlet-address');
+        outletAddressElements.forEach(el => {
+            el.textContent = outlet.address || '';
+        });
+    }
+
+    // Fungsi untuk coba lagi jika gagal
+    function retryLoadData() {
+        const datePicker = document.getElementById('reportDateInput');
+        const currentDate = datePicker?._flatpickr?.selectedDates[0] || new Date();
+        const formattedDate = currentDate.toISOString().split('T')[0];
+        
+        loadProductData(formattedDate);
+    }
+
+    // Fungsi untuk render tabel produk
     function renderProductTable(products, outletId, outletName) {
         const tableBody = document.getElementById('productTableBody');
         
         if (!products || products.length === 0) {
             tableBody.innerHTML = `
                 <tr>
-                    <td colspan="5" class="py-4 text-center text-gray-500">
+                    <td colspan="5" class="py-8 text-center text-gray-500">
                         <div class="flex flex-col items-center justify-center gap-2">
-                            <i data-lucide="package-x" class="w-8 h-8"></i>
-                            <span>Tidak ada data produk</span>
+                            <i data-lucide="package-x" class="w-10 h-10 text-gray-400"></i>
+                            <span class="mt-2">Tidak ada data produk pada tanggal ini</span>
                         </div>
                     </td>
                 </tr>
@@ -347,11 +434,19 @@
             if (!product.is_active) return; // Skip produk tidak aktif
             
             const categoryIcon = getCategoryIcon(product.category.name);
-            const isLowStock = product.quantity <= product.min_stock;
-            const stockClass = isLowStock ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700';
+            
+            // Tentukan status stok (normal, low, atau critical)
+            let stockStatus = 'normal';
+            if (product.quantity <= product.min_stock * 0.5) {
+                stockStatus = 'critical';
+            } else if (product.quantity <= product.min_stock) {
+                stockStatus = 'low';
+            }
+            
+            const stockStyle = stockStyles[stockStatus];
             
             tableContent += `
-                <tr>
+                <tr class="border-b hover:bg-gray-50">
                     <td class="py-4 font-medium">${product.sku}</td>
                     <td class="py-4">
                         <div class="flex items-center gap-3">
@@ -364,13 +459,14 @@
                     <td class="py-4">${product.category.name}</td>
                     <td class="py-4">
                         <div class="flex flex-col">
-                            <span class="px-3 py-1.5 text-sm font-medium ${stockClass} rounded-full w-fit">${product.quantity}</span>
+                            <span class="px-3 py-1.5 text-sm font-medium ${stockStyle.bg} ${stockStyle.text} rounded-full w-fit">${product.quantity}</span>
                             <span class="text-xs text-gray-500 mt-1">Min: ${product.min_stock}</span>
                         </div>
                     </td>
                     <td class="py-4">
                         <button onclick="openModalTransfer('${product.id}', '${product.sku}', '${product.name}', ${outletId}, '${outletName}', ${product.quantity})" 
-                            class="px-3 py-1.5 text-sm font-medium text-white bg-orange-500 rounded-md hover:bg-orange-600 flex items-center gap-2">
+                            class="px-3 py-1.5 text-sm font-medium text-white bg-orange-500 rounded-md hover:bg-orange-600 flex items-center gap-2"
+                            ${product.quantity <= 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
                             <i data-lucide="truck" class="w-4 h-4"></i> Transfer
                         </button>
                     </td>
@@ -386,43 +482,165 @@
         }
     }
 
+    // Fungsi untuk memperbarui info outlet ketika tidak ada data
+    async function updateOutletInfoFromSelection() {
+        try {
+            const outletId = getSelectedOutletId();
+            const response = await fetch(`http://127.0.0.1:8000/api/outlets/${outletId}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Accept': 'application/json'
+                }
+            });
+            
+            const { data, success } = await response.json();
+            
+            if (success && data) {
+                updateOutletInfo(data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch outlet details:', error);
+        }
+    }
+
+    // Connect to outlet selection dropdown
+    function connectOutletSelectionToProducts() {
+        // Listen for outlet changes in localStorage
+        window.addEventListener('storage', function(event) {
+            if (event.key === 'selectedOutletId') {
+                // Get current date
+                const datePicker = document.getElementById('reportDateInput');
+                const currentDate = datePicker?._flatpickr?.selectedDates[0] || new Date();
+                const formattedDate = currentDate.toISOString().split('T')[0];
+                
+                // Reload product data with new outlet
+                loadProductData(formattedDate);
+            }
+        });
+        
+        // Also watch for clicks on outlet items in dropdown
+        const outletListContainer = document.getElementById('outletListContainer');
+        if (outletListContainer) {
+            outletListContainer.addEventListener('click', function(event) {
+                // Find the clicked li element
+                let targetElement = event.target;
+                while (targetElement && targetElement !== outletListContainer && targetElement.tagName !== 'LI') {
+                    targetElement = targetElement.parentElement;
+                }
+                
+                // If we clicked on an outlet list item
+                if (targetElement && targetElement.tagName === 'LI') {
+                    // Update product data after a short delay to allow your existing code to complete
+                    setTimeout(() => {
+                        const datePicker = document.getElementById('reportDateInput');
+                        const currentDate = datePicker?._flatpickr?.selectedDates[0] || new Date();
+                        const formattedDate = currentDate.toISOString().split('T')[0];
+                        
+                        loadProductData(formattedDate);
+                    }, 100);
+                }
+            });
+        }
+    }
+
     // Fungsi pencarian produk
     function setupSearch() {
         const searchInput = document.getElementById('searchInput');
         
-        searchInput.addEventListener('input', async function() {
-            try {
-                const searchTerm = this.value.toLowerCase().trim();
-                const response = await fetch('http://127.0.0.1:8000/api/products/outlet/1');
-                const result = await response.json();
+        if (!searchInput) return;
+        
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            const rows = document.querySelectorAll('#productTableBody tr');
+            
+            rows.forEach(row => {
+                // Skip the "no data" row
+                if (row.querySelector('td[colspan]')) return;
                 
-                if (!result.success) {
-                    throw new Error(result.message || 'Gagal memuat data');
+                const sku = row.querySelector('td:first-child').textContent.toLowerCase();
+                const name = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                const category = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                
+                const matches = 
+                    sku.includes(searchTerm) || 
+                    name.includes(searchTerm) || 
+                    category.includes(searchTerm);
+                
+                row.style.display = matches ? '' : 'none';
+            });
+            
+            // Show "no results" message if all rows are hidden
+            let allHidden = true;
+            rows.forEach(row => {
+                if (row.style.display !== 'none' && !row.querySelector('td[colspan]')) {
+                    allHidden = false;
                 }
+            });
+            
+            // If search term exists and no results found
+            if (searchTerm && allHidden) {
+                // Remove existing "no results" row if it exists
+                const existingNoResults = document.querySelector('#noResultsRow');
+                if (existingNoResults) existingNoResults.remove();
                 
-                // Filter produk berdasarkan pencarian
-                const filteredProducts = result.data.filter(product => 
-                    product.name.toLowerCase().includes(searchTerm) || 
-                    product.sku.toLowerCase().includes(searchTerm) ||
-                    product.category.name.toLowerCase().includes(searchTerm)
-                );
+                // Add "no results" row
+                const tbody = document.getElementById('productTableBody');
+                const noResultsRow = document.createElement('tr');
+                noResultsRow.id = 'noResultsRow';
+                noResultsRow.innerHTML = `
+                    <td colspan="5" class="py-4 text-center text-gray-500">
+                        <div class="flex flex-col items-center justify-center gap-2">
+                            <i data-lucide="search-x" class="w-8 h-8"></i>
+                            <span>Tidak ada hasil untuk "${searchTerm}"</span>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(noResultsRow);
                 
-                renderProductTable(filteredProducts);
-            } catch (error) {
-                console.error('Error searching data:', error);
-                showAlert('error', 'Gagal melakukan pencarian');
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+            } else {
+                // Remove "no results" row if it exists
+                const existingNoResults = document.querySelector('#noResultsRow');
+                if (existingNoResults) existingNoResults.remove();
             }
         });
     }
-
-    // Event listener untuk tombol di modal
-    document.getElementById('btnBatalTransfer')?.addEventListener('click', closeModalTransfer);
-    document.getElementById('btnSubmitTransfer')?.addEventListener('click', submitTransfer);
     
-    // Load data saat halaman dimuat
+    // Event listener untuk tombol di modal
     document.addEventListener('DOMContentLoaded', function() {
-        loadProductData();
+        const btnBatalTransfer = document.getElementById('btnBatalTransfer');
+        if (btnBatalTransfer) {
+            btnBatalTransfer.addEventListener('click', closeModalTransfer);
+        }
+        
+        const btnSubmitTransfer = document.getElementById('btnSubmitTransfer');
+        if (btnSubmitTransfer) {
+            btnSubmitTransfer.addEventListener('click', submitTransfer);
+        }
+        
+        // Setup date picker untuk filter tanggal
+        flatpickr("#reportDateInput", {
+            dateFormat: "Y-m-d",
+            defaultDate: "today",
+            onChange: async function(selectedDates, dateStr) {
+                await loadProductData(dateStr);
+            },
+            locale: {
+                firstDayOfWeek: 1
+            }
+        });
+        
+        // Inisialisasi dengan tanggal hari ini
+        const initialDate = new Date().toISOString().split('T')[0];
+        loadProductData(initialDate);
+        
+        // Setup pencarian
         setupSearch();
+        
+        // Connect outlet selection to product data updates
+        connectOutletSelectionToProducts();
     });
 </script>
 
