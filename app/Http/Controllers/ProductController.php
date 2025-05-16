@@ -408,6 +408,7 @@ class ProductController extends Controller
             return $this->errorResponse($th->getMessage());
         }
     }
+    
     public function getOutletProductsPOS(Request $request, $outletId)
     {
         try {
