@@ -1,9 +1,5 @@
-<!-- Modal Edit Kategori -->
 <div id="modalEditKategori" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center" onclick="closeModal('modalEditKategori')">
-    <div
-        class="bg-white w-full max-w-md rounded-lg shadow-lg max-h-screen flex flex-col"
-        onclick="event.stopPropagation()"
-    >
+    <div class="bg-white w-full max-w-md rounded-lg shadow-lg max-h-screen flex flex-col" onclick="event.stopPropagation()">
         <!-- Header -->
         <div class="p-4 border-b">
             <h2 class="text-lg font-semibold">Edit Kategori</h2>
@@ -49,7 +45,6 @@
                     class="px-4 py-2 text-red-600 hover:text-red-800 text-sm"
                     onclick="hapusKategori()"
                 >
-                    Hapus Kategori
                 </button>
             </div>
             <div class="space-x-2">

@@ -5,20 +5,46 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
 {
     use ApiResponse;
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+
+    public function indexOLD()
     {
         try {
             $categories = Category::withCount('products')->get();
             return $this->successResponse($categories, 'Categories retrieved successfully');
         } catch (\Throwable $th) {
             return $this->errorResponse($th->getMessage());
+        }
+    }
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        try {
+            $categories = Category::with(['products.inventory'])->get()
+                ->map(function ($category) {
+                    $category->total_inventory_quantity = $category->products->sum(function ($product) {
+                        // Akses relasi inventory (bukan inventories)
+                        return $product->inventory ? $product->inventory->quantity : 0;
+                    });
+                    return $category;
+                });
+    
+            return response()->json([
+                'success' => true,
+                'data' => $categories
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat memuat data kategori'
+            ], 500);
         }
     }
 

@@ -84,7 +84,7 @@
                 <select id="editStatus" class="w-full border rounded px-3 py-2 text-sm">
                     <option value="active">Aktif</option>
                     <option value="inactive">Nonaktif</option>
-                    <option value="archived">Diarsipkan</option>
+                    {{-- <option value="archived">Diarsipkan</option> --}}
                 </select>
             </div>
         </div>
@@ -92,7 +92,7 @@
         <!-- Footer: Tombol Aksi -->
         <div class="p-4 border-t flex justify-between">
             <div>
-                <button id="btnHapusProduk" class="px-4 py-2 text-red-600 hover:text-red-800 text-sm">Hapus Produk</button>
+                <button id="btnHapusProduk" class="px-4 py-2 text-red-600 hover:text-red-800 text-sm"></button>
             </div>
             <div class="space-x-2">
                 <button id="btnBatalEdit" class="px-4 py-2 border rounded hover:bg-gray-100">Batal</button>

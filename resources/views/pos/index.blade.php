@@ -36,7 +36,7 @@
         }
         .cart-items-container {
             overflow-y: auto;
-            max-height: calc(100vh - 400px);
+            flex-grow: 1;
         }
         .cart-item-grid {
             display: grid;
@@ -69,6 +69,21 @@
             border: 1px solid #d1d5db;
             border-radius: 4px;
             padding: 4px;
+        }
+        /* New styles for sticky cart footer */
+        .cart-section {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .payment-section {
+            margin-top: auto;
+            background: white;
+        }
+        /* Scrollable products */
+        .products-list-container {
+            overflow-y: auto;
+            flex-grow: 1;
         }
     </style>
 </head>
@@ -128,7 +143,7 @@
                 <hr class="border-t border-orange-500 opacity-30 my-0">
 
                 <!-- Products List -->
-                <div id="productsContainer" class="flex-1 overflow-y-auto p-4">
+                <div id="productsContainer" class="products-list-container p-4">
                     <div class="empty-cart p-8 text-center">
                         <i class="fas fa-spinner fa-spin text-gray-300"></i>
                         <p class="text-gray-500 text-lg font-medium">Memuat produk...</p>
@@ -162,7 +177,7 @@
                     </div>
                 </div>
 
-                <!-- Payment Section -->
+                <!-- Payment Section - Now sticks to bottom -->
                 <div class="payment-section p-5 border-t border-orange-200">
                     <div class="flex justify-between mb-1">
                         <div class="summary-item text-base text-gray-700">Subtotal</div>
@@ -208,7 +223,7 @@
         lucide.createIcons();
         
         // Initialize cart and product data
-        let cart = [];
+        let cart = []; // Cart is now empty on refresh
         let products = [];
         let categories = [];
         
@@ -299,7 +314,13 @@
                 showNotification('Keranjang belanja kosong', 'warning');
                 return;
             }
-            openModal('paymentModal');
+            // Calculate total from cart items
+            const total = cart.reduce((sum, item) => {
+                const discount = item.discount || 0;
+                return sum + (item.price * item.quantity - discount);
+            }, 0);
+            // Call showPaymentModal to update cartItems and UI
+            showPaymentModal(total);
         });
         
         btnStockModal.addEventListener('click', function() {
@@ -701,35 +722,11 @@
             renderProducts(activeCategory, searchTerm);
         });
         
-        function initCart() {
-            const savedCart = localStorage.getItem('posCart');
-            if (savedCart) {
-                try {
-                    cart = JSON.parse(savedCart);
-                    updateCart();
-                } catch (e) {
-                    console.error('Error loading cart from localStorage:', e);
-                    cart = [];
-                }
-            }
-        }
-        
-        function saveCart() {
-            localStorage.setItem('posCart', JSON.stringify(cart));
-        }
-        
-        ['click', 'change', 'input'].forEach(eventType => {
-            document.addEventListener(eventType, function(e) {
-                if (e.target.closest('.cart-item') || e.target.closest('.btn-add-to-cart')) {
-                    setTimeout(saveCart, 100);
-                }
-            });
-        });
+        // Removed cart persistence from localStorage since you want it to clear on refresh
         
         window.clearCart = function() {
             cart = [];
             updateCart();
-            saveCart();
             showNotification('Keranjang telah dikosongkan', 'info');
         };
         
@@ -737,7 +734,8 @@
             fetchProducts();
         };
         
-        initCart();
+        // Initialize with empty cart
+        updateCart();
         const loadedFromStorage = loadProductsFromLocalStorage();
         fetchProducts();
     });
