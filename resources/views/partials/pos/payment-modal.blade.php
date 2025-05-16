@@ -209,8 +209,7 @@
     </div>
 
     <script>
-        // Global variables to store cart data
-        let cartItems = [];
+        // Global variables
         let selectedMemberId = null;
         let outletId = null;
         let shiftId = null;
@@ -225,21 +224,15 @@
         function showPaymentModal(total) {
             currentTotal = total;
 
-            // Get cart data from the POS system
+            // Get cart data directly from window.cart
             const cart = window.cart || [];
+            
+            // Calculate total items in cart
             const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
             // Update UI
             document.getElementById("paymentTotal").textContent = formatRupiah(total);
             document.getElementById("itemCount").textContent = `${itemCount} item dalam transaksi`;
-
-            // Store cart items for processing
-            cartItems = cart.map((item) => ({
-                product_id: item.id,
-                quantity: item.quantity,
-                price: item.price,
-                discount: item.discount || 0,
-            }));
 
             // Reset form
             document.getElementById("cashReceived").value = "";
@@ -285,9 +278,9 @@
                         noMemberItem.className = "px-3 py-2 hover:bg-orange-50 cursor-pointer";
                         noMemberItem.onclick = () => selectMember(null, "Tanpa Member");
                         noMemberItem.innerHTML = `
-                    <p class="font-medium">Tanpa Member</p>
-                    <p class="text-xs text-gray-500">Tidak menggunakan member</p>
-                `;
+                            <p class="font-medium">Tanpa Member</p>
+                            <p class="text-xs text-gray-500">Tidak menggunakan member</p>
+                        `;
                         memberList.appendChild(noMemberItem);
 
                         // Add all members from API
@@ -296,9 +289,9 @@
                             item.className = "px-3 py-2 hover:bg-orange-50 cursor-pointer";
                             item.onclick = () => selectMember(member.id, member.name);
                             item.innerHTML = `
-                        <p class="font-medium">${member.name}</p>
-                        <p class="text-xs text-gray-500">${member.member_code || member.phone || ""}</p>
-                    `;
+                                <p class="font-medium">${member.name}</p>
+                                <p class="text-xs text-gray-500">${member.member_code || member.phone || ""}</p>
+                            `;
                             memberList.appendChild(item);
                         });
                     }
@@ -308,19 +301,19 @@
                     // Fallback with sample data if API fails
                     const memberList = document.getElementById("memberList");
                     memberList.innerHTML = `
-                <li onclick="selectMember(null, 'Tanpa Member')" class="px-3 py-2 hover:bg-orange-50 cursor-pointer">
-                    <p class="font-medium">Tanpa Member</p>
-                    <p class="text-xs text-gray-500">Tidak menggunakan member</p>
-                </li>
-                <li onclick="selectMember(1, 'Andi Pratama')" class="px-3 py-2 hover:bg-orange-50 cursor-pointer">
-                    <p class="font-medium">Andi Pratama</p>
-                    <p class="text-xs text-gray-500">M001</p>
-                </li>
-                <li onclick="selectMember(2, 'Budi Santoso')" class="px-3 py-2 hover:bg-orange-50 cursor-pointer">
-                    <p class="font-medium">Budi Santoso</p>
-                    <p class="text-xs text-gray-500">M002</p>
-                </li>
-            `;
+                        <li onclick="selectMember(null, 'Tanpa Member')" class="px-3 py-2 hover:bg-orange-50 cursor-pointer">
+                            <p class="font-medium">Tanpa Member</p>
+                            <p class="text-xs text-gray-500">Tidak menggunakan member</p>
+                        </li>
+                        <li onclick="selectMember(1, 'Andi Pratama')" class="px-3 py-2 hover:bg-orange-50 cursor-pointer">
+                            <p class="font-medium">Andi Pratama</p>
+                            <p class="text-xs text-gray-500">M001</p>
+                        </li>
+                        <li onclick="selectMember(2, 'Budi Santoso')" class="px-3 py-2 hover:bg-orange-50 cursor-pointer">
+                            <p class="font-medium">Budi Santoso</p>
+                            <p class="text-xs text-gray-500">M002</p>
+                        </li>
+                    `;
                 });
         }
 
@@ -385,26 +378,43 @@
             const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
             let totalPaid = currentTotal; // Default for QRIS and transfer
 
-            // Re-sync cartItems from current window.cart to ensure latest cart state
+            // Get current cart data directly from window.cart
             const currentCart = window.cart || [];
-            cartItems = currentCart.map((item) => ({
+            
+            // Validate cart items before proceeding
+            if (!currentCart || currentCart.length === 0) {
+                Swal.fire({
+                    position: "top-end",
+                    icon: "error",
+                    title: "Keranjang belanja kosong",
+                    text: "Silakan tambahkan produk sebelum melakukan pembayaran",
+                    showConfirmButton: false,
+                    timer: 3000,
+                    toast: true
+                });
+                return;
+            }
+
+            // Prepare cart items for API
+            const cartItems = currentCart.map((item) => ({
                 product_id: item.id,
                 quantity: item.quantity,
                 price: item.price,
-                discount: item.discount !== undefined ? item.discount : 0,
+                discount: item.discount || 0,
             }));
-
-            // Validate cart items before proceeding
-            if (!cartItems || cartItems.length === 0) {
-                showErrorAlert("Keranjang belanja kosong, silakan tambahkan produk sebelum melakukan pembayaran");
-                return;
-            }
 
             // Validate cash payment
             if (paymentMethod === "cash") {
                 const cashReceived = parseInt(document.getElementById("cashReceived").value) || 0;
                 if (cashReceived < currentTotal) {
-                    showErrorAlert("Jumlah uang tidak mencukupi");
+                    Swal.fire({
+                        position: "top-end",
+                        icon: "error",
+                        title: "Jumlah uang tidak mencukupi",
+                        showConfirmButton: false,
+                        timer: 3000,
+                        toast: true
+                    });
                     return;
                 }
                 totalPaid = cashReceived;
@@ -433,7 +443,15 @@
             // Call API to create order
             const token = localStorage.getItem("token");
             if (!token) {
-                showErrorAlert("Token tidak ditemukan, silakan login kembali");
+                Swal.fire({
+                    position: "top-end",
+                    icon: "error",
+                    title: "Token tidak ditemukan",
+                    text: "Silakan login kembali",
+                    showConfirmButton: false,
+                    timer: 3000,
+                    toast: true
+                });
                 return;
             }
 
@@ -485,12 +503,28 @@
                         });
                     } else {
                         // Show error message
-                        showErrorAlert(data.message || "Terjadi kesalahan saat memproses pembayaran");
+                        Swal.fire({
+                            position: "top-end",
+                            icon: "error",
+                            title: "Gagal memproses pembayaran",
+                            text: data.message || "Terjadi kesalahan saat memproses pembayaran",
+                            showConfirmButton: false,
+                            timer: 3000,
+                            toast: true
+                        });
                     }
                 })
                 .catch((error) => {
                     console.error("Error processing payment:", error);
-                    showErrorAlert("Terjadi kesalahan saat memproses pembayaran");
+                    Swal.fire({
+                        position: "top-end",
+                        icon: "error",
+                        title: "Terjadi kesalahan",
+                        text: "Gagal memproses pembayaran",
+                        showConfirmButton: false,
+                        timer: 3000,
+                        toast: true
+                    });
                 });
         }
 
@@ -498,20 +532,6 @@
         function printReceipt() {
             // Implement receipt printing logic here
             console.log("Printing receipt...");
-        }
-
-        // Show error alert
-        function showErrorAlert(message) {
-            Swal.fire({
-                position: "top-end",
-                icon: "error",
-                title: message,
-                showConfirmButton: false,
-                timer: 3000,
-                background: "#FF0000",
-                iconColor: "#fff",
-                toast: true,
-            });
         }
 
         // Toggle member dropdown

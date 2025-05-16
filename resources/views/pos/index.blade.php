@@ -64,8 +64,8 @@
             padding: 4px;
         }
         .discount-input {
-            width: 50px;
-            text-align: center;
+            width: 70px;
+            text-align: right;
             border: 1px solid #d1d5db;
             border-radius: 4px;
             padding: 4px;
@@ -162,8 +162,8 @@
                 <div class="cart-column-headers p-4 text-sm font-semibold text-gray-600 bg-gray-50">
                     <div class="grid grid-cols-12">
                         <div class="col-span-5">Produk</div>
-                        <div class="col-span-3 text-center">Qty</div>
-                        <div class="col-span-2 text-center">Diskon</div>
+                        <div class="col-span-2 text-center">Qty</div>
+                        <div class="col-span-3 text-center">Diskon</div>
                         <div class="col-span-2 text-right">Subtotal</div>
                     </div>
                 </div>
@@ -247,6 +247,21 @@
         const API_URL = 'http://127.0.0.1:8000/api/products/outlet/1';
         const API_TOKEN = localStorage.getItem('token') || '';
         
+        // Format currency input
+        function formatCurrencyInput(value) {
+            // Remove non-numeric characters
+            let num = value.replace(/[^0-9]/g, '');
+            // Convert to number
+            num = parseInt(num) || 0;
+            // Format with thousand separators
+            return num.toLocaleString('id-ID');
+        }
+
+        // Parse currency input to number
+        function parseCurrencyInput(value) {
+            return parseInt(value.replace(/[^0-9]/g, '')) || 0;
+        }
+
         // Show SweetAlert notification
         function showNotification(message, type = 'success') {
             const Toast = Swal.mixin({
@@ -582,7 +597,6 @@
                     }
                     
                     updateCart();
-                    showNotification(`${product.name} telah ditambahkan ke keranjang`);
                 });
             });
         }
@@ -632,7 +646,7 @@
                         </div>
                         
                         <div class="discount-control">
-                            <input type="text" class="discount-input" value="${item.discount}" data-index="${index}" placeholder="0">
+                            <input type="text" class="discount-input" value="Rp ${item.discount.toLocaleString('id-ID')}" data-index="${index}" placeholder="Rp 0">
                         </div>
                         
                         <div class="subtotal text-right font-medium">
@@ -655,6 +669,7 @@
             
             lucide.createIcons();
             
+            // Add event listeners to quantity controls
             document.querySelectorAll('.btn-decrease').forEach(button => {
                 button.addEventListener('click', function() {
                     const index = parseInt(this.getAttribute('data-index'));
@@ -690,10 +705,30 @@
                 });
             });
             
+            // Add event listeners to discount inputs
             document.querySelectorAll('.discount-input').forEach(input => {
+                // Format on blur
+                input.addEventListener('blur', function() {
+                    const formattedValue = formatCurrencyInput(this.value);
+                    this.value = formattedValue ? `Rp ${formattedValue}` : 'Rp 0';
+                    
+                    const index = parseInt(this.getAttribute('data-index'));
+                    const discount = parseCurrencyInput(this.value);
+                    cart[index].discount = discount;
+                    cart[index].subtotal = calculateItemSubtotal(cart[index]);
+                    updateCart();
+                });
+                
+                // Remove formatting on focus for easier editing
+                input.addEventListener('focus', function() {
+                    const numValue = parseCurrencyInput(this.value);
+                    this.value = numValue.toString();
+                });
+                
+                // Handle change event
                 input.addEventListener('change', function() {
                     const index = parseInt(this.getAttribute('data-index'));
-                    const discount = parseInt(this.value) || 0;
+                    const discount = parseCurrencyInput(this.value);
                     cart[index].discount = discount;
                     cart[index].subtotal = calculateItemSubtotal(cart[index]);
                     updateCart();
@@ -703,8 +738,7 @@
             document.querySelectorAll('.btn-remove').forEach(button => {
                 button.addEventListener('click', function() {
                     const index = parseInt(this.getAttribute('data-index'));
-                    const removedItem = cart.splice(index, 1)[0];
-                    showNotification(`${removedItem.name} telah dihapus dari keranjang`, 'info');
+                    cart.splice(index, 1);
                     updateCart();
                 });
             });
