@@ -215,37 +215,116 @@
         let shiftId = null;
         let currentTotal = 0;
 
+        // Initialize cart if not present
+        if (!window.cart) {
+            window.cart = [];
+        }
+
         // Initialize when document is ready
         document.addEventListener("DOMContentLoaded", () => {
             loadMembers();
         });
 
-        // Function to show payment modal with order data
-        function showPaymentModal(total) {
+        // Function to add item to cart
+        function addToCart(product) {
+            const existingItem = window.cart.find(item => item.id === product.id);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                window.cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    quantity: 1,
+                    discount: 0
+                });
+            }
+            updateCartUI();
+        }
+
+        // Function to update item quantity in cart
+        function updateCartItem(productId, quantity) {
+            const item = window.cart.find(item => item.id === productId);
+            if (item) {
+                item.quantity = quantity;
+                if (item.quantity <= 0) {
+                    removeCartItem(productId);
+                }
+            }
+            updateCartUI();
+        }
+
+        // Function to remove item from cart
+        function removeCartItem(productId) {
+            window.cart = window.cart.filter(item => item.id !== productId);
+            updateCartUI();
+        }
+
+        // Function to clear the cart
+        function clearCart() {
+            window.cart = [];
+            updateCartUI();
+        }
+
+        // Function to update cart UI (you can customize this to update cart display)
+        function updateCartUI() {
+            // Example: update total and item count in payment modal if open
+            const total = window.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            const itemCount = window.cart.reduce((sum, item) => sum + item.quantity, 0);
             currentTotal = total;
 
-            // Get cart data directly from window.cart
+            // Update payment modal if visible
+            const paymentModal = document.getElementById("paymentModal");
+            if (paymentModal && !paymentModal.classList.contains("hidden")) {
+                document.getElementById("paymentTotal").textContent = formatRupiah(total);
+                document.getElementById("itemCount").textContent = `${itemCount} item dalam transaksi`;
+            }
+
+            // You can also update cart display elsewhere if needed
+        }
+
+        // Function to validate cart before payment
+        function validateCart() {
+            if (!window.cart || window.cart.length === 0) {
+                Swal.fire({
+                    position: "top-end",
+                    icon: "error",
+                    title: "Keranjang belanja kosong",
+                    text: "Silakan tambahkan produk sebelum melakukan pembayaran",
+                    showConfirmButton: false,
+                    timer: 3000,
+                    toast: true
+                });
+                return false;
+            }
+            return true;
+        }
+
+               // Function untuk menampilkan modal pembayaran
+        function showPaymentModal(total) {
+            currentTotal = total;
+            
+            // Ambil data keranjang dari window.cart yang ada di POS utama
             const cart = window.cart || [];
             
-            // Calculate total items in cart
+            // Hitung total item
             const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-
+            
             // Update UI
             document.getElementById("paymentTotal").textContent = formatRupiah(total);
             document.getElementById("itemCount").textContent = `${itemCount} item dalam transaksi`;
-
+            
             // Reset form
             document.getElementById("cashReceived").value = "";
             document.getElementById("selectedMemberText").textContent = "Pilih Member";
             document.getElementById("orderNotes").value = "";
             selectedMemberId = null;
-
-            // Show modal
+            
+            // Tampilkan modal
             document.getElementById("paymentModal").classList.remove("hidden");
-
-            // Initialize the cash input section
             toggleCashInput();
         }
+
 
         // Function to load members from API
         function loadMembers() {
@@ -373,159 +452,89 @@
             }
         }
 
-        // Process payment
-        function processPayment() {
-            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-            let totalPaid = currentTotal; // Default for QRIS and transfer
-
-            // Get current cart data directly from window.cart
-            const currentCart = window.cart || [];
-            
-            // Validate cart items before proceeding
-            if (!currentCart || currentCart.length === 0) {
-                Swal.fire({
-                    position: "top-end",
-                    icon: "error",
-                    title: "Keranjang belanja kosong",
-                    text: "Silakan tambahkan produk sebelum melakukan pembayaran",
-                    showConfirmButton: false,
-                    timer: 3000,
-                    toast: true
-                });
-                return;
-            }
-
-            // Prepare cart items for API
-            const cartItems = currentCart.map((item) => ({
-                product_id: item.id,
-                quantity: item.quantity,
-                price: item.price,
-                discount: item.discount || 0,
-            }));
-
-            // Validate cash payment
-            if (paymentMethod === "cash") {
-                const cashReceived = parseInt(document.getElementById("cashReceived").value) || 0;
-                if (cashReceived < currentTotal) {
-                    Swal.fire({
-                        position: "top-end",
-                        icon: "error",
-                        title: "Jumlah uang tidak mencukupi",
-                        showConfirmButton: false,
-                        timer: 3000,
-                        toast: true
-                    });
-                    return;
+        // Function untuk memproses pembayaran
+        async function processPayment() {
+            try {
+                const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+                let totalPaid = currentTotal;
+                
+                // Validasi metode tunai
+                if (paymentMethod === "cash") {
+                    const cashReceived = parseInt(document.getElementById("cashReceived").value) || 0;
+                    if (cashReceived < currentTotal) {
+                        throw new Error("Jumlah uang tidak mencukupi");
+                    }
+                    totalPaid = cashReceived;
                 }
-                totalPaid = cashReceived;
-            }
-
-            // Get outlet and shift ID (you may need to get these dynamically)
-            outletId = 1;
-            shiftId = 1;
-
-            // Prepare order data
-            const orderData = {
-                outlet_id: outletId,
-                shift_id: shiftId,
-                items: cartItems,
-                payment_method: paymentMethod,
-                notes: document.getElementById("orderNotes").value,
-                total_paid: totalPaid,
-                total_amount: currentTotal,
-                tax: 0,
-                discount: 0,
-                member_id: selectedMemberId,
-            };
-
-            console.log("Order data to be sent:", orderData);
-
-            // Call API to create order
-            const token = localStorage.getItem("token");
-            if (!token) {
+                
+                // Ambil data keranjang terbaru
+                const currentCart = window.cart || [];
+                if (currentCart.length === 0) {
+                    throw new Error("Keranjang belanja kosong");
+                }
+                
+                // Siapkan data untuk dikirim ke backend
+                const orderData = {
+                    outlet_id: outletId,
+                    shift_id: shiftId,
+                    payment_method: paymentMethod,
+                    notes: document.getElementById("orderNotes").value,
+                    total_paid: totalPaid,
+                    total_amount: currentTotal,
+                    tax: 0, // Sesuaikan jika ada pajak
+                    discount: 0, // Sesuaikan jika ada diskon global
+                    member_id: selectedMemberId,
+                    items: currentCart.map(item => ({
+                        product_id: item.id,
+                        quantity: item.quantity,
+                        price: item.price,
+                        discount: item.discount || 0,
+                    }))
+                };
+                
+                // Kirim data ke backend
+                const token = localStorage.getItem("token");
+                if (!token) {
+                    throw new Error("Token tidak ditemukan");
+                }
+                
+                const response = await fetch("/api/orders", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify(orderData)
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || "Gagal memproses pembayaran");
+                }
+                
+                // Tampilkan modal sukses
+                document.getElementById("invoiceNumber").textContent = `Invoice: ${data.data.order_number || data.data.invoice_number || ""}`;
+                document.getElementById("paymentModal").classList.add("hidden");
+                document.getElementById("successModal").classList.remove("hidden");
+                
+                // Kosongkan keranjang
+                if (typeof window.clearCart === "function") {
+                    window.clearCart();
+                }
+                
+            } catch (error) {
                 Swal.fire({
                     position: "top-end",
                     icon: "error",
-                    title: "Token tidak ditemukan",
-                    text: "Silakan login kembali",
+                    title: "Error",
+                    text: error.message,
                     showConfirmButton: false,
                     timer: 3000,
                     toast: true
                 });
-                return;
+                console.error("Payment error:", error);
             }
-
-            fetch("/api/orders", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                    Accept: "application/json",
-                },
-                body: JSON.stringify(orderData),
-            })
-                .then(async (response) => {
-                    // First check if response is HTML (likely error page)
-                    const contentType = response.headers.get("content-type");
-                    if (contentType && contentType.indexOf("application/json") === -1) {
-                        const text = await response.text();
-                        if (text.startsWith("<!DOCTYPE html>")) {
-                            throw new Error("Server returned HTML instead of JSON");
-                        }
-                        throw new Error("Invalid response format");
-                    }
-
-                    return response.json();
-                })
-                .then((data) => {
-                    if (data.success) {
-                        // Hide payment modal
-                        closeModal("paymentModal");
-
-                        // Set invoice number in success modal
-                        document.getElementById("invoiceNumber").textContent = `Invoice: ${
-                            data.data.order_number || data.data.invoice_number || ""
-                        }`;
-
-                        // Show success modal
-                        document.getElementById("successModal").classList.remove("hidden");
-
-                        // Show success alert
-                        Swal.fire({
-                            position: "top-end",
-                            icon: "success",
-                            title: "Pembayaran Berhasil",
-                            showConfirmButton: false,
-                            timer: 3000,
-                            background: "#FFA500",
-                            iconColor: "#fff",
-                            toast: true,
-                        });
-                    } else {
-                        // Show error message
-                        Swal.fire({
-                            position: "top-end",
-                            icon: "error",
-                            title: "Gagal memproses pembayaran",
-                            text: data.message || "Terjadi kesalahan saat memproses pembayaran",
-                            showConfirmButton: false,
-                            timer: 3000,
-                            toast: true
-                        });
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error processing payment:", error);
-                    Swal.fire({
-                        position: "top-end",
-                        icon: "error",
-                        title: "Terjadi kesalahan",
-                        text: "Gagal memproses pembayaran",
-                        showConfirmButton: false,
-                        timer: 3000,
-                        toast: true
-                    });
-                });
         }
 
         // Function to print receipt
