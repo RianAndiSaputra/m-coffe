@@ -1,9 +1,9 @@
-<div class="sidebar bg-white text-gray-800 flex flex-col fixed h-full z-50" id="sidebar">
+<div class="sidebar bg-white text-gray-800 flex flex-col fixed h-full z-50 transition-all duration-300 ease-in-out" id="sidebar">
     <!-- Logo -->
     <div class="p-4 flex items-center justify-between border-b">
         <div class="flex items-center">
             <img src="/images/logo.png" alt="Kifa Bakery Logo" class="w-10 h-10 object-contain" />
-            <span class="ml-2 font-bold text-xl whitespace-nowrap">Kifa Bakery</span>
+            <span class="ml-2 font-bold text-xl whitespace-nowrap sidebar-logo-text">Kifa Bakery</span>
         </div>
         <button id="toggleSidebarBtn" class="text-gray-500 hover:text-black hidden md:block transition-all">
             <i data-lucide="chevrons-left" class="w-5 h-5 text-black" id="toggleIcon"></i>
@@ -16,7 +16,7 @@
             <button id="outletDropdownButton" class="w-full flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
                 <div class="flex items-center">
                     <i data-lucide="store" class="w-5 h-5 text-black"></i>
-                    <span class="ml-3 font-medium truncate">Loading outlets...</span>
+                    <span class="ml-3 font-medium truncate sidebar-text">Loading outlets...</span>
                 </div>
                 <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 transition-transform text-black" id="outletDropdownArrow"></i>
             </button>
@@ -24,7 +24,6 @@
             <!-- Outlet Dropdown Menu -->
             <div id="outletDropdown" class="hidden absolute left-0 right-0 mt-1 bg-white rounded-lg shadow-lg z-50 border border-gray-200 max-h-60 overflow-y-auto">
                 <!-- Search Box -->
-
                 <div class="p-2 border-b">
                     <div class="relative">
                         <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i>
@@ -42,9 +41,9 @@
     
     <!-- Menu -->
     <nav class="flex-1 overflow-y-auto py-4">
-        <div class="px-4 py-2  group rounded-lg transition-all menu-item">
+        <div class="px-4 py-2 group rounded-lg transition-all menu-item">
            <a href="/dashboard" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
-                <i data-lucide="layout-dashboard" class="w-4 h-4 mr-2 text-black sidebar-icon"></i>
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 text-black sidebar-icon"></i>
                 <span class="sidebar-text">Dashboard</span>
             </a>
         </div>
@@ -53,19 +52,19 @@
         <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="productDropdown">
             <div class="flex items-center justify-between w-full cursor-pointer">
                 <div class="flex items-center">
-                    <i data-lucide="package" class="w-5 h-5"></i>
-                    <span class="ml-3">Produk</span>
+                    <i data-lucide="package" class="w-5 h-5 sidebar-icon"></i>
+                    <span class="ml-3 sidebar-text">Produk</span>
                 </div>
-                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform" id="productDropdownArrow"></i>
+                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform sidebar-arrow" id="productDropdownArrow"></i>
             </div>
             <div id="productDropdown" class="hidden pl-12 mt-2 sidebar-dropdown">
                 <a href="/list-produk" class="menu-subitem flex items-center py-2 transition-all w-full">
-                    <i data-lucide="list" class="w-4 h-4 mr-3"></i>
-                    <span>Daftar Produk</span>
+                    <i data-lucide="list" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Daftar Produk</span>
                 </a>
                 <a href="/kategori" class="menu-subitem flex items-center py-2 transition-all w-full">
-                    <i data-lucide="tag" class="w-4 h-4 mr-3"></i>
-                    <span>Kategori</span>
+                    <i data-lucide="tag" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Kategori</span>
                 </a>
             </div>
         </div>
@@ -74,15 +73,15 @@
         <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="outletManagementDropdown">
             <div class="flex items-center justify-between w-full cursor-pointer">
                 <div class="flex items-center">
-                    <i data-lucide="building-2" class="w-5 h-5"></i>
-                    <span class="ml-3">Outlet</span>
+                    <i data-lucide="building-2" class="w-5 h-5 sidebar-icon"></i>
+                    <span class="ml-3 sidebar-text">Outlet</span>
                 </div>
-                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform" id="outletManagementDropdownArrow"></i>
+                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform sidebar-arrow" id="outletManagementDropdownArrow"></i>
             </div>
             <div id="outletManagementDropdown" class="hidden pl-12 mt-2 sidebar-dropdown">
                 <a href="/outlet" class="menu-subitem flex items-center py-2 transition-all w-full">
-                    <i data-lucide="list" class="w-4 h-4 mr-3"></i>
-                    <span>Daftar Outlet</span>
+                    <i data-lucide="list" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Daftar Outlet</span>
                 </a>
             </div>
         </div>
@@ -91,31 +90,31 @@
         <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="stockDropdown">
             <div class="flex items-center justify-between w-full cursor-pointer">
                 <div class="flex items-center">
-                    <i data-lucide="package-open" class="w-5 h-5"></i>
-                    <span class="ml-3">Stok</span>
+                    <i data-lucide="package-open" class="w-5 h-5 sidebar-icon"></i>
+                    <span class="ml-3 sidebar-text">Stok</span>
                 </div>
-                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform" id="stockDropdownArrow"></i>
+                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform sidebar-arrow" id="stockDropdownArrow"></i>
             </div>
             <div id="stockDropdown" class="hidden pl-12 mt-2 sidebar-dropdown">
                 <a href="/riwayat-stok" class="menu-subitem flex items-center py-2 transition-all w-full">
-                    <i data-lucide="history" class="w-4 h-4 mr-3"></i>
-                    <span>Riwayat Stok</span>
+                    <i data-lucide="history" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Riwayat Stok</span>
                 </a>
                 <a href="/stok-per-tanggal" class="menu-subitem flex items-center py-2 transition-all w-full">
-                    <i data-lucide="calendar" class="w-4 h-4 mr-3"></i>
-                    <span>Stok Pertanggal</span>
+                    <i data-lucide="calendar" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Stok Pertanggal</span>
                 </a>
                 <a href="/penyesuaian-stok" class="menu-subitem flex items-center py-2 transition-all w-full">
-                    <i data-lucide="edit" class="w-4 h-4 mr-3"></i>
-                    <span>Penyesuaian Stok</span>
+                    <i data-lucide="edit" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Penyesuaian Stok</span>
                 </a>
                 <a href="/transfer-stok" class="menu-subitem flex items-center py-2 transition-all w-full">
-                    <i data-lucide="truck" class="w-4 h-4 mr-3"></i>
-                    <span>Transfer Stok</span>
+                    <i data-lucide="truck" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Transfer Stok</span>
                 </a>
                 <a href="/approve-stok" class="menu-subitem flex items-center py-2 transition-all w-full">
-                    <i data-lucide="check-circle" class="w-4 h-4 mr-3"></i>
-                    <span>Approve Stok</span>
+                    <i data-lucide="check-circle" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Approve Stok</span>
                 </a>
             </div>
         </div>
@@ -124,19 +123,19 @@
         <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="userDropdown">
             <div class="flex items-center justify-between w-full cursor-pointer">
                 <div class="flex items-center">
-                    <i data-lucide="users" class="w-5 h-5"></i>
-                    <span class="ml-3">User</span>
+                    <i data-lucide="users" class="w-5 h-5 sidebar-icon"></i>
+                    <span class="ml-3 sidebar-text">User</span>
                 </div>
-                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform" id="userDropdownArrow"></i>
+                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform sidebar-arrow" id="userDropdownArrow"></i>
             </div>
             <div id="userDropdown" class="hidden pl-12 mt-2 sidebar-dropdown">
                 <a href="/member" class="menu-subitem flex items-center py-2 transition-all w-full">
-                    <i data-lucide="user" class="w-4 h-4 mr-3"></i>
-                    <span>Member</span>
+                    <i data-lucide="user" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Member</span>
                 </a>
                 <a href="/staff" class="menu-subitem flex items-center py-2 transition-all w-full">
-                    <i data-lucide="users" class="w-4 h-4 mr-3"></i>
-                    <span>Staff</span>
+                    <i data-lucide="users" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Staff</span>
                 </a>
             </div>
         </div>
@@ -145,19 +144,19 @@
         <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="closingDropdown">
             <div class="flex items-center justify-between w-full cursor-pointer">
                 <div class="flex items-center">
-                    <i data-lucide="clock" class="w-5 h-5"></i>
-                    <span class="ml-3">Closing</span>
+                    <i data-lucide="clock" class="w-5 h-5 sidebar-icon"></i>
+                    <span class="ml-3 sidebar-text">Closing</span>
                 </div>
-                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform" id="closingDropdownArrow"></i>
+                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform sidebar-arrow" id="closingDropdownArrow"></i>
             </div>
             <div id="closingDropdown" class="hidden pl-12 mt-2 sidebar-dropdown">
                 <a href="/riwayat-kas" class="menu-subitem flex items-center py-2 transition-all w-full">
-                    <i data-lucide="wallet" class="w-4 h-4 mr-3"></i>
-                    <span>Riwayat Kas</span>
+                    <i data-lucide="wallet" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Riwayat Kas</span>
                 </a>
                 <a href="/riwayat-transaksi" class="menu-subitem flex items-center py-2 transition-all w-full">
-                    <i data-lucide="receipt" class="w-4 h-4 mr-3"></i>
-                    <span>Riwayat Transaksi</span>
+                    <i data-lucide="receipt" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Riwayat Transaksi</span>
                 </a>
             </div>
         </div>
@@ -166,39 +165,39 @@
         <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="reportDropdown">
             <div class="flex items-center justify-between w-full cursor-pointer">
                 <div class="flex items-center">
-                    <i data-lucide="file-text" class="w-5 h-5"></i>
-                    <span class="ml-3">Laporan</span>
+                    <i data-lucide="file-text" class="w-5 h-5 sidebar-icon"></i>
+                    <span class="ml-3 sidebar-text">Laporan</span>
                 </div>
-                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform" id="reportDropdownArrow"></i>
+                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform sidebar-arrow" id="reportDropdownArrow"></i>
             </div>
             <div id="reportDropdown" class="hidden pl-12 mt-2 sidebar-dropdown">
                 <a href="/perhari" class="menu-subitem flex items-center py-2 transition-all w-full">
-                    <i data-lucide="calendar" class="w-4 h-4 mr-3"></i>
-                    <span>Perhari</span>
+                    <i data-lucide="calendar" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Perhari</span>
                 </a>
                 <a href="/per-item" class="menu-subitem flex items-center py-2 transition-all w-full">
-                    <i data-lucide="box" class="w-4 h-4 mr-3"></i>
-                    <span>Per Item</span>
+                    <i data-lucide="box" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Per Item</span>
                 </a>
                 <a href="/per-kategori" class="menu-subitem flex items-center py-2 transition-all w-full">
-                    <i data-lucide="tag" class="w-4 h-4 mr-3"></i>
-                    <span>Per Kategori</span>
+                    <i data-lucide="tag" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Per Kategori</span>
                 </a>
                 <a href="/per-member" class="menu-subitem flex items-center py-2 transition-all w-full">
-                    <i data-lucide="user" class="w-4 h-4 mr-3"></i>
-                    <span>Per Member</span>
+                    <i data-lucide="user" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Per Member</span>
                 </a>
                 <a href="/stok" class="menu-subitem flex items-center py-2 transition-all w-full">
-                    <i data-lucide="package" class="w-4 h-4 mr-3"></i>
-                    <span>Stock</span>
+                    <i data-lucide="package" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Stock</span>
                 </a>
                 <a href="/laporan-riwayat-stok" class="menu-subitem flex items-center py-2 transition-all w-full">
-                    <i data-lucide="history" class="w-4 h-4 mr-3"></i>
-                    <span>Riwayat Stok</span>
+                    <i data-lucide="history" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Riwayat Stok</span>
                 </a>
                 <a href="/laporan-approve" class="menu-subitem flex items-center py-2 transition-all w-full">
-                    <i data-lucide="check-circle" class="w-4 h-4 mr-3"></i>
-                    <span>Approve</span>
+                    <i data-lucide="check-circle" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Approve</span>
                 </a>
             </div>
         </div>
@@ -207,21 +206,21 @@
         <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="settingsDropdown">
             <div class="flex items-center justify-between w-full cursor-pointer">
                 <div class="flex items-center">
-                    <i data-lucide="settings" class="w-5 h-5"></i>
-                    <span class="ml-3">Pengaturan</span>
+                    <i data-lucide="settings" class="w-5 h-5 sidebar-icon"></i>
+                    <span class="ml-3 sidebar-text">Pengaturan</span>
                 </div>
-                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform" id="settingsDropdownArrow"></i>
+                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform sidebar-arrow" id="settingsDropdownArrow"></i>
             </div>
             <div id="settingsDropdown" class="hidden pl-12 mt-2 sidebar-dropdown">
                 <a href="/template-print" class="menu-subitem flex items-center py-2 transition-all w-full">
-                    <i data-lucide="printer" class="w-4 h-4 mr-3"></i>
-                    <span>Template Print</span>
+                    <i data-lucide="printer" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Template Print</span>
                 </a>
             </div>
         </div>
     </nav>
     
-    <!-- Collapse Button -->
+    <!-- Collapse Button for Desktop -->
     <div class="p-4 border-t flex justify-center">
         <button id="toggleSidebar" class="text-gray-500 hover:text-black transition-all">
             <i data-lucide="chevrons-left" class="w-5 h-5 text-black" id="bottomToggleIcon"></i>
@@ -229,72 +228,114 @@
     </div>
 </div>
 
+<!-- Mobile overlay for clicking outside to close -->
+<div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
+
+<!-- Mobile toggle button (hamburger) -->
+<button id="mobileSidebarToggle" class="fixed bottom-4 right-4 md:hidden bg-orange-700 text-white p-3 rounded-full shadow-lg z-30">
+    <i data-lucide="menu" class="w-6 h-6"></i>
+</button>
+
 <style>
-    /* Sidebar default (desktop) */
+    /* Sidebar responsive styles */
     .sidebar {
-        position: fixed;
         width: 280px;
-        transition: all 0.3s ease;
         left: 0;
         top: 0;
         bottom: 0;
-        background-color: white;
-        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
-        overflow-y: auto;
-        z-index: 50;
+        transform: translateX(0);
+        transition: transform 0.3s ease, width 0.3s ease;
     }
-
-    /* Sidebar collapsed (desktop) */
+    
     .sidebar.collapsed {
-        width: 0;
-        overflow: hidden;
-        padding: 0 !important;
-        border: none;
+        width: 80px;
     }
-
-    /* Sidebar mobile awalnya tersembunyi */
+    
+    .sidebar.collapsed .sidebar-text,
+    .sidebar.collapsed .sidebar-logo-text,
+    .sidebar.collapsed .sidebar-arrow {
+        display: none;
+    }
+    
+    .sidebar.collapsed .sidebar-icon {
+        margin-right: 0;
+    }
+    
+    .sidebar.collapsed .menu-item > div > div {
+        justify-content: center;
+    }
+    
+    .sidebar.collapsed .sidebar-dropdown {
+        position: absolute;
+        left: 80px;
+        width: 200px;
+        background: white;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        border-radius: 0 8px 8px 0;
+        padding-left: 0;
+        margin-left: 0;
+    }
+    
+    /* Mobile styles */
     @media (max-width: 768px) {
         .sidebar {
             transform: translateX(-100%);
             width: 280px;
-            z-index: 60;
         }
-
-        .sidebar.mobile-show {
+        
+        .sidebar.mobile-open {
             transform: translateX(0);
-            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
         }
-
-        /* Sembunyikan tombol toggle desktop di mobile */
-        #toggleSidebarBtn,
-        #toggleSidebar {
-            display: none !important;
+        
+        .sidebar.collapsed {
+            width: 280px;
+        }
+        
+        #mainContent {
+            margin-left: 0 !important;
         }
     }
-
-    /* Hover effect menu item dan subitem */
+    
+    /* Main content adjust with sidebar */
+    #mainContent {
+        margin-left: 280px;
+        transition: margin-left 0.3s ease;
+    }
+    
+    #mainContent.collapsed {
+        margin-left: 80px;
+    }
+    
+    /* Hover effect menu item and subitem */
     .sidebar .menu-item:hover > .flex.items-center,
     .sidebar .menu-subitem:hover {
         background-color: #f3f4f6;
         border-radius: 0.5rem;
         padding: 0.5rem 1rem;
+        margin-left: -0.5rem;
+        margin-right: -0.5rem;
     }
 
-    /* Aktif menu utama */
+    /* Active menu parent */
     .menu-item.active-parent > .flex.items-center.justify-between {
         background-color: #ffedd5;
         border-radius: 0.5rem;
         padding: 0.5rem 1rem;
+        margin-left: -0.5rem;
+        margin-right: -0.5rem;
     }
 
-    /* Aktif menu subitem */
+    /* Active menu subitem */
     .menu-subitem.active {
         background-color: #ffedd5;
         border-radius: 0.5rem;
         padding: 0.5rem 1rem;
+        margin-left: -0.5rem;
+        margin-right: -0.5rem;
     }
 
-    /* Warna dan berat font item aktif */
+    /* Text color and font weight for active items */
     .menu-subitem.active i,
     .menu-subitem.active span,
     .menu-item.active-parent > .flex.items-center.justify-between i,
@@ -303,18 +344,18 @@
         font-weight: 500;
     }
 
-    /* Dropdown smooth show/hide */
+    /* Dropdown styles */
     .sidebar-dropdown {
         transition: all 0.3s ease;
     }
 
-    /* Rotasi icon toggle */
+    /* Icon rotation animation */
     .rotate-180 {
         transform: rotate(180deg);
         transition: transform 0.3s ease;
     }
 
-    /* Cursor pointer untuk elemen klik */
+    /* Cursor for clickable items */
     .cursor-pointer {
         cursor: pointer;
     }
@@ -322,72 +363,110 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Inisialisasi Lucide icons
+        // Initialize Lucide icons
         lucide.createIcons();
 
+        // Get DOM elements
         const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
         const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
         const toggleSidebar = document.getElementById('toggleSidebar');
+        const mobileSidebarToggle = document.getElementById('mobileSidebarToggle');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
         const toggleIcon = document.getElementById('toggleIcon');
         const bottomToggleIcon = document.getElementById('bottomToggleIcon');
-        const mobileMenuButton = document.querySelector('[data-drawer-target="sidebar"]');
-       
-        // Check for stored sidebar state and apply it on page load
-        const sidebarState = localStorage.getItem('sidebarCollapsed');
-        if (sidebarState === 'true' && window.innerWidth > 768) {
-            sidebar.classList.add('collapsed');
-            toggleIcon?.classList.add('rotate-180');
-            bottomToggleIcon?.classList.add('rotate-180');
+
+        // Function to toggle sidebar collapsed state
+        function toggleCollapse() {
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('collapsed');
+            
+            // Rotate toggle icons
+            if (toggleIcon) toggleIcon.classList.toggle('rotate-180');
+            if (bottomToggleIcon) bottomToggleIcon.classList.toggle('rotate-180');
+            
+            // Store state in localStorage
+            const isCollapsed = sidebar.classList.contains('collapsed');
+            localStorage.setItem('sidebarCollapsed', isCollapsed);
         }
 
-        // Fungsi toggle sidebar
-        function toggleSidebarState() {
-            const isMobile = window.innerWidth <= 768;
+        // Function to toggle mobile sidebar
+        function toggleMobileSidebar() {
+            sidebar.classList.toggle('mobile-open');
+            sidebarOverlay.classList.toggle('hidden');
+            document.body.classList.toggle('overflow-hidden');
+        }
 
-            if (isMobile) {
-                // Mode Mobile
-                sidebar.classList.toggle('mobile-show');
+        // Initialize sidebar state from localStorage
+        if (localStorage.getItem('sidebarCollapsed') === 'true') {
+            sidebar.classList.add('collapsed');
+            mainContent.classList.add('collapsed');
+            if (toggleIcon) toggleIcon.classList.add('rotate-180');
+            if (bottomToggleIcon) bottomToggleIcon.classList.add('rotate-180');
+        }
+
+        // Event listeners for desktop toggle
+        if (toggleSidebarBtn) {
+            toggleSidebarBtn.addEventListener('click', toggleCollapse);
+        }
+        
+        if (toggleSidebar) {
+            toggleSidebar.addEventListener('click', toggleCollapse);
+        }
+        
+        // Event listeners for mobile toggle
+        if (mobileSidebarToggle) {
+            mobileSidebarToggle.addEventListener('click', toggleMobileSidebar);
+        }
+        
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', toggleMobileSidebar);
+        }
+
+        // Close mobile sidebar when clicking on a link
+        document.querySelectorAll('.sidebar a').forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 768) {
+                    toggleMobileSidebar();
+                }
+            });
+        });
+
+        // Handle window resize
+        function handleResize() {
+            if (window.innerWidth > 768) {
+                // On desktop, ensure mobile sidebar is closed
+                sidebar.classList.remove('mobile-open');
+                sidebarOverlay.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+                
+                // Apply collapsed state if it was saved
+                if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                    sidebar.classList.add('collapsed');
+                    mainContent.classList.add('collapsed');
+                } else {
+                    sidebar.classList.remove('collapsed');
+                    mainContent.classList.remove('collapsed');
+                }
             } else {
-                // Mode Desktop
-                const isNowCollapsed = sidebar.classList.toggle('collapsed');
-                
-                // Rotate both toggle icons
-                if (toggleIcon) toggleIcon.classList.toggle('rotate-180');
-                if (bottomToggleIcon) bottomToggleIcon.classList.toggle('rotate-180');
-                
-                // Save sidebar state in localStorage
-                localStorage.setItem('sidebarCollapsed', isNowCollapsed);
+                // On mobile, ensure sidebar starts closed
+                sidebar.classList.remove('mobile-open');
+                sidebarOverlay.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
             }
         }
 
-        // Tombol toggle sidebar (atas & bawah)
-        if (toggleSidebarBtn) {
-            toggleSidebarBtn.addEventListener('click', toggleSidebarState);
-        }
+        // Initial check
+        handleResize();
+        
+        // Add resize listener with debounce
+        let resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(handleResize, 250);
+        });
 
-        if (toggleSidebar) {
-            toggleSidebar.addEventListener('click', toggleSidebarState);
-        }
-
-        // Tombol menu di mode mobile (hamburger menu)
-        if (mobileMenuButton) {
-            mobileMenuButton.addEventListener('click', function () {
-                sidebar.classList.toggle('mobile-show');
-            });
-        }
-
-        // Tutup dropdown lain saat buka satu
-        function closeOtherDropdowns(currentDropdown) {
-            document.querySelectorAll('.sidebar-dropdown').forEach(dropdown => {
-                if (dropdown !== currentDropdown && !dropdown.classList.contains('hidden')) {
-                    dropdown.classList.add('hidden');
-                    const arrow = dropdown.closest('.menu-item')?.querySelector('[data-lucide="chevron-down"]');
-                    if (arrow) arrow.classList.remove('rotate-180');
-                }
-            });
-        }
-
-        // Dropdown Outlet
+        // Outlet Dropdown
         const outletDropdownButton = document.getElementById('outletDropdownButton');
         const outletDropdown = document.getElementById('outletDropdown');
         const outletDropdownArrow = document.getElementById('outletDropdownArrow');
@@ -415,13 +494,13 @@
             searchInput?.addEventListener('input', function () {
                 const searchTerm = this.value.toLowerCase();
                 outletItems.forEach(item => {
-                    const name = item.querySelector('span').textContent.toLowerCase();
+                    const name = item.textContent.toLowerCase();
                     item.style.display = name.includes(searchTerm) ? 'block' : 'none';
                 });
             });
         }
 
-        // Menu Dropdown Aktif & Interaksi
+        // Menu Dropdowns
         const menuItems = document.querySelectorAll('.menu-item[data-dropdown]');
 
         menuItems.forEach(item => {
@@ -446,32 +525,31 @@
                     subitem.classList.add('active');
                     document.querySelectorAll('.menu-item').forEach(mi => mi.classList.remove('active-parent'));
                     item.classList.add('active-parent');
-                    e.stopPropagation();
                 });
             });
         });
 
-        // Function to handle sidebar outside clicks
-        function handleOutsideClick(e) {
-            if (window.innerWidth <= 768 && 
-                !sidebar.contains(e.target) && 
-                !mobileMenuButton?.contains(e.target) &&
-                sidebar.classList.contains('mobile-show')) {
-                sidebar.classList.remove('mobile-show');
-            }
+        // Close other dropdowns when opening a new one
+        function closeOtherDropdowns(currentDropdown) {
+            document.querySelectorAll('.sidebar-dropdown').forEach(dropdown => {
+                if (dropdown !== currentDropdown && !dropdown.classList.contains('hidden')) {
+                    dropdown.classList.add('hidden');
+                    const arrow = dropdown.closest('.menu-item')?.querySelector('[data-lucide="chevron-down"]');
+                    if (arrow) arrow.classList.remove('rotate-180');
+                }
+            });
         }
 
-        // Add event listener for clicks outside the sidebar (on mobile)
-        document.addEventListener('click', handleOutsideClick);
-
-        // Menandai menu aktif berdasarkan URL
+        // Set active menu based on current URL
         function setActiveMenu() {
             const currentPath = window.location.pathname;
 
+            // Remove all active classes first
             document.querySelectorAll('.active-parent, .active').forEach(el => {
                 el.classList.remove('active-parent', 'active');
             });
 
+            // Find matching menu item
             const allLinks = [...document.querySelectorAll('.menu-link, .menu-subitem')];
             const activeLink = allLinks.find(link => {
                 const href = link.getAttribute('href');
@@ -493,74 +571,70 @@
             }
         }
 
-        // Pastikan sidebar sesuai setelah resize
-        window.addEventListener('resize', () => {
-            if (window.innerWidth > 768) {
-                sidebar.classList.remove('mobile-show');
+        // Load outlets function
+        async function loadOutletsFromAPI() {
+            const outletListContainer = document.getElementById('outletListContainer');
+            const outletNameDisplay = document.querySelector('#outletDropdownButton span');
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/outlets', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (!result.success) throw new Error('Gagal memuat outlet');
+
+                // Clear existing list
+                outletListContainer.innerHTML = '';
+
+                result.data.forEach(outlet => {
+                    const li = document.createElement('li');
+                    li.className = 'px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm flex items-center gap-2';
+                    li.innerHTML = `<i data-lucide="store" class="w-4 h-4 text-orange-500"></i> <span>${outlet.name}</span>`;
+                    
+                    li.addEventListener('click', () => {
+                        outletNameDisplay.textContent = outlet.name;
+                        outletDropdown.classList.add('hidden');
+                        outletDropdownArrow.classList.remove('rotate-180');
+
+                        // Save selected outlet to localStorage
+                        localStorage.setItem('selectedOutletId', outlet.id);
+
+                        // Reload data for selected outlet if needed
+                        if (typeof loadProductData === 'function') {
+                            loadProductData(outlet.id);
+                        }
+                    });
+
+                    outletListContainer.appendChild(li);
+                });
+
+                // Re-initialize Lucide icons for dynamically added content
+                lucide.createIcons();
                 
-                // Apply collapsed state from localStorage when returning to desktop
-                const sidebarState = localStorage.getItem('sidebarCollapsed');
-                if (sidebarState === 'true') {
-                    sidebar.classList.add('collapsed');
-                    toggleIcon?.classList.add('rotate-180');
-                    bottomToggleIcon?.classList.add('rotate-180');
-                } else {
-                    sidebar.classList.remove('collapsed');
-                    toggleIcon?.classList.remove('rotate-180');
-                    bottomToggleIcon?.classList.remove('rotate-180');
+                // Set first outlet as default if available
+                if (result.data.length > 0) {
+                    const savedOutletId = localStorage.getItem('selectedOutletId');
+                    const defaultOutlet = result.data.find(o => o.id.toString() === savedOutletId) || result.data[0];
+                    outletNameDisplay.textContent = defaultOutlet.name;
+                }
+                
+            } catch (err) {
+                console.error('Failed to load outlets:', err);
+                outletListContainer.innerHTML = '<li class="px-4 py-2 text-sm text-red-500">Gagal memuat outlet</li>';
+                const outletNameDisplay = document.querySelector('#outletDropdownButton span');
+                if (outletNameDisplay) {
+                    outletNameDisplay.textContent = 'Pilih Outlet';
                 }
             }
-        });
+        }
 
+        // Initialize active menu and load outlets
         setActiveMenu();
         loadOutletsFromAPI();
     });
-
-    async function loadOutletsFromAPI() {
-        const outletListContainer = document.getElementById('outletListContainer');
-        const outletNameDisplay = document.querySelector('#outletDropdownButton span');
-
-        try {
-            const response = await fetch('http://127.0.0.1:8000/api/outlets', {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                    'Accept': 'application/json'
-                }
-            });
-
-            const result = await response.json();
-
-            if (!result.success) throw new Error('Gagal memuat outlet');
-
-            // Bersihkan list dulu
-            outletListContainer.innerHTML = '';
-
-            result.data.forEach(outlet => {
-                const li = document.createElement('li');
-                li.className = 'px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm flex items-center gap-2';
-                li.innerHTML = `<i data-lucide="store" class="w-4 h-4 text-orange-500"></i> <span>${outlet.name}</span>`;
-                
-                li.addEventListener('click', () => {
-                    outletNameDisplay.textContent = outlet.name;
-                    outletDropdown.classList.add('hidden');
-                    outletDropdownArrow.classList.remove('rotate-180');
-
-                    // Simpan outlet ID ke localStorage (jika perlu)
-                    localStorage.setItem('selectedOutletId', outlet.id);
-
-                    // Panggil fungsi untuk reload data sesuai outlet
-                    loadProductData(outlet.id); // pastikan fungsi ini tersedia
-                });
-
-                outletListContainer.appendChild(li);
-            });
-
-            lucide.createIcons(); // Render ulang icon Lucide
-        } catch (err) {
-            console.error('Gagal memuat outlet:', err);
-            outletListContainer.innerHTML = '<li class="px-4 py-2 text-sm text-red-500">Gagal memuat outlet</li>';
-        }
-    }
-
-    
 </script>
