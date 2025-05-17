@@ -90,9 +90,9 @@ class OutletController extends Controller
             $outlet->load([
                 'users',
                 'products',
-                'shifts',
+                // 'shifts',
                 'orders',
-                'inventory'
+                // 'inventory'
             ]);
 
             return $this->successResponse($outlet, 'Outlet retrieved successfully');

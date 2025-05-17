@@ -219,7 +219,7 @@
 
         // Modify the login submission handler in your HTML
         document.getElementById('loginForm').addEventListener('submit', async function (e) {
-            e.preventDefault(); // Wajib ada di sini!
+            e.preventDefault(); // Wajib untuk mencegah reload
 
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -240,21 +240,27 @@
                     return showError(data.message || 'Login gagal.');
                 }
 
+                // Simpan token dan data user dasar
                 localStorage.setItem('token', data.data.token);
                 localStorage.setItem('role', data.data.user.role);
                 localStorage.setItem('user_id', data.data.user.id);
                 localStorage.setItem('name', data.data.user.name);
-                localStorage.setItem('outlet_name', data.data.user.outlet.name);
-                localStorage.setItem('outlet_id', data.data.user.outlet_id);
-
-                if (data.data.shift) {
-                    localStorage.setItem('shift_id', data.data.shift.id); // Simpan shift_id
-                    // Jika shift memiliki data tambahan, simpan sebagai JSON
-                    localStorage.setItem('shift_data', JSON.stringify(data.data.shift));
-                }
 
                 const userRole = data.data.user.role;
 
+                // Hanya simpan outlet_name dan outlet_id jika bukan admin
+                if (userRole !== 'admin') {
+                    localStorage.setItem('outlet_name', data.data.user.outlet.name);
+                    localStorage.setItem('outlet_id', data.data.user.outlet.id);
+                }
+
+                // Jika ada data shift, simpan juga
+                if (data.data.shift) {
+                    localStorage.setItem('shift_id', data.data.shift.id);
+                    localStorage.setItem('shift_data', JSON.stringify(data.data.shift));
+                }
+
+                // Arahkan ke halaman sesuai role
                 if (userRole === 'kasir') {
                     showSuccess('Login berhasil! Mengarahkan ke POS...');
                     setTimeout(() => window.location.href = '/pos', 1500);

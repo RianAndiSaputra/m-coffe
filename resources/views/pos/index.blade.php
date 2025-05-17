@@ -446,50 +446,11 @@
         function closeModal(id) {
             document.getElementById(id).classList.add('hidden');
         }
-        
-        // Fetch outlet information
-        // async function fetchOutletInfo() {
-        //     try {
-        //         const response = await fetch(`${API_BASE_URL}/outlets/1`, {
-        //             method: 'GET',
-        //             headers: {
-        //                 'Content-Type': 'application/json',
-        //                 'Authorization': `Bearer ${API_TOKEN}`,
-        //                 'Accept': 'application/json'
-        //             },
-        //             credentials: 'include'
-        //         });
-                
-        //         if (!response.ok) {
-        //             throw new Error(`HTTP error! Status: ${response.status}`);
-        //         }
-                
-        //         const data = await response.json();
-                
-        //         if (data.success) {
-        //             outletInfo.tax = data.data.tax || 0;
-        //             outletInfo.qris = data.data.qris;
-        //             outletInfo.bank_account = {
-        //                 atas_nama: data.data.atas_nama_bank,
-        //                 bank: data.data.nama_bank,
-        //                 nomor: data.data.nomor_transaksi_bank
-        //             };
-                    
-        //             // Update tax display
-        //             taxAmountElement.textContent = `Pajak (${outletInfo.tax}%)`;
-                    
-        //             // Get current shift
-        //             await fetchCurrentShift();
-        //         }
-        //     } catch (error) {
-        //         console.error('Error fetching outlet info:', error);
-        //     }
-        // }
-        
+
         // Fetch current shift
         async function fetchCurrentShift() {
             try {
-                const response = await fetch(`${API_BASE_URL}/shifts/current`, {
+                const response = await fetch(`${API_BASE_URL}/shifts/${outletInfo.shift_id}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -513,6 +474,45 @@
             }
         }
         
+        // Fetch outlet information
+        async function fetchOutletInfo() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/outlets/${outletInfo.id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_TOKEN}`,
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    outletInfo.tax = data.data.tax || 0;
+                    outletInfo.qris = data.data.qris;
+                    outletInfo.bank_account = {
+                        atas_nama: data.data.atas_nama_bank,
+                        bank: data.data.nama_bank,
+                        nomor: data.data.nomor_transaksi_bank
+                    };
+                    
+                    // Update tax display
+                    taxAmountElement.textContent = `Pajak (${outletInfo.tax}%)`;
+                    
+                    // Get current shift
+                    await fetchCurrentShift();
+                }
+            } catch (error) {
+                console.error('Error fetching outlet info:', error);
+            }
+        }
+    
         // Fetch products from API
         async function fetchProducts() {
             try {
@@ -1299,7 +1299,7 @@
         };
         
         // Load data
-        // fetchOutletInfo();
+        fetchOutletInfo();
         updateCart();
         loadProductsFromLocalStorage();
         fetchProducts();
