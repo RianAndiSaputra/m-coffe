@@ -9,6 +9,7 @@
         <div class="modal-content py-6 px-6 text-center">
             <p class="text-sm text-gray-500 font-semibold mb-1">Kas Kasir</p>
             <div id="kasTotal" class="text-3xl font-bold text-orange-500 mb-4">Rp 0</div>
+            <div id="cashRegisterName" class="text-sm text-gray-500 mb-4"></div>
             <hr class="mb-4 border-orange-200">
 
             <div class="flex justify-center gap-3">
@@ -92,10 +93,92 @@
     // Initialize Lucide icons
     lucide.createIcons();
     
-    let kas = 0;
+    let currentCashBalance = 0;
+    let currentCashRegisterId = null;
+    let currentOutletId = 1; // Default outlet ID
 
-    function updateKas() {
-        document.getElementById('kasTotal').innerText = 'Rp ' + kas.toLocaleString('id-ID');
+    // Format currency to IDR
+    function formatRupiah(amount) {
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0
+        }).format(amount);
+    }
+
+    // Get current outlet ID
+    function getCurrentOutletId() {
+        // Try to get from data attribute
+        const outletElement = document.querySelector('[data-outlet-id]');
+        if (outletElement && outletElement.dataset.outletId) {
+            return outletElement.dataset.outletId;
+        }
+        
+        // Try to get from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const outletParam = urlParams.get('outlet_id');
+        if (outletParam) {
+            return outletParam;
+        }
+        
+        // Try to get from localStorage
+        const storedOutletId = localStorage.getItem('outletId');
+        if (storedOutletId) {
+            return storedOutletId;
+        }
+        
+        return currentOutletId; // default
+    }
+
+    // Update cash display
+    function updateCashDisplay(balance, name = '') {
+        document.getElementById('kasTotal').innerText = formatRupiah(balance);
+        if (name) {
+            document.getElementById('cashRegisterName').innerText = name;
+        }
+    }
+
+    // Fetch current cash balance from API
+    async function fetchCashBalance() {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showAuthError();
+                return;
+            }
+
+            const outletId = getCurrentOutletId();
+            
+            // Get cash register for this outlet
+            const registerResponse = await fetch(`http://127.0.0.1:8000/api/cash-registers/${outletId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!registerResponse.ok) {
+                throw new Error(`HTTP error! Status: ${registerResponse.status}`);
+            }
+
+            const registerResult = await registerResponse.json();
+            
+            if (!registerResult.success || !registerResult.data) {
+                throw new Error('Cash register not found for this outlet');
+            }
+
+            currentCashRegisterId = registerResult.data.id;
+            currentCashBalance = parseFloat(registerResult.data.balance) || 0;
+            
+            updateCashDisplay(currentCashBalance, `Kasir #${currentCashRegisterId}`);
+        } catch (error) {
+            console.error('Error fetching cash balance:', error);
+            showAlert({
+                title: 'Error',
+                message: 'Gagal memuat saldo kas: ' + error.message,
+                type: 'error'
+            });
+        }
     }
 
     // Modal functions
@@ -107,61 +190,155 @@
         document.getElementById(id).classList.add('hidden');
     }
 
+    // Show authentication error
+    function showAuthError(message = 'Anda perlu login untuk mengakses fitur ini') {
+        showAlert({
+            title: 'Akses Ditolak',
+            message: message,
+            type: 'error'
+        });
+    }
+
     // Tambah Kas function
-    function submitTambahKas(e) {
+    async function submitTambahKas(e) {
         e.preventDefault();
 
-        const jumlah = parseInt(document.getElementById('inputJumlah').value);
-        const catatan = document.getElementById('inputCatatan').value;
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showAuthError();
+            return;
+        }
 
-        if (!isNaN(jumlah) && jumlah > 0) {
-            kas += jumlah;
-            updateKas();
+        const amount = parseFloat(document.getElementById('inputJumlah').value);
+        const reason = document.getElementById('inputCatatan').value;
+        const outletId = getCurrentOutletId();
+
+        if (isNaN(amount) || amount <= 0) {
             showAlert({
-                title: 'Berhasil!',
-                message: 'Kas berhasil ditambahkan: Rp ' + jumlah.toLocaleString('id-ID'),
-                type: 'success'
+                title: 'Gagal',
+                message: 'Jumlah tidak valid',
+                type: 'error'
             });
-            closeModal('tambahKasModal');
-            e.target.reset();
-        } else {
+            return;
+        }
+
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/cash-register-transactions/add-cash', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    amount: amount,
+                    outlet_id: outletId,
+                    reason: reason
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || 'Gagal menambahkan kas');
+            }
+
+            if (result.success) {
+                showAlert({
+                    title: 'Berhasil',
+                    message: 'Kas berhasil ditambahkan: ' + formatRupiah(amount),
+                    type: 'success'
+                });
+                
+                // Refresh cash balance
+                await fetchCashBalance();
+                closeModal('tambahKasModal');
+                e.target.reset();
+            } else {
+                throw new Error(result.message || 'Gagal menambahkan kas');
+            }
+        } catch (error) {
+            console.error('Error adding cash:', error);
             showAlert({
-                title: 'Gagal!',
-                message: 'Jumlah tidak valid!',
+                title: 'Gagal',
+                message: error.message || 'Terjadi kesalahan saat menambahkan kas',
                 type: 'error'
             });
         }
     }
 
     // Ambil Kas function
-    function submitWithdrawKas(e) {
+    async function submitWithdrawKas(e) {
         e.preventDefault();
 
-        const jumlah = parseInt(document.getElementById('withdrawAmount').value);
-        const catatan = document.getElementById('withdrawNote').value;
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showAuthError();
+            return;
+        }
 
-        if (!isNaN(jumlah) && jumlah > 0) {
-            if (jumlah <= kas) {
-                kas -= jumlah;
-                updateKas();
+        const amount = parseFloat(document.getElementById('withdrawAmount').value);
+        const reason = document.getElementById('withdrawNote').value;
+        const outletId = getCurrentOutletId();
+
+        if (isNaN(amount) || amount <= 0) {
+            showAlert({
+                title: 'Gagal',
+                message: 'Jumlah tidak valid',
+                type: 'error'
+            });
+            return;
+        }
+
+        if (amount > currentCashBalance) {
+            showAlert({
+                title: 'Gagal',
+                message: 'Saldo tidak mencukupi',
+                type: 'error'
+            });
+            return;
+        }
+
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/cash-register-transactions/subtract-cash', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    amount: amount,
+                    outlet_id: outletId,
+                    reason: reason
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || 'Gagal mengambil kas');
+            }
+
+            if (result.success) {
                 showAlert({
-                    title: 'Berhasil!',
-                    message: 'Kas berhasil diambil: Rp ' + jumlah.toLocaleString('id-ID'),
+                    title: 'Berhasil',
+                    message: 'Kas berhasil diambil: ' + formatRupiah(amount),
                     type: 'success'
                 });
+                
+                // Refresh cash balance
+                await fetchCashBalance();
                 closeModal('withdrawModal');
                 e.target.reset();
             } else {
-                showAlert({
-                    title: 'Gagal!',
-                    message: 'Saldo kas tidak mencukupi!',
-                    type: 'error'
-                });
+                throw new Error(result.message || 'Gagal mengambil kas');
             }
-        } else {
+        } catch (error) {
+            console.error('Error withdrawing cash:', error);
             showAlert({
-                title: 'Gagal!',
-                message: 'Jumlah tidak valid!',
+                title: 'Gagal',
+                message: error.message || 'Terjadi kesalahan saat mengambil kas',
                 type: 'error'
             });
         }
@@ -258,6 +435,26 @@
     `;
     document.head.appendChild(style);
 
-    // Update kas on load
-    updateKas();
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        // Fetch initial cash balance
+        fetchCashBalance();
+        
+        // Set up form submit handlers
+        document.getElementById('tambahKasForm')?.addEventListener('submit', submitTambahKas);
+        document.getElementById('withdrawForm')?.addEventListener('submit', submitWithdrawKas);
+        
+        // Set up click handlers
+        const btnCashier = document.getElementById('btnCashier');
+        if (btnCashier) {
+            btnCashier.addEventListener('click', function() {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    showAuthError();
+                    return;
+                }
+                openModal('cashierModal');
+            });
+        }
+    });
 </script>
