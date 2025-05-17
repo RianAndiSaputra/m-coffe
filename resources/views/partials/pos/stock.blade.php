@@ -43,12 +43,12 @@
                             <div class="relative">
                                 <select id="adjust_type" class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 appearance-none bg-white pr-10">
                                     <option value="">Pilih tipe</option>
-                                    <option value="shipment">Kiriman</option>
+                                    <option value="shipment">Kiriman Pabrik</option>
                                     <option value="purchase">Pembelian</option>
                                     <option value="sale">Penjualan</option>
                                     <option value="adjustment">Penyesuaian</option>
-                                    <option value="stocktake">Stok Opname</option>
-                                    <option value="transfer">Transfer</option>
+                                    {{-- <option value="stocktake">Stok Opname</option>
+                                    <option value="transfer">Transfer</option> --}}
                                     <option value="other">Lainnya</option>
                                 </select>
                                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
