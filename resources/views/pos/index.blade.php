@@ -221,25 +221,6 @@
                     </h4>
                 </div>
 
-                <!-- Member Search -->
-                <div class="member-search-container p-4 border-b border-orange-200">
-                    <input
-                        id="memberSearch"
-                        type="text"
-                        class="w-full px-3 py-2 text-sm rounded-md border border-gray-300 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 placeholder-gray-400"
-                        placeholder="Cari member (nama/kode)"
-                    >
-                    <div id="memberResults" class="member-results"></div>
-                    <div id="selectedMember" class="mt-2 hidden">
-                        <div class="flex justify-between items-center bg-orange-50 p-2 rounded">
-                            <span id="memberName" class="font-medium"></span>
-                            <button id="removeMember" class="text-red-500">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="cart-column-headers p-4 text-sm font-semibold text-gray-600 bg-gray-50">
                     <div class="grid grid-cols-12">
                         <div class="col-span-5">Produk</div>
@@ -303,8 +284,7 @@
     @include('partials.pos.income-modal')
     @include('partials.pos.stock')
 
-<script>
-    
+<script> 
     let processPaymentHandler;
     // let cart = [];
     // let products = [];
@@ -345,6 +325,7 @@
         
         // Member search elements
         const memberSearchInput = document.getElementById('memberSearch');
+        const memberDropdownList = document.getElementById('memberDropdownList');
         const memberResultsContainer = document.getElementById('memberResults');
         const selectedMemberContainer = document.getElementById('selectedMember');
         const memberNameElement = document.getElementById('memberName');
@@ -397,6 +378,15 @@
         // Format currency display
         function formatCurrency(num) {
             return 'Rp ' + num.toLocaleString('id-ID');
+        }
+
+        // Kontrol tampilan dropdown
+        function showMemberDropdown() {
+            memberDropdownList.classList.remove('hidden');
+        }
+
+        function hideMemberDropdown() {
+            memberDropdownList.classList.add('hidden');
         }
 
         // Show SweetAlert notification
@@ -495,7 +485,7 @@
                 
                 if (data.success) {
                     outletInfo.tax = data.data.tax || 0;
-                    outletInfo.qris = data.data.qris;
+                    outletInfo.qris = data.data.qris_url;
                     outletInfo.bank_account = {
                         atas_nama: data.data.atas_nama_bank,
                         bank: data.data.nama_bank,
@@ -946,18 +936,19 @@
             const discountAmount = item.discount || 0;
             return Math.max(0, basePrice - discountAmount);
         }
-        
+
         // Search members
         memberSearchInput.addEventListener('input', function() {
             const query = this.value.trim();
             
             if (query.length < 2) {
                 memberResultsContainer.innerHTML = '';
-                memberResultsContainer.style.display = 'none';
+                hideMemberDropdown();
                 return;
             }
             
-            fetch(`${API_BASE_URL}/members/search?query=${encodeURIComponent(query)}`, {
+            // Fetch from the main members endpoint
+            fetch(`${API_BASE_URL}/members`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -969,47 +960,124 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success && data.data.length > 0) {
+                    // Filter members based on the search query
+                    const filteredMembers = data.data.filter(member => 
+                        member.name.toLowerCase().includes(query.toLowerCase()) || 
+                        (member.member_code && member.member_code.toLowerCase().includes(query.toLowerCase()))
+                    );
+                    
                     memberResultsContainer.innerHTML = '';
                     
-                    data.data.forEach(member => {
-                        const memberItem = document.createElement('div');
-                        memberItem.className = 'member-item';
-                        memberItem.innerHTML = `
-                            <div class="font-medium">${member.name}</div>
-                            <div class="text-sm text-gray-500">${member.member_code}</div>
-                        `;
-                        
-                        memberItem.addEventListener('click', function() {
-                            selectMember(member);
+                    if (filteredMembers.length > 0) {
+                        filteredMembers.forEach(member => {
+                            const memberItem = document.createElement('div');
+                            memberItem.className = 'member-item';
+                            memberItem.innerHTML = `
+                                <div class="font-medium">${member.name}</div>
+                                <div class="text-sm text-gray-500">${member.member_code || 'No Code'}</div>
+                            `;
+                            
+                            memberItem.addEventListener('click', function() {
+                                selectMember(member);
+                                hideMemberDropdown();
+                            });
+                            
+                            memberResultsContainer.appendChild(memberItem);
                         });
                         
-                        memberResultsContainer.appendChild(memberItem);
-                    });
-                    
-                    memberResultsContainer.style.display = 'block';
+                        showMemberDropdown();
+                    } else {
+                        memberResultsContainer.innerHTML = '<div class="member-item text-gray-500">Tidak ditemukan</div>';
+                        showMemberDropdown();
+                    }
                 } else {
                     memberResultsContainer.innerHTML = '<div class="member-item text-gray-500">Tidak ditemukan</div>';
-                    memberResultsContainer.style.display = 'block';
+                    showMemberDropdown();
                 }
             })
             .catch(error => {
-                console.error('Error searching members:', error);
+                console.error('Error fetching members:', error);
+                memberResultsContainer.innerHTML = '<div class="member-item text-gray-500">Terjadi kesalahan</div>';
+                showMemberDropdown();
             });
         });
-        
-        // Select member
+                
+                // Select member
         function selectMember(member) {
             selectedMember = member;
             memberNameElement.textContent = `${member.name} (${member.member_code})`;
             selectedMemberContainer.classList.remove('hidden');
             memberSearchInput.value = '';
-            memberResultsContainer.style.display = 'none';
+            hideMemberDropdown();
         }
-        
-        // Remove member
+                
+                // Remove member
         removeMemberButton.addEventListener('click', function() {
             selectedMember = null;
             selectedMemberContainer.classList.add('hidden');
+        });
+
+        memberSearchInput.addEventListener('click', function() {
+            if (this.value.trim().length >= 2) {
+                showMemberDropdown();
+            }
+        });
+
+        // Tampilkan dropdown ketika input mendapatkan fokus
+        memberSearchInput.addEventListener('focus', function() {
+            if (this.value.trim().length >= 2) {
+                showMemberDropdown();
+            }
+        });
+
+        // Tutup dropdown ketika klik di luar dropdown
+        document.addEventListener('click', function(event) {
+            if (!memberSearchInput.contains(event.target) && !memberDropdownList.contains(event.target)) {
+                hideMemberDropdown();
+            }
+        });
+
+        // Navigasi dropdown dengan keyboard
+        memberSearchInput.addEventListener('keydown', function(event) {
+            const items = memberResultsContainer.querySelectorAll('.member-item');
+            const activeItem = memberResultsContainer.querySelector('.member-item.active');
+            
+            if (items.length === 0) return;
+            
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                
+                if (!activeItem) {
+                    items[0].classList.add('active');
+                } else {
+                    const nextItem = activeItem.nextElementSibling;
+                    if (nextItem) {
+                        activeItem.classList.remove('active');
+                        nextItem.classList.add('active');
+                    }
+                }
+            } else if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                
+                if (!activeItem) {
+                    items[items.length - 1].classList.add('active');
+                } else {
+                    const prevItem = activeItem.previousElementSibling;
+                    if (prevItem) {
+                        activeItem.classList.remove('active');
+                        prevItem.classList.add('active');
+                    }
+                }
+            } else if (event.key === 'Enter') {
+                if (activeItem) {
+                    event.preventDefault();
+                    
+                    // Simulate click on the active item
+                    activeItem.click();
+                }
+            } else if (event.key === 'Escape') {
+                hideMemberDropdown();
+            }
         });
         
         // Render payment methods
@@ -1039,13 +1107,56 @@
                     this.classList.add('selected');
                     document.getElementById('paymentMethod').value = method.id;
                     
-                    // Show/hide cash payment section
+                    // Handle cash section
                     if (method.id === 'cash') {
                         cashPaymentSection.style.display = 'block';
+                        document.getElementById('transferDetails').classList.add('hidden');
+                        document.getElementById('qrisDetails').classList.add('hidden');
                     } else {
                         cashPaymentSection.style.display = 'none';
                         amountReceivedInput.value = '';
                         changeAmountInput.value = '';
+                    }
+                    
+                    // Handle transfer details
+                    if (method.id === 'transfer') {
+                        document.getElementById('transferDetails').classList.remove('hidden');
+                        document.getElementById('qrisDetails').classList.add('hidden');
+                        
+                        document.getElementById('bankAccountName').textContent = 
+                            outletInfo.bank_account?.atas_nama || '-';
+                        document.getElementById('bankName').textContent = 
+                            outletInfo.bank_account?.bank || '-';
+                        document.getElementById('bankAccountNumber').textContent = 
+                            outletInfo.bank_account?.nomor || '-';
+                    } 
+                    // Handle QRIS details
+                    else if (method.id === 'qris') {
+                        document.getElementById('transferDetails').classList.add('hidden');
+                        document.getElementById('qrisDetails').classList.remove('hidden');
+                        
+                        const qrisContainer = document.getElementById('qrisImageContainer');
+                        qrisContainer.innerHTML = '';
+                        
+                        if (outletInfo.qris) {
+                            const img = document.createElement('img');
+                            img.src = outletInfo.qris;
+                            img.alt = 'QRIS Payment';
+                            img.className = 'w-48 h-48 object-contain';
+                            qrisContainer.appendChild(img);
+                        } else {
+                            qrisContainer.innerHTML = `
+                                <div class="text-center py-8 text-gray-400">
+                                    <i data-lucide="image-off" class="w-12 h-12 mx-auto mb-2"></i>
+                                    <p>QR Code tidak tersedia</p>
+                                </div>
+                            `;
+                            lucide.createIcons();
+                        }
+                    } 
+                    else {
+                        document.getElementById('transferDetails').classList.add('hidden');
+                        document.getElementById('qrisDetails').classList.add('hidden');
                     }
                 });
                 
@@ -1086,9 +1197,9 @@
             const grandTotal = orderSubtotal + tax;
             
             // Update payment modal values
-            paymentSubtotalElement.textContent = formatCurrency(rawSubtotal);
-            paymentDiscountElement.textContent = formatCurrency(totalDiscount);
-            paymentTaxElement.textContent = formatCurrency(tax);
+            // paymentSubtotalElement.textContent = formatCurrency(rawSubtotal);
+            // paymentDiscountElement.textContent = formatCurrency(totalDiscount);
+            // paymentTaxElement.textContent = formatCurrency(tax);
             paymentGrandTotalElement.textContent = formatCurrency(grandTotal);
             
             // Reset payment inputs
@@ -1330,7 +1441,6 @@
             showNotification('Gagal logout!', 'error');
         });
     });
-
 
     //history-modal
     document.getElementById('btnHistoryModal').addEventListener('click', function() {

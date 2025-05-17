@@ -140,7 +140,7 @@
         </div>
   <div class="mt-8 text-center text-sm text-gray-500">
           © Copyright <span class="font-medium"><img src="/images/LogoIt.png" alt="IT Solution Logo" class="inline w-24 h-6 object-contain" /></span>
-        </div>
+</div>
 
         
     <script>

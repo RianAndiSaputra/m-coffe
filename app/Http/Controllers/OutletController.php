@@ -91,7 +91,9 @@ class OutletController extends Controller
                 'users',
                 'products',
                 // 'shifts',
-                'orders',
+                'orders' => function ($query) {
+                    $query->latest()->take(10);
+                },
                 // 'inventory'
             ]);
 
