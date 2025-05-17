@@ -1,0 +1,661 @@
+<!-- Payment Process Modal -->
+<div id="paymentModal" class="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg max-w-md w-full p-6 text-center relative">
+        <h3 class="text-lg font-semibold mb-4">Pilih Metode Pembayaran</h3>
+        
+        <!-- Payment summary - dynamically filled -->
+        <div id="paymentSummary" class="text-left mb-4">
+            <!-- Will be filled with order summary -->
+        </div>
+        
+        <!-- Payment methods -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <button onclick="selectPaymentMethod('cash')" class="border p-3 rounded hover:bg-gray-100">
+                Cash
+            </button>
+            <button onclick="selectPaymentMethod('transfer')" class="border p-3 rounded hover:bg-gray-100">
+                Transfer
+            </button>
+        </div>
+        
+        <!-- Action buttons -->
+        <div class="flex justify-end gap-3">
+            <button onclick="closeModal('paymentModal')" class="bg-gray-200 px-4 py-2 rounded">
+                Batal
+            </button>
+            <button id="processPaymentBtn" onclick="processPayment()" class="bg-blue-500 text-white px-4 py-2 rounded">
+                Bayar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Success Payment Modal -->
+<div id="successPaymentModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg max-w-sm w-full p-6 text-center relative">
+        <!-- Icon Success -->
+        <div class="flex justify-center mb-4">
+            <div class="bg-green-100 rounded-full p-3">
+                <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" stroke-width="2" 
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Text Success -->
+        <h3 class="text-lg font-semibold text-green-600 mb-1">Pembayaran Berhasil!</h3>
+        <p class="text-gray-600 text-sm mb-6">Transaksi telah berhasil diselesaikan</p>
+
+        <!-- Buttons -->
+        <div class="flex justify-center gap-3">
+            <button onclick="cetakInvoice()" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded">
+                Cetak Struk
+            </button>
+            <button onclick="closeModal('successPaymentModal')" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-100">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Global variables to track current transaction
+    let currentOrder = {
+        id: null,             // Will be set when order is created
+        items: [],            // Cart items
+        payment_method: null, // Selected payment method
+        total: 0              // Order total
+    };
+    
+    // Base URL for API calls - modify this to match your environment
+    const BASE_URL = window.location.origin;
+    
+    // Function to show payment modal with cart details
+    function showPaymentModal(cartItems, total) {
+        // Update current order with cart items and total
+        currentOrder.items = cartItems;
+        currentOrder.total = total;
+        
+        // Update payment summary in modal
+        const summaryHTML = `
+            <div class="mb-3">
+                <div class="font-semibold">Ringkasan Pembelian:</div>
+                <div class="text-sm">Total Item: ${cartItems.length}</div>
+                <div class="text-lg font-bold">Total: Rp ${formatCurrency(total)}</div>
+            </div>
+        `;
+        
+        document.getElementById('paymentSummary').innerHTML = summaryHTML;
+        
+        // Show payment modal
+        const modal = document.getElementById('paymentModal');
+        modal.classList.remove('hidden');
+    }
+    
+    // Function to select payment method
+    function selectPaymentMethod(method) {
+        currentOrder.payment_method = method;
+        
+        // Highlight selected payment method (optional UI enhancement)
+        const buttons = document.querySelectorAll('#paymentModal button');
+        buttons.forEach(btn => {
+            if (btn.innerText.toLowerCase().includes(method)) {
+                btn.classList.add('bg-blue-100', 'border-blue-500', 'border-2');
+            } else {
+                btn.classList.remove('bg-blue-100', 'border-blue-500', 'border-2');
+            }
+        });
+    }
+    
+    // Function to process payment
+    async function processPayment() {
+        try {
+            // Validate payment method
+            if (!currentOrder.payment_method) {
+                alert('Silakan pilih metode pembayaran');
+                return;
+            }
+            
+            // Get auth token
+            const token = localStorage.getItem('token') || document.querySelector('meta[name="csrf-token"]')?.content;
+            if (!token) {
+                throw new Error('Token autentikasi tidak ditemukan');
+            }
+            
+            // Get outlet ID from localStorage or elsewhere in your app
+            const outletId = localStorage.getItem('outlet_id');
+            if (!outletId) {
+                throw new Error('Outlet ID tidak ditemukan');
+            }
+            
+            // Prepare order data
+            const orderData = {
+                outlet_id: outletId,
+                items: currentOrder.items,
+                payment_method: currentOrder.payment_method,
+                // Add other necessary fields based on your API requirements
+            };
+            
+            console.log('Submitting order:', orderData);
+            
+            // Submit order to API
+            const response = await fetch(`${BASE_URL}/api/orders`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(orderData)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Server responded with status: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            console.log('Order creation response:', result);
+            
+            if (!result.success) {
+                throw new Error(result.message || 'Gagal membuat order');
+            }
+            
+            // Store the created order ID and data for receipt printing
+            if (result && result.data && result.data.id) {
+                currentOrder.id = result.data.id;
+                currentOrder.data = result.data; // Store the full order data
+                console.log('Order ID stored:', currentOrder.id);
+            } else {
+                throw new Error('Order ID not received from server');
+            }
+            
+            // Close payment modal
+            closeModal('paymentModal');
+            
+            // Show success modal
+            const successModal = document.getElementById('successPaymentModal');
+            successModal.classList.remove('hidden');
+            
+        } catch (error) {
+            console.error('Payment processing error:', error);
+            alert(`Gagal memproses pembayaran: ${error.message}`);
+        }
+    }
+    
+    // Function to close modal
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) modal.classList.add('hidden');
+    }
+
+    // Fungsi untuk mengambil template struk dari database
+    async function fetchReceiptTemplate() {
+        try {
+            // Get auth token
+            const token = localStorage.getItem('token') || document.querySelector('meta[name="csrf-token"]')?.content;
+            if (!token) {
+                throw new Error('Token autentikasi tidak ditemukan');
+            }
+            
+            // Get outlet ID
+            const outletId = localStorage.getItem('outlet_id');
+            if (!outletId) {
+                throw new Error('Outlet ID tidak ditemukan');
+            }
+            
+            console.log('Fetching receipt template for outlet ID:', outletId);
+            
+            // Fetch template from API
+            const response = await fetch(`${BASE_URL}/api/print-template/${outletId}`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Gagal mengambil template cetak: ${response.status}`);
+            }
+            
+            const responseData = await response.json();
+            
+            if (!responseData.success) {
+                throw new Error(responseData.message || 'Gagal memuat template cetak');
+            }
+            
+            console.log('Receipt template fetched successfully:', responseData.data);
+            return responseData.data;
+            
+        } catch (error) {
+            console.error('Error fetching receipt template:', error);
+            // Return default template when fetch fails
+            return {
+                company_name: 'Kifa Bakery',
+                company_slogan: 'Roti dan Kue Terbaik',
+                logo_url: '/images/logo.png',
+                footer_message: 'Terima kasih telah berbelanja',
+                outlet: {
+                    name: 'Kifa Bakery',
+                    address: 'Jl. Contoh No. 123',
+                    phone: '0812-3456-7890'
+                }
+            };
+        }
+    }
+
+    // Function to print receipt
+    async function cetakInvoice() {
+        try {
+            // Periksa apakah currentOrder ada
+            if (!currentOrder || !currentOrder.data) {
+                throw new Error('Data transaksi tidak tersedia');
+            }
+
+            // Ambil data dari currentOrder yang sudah disimpan
+            const order = currentOrder.data;
+            console.log('Order data for receipt:', order);
+            
+            // Fetch receipt template from database
+            const templateData = await fetchReceiptTemplate();
+            console.log('Template data for receipt:', templateData);
+
+            // Buat window cetak
+            const printWindow = window.open('', '_blank', 'width=400,height=600');
+            if (!printWindow) {
+                throw new Error('Popup cetak gagal dibuka. Periksa izin browser.');
+            }
+
+            // Generate HTML struk dengan template dari database
+            const receiptHTML = generateReceiptWithTemplate(order, templateData);
+            printWindow.document.open();
+            printWindow.document.write(receiptHTML);
+            printWindow.document.close();
+            
+            // Cetak setelah window siap
+            printWindow.onload = () => {
+                printWindow.print();
+                
+                // Auto-close window after print dialog is closed or cancelled
+                const mediaQueryList = printWindow.matchMedia('print');
+                mediaQueryList.addEventListener('change', (mql) => {
+                    if (!mql.matches) {
+                        // Print dialog was closed
+                        printWindow.close();
+                    }
+                }, { once: true });
+                
+                // Safety timeout to close the window if event listener fails
+                setTimeout(() => {
+                    try {
+                        if (!printWindow.closed) {
+                            printWindow.close();
+                        }
+                    } catch (e) {
+                        console.log('Window may already be closed');
+                    }
+                }, 4000);
+            };
+            
+        } catch (error) {
+            console.error('Error printing receipt:', error);
+            alert(`Gagal mencetak struk: ${error.message}`);
+        }
+    }
+
+    // Function to generate receipt HTML with template
+    function generateReceiptWithTemplate(order, templateData) {
+        // Format tanggal dengan lebih baik
+        const formatDate = (dateString) => {
+            if (!dateString) return 'Tanggal tidak tersedia';
+            try {
+                const options = { 
+                    day: '2-digit', 
+                    month: 'long', 
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    timeZone: 'Asia/Jakarta'
+                };
+                return new Date(dateString).toLocaleDateString('id-ID', options);
+            } catch (e) {
+                console.error('Error formatting date:', e);
+                return dateString || 'Tanggal tidak tersedia';
+            }
+        };
+
+        // Helper function untuk menangani nilai yang mungkin undefined/null
+        const safeNumber = (value) => {
+            const num = parseFloat(value);
+            return isNaN(num) ? 0 : num;
+        };
+
+        // Format mata uang dengan penanganan error
+        const formatCurrency = (value) => {
+            return safeNumber(value).toLocaleString('id-ID');
+        };
+
+        // Get outlet data from template or use defaults
+        const outletData = templateData.outlet || {
+            name: templateData.company_name || 'Kifa Bakery UHUY',
+            address: '',
+            phone: '',
+            tax: 0
+        };
+
+        // Use logo from template or default
+        const logoPath = templateData.logo_url || '/images/logo.png';
+        
+        // Data order yang aman
+        const safeOrder = {
+            ...order,
+            subtotal: safeNumber(order.subtotal),
+            discount: safeNumber(order.discount),
+            tax: safeNumber(order.tax),
+            total: safeNumber(order.total),
+            total_paid: safeNumber(order.total_paid || order.total),
+            change: safeNumber(order.change || 0),
+            items: order.items || [],
+            payment_method: order.payment_method || 'cash',
+            created_at: order.created_at || new Date().toISOString(),
+            order_number: order.order_number || 'TANPA-NOMOR',
+            user: order.user || 'Kasir'
+        };
+
+        return `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Struk #${safeOrder.order_number}</title>
+                <meta charset="UTF-8">
+                <style>
+                    /* Reset dan base styling */
+                    * {
+                        margin: 0;
+                        padding: 0;
+                        box-sizing: border-box;
+                        font-family: 'Courier New', monospace;
+                    }
+                    
+                    body {
+                        padding: 15px;
+                        max-width: 300px;
+                        margin: 0 auto;
+                        font-size: 14px;
+                        color: #000;
+                    }
+                    
+                    /* Header styling */
+                    .receipt-header {
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        margin-bottom: 15px;
+                        padding-bottom: 10px;
+                        border-bottom: 1px dashed #ccc;
+                    }
+                    
+                    .logo-container {
+                        width: 60px;
+                        height: 60px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                    
+                    .logo {
+                        max-width: 100%;
+                        max-height: 100%;
+                        object-fit: contain;
+                    }
+                    
+                    .header-text {
+                        flex: 1;
+                    }
+                    
+                    .company-name {
+                        font-weight: bold;
+                        font-size: 16px;
+                        margin-bottom: 3px;
+                        text-align: center;
+                    }
+                    
+                    .company-info {
+                        font-size: 12px;
+                        text-align: center;
+                        line-height: 1.3;
+                    }
+                    
+                    /* Divider */
+                    .divider {
+                        border-top: 1px dashed #000;
+                        margin: 8px 0;
+                    }
+                    
+                    /* Transaction info */
+                    .transaction-info {
+                        margin-bottom: 10px;
+                    }
+                    
+                    .info-row {
+                        display: flex;
+                        justify-content: space-between;
+                        margin-bottom: 3px;
+                    }
+                    
+                    .info-label {
+                        font-weight: bold;
+                    }
+                    
+                    /* Items list */
+                    .items-list {
+                        margin: 10px 0;
+                    }
+                    
+                    .item-row {
+                        display: flex;
+                        justify-content: space-between;
+                        margin-bottom: 5px;
+                    }
+                    
+                    .item-name {
+                        flex: 2;
+                    }
+                    
+                    .item-price {
+                        flex: 1;
+                        text-align: right;
+                    }
+                    
+                    /* Totals */
+                    .totals {
+                        margin-top: 10px;
+                    }
+                    
+                    .total-row {
+                        display: flex;
+                        justify-content: space-between;
+                        margin-bottom: 5px;
+                    }
+                    
+                    .grand-total {
+                        font-weight: bold;
+                        font-size: 15px;
+                        margin-top: 8px;
+                        padding-top: 5px;
+                        border-top: 1px dashed #000;
+                    }
+                    
+                    /* Payment info */
+                    .payment-info {
+                        margin-top: 10px;
+                    }
+                    
+                    /* Footer */
+                    .receipt-footer {
+                        margin-top: 15px;
+                        text-align: center;
+                        font-size: 12px;
+                        line-height: 1.4;
+                    }
+                    
+                    /* Utilities */
+                    .text-center {
+                        text-align: center;
+                    }
+                    
+                    .text-right {
+                        text-align: right;
+                    }
+                    
+                    .text-bold {
+                        font-weight: bold;
+                    }
+                </style>
+            </head>
+            <body>
+                <!-- Header dengan logo -->
+                <div class="receipt-header">
+                    <div class="logo-container">
+                        <img src="${logoPath}" 
+                            alt="Logo Toko" 
+                            class="logo"
+                            onerror="this.style.display='none'">
+                    </div>
+                    <div class="header-text">
+                        <div class="company-name">${templateData.company_name || outletData.name || 'TOKO ANDA'}</div>
+                        <div class="company-info">
+                            ${templateData.company_slogan || ''}
+                            ${outletData.address ? `<br>${outletData.address}` : ''}
+                            ${outletData.phone ? `<br>Telp: ${outletData.phone}` : ''}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info transaksi -->
+                <div class="transaction-info">
+                    <div class="info-row">
+                        <span class="info-label">No. Order:</span>
+                        <span>${safeOrder.order_number}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Tanggal:</span>
+                        <span>${formatDate(safeOrder.created_at)}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Kasir:</span>
+                        <span>${safeOrder.user}</span>
+                    </div>
+                </div>
+                
+                <div class="divider"></div>
+                
+                <!-- Daftar item -->
+                <div class="items-list">
+                    ${safeOrder.items.length > 0 
+                        ? safeOrder.items.map(item => {
+                            const safeItem = {
+                                ...item,
+                                quantity: safeNumber(item.quantity),
+                                price: safeNumber(item.price),
+                                discount: safeNumber(item.discount),
+                                product: item.product || 'Produk'
+                            };
+                            
+                            return `
+                                <div class="item-row">
+                                    <div class="item-name">
+                                        ${safeItem.quantity}x ${safeItem.product}
+                                    </div>
+                                    <div class="item-price">
+                                        Rp ${formatCurrency(safeItem.price * safeItem.quantity)}
+                                        ${safeItem.discount > 0 ? `<br><small>Diskon: -Rp ${formatCurrency(safeItem.discount)}</small>` : ''}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')
+                        : '<div class="text-center">Tidak ada item</div>'
+                    }
+                </div>
+                
+                <div class="divider"></div>
+                
+                <!-- Total pembelian -->
+                <div class="totals">
+                    <div class="total-row">
+                        <span>Subtotal:</span>
+                        <span>Rp ${formatCurrency(safeOrder.subtotal)}</span>
+                    </div>
+                    
+                    ${safeOrder.discount > 0 ? `
+                    <div class="total-row">
+                        <span>Diskon:</span>
+                        <span>- Rp ${formatCurrency(safeOrder.discount)}</span>
+                    </div>
+                    ` : ''}
+                    
+                    ${safeOrder.tax > 0 ? `
+                    <div class="total-row">
+                        <span>Pajak:</span>
+                        <span>Rp ${formatCurrency(safeOrder.tax)}</span>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="total-row grand-total">
+                        <span>TOTAL:</span>
+                        <span>Rp ${formatCurrency(safeOrder.total)}</span>
+                    </div>
+                </div>
+                
+                <!-- Info pembayaran -->
+                <div class="payment-info">
+                    <div class="total-row">
+                        <span>Metode Bayar:</span>
+                        <span>${safeOrder.payment_method.toUpperCase()}</span>
+                    </div>
+                    
+                    ${safeOrder.payment_method === 'cash' ? `
+                    <div class="total-row">
+                        <span>Dibayar:</span>
+                        <span>Rp ${formatCurrency(safeOrder.total_paid)}</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Kembalian:</span>
+                        <span>Rp ${formatCurrency(safeOrder.change)}</span>
+                    </div>
+                    ` : ''}
+                </div>
+                
+                ${safeOrder.member ? `
+                <div class="divider"></div>
+                <div class="info-row">
+                    <span class="info-label">Member:</span>
+                    <span>${safeOrder.member.name || ''} (${safeOrder.member.member_code || ''})</span>
+                </div>
+                ` : ''}
+                
+                <!-- Footer -->
+                <div class="divider"></div>
+                <div class="receipt-footer">
+                    ${templateData.footer_message || 'Terima kasih telah berbelanja'}<br>
+                    Barang yang sudah dibeli tidak dapat ditukar<br>
+                    ${new Date().getFullYear()} © ${templateData.company_name || outletData.name || 'TOKO ANDA'}
+                </div>
+            </body>
+            </html>
+        `;
+    }
+
+    // Format currency function
+    function formatCurrency(num) {
+        return parseFloat(num).toLocaleString('id-ID');
+    }
+
+    // Example of how to start the payment process (call this from your product selection UI)
+    function startCheckout(cartItems, total) {
+        showPaymentModal(cartItems, total);
+    }
+</script>
+
+{{-- invoice modal --}}

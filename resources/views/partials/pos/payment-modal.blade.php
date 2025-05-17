@@ -1,623 +1,69 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Payment Modal</title>
-    <!-- Tailwind CSS and Font Awesome -->
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</head>
-<body>
     <!-- Payment Modal -->
-    <div id="paymentModal" class="modal fixed inset-0 z-50 hidden">
-        <div class="modal-overlay absolute w-full h-full bg-black opacity-50"></div>
-        <div
-            class="modal-container bg-white w-full max-w-md mx-auto rounded-xl shadow-lg z-50 overflow-y-auto relative top-1/2 transform -translate-y-1/2"
-        >
-            <div class="modal-content p-6 text-left">
-                <div class="flex justify-between items-center pb-4">
-                    <h3 class="text-xl font-bold">Pembayaran</h3>
-                    <button onclick="closeModal('paymentModal')" class="text-gray-400 hover:text-red-500">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-
-                <p class="text-sm mb-4 text-gray-600">Selesaikan transaksi dengan memilih metode pembayaran</p>
-
-                <div class="bg-orange-100 text-orange-600 p-4 rounded-lg mb-4">
-                    <p class="text-sm">Total Pembayaran</p>
-                    <p id="paymentTotal" class="text-lg font-semibold">Rp 0</p>
-                    <p id="itemCount" class="text-xs text-gray-500">0 item dalam transaksi</p>
-                </div>
-
-                <!-- Metode Pembayaran dengan Border -->
-                <div class="mb-4">
-                    <label class="font-semibold mb-2 block">Metode Pembayaran</label>
-                    <div class="space-y-2">
-                        <label class="flex items-center space-x-2 border border-gray-300 p-2 rounded-lg">
-                            <input
-                                type="radio"
-                                name="paymentMethod"
-                                value="cash"
-                                class="accent-black"
-                                checked
-                                onchange="toggleCashInput()"
-                            />
-                            <i class="fas fa-money-bill-wave text-orange-500"></i>
-                            <span class="w-full">Tunai</span>
-                        </label>
-                        <label class="flex items-center space-x-2 border border-gray-300 p-2 rounded-lg">
-                            <input
-                                type="radio"
-                                name="paymentMethod"
-                                value="transfer"
-                                class="accent-black"
-                                onchange="toggleCashInput()"
-                            />
-                            <i class="fas fa-exchange-alt text-orange-500"></i>
-                            <span class="w-full">Transfer</span>
-                        </label>
-                        <label class="flex items-center space-x-2 border border-gray-300 p-2 rounded-lg">
-                            <input
-                                type="radio"
-                                name="paymentMethod"
-                                value="qris"
-                                class="accent-black"
-                                onchange="toggleCashInput()"
-                            />
-                            <i class="fas fa-qrcode text-orange-500"></i>
-                            <span class="w-full">QRIS</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Jumlah Uang (Hanya muncul saat metode tunai dipilih) -->
-                <div id="cashInputSection" class="mb-4">
-                    <label class="font-semibold block mb-2">Jumlah Uang Diterima</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-600">Rp</span>
-                        <input
-                            type="number"
-                            id="cashReceived"
-                            placeholder="0"
-                            class="w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
-                            oninput="calculateChange()"
-                        />
-                    </div>
-
-                    <!-- Tampilkan Kembalian -->
-                    <div id="changeSection" class="mt-2 hidden">
-                        <div class="flex justify-between items-center bg-green-100 text-green-700 p-2 rounded">
-                            <span class="text-sm">Kembalian:</span>
-                            <span id="changeAmount" class="font-semibold">Rp 0</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Member with Search -->
-                <div class="mb-4 relative">
-                    <label class="font-semibold block mb-2">Member</label>
-                    <div class="relative">
-                        <button
-                            id="memberDropdownButton"
-                            onclick="toggleMemberDropdown()"
-                            class="w-full px-3 py-2 border rounded-lg text-left flex justify-between items-center"
-                        >
-                            <span id="selectedMemberText">Pilih Member</span>
-                            <i class="fas fa-chevron-down text-gray-400"></i>
-                        </button>
-
-                        <div
-                            id="memberDropdown"
-                            class="absolute z-10 hidden w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
-                        >
-                            <div class="p-2 border-b sticky top-0 bg-white">
-                                <div class="relative">
-                                    <input
-                                        type="text"
-                                        id="memberSearchInput"
-                                        placeholder="Cari member..."
-                                        class="w-full pl-8 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-400"
-                                    />
-                                    <i class="fas fa-search absolute left-2 top-3 text-gray-400"></i>
-                                </div>
-                            </div>
-                            <ul id="memberList" class="py-1">
-                                <!-- Members will be loaded dynamically -->
-                                <li onclick="selectMember(null, 'Tanpa Member')" class="px-3 py-2 hover:bg-orange-50 cursor-pointer">
-                                    <p class="font-medium">Tanpa Member</p>
-                                    <p class="text-xs text-gray-500">Tidak menggunakan member</p>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Notes field -->
-                <div class="mb-4">
-                    <label class="font-semibold block mb-2">Catatan</label>
-                    <textarea
-                        id="orderNotes"
-                        class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        rows="2"
-                    ></textarea>
-                </div>
-
-                <!-- Actions -->
-                <div class="flex justify-end space-x-3 pt-4">
-                    <button onclick="closeModal('paymentModal')" class="px-4 py-2 text-sm bg-gray-200 hover:bg-gray-300 rounded-lg">
-                        Batal
-                    </button>
-                    <button onclick="processPayment()" class="px-4 py-2 text-sm bg-orange-500 text-white hover:bg-orange-600 rounded-lg">
-                        Bayar
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Success Modal -->
-    <div id="successModal" class="modal fixed inset-0 z-50 hidden">
+    <div id="paymentModal" class="modal hidden fixed inset-0 z-50 overflow-y-auto">
         <div class="modal-overlay absolute w-full h-full bg-gray-900 opacity-50"></div>
-        <div
-            class="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded-lg shadow-lg z-50 overflow-y-auto relative top-1/2 transform -translate-y-1/2"
-        >
-            <div class="modal-content py-6 text-left px-6">
-                <!-- Header -->
-                <div class="flex justify-between items-center pb-2">
-                    <p class="text-base font-semibold">Pembayaran</p>
-                    <button onclick="closeModal('successModal')" class="modal-close cursor-pointer z-50">
-                        <i class="fas fa-times text-gray-600"></i>
+        <div class="modal-container bg-white w-full max-w-md mx-auto rounded shadow-lg z-50 overflow-y-auto relative my-16">
+            <div class="modal-content py-4 text-left px-6">
+                <div class="flex justify-between items-center pb-3">
+                    <h3 class="text-xl font-bold text-gray-800">Pembayaran</h3>
+                    <button class="modal-close cursor-pointer z-50" onclick="closeModal('paymentModal')">
+                        <i class="fas fa-times text-gray-500 hover:text-gray-700"></i>
                     </button>
                 </div>
-
-                <!-- Description -->
-                <p class="text-sm text-gray-500 mb-4">Detail transaksi yang berhasil</p>
-
-                <!-- Success icon and message -->
-                <div class="text-center my-6">
-                    <div class="flex justify-center mb-3">
-                        <div class="bg-green-100 p-3 rounded-full">
-                            <i class="fas fa-check-circle text-green-500 text-2xl"></i>
+                
+                <div class="mb-4">
+                    <div class="flex justify-between mb-2">
+                        <span class="text-gray-700">Subtotal:</span>
+                        <span id="paymentSubtotal" class="font-bold">Rp 0</span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <span class="text-gray-700">Diskon:</span>
+                        <span id="paymentDiscount" class="font-bold">Rp 0</span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <span class="text-gray-700">Pajak:</span>
+                        <span id="paymentTax" class="text-gray-700">Rp 0</span>
+                    </div>
+                    <div class="flex justify-between mb-4">
+                        <span class="text-gray-700">Total Pembayaran:</span>
+                        <span id="paymentGrandTotal" class="text-orange-500 font-bold text-lg">Rp 0</span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="paymentMethod">
+                            Metode Pembayaran
+                        </label>
+                        <div id="paymentMethods">
+                            <!-- Payment methods will be added here -->
                         </div>
                     </div>
-                    <p class="text-green-600 text-lg font-semibold mb-1">Pembayaran Berhasil!</p>
-                    <p class="text-sm text-gray-600">Transaksi telah berhasil diselesaikan</p>
-                    <p id="invoiceNumber" class="text-sm font-medium text-gray-800 mt-2"></p>
-                </div>
+                    
+                    <div id="cashPaymentSection" class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="amountReceived">
+                            Jumlah Uang Diterima
+                        </label>
+                        <input type="text" id="amountReceived" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500" placeholder="Rp 0">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="changeAmount">
+                            Kembalian
+                        </label>
+                        <input type="text" id="changeAmount" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100" readonly>
+                    </div>
 
-                <!-- Action buttons -->
-                <div class="flex justify-center pt-4 space-x-3">
-                    <button
-                        onclick="printReceipt()"
-                        class="px-5 py-2 text-sm bg-orange-500 text-white rounded hover:bg-orange-600 transition"
-                    >
-                        Cetak Struk
-                    </button>
-                    <button
-                        onclick="closeSuccessModal()"
-                        class="px-5 py-2 text-sm bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition"
-                    >
-                        Tutup
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="notes">
+                            Catatan (Opsional)
+                        </label>
+                        <textarea id="notes" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500" rows="2"></textarea>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end pt-2">
+                    <button id="btnProcessPayment" class="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition-colors">
+                        Proses Pembayaran
                     </button>
                 </div>
             </div>
         </div>
     </div>
-
-    <script>
-        // Global variables
-        let selectedMemberId = null;
-        let outletId = null;
-        let shiftId = null;
-        let currentTotal = 0;
-
-        // Initialize cart if not present
-        if (!window.cart) {
-            window.cart = [];
-        }
-
-        // Initialize when document is ready
-        document.addEventListener("DOMContentLoaded", () => {
-            loadMembers();
-        });
-
-        // Function to add item to cart
-        function addToCart(product) {
-            const existingItem = window.cart.find(item => item.id === product.id);
-            if (existingItem) {
-                existingItem.quantity += 1;
-            } else {
-                window.cart.push({
-                    id: product.id,
-                    name: product.name,
-                    price: product.price,
-                    quantity: 1,
-                    discount: 0
-                });
-            }
-            updateCartUI();
-        }
-
-        // Function to update item quantity in cart
-        function updateCartItem(productId, quantity) {
-            const item = window.cart.find(item => item.id === productId);
-            if (item) {
-                item.quantity = quantity;
-                if (item.quantity <= 0) {
-                    removeCartItem(productId);
-                }
-            }
-            updateCartUI();
-        }
-
-        // Function to remove item from cart
-        function removeCartItem(productId) {
-            window.cart = window.cart.filter(item => item.id !== productId);
-            updateCartUI();
-        }
-
-        // Function to clear the cart
-        function clearCart() {
-            window.cart = [];
-            updateCartUI();
-        }
-
-        // Function to update cart UI (you can customize this to update cart display)
-        function updateCartUI() {
-            // Example: update total and item count in payment modal if open
-            const total = window.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            const itemCount = window.cart.reduce((sum, item) => sum + item.quantity, 0);
-            currentTotal = total;
-
-            // Update payment modal if visible
-            const paymentModal = document.getElementById("paymentModal");
-            if (paymentModal && !paymentModal.classList.contains("hidden")) {
-                document.getElementById("paymentTotal").textContent = formatRupiah(total);
-                document.getElementById("itemCount").textContent = `${itemCount} item dalam transaksi`;
-            }
-
-            // You can also update cart display elsewhere if needed
-        }
-
-        // Function to validate cart before payment
-        function validateCart() {
-            if (!window.cart || window.cart.length === 0) {
-                Swal.fire({
-                    position: "top-end",
-                    icon: "error",
-                    title: "Keranjang belanja kosong",
-                    text: "Silakan tambahkan produk sebelum melakukan pembayaran",
-                    showConfirmButton: false,
-                    timer: 3000,
-                    toast: true
-                });
-                return false;
-            }
-            return true;
-        }
-
-               // Function untuk menampilkan modal pembayaran
-        function showPaymentModal(total) {
-            currentTotal = total;
-            
-            // Ambil data keranjang dari window.cart yang ada di POS utama
-            const cart = window.cart || [];
-            
-            // Hitung total item
-            const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-            
-            // Update UI
-            document.getElementById("paymentTotal").textContent = formatRupiah(total);
-            document.getElementById("itemCount").textContent = `${itemCount} item dalam transaksi`;
-            
-            // Reset form
-            document.getElementById("cashReceived").value = "";
-            document.getElementById("selectedMemberText").textContent = "Pilih Member";
-            document.getElementById("orderNotes").value = "";
-            selectedMemberId = null;
-            
-            // Tampilkan modal
-            document.getElementById("paymentModal").classList.remove("hidden");
-            toggleCashInput();
-        }
-
-
-        // Function to load members from API
-        function loadMembers() {
-            const token = localStorage.getItem("token");
-            if (!token) {
-                console.error("Token not found in localStorage");
-                return;
-            }
-
-            fetch("/api/members", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-                .then((response) => {
-                    if (!response.ok) {
-                        throw new Error("Failed to load members");
-                    }
-                    return response.json();
-                })
-                .then((data) => {
-                    if (data.success && data.data) {
-                        const memberList = document.getElementById("memberList");
-                        memberList.innerHTML = "";
-
-                        // Add "No Member" option
-                        const noMemberItem = document.createElement("li");
-                        noMemberItem.className = "px-3 py-2 hover:bg-orange-50 cursor-pointer";
-                        noMemberItem.onclick = () => selectMember(null, "Tanpa Member");
-                        noMemberItem.innerHTML = `
-                            <p class="font-medium">Tanpa Member</p>
-                            <p class="text-xs text-gray-500">Tidak menggunakan member</p>
-                        `;
-                        memberList.appendChild(noMemberItem);
-
-                        // Add all members from API
-                        data.data.forEach((member) => {
-                            const item = document.createElement("li");
-                            item.className = "px-3 py-2 hover:bg-orange-50 cursor-pointer";
-                            item.onclick = () => selectMember(member.id, member.name);
-                            item.innerHTML = `
-                                <p class="font-medium">${member.name}</p>
-                                <p class="text-xs text-gray-500">${member.member_code || member.phone || ""}</p>
-                            `;
-                            memberList.appendChild(item);
-                        });
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error loading members:", error);
-                    // Fallback with sample data if API fails
-                    const memberList = document.getElementById("memberList");
-                    memberList.innerHTML = `
-                        <li onclick="selectMember(null, 'Tanpa Member')" class="px-3 py-2 hover:bg-orange-50 cursor-pointer">
-                            <p class="font-medium">Tanpa Member</p>
-                            <p class="text-xs text-gray-500">Tidak menggunakan member</p>
-                        </li>
-                        <li onclick="selectMember(1, 'Andi Pratama')" class="px-3 py-2 hover:bg-orange-50 cursor-pointer">
-                            <p class="font-medium">Andi Pratama</p>
-                            <p class="text-xs text-gray-500">M001</p>
-                        </li>
-                        <li onclick="selectMember(2, 'Budi Santoso')" class="px-3 py-2 hover:bg-orange-50 cursor-pointer">
-                            <p class="font-medium">Budi Santoso</p>
-                            <p class="text-xs text-gray-500">M002</p>
-                        </li>
-                    `;
-                });
-        }
-
-        // Calculate change when cash amount is entered
-        function calculateChange() {
-            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-            if (paymentMethod !== "cash") {
-                document.getElementById("cashInputSection").classList.add("hidden");
-                return;
-            } else {
-                document.getElementById("cashInputSection").classList.remove("hidden");
-            }
-
-            const cash = parseInt(document.getElementById("cashReceived").value) || 0;
-            const change = cash - currentTotal;
-
-            const changeSection = document.getElementById("changeSection");
-            const changeAmount = document.getElementById("changeAmount");
-
-            if (cash >= currentTotal) {
-                changeAmount.textContent = formatRupiah(change);
-                changeSection.classList.remove("hidden");
-            } else {
-                changeSection.classList.add("hidden");
-            }
-        }
-
-        // Format number to Rupiah
-        function formatRupiah(amount) {
-            return "Rp " + amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-        }
-
-        // Toggle cash input section based on payment method
-        function toggleCashInput() {
-            const selected = document.querySelector('input[name="paymentMethod"]:checked').value;
-            const cashSection = document.getElementById("cashInputSection");
-
-            if (selected === "cash") {
-                cashSection.classList.remove("hidden");
-                calculateChange();
-            } else {
-                cashSection.classList.add("hidden");
-            }
-        }
-
-        // Close any modal
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.add("hidden");
-        }
-
-        // Close success modal and potentially reset the cart
-        function closeSuccessModal() {
-            closeModal("successModal");
-            // Reset the cart
-            if (typeof window.clearCart === "function") {
-                window.clearCart();
-            }
-        }
-
-        // Function untuk memproses pembayaran
-        async function processPayment() {
-            try {
-                const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-                let totalPaid = currentTotal;
-                
-                // Validasi metode tunai
-                if (paymentMethod === "cash") {
-                    const cashReceived = parseInt(document.getElementById("cashReceived").value) || 0;
-                    if (cashReceived < currentTotal) {
-                        throw new Error("Jumlah uang tidak mencukupi");
-                    }
-                    totalPaid = cashReceived;
-                }
-                
-                // Ambil data keranjang terbaru
-                const currentCart = window.cart || [];
-                if (currentCart.length === 0) {
-                    throw new Error("Keranjang belanja kosong");
-                }
-                
-                // Siapkan data untuk dikirim ke backend
-                const orderData = {
-                    outlet_id: outletId,
-                    shift_id: shiftId,
-                    payment_method: paymentMethod,
-                    notes: document.getElementById("orderNotes").value,
-                    total_paid: totalPaid,
-                    total_amount: currentTotal,
-                    tax: 0, // Sesuaikan jika ada pajak
-                    discount: 0, // Sesuaikan jika ada diskon global
-                    member_id: selectedMemberId,
-                    items: currentCart.map(item => ({
-                        product_id: item.id,
-                        quantity: item.quantity,
-                        price: item.price,
-                        discount: item.discount || 0,
-                    }))
-                };
-                
-                // Kirim data ke backend
-                const token = localStorage.getItem("token");
-                if (!token) {
-                    throw new Error("Token tidak ditemukan");
-                }
-                
-                const response = await fetch("/api/orders", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`
-                    },
-                    body: JSON.stringify(orderData)
-                });
-                
-                const data = await response.json();
-                
-                if (!response.ok) {
-                    throw new Error(data.message || "Gagal memproses pembayaran");
-                }
-                
-                // Tampilkan modal sukses
-                document.getElementById("invoiceNumber").textContent = `Invoice: ${data.data.order_number || data.data.invoice_number || ""}`;
-                document.getElementById("paymentModal").classList.add("hidden");
-                document.getElementById("successModal").classList.remove("hidden");
-                
-                // Kosongkan keranjang
-                if (typeof window.clearCart === "function") {
-                    window.clearCart();
-                }
-                
-            } catch (error) {
-                Swal.fire({
-                    position: "top-end",
-                    icon: "error",
-                    title: "Error",
-                    text: error.message,
-                    showConfirmButton: false,
-                    timer: 3000,
-                    toast: true
-                });
-                console.error("Payment error:", error);
-            }
-        }
-
-        // Function to print receipt
-        function printReceipt() {
-            // Implement receipt printing logic here
-            console.log("Printing receipt...");
-        }
-
-        // Toggle member dropdown
-        function toggleMemberDropdown() {
-            const dropdown = document.getElementById("memberDropdown");
-            dropdown.classList.toggle("hidden");
-
-            // Focus on search input when dropdown is shown
-            if (!dropdown.classList.contains("hidden")) {
-                document.getElementById("memberSearchInput").focus();
-            }
-        }
-
-        // Select a member
-        function selectMember(id, name) {
-            selectedMemberId = id;
-            document.getElementById("selectedMemberText").textContent = name;
-            document.getElementById("memberDropdown").classList.add("hidden");
-        }
-
-        // Close dropdown when clicking outside
-        document.addEventListener("click", function (event) {
-            const dropdown = document.getElementById("memberDropdown");
-            const button = document.getElementById("memberDropdownButton");
-
-            if (!button.contains(event.target) && !dropdown.contains(event.target)) {
-                dropdown.classList.add("hidden");
-            }
-        });
-
-        // Search functionality for members
-        document.getElementById("memberSearchInput").addEventListener("input", function () {
-            const searchTerm = this.value.toLowerCase();
-            const members = document.querySelectorAll("#memberList li");
-
-            members.forEach((member) => {
-                const name = member.querySelector("p.font-medium").textContent.toLowerCase();
-                const id = member.querySelector("p.text-xs")?.textContent.toLowerCase() || "";
-
-                if (name.includes(searchTerm) || id.includes(searchTerm)) {
-                    member.style.display = "block";
-                } else {
-                    member.style.display = "none";
-                }
-            });
-        });
-    </script>
-
-    <style>
-        .modal {
-            transition: opacity 0.25s ease;
-        }
-
-        /* SweetAlert toast styling */
-        .swal2-toast {
-            width: auto !important;
-            padding: 1rem 1.5rem !important;
-        }
-
-        /* Custom scrollbar for dropdown */
-        #memberDropdown::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        #memberDropdown::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 0 0 8px 8px;
-        }
-
-        #memberDropdown::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 3px;
-        }
-
-        #memberDropdown::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-    </style>
-</body>
-</html>
