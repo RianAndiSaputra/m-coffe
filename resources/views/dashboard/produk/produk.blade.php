@@ -32,12 +32,14 @@
         </div>
     </div>
     <div class="flex items-center space-x-2">
-        <button class="flex items-center px-4 py-2 text-sm font-medium bg-white border rounded shadow hover:bg-gray-50">
-            <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Cetak
-        </button>
-        <button class="flex items-center px-4 py-2 text-sm font-medium bg-white border rounded shadow hover:bg-gray-50">
-            <i data-lucide="download" class="w-4 h-4 mr-2"></i> Ekspor
-        </button>
+        <div class="flex items-center space-x-2">
+            <button onclick="ProductManager.printProductReport()" class="flex items-center px-4 py-2 text-sm font-medium bg-white border rounded shadow hover:bg-gray-50">
+                <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Cetak
+            </button>
+            <button onclick="ProductManager.exportProductsToCSV()" class="flex items-center px-4 py-2 text-sm font-medium bg-white border rounded shadow hover:bg-gray-50">
+                <i data-lucide="download" class="w-4 h-4 mr-2"></i> Ekspor
+            </button>
+        </div>
     </div>
 </div>
 
