@@ -1,3 +1,4 @@
+<!-- History Modal -->
 <div id="historyModal" class="fixed inset-0 z-50 hidden">
     <!-- Overlay -->
     <div class="absolute w-full h-full bg-gray-900 opacity-50" onclick="tutupModal('historyModal')"></div>
@@ -101,7 +102,9 @@
      // Variabel global untuk menyimpan data transaksi
     let semuaTransaksi = [];
     let sedangMemuat = false;
-    const BASE_URL = 'http://127.0.0.1:8000/api'; // Sesuaikan dengan base URL API Anda
+    // const BASE_URL = 'http://127.0.0.1:8000/api'; // Sesuaikan dengan base URL API Anda
+    // const API_BASE_URL = 'http://127.0.0.1:8000/api';
+
 
     // Inisialisasi date range picker
     const dateRangePicker = flatpickr("#dateRange", {
@@ -128,7 +131,7 @@
             `;
 
             // Membuat URL endpoint dengan parameter
-            let url = BASE_URL + '/orders/history';
+            let url = '/api/orders/history';
             const params = new URLSearchParams();
             
             if (tanggalMulai && tanggalSampai) {
@@ -308,7 +311,7 @@
             }
 
             // Ambil data template cetak dari endpoint
-            const response = await fetch(`${BASE_URL}/print-template/${outletId}`, {
+            const response = await fetch(`/api/print-template/${outletId}`, {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
@@ -580,19 +583,12 @@
         `;
     }
 
-
-    // Fungsi untuk menutup modal
-    function tutupModal(id) {
-        document.getElementById(id).classList.add("hidden");
-    }
-
-    // Fungsi untuk membuka modal
     function bukaModal(id) {
-        document.getElementById(id).classList.remove("hidden");
-        // Ambil data saat modal dibuka jika belum ada data
-        if (semuaTransaksi.length === 0) {
-            ambilDataTransaksi();
-        }
+        document.getElementById(id).classList.remove('hidden');
+    }
+        
+    function tutupModal(id) {
+        document.getElementById(id).classList.add('hidden');
     }
 
     function lihatDetail(nomorInvoice) {

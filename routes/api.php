@@ -23,6 +23,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', 'logout');
         Route::get('/validate-token', 'validateToken');
     });
+
+    Route::controller(OutletController::class)->group(function(){
+        Route::get('/outlets/{outlet}', 'show');
+    });
     
     Route::middleware('role:admin,manajer')->group(function () {
         
@@ -36,7 +40,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::controller(OutletController::class)->group(function () {
             Route::get('/outlets', 'index');
             Route::post('/outlets', 'store')->middleware('role:admin');
-            Route::get('/outlets/{outlet}', 'show');
             Route::post('/outlets/{outlet}', 'update')->middleware('role:admin'); 
             Route::delete('/outlets/{outlet}', 'destroy')->middleware('role:admin');
         });

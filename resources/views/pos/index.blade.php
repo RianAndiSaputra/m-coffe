@@ -152,7 +152,9 @@
         <!-- Enhanced Navbar -->
         <nav class="navbar bg-white shadow-sm border-b py-4 px-5">
             <div class="flex flex-col md:flex-row md:justify-between md:items-center w-full gap-3">
-                <a href="#" class="text-orange-500 font-bold text-xl md:text-2xl">Kifa Bakery Pusat</a>
+                <a href="#" class="text-orange-500 font-bold text-xl md:text-2xl">
+                    <span id="outletName">Loading ...</span>
+                </a>
                 <div class="flex flex-wrap gap-2 items-center">
                    <button id="btnStockModal" class="px-3 py-1.5 text-sm text-black font-bold bg-orange-50 border border-orange-300 rounded-md hover:bg-orange-100 transition-colors">
                         <i class="fas fa-box mr-1.5 text-orange-500 text-base"></i> Stok
@@ -219,25 +221,6 @@
                     </h4>
                 </div>
 
-                <!-- Member Search -->
-                <div class="member-search-container p-4 border-b border-orange-200">
-                    <input
-                        id="memberSearch"
-                        type="text"
-                        class="w-full px-3 py-2 text-sm rounded-md border border-gray-300 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 placeholder-gray-400"
-                        placeholder="Cari member (nama/kode)"
-                    >
-                    <div id="memberResults" class="member-results"></div>
-                    <div id="selectedMember" class="mt-2 hidden">
-                        <div class="flex justify-between items-center bg-orange-50 p-2 rounded">
-                            <span id="memberName" class="font-medium"></span>
-                            <button id="removeMember" class="text-red-500">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="cart-column-headers p-4 text-sm font-semibold text-gray-600 bg-gray-50">
                     <div class="grid grid-cols-12">
                         <div class="col-span-5">Produk</div>
@@ -293,180 +276,15 @@
         </div>
     </div>
 
-    <!-- Payment Modal -->
-    <div id="paymentModal" class="modal hidden fixed inset-0 z-50 overflow-y-auto">
-        <div class="modal-overlay absolute w-full h-full bg-gray-900 opacity-50"></div>
-        <div class="modal-container bg-white w-full max-w-md mx-auto rounded shadow-lg z-50 overflow-y-auto relative my-16">
-            <div class="modal-content py-4 text-left px-6">
-                <div class="flex justify-between items-center pb-3">
-                    <h3 class="text-xl font-bold text-gray-800">Pembayaran</h3>
-                    <button class="modal-close cursor-pointer z-50" onclick="closeModal('paymentModal')">
-                        <i class="fas fa-times text-gray-500 hover:text-gray-700"></i>
-                    </button>
-                </div>
-                
-                <div class="mb-4">
-                    <div class="flex justify-between mb-2">
-                        <span class="text-gray-700">Subtotal:</span>
-                        <span id="paymentSubtotal" class="font-bold">Rp 0</span>
-                    </div>
-                    <div class="flex justify-between mb-2">
-                        <span class="text-gray-700">Diskon:</span>
-                        <span id="paymentDiscount" class="font-bold">Rp 0</span>
-                    </div>
-                    <div class="flex justify-between mb-2">
-                        <span class="text-gray-700">Pajak:</span>
-                        <span id="paymentTax" class="text-gray-700">Rp 0</span>
-                    </div>
-                    <div class="flex justify-between mb-4">
-                        <span class="text-gray-700">Total Pembayaran:</span>
-                        <span id="paymentGrandTotal" class="text-orange-500 font-bold text-lg">Rp 0</span>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="paymentMethod">
-                            Metode Pembayaran
-                        </label>
-                        <div id="paymentMethods">
-                            <!-- Payment methods will be added here -->
-                        </div>
-                    </div>
-                    
-                    <div id="cashPaymentSection" class="mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="amountReceived">
-                            Jumlah Uang Diterima
-                        </label>
-                        <input type="text" id="amountReceived" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500" placeholder="Rp 0">
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="changeAmount">
-                            Kembalian
-                        </label>
-                        <input type="text" id="changeAmount" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100" readonly>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="notes">
-                            Catatan (Opsional)
-                        </label>
-                        <textarea id="notes" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500" rows="2"></textarea>
-                    </div>
-                </div>
-                
-                <div class="flex justify-end pt-2">
-                    <button id="btnProcessPayment" class="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition-colors">
-                        Proses Pembayaran
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Invoice Modal -->
-    <div id="invoiceModal" class="modal hidden fixed inset-0 z-50 overflow-y-auto">
-        <div class="modal-overlay absolute w-full h-full bg-gray-900 opacity-50"></div>
-        <div class="modal-container bg-white w-full max-w-2xl mx-auto rounded shadow-lg z-50 overflow-y-auto relative my-16">
-            <div class="modal-content py-4 text-left px-6">
-                <div class="flex justify-between items-center pb-3">
-                    <h3 class="text-xl font-bold text-gray-800">Invoice</h3>
-                    <div>
-                        <button onclick="printInvoice()" class="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 mr-2">
-                            <i class="fas fa-print mr-1"></i> Cetak
-                        </button>
-                        <button class="modal-close cursor-pointer z-50" onclick="closeModal('invoiceModal')">
-                            <i class="fas fa-times text-gray-500 hover:text-gray-700"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <div id="invoice-print" class="p-4">
-                    <div class="text-center mb-4">
-                        <h2 class="text-2xl font-bold">Kifa Bakery Pusat</h2>
-                        <p class="text-gray-600">Jl. Contoh No. 123, Kota Bandung</p>
-                        <p class="text-gray-600">Telp: 081234567890</p>
-                    </div>
-                    
-                    <div class="border-t border-b border-gray-300 py-2 my-2">
-                        <div class="flex justify-between">
-                            <span class="font-medium">Invoice #<span id="invoiceNumber">-</span></span>
-                            <span id="invoiceDate" class="text-gray-600">-</span>
-                        </div>
-                        <div id="invoiceMember" class="text-sm mt-1 hidden">
-                            Member: <span id="memberNameDisplay"></span> (<span id="memberCodeDisplay"></span>)
-                        </div>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <table class="w-full mb-4">
-                            <thead>
-                                <tr class="border-b border-gray-300">
-                                    <th class="text-left py-2">Produk</th>
-                                    <th class="text-right py-2">Harga</th>
-                                    <th class="text-right py-2">Qty</th>
-                                    <th class="text-right py-2">Diskon</th>
-                                    <th class="text-right py-2">Subtotal</th>
-                                </tr>
-                            </thead>
-                            <tbody id="invoiceItems">
-                                <!-- Invoice items will be added here -->
-                            </tbody>
-                            <tfoot>
-                                <tr class="border-t border-gray-300">
-                                    <td colspan="4" class="text-right py-2 font-bold">Subtotal:</td>
-                                    <td class="text-right py-2" id="invoiceSubtotal">Rp 0</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="4" class="text-right py-2 font-bold">Diskon:</td>
-                                    <td class="text-right py-2" id="invoiceDiscount">Rp 0</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="4" class="text-right py-2 font-bold">Pajak:</td>
-                                    <td class="text-right py-2" id="invoiceTax">Rp 0</td>
-                                </tr>
-                                <tr class="border-t border-gray-300">
-                                    <td colspan="4" class="text-right py-2 font-bold">Total:</td>
-                                    <td class="text-right py-2 font-bold text-lg" id="invoiceGrandTotal">Rp 0</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="4" class="text-right py-2">Metode Pembayaran:</td>
-                                    <td class="text-right py-2" id="invoicePaymentMethod">-</td>
-                                </tr>
-                                <tr id="invoiceCashRow">
-                                    <td colspan="4" class="text-right py-2">Tunai:</td>
-                                    <td class="text-right py-2" id="invoiceCash">Rp 0</td>
-                                </tr>
-                                <tr id="invoiceChangeRow">
-                                    <td colspan="4" class="text-right py-2">Kembalian:</td>
-                                    <td class="text-right py-2" id="invoiceChange">Rp 0</td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                    
-                    <div class="text-center mt-6 pt-4 border-t border-gray-300">
-                        <p>Terima kasih telah berbelanja di Kifa Bakery Pusat</p>
-                        <p class="text-sm text-gray-500 mt-2">Barang yang sudah dibeli tidak dapat dikembalikan</p>
-                    </div>
-                </div>
-                
-                <div class="flex justify-end pt-4">
-                    <button onclick="closeModal('invoiceModal')" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors">
-                        Tutup
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Include other modals -->
+    @include('partials.pos.payment-modal')
+    @include('partials.pos.invoice-modal')
     @include('partials.pos.cashier-modal')
     @include('partials.pos.history-modal')
     @include('partials.pos.income-modal')
     @include('partials.pos.stock')
 
-<script>
-    
+<script> 
     let processPaymentHandler;
     // let cart = [];
     // let products = [];
@@ -475,7 +293,6 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize Lucide icons
         lucide.createIcons();
-
         
         // Initialize cart and product data
         let cart = [];
@@ -489,6 +306,11 @@
             shift_id: parseInt(localStorage.getItem('shift_id')) || null
         };
         let selectedMember = null;
+
+        const outletName = localStorage.getItem('outlet_name') || 'Kifa Bakery Pusat';
+    
+        // Set nilai ke elemen
+        document.getElementById('outletName').textContent = outletName;
         
         // DOM elements
         const searchInput = document.getElementById('searchInput');
@@ -503,6 +325,7 @@
         
         // Member search elements
         const memberSearchInput = document.getElementById('memberSearch');
+        const memberDropdownList = document.getElementById('memberDropdownList');
         const memberResultsContainer = document.getElementById('memberResults');
         const selectedMemberContainer = document.getElementById('selectedMember');
         const memberNameElement = document.getElementById('memberName');
@@ -557,6 +380,15 @@
             return 'Rp ' + num.toLocaleString('id-ID');
         }
 
+        // Kontrol tampilan dropdown
+        function showMemberDropdown() {
+            memberDropdownList.classList.remove('hidden');
+        }
+
+        function hideMemberDropdown() {
+            memberDropdownList.classList.add('hidden');
+        }
+
         // Show SweetAlert notification
         function showNotification(message, type = 'success') {
             const Toast = Swal.mixin({
@@ -604,50 +436,11 @@
         function closeModal(id) {
             document.getElementById(id).classList.add('hidden');
         }
-        
-        // Fetch outlet information
-        // async function fetchOutletInfo() {
-        //     try {
-        //         const response = await fetch(`${API_BASE_URL}/outlets/1`, {
-        //             method: 'GET',
-        //             headers: {
-        //                 'Content-Type': 'application/json',
-        //                 'Authorization': `Bearer ${API_TOKEN}`,
-        //                 'Accept': 'application/json'
-        //             },
-        //             credentials: 'include'
-        //         });
-                
-        //         if (!response.ok) {
-        //             throw new Error(`HTTP error! Status: ${response.status}`);
-        //         }
-                
-        //         const data = await response.json();
-                
-        //         if (data.success) {
-        //             outletInfo.tax = data.data.tax || 0;
-        //             outletInfo.qris = data.data.qris;
-        //             outletInfo.bank_account = {
-        //                 atas_nama: data.data.atas_nama_bank,
-        //                 bank: data.data.nama_bank,
-        //                 nomor: data.data.nomor_transaksi_bank
-        //             };
-                    
-        //             // Update tax display
-        //             taxAmountElement.textContent = `Pajak (${outletInfo.tax}%)`;
-                    
-        //             // Get current shift
-        //             await fetchCurrentShift();
-        //         }
-        //     } catch (error) {
-        //         console.error('Error fetching outlet info:', error);
-        //     }
-        // }
-        
+
         // Fetch current shift
         async function fetchCurrentShift() {
             try {
-                const response = await fetch(`${API_BASE_URL}/shifts/current`, {
+                const response = await fetch(`${API_BASE_URL}/shifts/${outletInfo.shift_id}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -671,6 +464,45 @@
             }
         }
         
+        // Fetch outlet information
+        async function fetchOutletInfo() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/outlets/${outletInfo.id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_TOKEN}`,
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    outletInfo.tax = data.data.tax || 0;
+                    outletInfo.qris = data.data.qris_url;
+                    outletInfo.bank_account = {
+                        atas_nama: data.data.atas_nama_bank,
+                        bank: data.data.nama_bank,
+                        nomor: data.data.nomor_transaksi_bank
+                    };
+                    
+                    // Update tax display
+                    taxAmountElement.textContent = `Pajak (${outletInfo.tax}%)`;
+                    
+                    // Get current shift
+                    await fetchCurrentShift();
+                }
+            } catch (error) {
+                console.error('Error fetching outlet info:', error);
+            }
+        }
+    
         // Fetch products from API
         async function fetchProducts() {
             try {
@@ -678,7 +510,7 @@
                     throw new Error('Token tidak ditemukan');
                 }
                 
-                const response = await fetch(`${API_BASE_URL}/products/outlet/1`, {
+                const response = await fetch(`${API_BASE_URL}/products/outlet/${outletInfo.id}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -890,6 +722,7 @@
             
             // Add event listeners to all "Add to Cart" buttons
             document.querySelectorAll('.btn-add-to-cart').forEach(button => {
+                // Di event listener tombol tambah ke keranjang
                 button.addEventListener('click', function() {
                     const productCard = this.closest('.product-card');
                     const productName = productCard.querySelector('.product-name').textContent.split(' (')[0];
@@ -897,10 +730,19 @@
                     
                     if (!product) return;
                     
-                    // Check if product already in cart
+                    // Validasi stok
+                    if (product.quantity <= 0) {
+                        showNotification('Stok produk habis', 'error');
+                        return;
+                    }
+
                     const existingItem = cart.find(item => item.id === product.id);
                     
                     if (existingItem) {
+                        if (existingItem.quantity + 1 > product.quantity) {
+                            showNotification('Stok tidak mencukupi', 'error');
+                            return;
+                        }
                         existingItem.quantity += 1;
                         existingItem.subtotal = calculateItemSubtotal(existingItem);
                     } else {
@@ -909,6 +751,7 @@
                             name: product.name,
                             price: product.price,
                             quantity: 1,
+                            stock: product.quantity, // Simpan stok saat ini
                             discount: 0,
                             subtotal: product.price
                         });
@@ -1016,11 +859,19 @@
                 });
             });
             
+            // Di bagian event listener tombol tambah quantity
             document.querySelectorAll('.btn-increase').forEach(button => {
                 button.addEventListener('click', function() {
                     const index = parseInt(this.getAttribute('data-index'));
-                    cart[index].quantity += 1;
-                    cart[index].subtotal = calculateItemSubtotal(cart[index]);
+                    const item = cart[index];
+                    
+                    if (item.quantity + 1 > item.stock) {
+                        showNotification('Stok tidak mencukupi', 'error');
+                        return;
+                    }
+                    
+                    item.quantity += 1;
+                    item.subtotal = calculateItemSubtotal(item);
                     updateCart();
                 });
             });
@@ -1029,12 +880,13 @@
                 input.addEventListener('change', function() {
                     const index = parseInt(this.getAttribute('data-index'));
                     const newQty = parseInt(this.value) || 1;
-                    if (newQty <= 0) {
-                        this.value = 1;
-                        cart[index].quantity = 1;
-                    } else {
-                        cart[index].quantity = newQty;
-                    }
+                    const item = cart[index];
+
+                            if (newQty > item.stock) {
+            showNotification(`Stok hanya tersedia ${item.stock}`, 'error');
+            this.value = item.quantity;
+            return;
+        }
                     cart[index].subtotal = calculateItemSubtotal(cart[index]);
                     updateCart();
                 });
@@ -1084,18 +936,19 @@
             const discountAmount = item.discount || 0;
             return Math.max(0, basePrice - discountAmount);
         }
-        
+
         // Search members
         memberSearchInput.addEventListener('input', function() {
             const query = this.value.trim();
             
             if (query.length < 2) {
                 memberResultsContainer.innerHTML = '';
-                memberResultsContainer.style.display = 'none';
+                hideMemberDropdown();
                 return;
             }
             
-            fetch(`${API_BASE_URL}/members/search?query=${encodeURIComponent(query)}`, {
+            // Fetch from the main members endpoint
+            fetch(`${API_BASE_URL}/members`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1107,47 +960,124 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success && data.data.length > 0) {
+                    // Filter members based on the search query
+                    const filteredMembers = data.data.filter(member => 
+                        member.name.toLowerCase().includes(query.toLowerCase()) || 
+                        (member.member_code && member.member_code.toLowerCase().includes(query.toLowerCase()))
+                    );
+                    
                     memberResultsContainer.innerHTML = '';
                     
-                    data.data.forEach(member => {
-                        const memberItem = document.createElement('div');
-                        memberItem.className = 'member-item';
-                        memberItem.innerHTML = `
-                            <div class="font-medium">${member.name}</div>
-                            <div class="text-sm text-gray-500">${member.member_code}</div>
-                        `;
-                        
-                        memberItem.addEventListener('click', function() {
-                            selectMember(member);
+                    if (filteredMembers.length > 0) {
+                        filteredMembers.forEach(member => {
+                            const memberItem = document.createElement('div');
+                            memberItem.className = 'member-item';
+                            memberItem.innerHTML = `
+                                <div class="font-medium">${member.name}</div>
+                                <div class="text-sm text-gray-500">${member.member_code || 'No Code'}</div>
+                            `;
+                            
+                            memberItem.addEventListener('click', function() {
+                                selectMember(member);
+                                hideMemberDropdown();
+                            });
+                            
+                            memberResultsContainer.appendChild(memberItem);
                         });
                         
-                        memberResultsContainer.appendChild(memberItem);
-                    });
-                    
-                    memberResultsContainer.style.display = 'block';
+                        showMemberDropdown();
+                    } else {
+                        memberResultsContainer.innerHTML = '<div class="member-item text-gray-500">Tidak ditemukan</div>';
+                        showMemberDropdown();
+                    }
                 } else {
                     memberResultsContainer.innerHTML = '<div class="member-item text-gray-500">Tidak ditemukan</div>';
-                    memberResultsContainer.style.display = 'block';
+                    showMemberDropdown();
                 }
             })
             .catch(error => {
-                console.error('Error searching members:', error);
+                console.error('Error fetching members:', error);
+                memberResultsContainer.innerHTML = '<div class="member-item text-gray-500">Terjadi kesalahan</div>';
+                showMemberDropdown();
             });
         });
-        
-        // Select member
+                
+                // Select member
         function selectMember(member) {
             selectedMember = member;
             memberNameElement.textContent = `${member.name} (${member.member_code})`;
             selectedMemberContainer.classList.remove('hidden');
             memberSearchInput.value = '';
-            memberResultsContainer.style.display = 'none';
+            hideMemberDropdown();
         }
-        
-        // Remove member
+                
+                // Remove member
         removeMemberButton.addEventListener('click', function() {
             selectedMember = null;
             selectedMemberContainer.classList.add('hidden');
+        });
+
+        memberSearchInput.addEventListener('click', function() {
+            if (this.value.trim().length >= 2) {
+                showMemberDropdown();
+            }
+        });
+
+        // Tampilkan dropdown ketika input mendapatkan fokus
+        memberSearchInput.addEventListener('focus', function() {
+            if (this.value.trim().length >= 2) {
+                showMemberDropdown();
+            }
+        });
+
+        // Tutup dropdown ketika klik di luar dropdown
+        document.addEventListener('click', function(event) {
+            if (!memberSearchInput.contains(event.target) && !memberDropdownList.contains(event.target)) {
+                hideMemberDropdown();
+            }
+        });
+
+        // Navigasi dropdown dengan keyboard
+        memberSearchInput.addEventListener('keydown', function(event) {
+            const items = memberResultsContainer.querySelectorAll('.member-item');
+            const activeItem = memberResultsContainer.querySelector('.member-item.active');
+            
+            if (items.length === 0) return;
+            
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                
+                if (!activeItem) {
+                    items[0].classList.add('active');
+                } else {
+                    const nextItem = activeItem.nextElementSibling;
+                    if (nextItem) {
+                        activeItem.classList.remove('active');
+                        nextItem.classList.add('active');
+                    }
+                }
+            } else if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                
+                if (!activeItem) {
+                    items[items.length - 1].classList.add('active');
+                } else {
+                    const prevItem = activeItem.previousElementSibling;
+                    if (prevItem) {
+                        activeItem.classList.remove('active');
+                        prevItem.classList.add('active');
+                    }
+                }
+            } else if (event.key === 'Enter') {
+                if (activeItem) {
+                    event.preventDefault();
+                    
+                    // Simulate click on the active item
+                    activeItem.click();
+                }
+            } else if (event.key === 'Escape') {
+                hideMemberDropdown();
+            }
         });
         
         // Render payment methods
@@ -1177,13 +1107,56 @@
                     this.classList.add('selected');
                     document.getElementById('paymentMethod').value = method.id;
                     
-                    // Show/hide cash payment section
+                    // Handle cash section
                     if (method.id === 'cash') {
                         cashPaymentSection.style.display = 'block';
+                        document.getElementById('transferDetails').classList.add('hidden');
+                        document.getElementById('qrisDetails').classList.add('hidden');
                     } else {
                         cashPaymentSection.style.display = 'none';
                         amountReceivedInput.value = '';
                         changeAmountInput.value = '';
+                    }
+                    
+                    // Handle transfer details
+                    if (method.id === 'transfer') {
+                        document.getElementById('transferDetails').classList.remove('hidden');
+                        document.getElementById('qrisDetails').classList.add('hidden');
+                        
+                        document.getElementById('bankAccountName').textContent = 
+                            outletInfo.bank_account?.atas_nama || '-';
+                        document.getElementById('bankName').textContent = 
+                            outletInfo.bank_account?.bank || '-';
+                        document.getElementById('bankAccountNumber').textContent = 
+                            outletInfo.bank_account?.nomor || '-';
+                    } 
+                    // Handle QRIS details
+                    else if (method.id === 'qris') {
+                        document.getElementById('transferDetails').classList.add('hidden');
+                        document.getElementById('qrisDetails').classList.remove('hidden');
+                        
+                        const qrisContainer = document.getElementById('qrisImageContainer');
+                        qrisContainer.innerHTML = '';
+                        
+                        if (outletInfo.qris) {
+                            const img = document.createElement('img');
+                            img.src = outletInfo.qris;
+                            img.alt = 'QRIS Payment';
+                            img.className = 'w-48 h-48 object-contain';
+                            qrisContainer.appendChild(img);
+                        } else {
+                            qrisContainer.innerHTML = `
+                                <div class="text-center py-8 text-gray-400">
+                                    <i data-lucide="image-off" class="w-12 h-12 mx-auto mb-2"></i>
+                                    <p>QR Code tidak tersedia</p>
+                                </div>
+                            `;
+                            lucide.createIcons();
+                        }
+                    } 
+                    else {
+                        document.getElementById('transferDetails').classList.add('hidden');
+                        document.getElementById('qrisDetails').classList.add('hidden');
                     }
                 });
                 
@@ -1224,9 +1197,9 @@
             const grandTotal = orderSubtotal + tax;
             
             // Update payment modal values
-            paymentSubtotalElement.textContent = formatCurrency(rawSubtotal);
-            paymentDiscountElement.textContent = formatCurrency(totalDiscount);
-            paymentTaxElement.textContent = formatCurrency(tax);
+            // paymentSubtotalElement.textContent = formatCurrency(rawSubtotal);
+            // paymentDiscountElement.textContent = formatCurrency(totalDiscount);
+            // paymentTaxElement.textContent = formatCurrency(tax);
             paymentGrandTotalElement.textContent = formatCurrency(grandTotal);
             
             // Reset payment inputs
@@ -1262,7 +1235,6 @@
             openModal('paymentModal');
         }
         
-        // Process payment
         async function processPayment(grandTotal) {
             const paymentMethod = document.getElementById('paymentMethod').value;
             const amountReceived = parseCurrencyInput(amountReceivedInput.value);
@@ -1314,20 +1286,38 @@
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
                 }
                 
                 const data = await response.json();
+                console.log('Payment response:', data); // Debugging
                 
                 if (data.success) {
+                    // Simpan data transaksi ke variabel global
+                    currentOrder = {
+                        id: data.data.id, // Pastikan ini sesuai dengan struktur response API
+                        items: cart,
+                        payment_method: paymentMethod,
+                        total: grandTotal,
+                        data: data.data,
+                        outlet: outletInfo  // Simpan seluruh data response
+                    };
+                    
+                    // Debugging
+                    console.log('Current order stored:', currentOrder);
+                    
                     // Show invoice
                     showInvoice(data.data, amountReceived, paymentMethod);
+                    
                     // Clear cart
                     cart = [];
                     updateCart();
+                    
                     // Clear member
                     selectedMember = null;
                     selectedMemberContainer.classList.add('hidden');
+                    
                     // Close payment modal
                     closeModal('paymentModal');
                 } else {
@@ -1335,65 +1325,63 @@
                 }
             } catch (error) {
                 console.error('Error processing payment:', error);
-                showNotification('Gagal memproses pembayaran', 'error');
+                showNotification(error.message || 'Gagal memproses pembayaran', 'error');
             }
-
-            closeModal('paymentModal');
         }
         
         // Show invoice
         function showInvoice(order, amountReceived, paymentMethod) {
             // Set invoice number and date
-            invoiceNumberElement.textContent = order.order_number;
-            invoiceDateElement.textContent = new Date(order.created_at).toLocaleString('id-ID');
+            // invoiceNumberElement.textContent = order.order_number;
+            // invoiceDateElement.textContent = new Date(order.created_at).toLocaleString('id-ID');
             
-            // Show member if exists
-            if (order.member) {
-                invoiceMemberElement.classList.remove('hidden');
-                memberNameDisplayElement.textContent = order.member.name;
-                memberCodeDisplayElement.textContent = order.member.member_code;
-            } else {
-                invoiceMemberElement.classList.add('hidden');
-            }
+            // // Show member if exists
+            // if (order.member) {
+            //     invoiceMemberElement.classList.remove('hidden');
+            //     memberNameDisplayElement.textContent = order.member.name;
+            //     memberCodeDisplayElement.textContent = order.member.member_code;
+            // } else {
+            //     invoiceMemberElement.classList.add('hidden');
+            // }
             
-            // Clear previous items
-            invoiceItemsContainer.innerHTML = '';
+            // // Clear previous items
+            // invoiceItemsContainer.innerHTML = '';
             
-            // Add items to invoice
-            order.items.forEach(item => {
-                const itemElement = document.createElement('tr');
-                itemElement.className = 'border-b border-gray-200';
-                itemElement.innerHTML = `
-                    <td class="py-2">${item.product}</td>
-                    <td class="py-2 text-right">${formatCurrency(item.price)}</td>
-                    <td class="py-2 text-right">${item.quantity}</td>
-                    <td class="py-2 text-right">${formatCurrency(item.discount)}</td>
-                    <td class="py-2 text-right">${formatCurrency(item.quantity * item.price - item.discount)}</td>
-                `;
-                invoiceItemsContainer.appendChild(itemElement);
-            });
+            // // Add items to invoice
+            // order.items.forEach(item => {
+            //     const itemElement = document.createElement('tr');
+            //     itemElement.className = 'border-b border-gray-200';
+            //     itemElement.innerHTML = `
+            //         <td class="py-2">${item.product}</td>
+            //         <td class="py-2 text-right">${formatCurrency(item.price)}</td>
+            //         <td class="py-2 text-right">${item.quantity}</td>
+            //         <td class="py-2 text-right">${formatCurrency(item.discount)}</td>
+            //         <td class="py-2 text-right">${formatCurrency(item.quantity * item.price - item.discount)}</td>
+            //     `;
+            //     invoiceItemsContainer.appendChild(itemElement);
+            // });
             
-            // Set invoice totals
-            invoiceSubtotalElement.textContent = formatCurrency(order.subtotal);
-            invoiceDiscountElement.textContent = formatCurrency(order.discount);
-            invoiceTaxElement.textContent = formatCurrency(order.tax);
-            invoiceGrandTotalElement.textContent = formatCurrency(order.total);
-            invoicePaymentMethodElement.textContent = paymentMethod === 'cash' ? 'Tunai' : 
-                                                  paymentMethod === 'qris' ? 'QRIS' : 'Transfer Bank';
+            // // Set invoice totals
+            // invoiceSubtotalElement.textContent = formatCurrency(order.subtotal);
+            // invoiceDiscountElement.textContent = formatCurrency(order.discount);
+            // invoiceTaxElement.textContent = formatCurrency(order.tax);
+            // invoiceGrandTotalElement.textContent = formatCurrency(order.total);
+            // invoicePaymentMethodElement.textContent = paymentMethod === 'cash' ? 'Tunai' : 
+            //                                       paymentMethod === 'qris' ? 'QRIS' : 'Transfer Bank';
             
-            // Show/hide cash and change rows based on payment method
-            if (paymentMethod === 'cash') {
-                invoiceCashRow.style.display = '';
-                invoiceChangeRow.style.display = '';
-                invoiceCashElement.textContent = formatCurrency(amountReceived);
-                invoiceChangeElement.textContent = formatCurrency(order.change);
-            } else {
-                invoiceCashRow.style.display = 'none';
-                invoiceChangeRow.style.display = 'none';
-            }
+            // // Show/hide cash and change rows based on payment method
+            // if (paymentMethod === 'cash') {
+            //     invoiceCashRow.style.display = '';
+            //     invoiceChangeRow.style.display = '';
+            //     invoiceCashElement.textContent = formatCurrency(amountReceived);
+            //     invoiceChangeElement.textContent = formatCurrency(order.change);
+            // } else {
+            //     invoiceCashRow.style.display = 'none';
+            //     invoiceChangeRow.style.display = 'none';
+            // }
             
             // Open invoice modal
-            openModal('invoiceModal');
+            openModal('successPaymentModal');
         }
         
         // Print invoice
@@ -1422,7 +1410,7 @@
         };
         
         // Load data
-        // fetchOutletInfo();
+        fetchOutletInfo();
         updateCart();
         loadProductsFromLocalStorage();
         fetchProducts();
@@ -1454,6 +1442,7 @@
         });
     });
 
+    //history-modal
     document.getElementById('btnHistoryModal').addEventListener('click', function() {
         openModal('historyModal');
         
