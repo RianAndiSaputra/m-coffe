@@ -85,7 +85,14 @@
                 </tr>
             </thead>
             <tbody id="outletTableBody" class="text-gray-700 divide-y">
-                <!-- Data outlet akan dimuat secara dinamis di sini -->
+                <!-- Loading row -->
+                <tr id="loadingRow">
+                    <td colspan="7" class="py-8 text-center">
+                        <div class="flex justify-center items-center">
+                            <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-orange-500"></div>
+                        </div>
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>
@@ -98,6 +105,7 @@
    // Variabel global
         let outletIdToDelete = null;
         let allOutlets = [];
+        let currentAlertId = null;
 
         // Fungsi untuk mendapatkan CSRF token
         function getCSRFToken() {
@@ -109,8 +117,25 @@
             return null;
         }
 
+        // Fungsi untuk menampilkan loading di tabel
+        function showTableLoading() {
+            const loadingRow = document.getElementById('loadingRow');
+            if (loadingRow) {
+                loadingRow.classList.remove('hidden');
+            }
+        }
+
+        // Fungsi untuk menyembunyikan loading di tabel
+        function hideTableLoading() {
+            const loadingRow = document.getElementById('loadingRow');
+            if (loadingRow) {
+                loadingRow.classList.add('hidden');
+            }
+        }
+
         // Fungsi untuk memuat data outlet dari API
         async function loadOutlets() {
+            showTableLoading();
             try {
                 const token = localStorage.getItem('token');
                 
@@ -141,13 +166,33 @@
             } catch (error) {
                 console.error('Error:', error);
                 showAlert('error', 'Terjadi kesalahan saat memuat data');
+            } finally {
+                hideTableLoading();
             }
         }
 
         // Fungsi untuk menampilkan data outlet di tabel
         function renderOutlets(outlets) {
             const tableBody = document.getElementById('outletTableBody');
-            tableBody.innerHTML = '';
+            // Kosongkan tabel kecuali loading row
+            tableBody.innerHTML = `
+                <tr id="loadingRow" class="hidden">
+                    <td colspan="7" class="py-8 text-center">
+                        <div class="flex justify-center items-center">
+                            <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-orange-500"></div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+
+            if (outlets.length === 0) {
+                tableBody.innerHTML += `
+                    <tr>
+                        <td colspan="7" class="py-4 text-center text-gray-500">Tidak ada data outlet</td>
+                    </tr>
+                `;
+                return;
+            }
 
             outlets.forEach((outlet, index) => {
                 const row = document.createElement('tr');
@@ -178,7 +223,7 @@
                                 <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
                             </button>
                             <!-- Dropdown -->
-                            <div class="dropdown-menu hidden absolute right-0 z-20 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-base">
+                            <div class="dropdown-menu hidden absolute right-0 z-20 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-base">
                                 <button onclick="editOutlet(${outlet.id})" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left rounded-t-lg">
                                     <i data-lucide="pencil" class="w-5 h-5 mr-3 text-gray-500"></i> Edit
                                 </button>
@@ -200,8 +245,14 @@
 
         // Fungsi untuk menampilkan alert
         function showAlert(type, message) {
+            // Hapus alert sebelumnya jika ada
+            if (currentAlertId) {
+                closeAlert(currentAlertId);
+            }
+
             const alertContainer = document.getElementById('alertContainer');
             const alertId = 'alert-' + Date.now();
+            currentAlertId = alertId;
             
             const alertConfig = {
                 success: {
@@ -253,16 +304,27 @@
                 alert.classList.add('animate-fade-out');
                 setTimeout(() => {
                     alert.remove();
+                    if (currentAlertId === id) {
+                        currentAlertId = null;
+                    }
                 }, 300);
             }
         }
 
         // Fungsi untuk menampilkan modal konfirmasi hapus
         function showConfirmDelete(id) {
+            // Tutup semua dropdown terlebih dahulu
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.add('hidden');
+            });
+
             outletIdToDelete = id;
             const modal = document.getElementById('modalHapusOutlet');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+            
+            // Nonaktifkan scroll pada body
+            document.body.style.overflow = 'hidden';
         }
 
         // Fungsi untuk menutup modal konfirmasi hapus
@@ -271,11 +333,16 @@
             modal.classList.add('hidden');
             modal.classList.remove('flex');
             outletIdToDelete = null;
+            
+            // Aktifkan kembali scroll pada body
+            document.body.style.overflow = '';
         }
-            //fungsi delete
+
+        //fungsi delete
         async function hapusOutlet() {
             if (!outletIdToDelete) return;
             
+            showTableLoading();
             const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
             const token = localStorage.getItem('token');
             
@@ -305,9 +372,38 @@
                 console.error('Delete error:', error);
                 showAlert('error', error.message);
             } finally {
+                hideTableLoading();
                 closeConfirmDelete();
             }
         }
+
+        // Fungsi untuk toggle dropdown
+        function toggleDropdown(button) {
+            const menu = button.nextElementSibling;
+
+            document.querySelectorAll('.dropdown-menu').forEach(m => {
+                if (m !== menu) {
+                    m.classList.add('hidden');
+                }
+            });
+
+            menu.classList.toggle('hidden');
+            
+            // Hitung posisi dropdown
+            const buttonRect = button.getBoundingClientRect();
+            const menuHeight = 84; // Tinggi dropdown (2 item x 42px)
+            const spaceBelow = window.innerHeight - buttonRect.bottom;
+            
+            // Selalu tampilkan dropdown ke atas jika tidak cukup ruang di bawah
+            if (spaceBelow < menuHeight) {
+                menu.style.bottom = '100%';
+                menu.style.top = 'auto';
+            } else {
+                menu.style.top = '100%';
+                menu.style.bottom = 'auto';
+            }
+        }
+
         // Fungsi untuk menambahkan outlet baru
         async function tambahOutlet() {
             // Validasi form sebelum submit
@@ -341,10 +437,7 @@
             const btnTambah = document.getElementById('btnTambahOutlet');
             const originalText = btnTambah.innerHTML;
             btnTambah.innerHTML = `
-                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
+                <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
                 Menyimpan...
             `;
             btnTambah.disabled = true;
@@ -387,86 +480,83 @@
             }
         }
 
-            async function updateOutlet() {
-        // Validasi form (tetap gunakan kode validasi yang ada)
-        if (!validateEditForm()) {
-            return;
-        }
-
-        const outletId = document.getElementById('outletIdToEdit').value;
-        if (!outletId) return;
-
-        // Siapkan data form
-        const formData = new FormData();
-        formData.append('name', document.getElementById('editNamaOutlet').value);
-        formData.append('phone', document.getElementById('editNomorTelepon').value);
-        formData.append('address', document.getElementById('editAlamatLengkap').value);
-        formData.append('email', document.getElementById('editEmail').value);
-        formData.append('tax', document.getElementById('editPersentasePajak').value || '0.00');
-        formData.append('nomor_transaksi_bank', document.getElementById('editNoTransaksi').value);
-        formData.append('nama_bank', document.getElementById('editNamaBank').value);
-        formData.append('atas_nama_bank', document.getElementById('editAtasNama').value);
-        formData.append('is_active', document.getElementById('editStatusAktif').checked ? '1' : '0');
-        
-        // Tambahkan file jika ada
-        const fileInput = document.getElementById('editFotoOutlet');
-        if (fileInput.files[0]) {
-            formData.append('qris', fileInput.files[0]);
-        }
-
-        // Dapatkan token CSRF
-        const csrfToken = getCSRFToken();
-        if (csrfToken) {
-            formData.append('_token', csrfToken);
-        }
-
-        // Tampilkan loading
-        const btnSimpan = document.getElementById('btnSimpanPerubahan');
-        const originalText = btnSimpan.innerHTML;
-        btnSimpan.innerHTML = `
-            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Menyimpan...
-        `;
-        btnSimpan.disabled = true;
-
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`http://127.0.0.1:8000/api/outlets/${outletId}`, {
-                method: 'POST', // Tetap gunakan POST karena Laravel menerima _method
-                body: formData,
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            });
-
-            if (response.redirected) {
-                window.location.href = response.url;
+        async function updateOutlet() {
+            // Validasi form (tetap gunakan kode validasi yang ada)
+            if (!validateEditForm()) {
                 return;
             }
 
-            const data = await response.json();
+            const outletId = document.getElementById('outletIdToEdit').value;
+            if (!outletId) return;
 
-            if (data.success) {
-                showAlert('success', 'Outlet berhasil diperbarui!');
-                closeModalEdit();
-                loadOutlets(); // Muat ulang data
-            } else {
-                showAlert('error', data.message || 'Gagal memperbarui outlet');
+            // Siapkan data form
+            const formData = new FormData();
+            formData.append('name', document.getElementById('editNamaOutlet').value);
+            formData.append('phone', document.getElementById('editNomorTelepon').value);
+            formData.append('address', document.getElementById('editAlamatLengkap').value);
+            formData.append('email', document.getElementById('editEmail').value);
+            formData.append('tax', document.getElementById('editPersentasePajak').value || '0.00');
+            formData.append('nomor_transaksi_bank', document.getElementById('editNoTransaksi').value);
+            formData.append('nama_bank', document.getElementById('editNamaBank').value);
+            formData.append('atas_nama_bank', document.getElementById('editAtasNama').value);
+            formData.append('is_active', document.getElementById('editStatusAktif').checked ? '1' : '0');
+            
+            // Tambahkan file jika ada
+            const fileInput = document.getElementById('editFotoOutlet');
+            if (fileInput.files[0]) {
+                formData.append('qris', fileInput.files[0]);
             }
-        } catch (error) {
-            console.error('Error:', error);
-            showAlert('error', 'Terjadi kesalahan saat memperbarui outlet');
-        } finally {
-            // Kembalikan tombol ke state semula
-            btnSimpan.innerHTML = originalText;
-            btnSimpan.disabled = false;
+
+            // Dapatkan token CSRF
+            const csrfToken = getCSRFToken();
+            if (csrfToken) {
+                formData.append('_token', csrfToken);
+            }
+
+            // Tampilkan loading
+            const btnSimpan = document.getElementById('btnSimpanPerubahan');
+            const originalText = btnSimpan.innerHTML;
+            btnSimpan.innerHTML = `
+                <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                Menyimpan...
+            `;
+            btnSimpan.disabled = true;
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`http://127.0.0.1:8000/api/outlets/${outletId}`, {
+                    method: 'POST', // Tetap gunakan POST karena Laravel menerima _method
+                    body: formData,
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('success', 'Outlet berhasil diperbarui!');
+                    closeModalEdit();
+                    loadOutlets(); // Muat ulang data
+                } else {
+                    showAlert('error', data.message || 'Gagal memperbarui outlet');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('error', 'Terjadi kesalahan saat memperbarui outlet');
+            } finally {
+                // Kembalikan tombol ke state semula
+                btnSimpan.innerHTML = originalText;
+                btnSimpan.disabled = false;
+            }
         }
-    }
 
         // Fungsi untuk mengisi form edit dengan data outlet
         function editOutlet(id) {
@@ -497,33 +587,6 @@
             }
 
             openModalEdit();
-        }
-
-        // Fungsi untuk toggle dropdown
-        function toggleDropdown(button) {
-            const menu = button.nextElementSibling;
-
-            document.querySelectorAll('.dropdown-menu').forEach(m => {
-                if (m !== menu) {
-                    m.classList.add('hidden');
-                    m.classList.remove('dropdown-up');
-                    m.classList.remove('dropdown-down');
-                }
-            });
-
-            menu.classList.toggle('hidden');
-            menu.classList.remove('dropdown-up', 'dropdown-down');
-
-            const menuRect = menu.getBoundingClientRect();
-            const buttonRect = button.getBoundingClientRect();
-            const spaceBelow = window.innerHeight - buttonRect.bottom;
-            const spaceAbove = buttonRect.top;
-
-            if (spaceBelow < menuRect.height && spaceAbove > menuRect.height) {
-                menu.classList.add('dropdown-up');
-            } else {
-                menu.classList.add('dropdown-down');
-            }
         }
 
         // Fungsi untuk validasi form tambah
@@ -666,8 +729,6 @@
             if (!e.target.closest('.relative.inline-block')) {
                 document.querySelectorAll('.dropdown-menu').forEach(menu => {
                     menu.classList.add('hidden');
-                    menu.classList.remove('dropdown-up');
-                    menu.classList.remove('dropdown-down');
                 });
             }
         });
@@ -676,21 +737,25 @@
         function openModalTambah() {
             document.getElementById('modalTambahOutlet').classList.remove('hidden');
             document.getElementById('modalTambahOutlet').classList.add('flex');
+            document.body.style.overflow = 'hidden';
         }
 
         function closeModalTambah() {
             document.getElementById('modalTambahOutlet').classList.add('hidden');
             document.getElementById('modalTambahOutlet').classList.remove('flex');
+            document.body.style.overflow = '';
         }
 
         function openModalEdit() {
             document.getElementById('modalEditOutlet').classList.remove('hidden');
             document.getElementById('modalEditOutlet').classList.add('flex');
+            document.body.style.overflow = 'hidden';
         }
 
         function closeModalEdit() {
             document.getElementById('modalEditOutlet').classList.add('hidden');
             document.getElementById('modalEditOutlet').classList.remove('flex');
+            document.body.style.overflow = '';
         }
 
         // Fungsi untuk preview foto outlet
@@ -810,6 +875,20 @@
     
     .animate-fade-out {
         animation: fadeOut 0.3s ease-out forwards;
+    }
+    
+    /* Style untuk dropdown */
+    .dropdown-menu {
+        position: absolute;
+        right: 0;
+        min-width: 160px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        z-index: 50;
+    }
+    
+    /* Nonaktifkan scroll saat modal aktif */
+    body.modal-active {
+        overflow: hidden;
     }
 </style>
 
