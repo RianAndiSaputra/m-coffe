@@ -272,15 +272,17 @@
 @include('partials.laporan.modal-riwayat-stok')
 
 <!-- Flatpickr JS -->
+
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
-{{-- <script src="https://unpkg.com/flowbite@1.6.5/dist/flowbite.min.js"></script> --}}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
 
 <script>
     // Data storage
     let stockData = {};
     let modal;
+    let currentStartDate;
+    let currentEndDate;
 
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize modal globally
@@ -298,7 +300,88 @@
                 if (modal) modal.hide();
             });
         });
+
+        // Initialize the page
+        initializePage();
     });
+
+    // Initialize page with outlet management
+    function initializePage() {
+        // Set default dates
+        const defaultDates = getDefaultDateRange();
+        currentStartDate = formatDateForAPI(defaultDates[0]);
+        currentEndDate = formatDateForAPI(defaultDates[1]);
+        
+        // Set display
+        document.getElementById('dateRangeDisplay').textContent = 
+            `${formatDateForDisplay(defaultDates[0])} - ${formatDateForDisplay(defaultDates[1])}`;
+        
+        // Get selected outlet
+        const outletId = getSelectedOutletId();
+        
+        // Load initial data
+        fetchStockData(outletId, currentStartDate, currentEndDate);
+        
+        // Connect outlet selection to report updates
+        connectOutletSelectionToReport();
+        
+        // Initialize Lucide icons
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    }
+
+    // Get currently selected outlet ID
+    function getSelectedOutletId() {
+        // First check URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const outletIdFromUrl = urlParams.get('outlet_id');
+        
+        if (outletIdFromUrl) {
+            return outletIdFromUrl;
+        }
+        
+        // Then check localStorage
+        const savedOutletId = localStorage.getItem('selectedOutletId');
+        
+        if (savedOutletId) {
+            return savedOutletId;
+        }
+        
+        // Default to outlet ID 1 if nothing is found
+        return 1;
+    }
+
+    // Connect outlet selection dropdown to report updates
+    function connectOutletSelectionToReport() {
+        // Listen for outlet changes in localStorage
+        window.addEventListener('storage', function(event) {
+            if (event.key === 'selectedOutletId') {
+                // Reload report with new outlet
+                fetchStockData(event.newValue, currentStartDate, currentEndDate);
+            }
+        });
+        
+        // Also watch for clicks on outlet items in dropdown
+        const outletListContainer = document.getElementById('outletListContainer');
+        if (outletListContainer) {
+            outletListContainer.addEventListener('click', function(event) {
+                // Find the clicked li element
+                let targetElement = event.target;
+                while (targetElement && targetElement !== outletListContainer && targetElement.tagName !== 'LI') {
+                    targetElement = targetElement.parentElement;
+                }
+                
+                // If we clicked on an outlet list item
+                if (targetElement && targetElement.tagName === 'LI') {
+                    // Update report after a short delay to allow existing code to complete
+                    setTimeout(() => {
+                        fetchStockData(getSelectedOutletId(), currentStartDate, currentEndDate);
+                    }, 100);
+                }
+            });
+        }
+    }
 
     function closeModal() {
         const modalElement = document.getElementById('stockHistoryModal');
@@ -323,8 +406,8 @@
         onChange: function(selectedDates, dateStr) {
             if (selectedDates.length === 2) {
                 // Format tanggal untuk API (YYYY-MM-DD)
-                const apiStartDate = formatDateForAPI(selectedDates[0]);
-                const apiEndDate = formatDateForAPI(selectedDates[1]);
+                currentStartDate = formatDateForAPI(selectedDates[0]);
+                currentEndDate = formatDateForAPI(selectedDates[1]);
                 
                 // Format tanggal untuk tampilan UI
                 const displayStartDate = formatDateForDisplay(selectedDates[0]);
@@ -332,11 +415,11 @@
                 
                 document.getElementById('dateRangeDisplay').textContent = `${displayStartDate} - ${displayEndDate}`;
                 
-                // Kirim ke API
-                fetchStockData(apiStartDate, apiEndDate);
+                // Kirim ke API dengan outlet yang dipilih
+                fetchStockData(getSelectedOutletId(), currentStartDate, currentEndDate);
                 
                 // Tampilkan notifikasi
-                if (apiStartDate === apiEndDate) {
+                if (currentStartDate === currentEndDate) {
                     showAlert('info', `Memuat data untuk tanggal ${displayStartDate}`);
                 } else {
                     showAlert('info', `Memuat data dari ${displayStartDate} sampai ${displayEndDate}`);
@@ -406,9 +489,13 @@
         });
     }
 
-    // Fetch stock data from API
-    function fetchStockData(startDate, endDate) {
+    // Fetch stock data from API with outlet management
+    function fetchStockData(outletId, startDate, endDate) {
         // Validasi parameter
+        if (!outletId) {
+            outletId = getSelectedOutletId();
+        }
+        
         if (!startDate || !endDate) {
             const defaultDates = getDefaultDateRange();
             startDate = formatDateForAPI(defaultDates[0]);
@@ -418,7 +505,7 @@
         showLoading(true);
         // showAlert('info', 'Memuat data...');
         
-        const url = `http://127.0.0.1:8000/api/inventory-histories/type/1?start_date=${startDate}&end_date=${endDate}`;
+        const url = `http://127.0.0.1:8000/api/inventory-histories/type/${outletId}?start_date=${startDate}&end_date=${endDate}`;
         
         console.log('Request URL:', url); // Untuk debugging
         
@@ -448,27 +535,7 @@
         });
     }
 
-    // Inisialisasi pertama kali
-    document.addEventListener('DOMContentLoaded', function() {
-        // Set default dates
-        const defaultDates = getDefaultDateRange();
-        const defaultStart = formatDateForAPI(defaultDates[0]);
-        const defaultEnd = formatDateForAPI(defaultDates[1]);
-        
-        // Set display
-        document.getElementById('dateRangeDisplay').textContent = 
-            `${formatDateForDisplay(defaultDates[0])} - ${formatDateForDisplay(defaultDates[1])}`;
-        
-        // Load initial data
-        fetchStockData(defaultStart, defaultEnd);
-        
-        // Initialize Lucide icons
-        if (window.lucide) {
-            lucide.createIcons();
-        }
-    });
-
-    // Display stock data
+    // Display stock data with outlet information
     function displayStockData(data) {
         // Reset all tables
         const allContainers = ['adjustment', 'shipment', 'purchase', 'sale', 'transferIn', 'transferOut', 'other'];
@@ -483,11 +550,18 @@
             return;
         }
         
-        // Store outlet name
-        if (data.meta && data.meta.outlet_id) {
-            const outletName = 'Kifa Bakery Pusat'; // In real app, you'd get this from API
+        // Update outlet name in multiple places
+        if (data.data && data.data.outlet_name) {
+            const outletName = data.data.outlet_name;
             document.getElementById('outletName').textContent = outletName;
             document.getElementById('outletName2').textContent = outletName;
+            document.getElementById('outletNameHeader').textContent = outletName;
+        } else {
+            // Fallback if outlet name not in response
+            const fallbackOutletName = 'Kifa Bakery';
+            document.getElementById('outletName').textContent = fallbackOutletName;
+            document.getElementById('outletName2').textContent = fallbackOutletName;
+            // document.getElementById('outletNameHeader').textContent = fallbackOutletName;
         }
         
         // Process each type of stock change
@@ -672,7 +746,7 @@
         document.getElementById('noDataState').style.display = show ? 'flex' : 'none';
     }
 
-    // Print report function
+    // Print report function with outlet name
     function printReport() {
         if (!stockData || !stockData.data || !stockData.data.summary_by_type) {
             showAlert('error', 'Tidak ada data untuk dicetak');
@@ -682,15 +756,16 @@
         showAlert('info', 'Mempersiapkan laporan untuk dicetak...');
 
         setTimeout(() => {
-        const printWindow = window.open('', '_blank');
-        const periodeStart = document.querySelector("#dateRange")._flatpickr.selectedDates?.[0] || new Date();
-        const periodeEnd = document.querySelector("#dateRange")._flatpickr.selectedDates?.[1] || new Date();
+            const printWindow = window.open('', '_blank');
+            const periodeStart = document.querySelector("#dateRange")._flatpickr.selectedDates?.[0] || new Date();
+            const periodeEnd = document.querySelector("#dateRange")._flatpickr.selectedDates?.[1] || new Date();
+            const outletName = document.getElementById('outletName')?.textContent || 'Outlet';
 
             printWindow.document.write(`
                 <!DOCTYPE html>
                 <html>
                 <head>
-                    <title>Laporan Riwayat Stok</title>
+                    <title>Laporan Riwayat Stok - ${outletName}</title>
                     <style>
                         body { font-family: Arial, sans-serif; margin: 20px; }
                         h1, h2 { color: #333; }
@@ -723,7 +798,7 @@
                         <div>
                             <h1>LAPORAN RIWAYAT STOK</h1>
                             <div class="header-info">
-                                Outlet: ${document.getElementById('outletName')?.textContent || 'Outlet'}<br>
+                                Outlet: ${outletName}<br>
                                 Periode: ${periodeStart.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} 
                                 hingga ${periodeEnd.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}<br>
                                 Dicetak pada: ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
@@ -797,25 +872,30 @@
         }, 1000);
     }
 
-    // Export report function
+    // Export report function with outlet name
     function exportReport() {
         showAlert('info', 'Mempersiapkan laporan untuk diekspor...');
         
-        // In a real app, you might want to format the data properly for CSV
         setTimeout(() => {
             try {
                 let csvContent = "data:text/csv;charset=utf-8,";
                 
-                // Add header
+                // Add header with outlet info
+                const outletName = document.getElementById('outletName')?.textContent || 'Outlet';
+                const formattedStartDate = new Date(currentStartDate).toLocaleDateString('id-ID');
+                const formattedEndDate = new Date(currentEndDate).toLocaleDateString('id-ID');
+                
                 csvContent += "Tipe,Produk,SKU,Stok Akhir,Total Perubahan,Total Entri\n";
                 
                 // Add data from all categories
-                const categories = ['adjustment', 'shipment', 'purchase', 'sale', 'other'];
+                const categories = ['adjustment', 'shipment', 'purchase', 'sale', 'transfer_in', 'transfer_out', 'other'];
                 const typeLabels = {
                     'adjustment': 'Penyesuaian',
                     'shipment': 'Kiriman Pabrik',
                     'purchase': 'Pembelian',
                     'sale': 'Penjualan',
+                    'transfer_in': 'Transfer Masuk',
+                    'transfer_out': 'Transfer Keluar',
                     'other': 'Lainnya'
                 };
                 
@@ -831,7 +911,7 @@
                 const encodedUri = encodeURI(csvContent);
                 const link = document.createElement("a");
                 link.setAttribute("href", encodedUri);
-                link.setAttribute("download", `riwayat-stok-${new Date().toISOString().slice(0,10)}.csv`);
+                link.setAttribute("download", `riwayat-stok-${outletName}-${formattedStartDate}-${formattedEndDate}.csv`);
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -842,7 +922,6 @@
                 showAlert('error', 'Gagal mengekspor data');
             }
         }, 1000);
-
     }
 
     // Show alert function
@@ -875,17 +954,6 @@
             alert.remove();
         }, 5000);
     }
-
-    // Initialize the page
-    // document.addEventListener('DOMContentLoaded', function() {
-    //     // Initial data fetch
-    //     fetchStockData();
-        
-    //     // Initialize Lucide icons
-    //     if (window.lucide) {
-    //         lucide.createIcons();
-    //     }
-    // });
 </script>
 
 <style>
