@@ -195,9 +195,9 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 
 <script>
-    // API endpoint base
-    const API_ENDPOINT = 'http://127.0.0.1:8000/api/reports/monthly-inventory/1';
-    
+    // API endpoint base (modified to use dynamic outlet ID)
+    const API_ENDPOINT_BASE = 'http://127.0.0.1:8000/api/reports/monthly-inventory';
+        
     // Inventory data from API
     let inventoryData = {
         outlet: '',
@@ -232,33 +232,94 @@
         return date.toLocaleDateString('id-ID', options);
     }
 
-    // Initialize date range picker
-    const dateRangePicker = flatpickr("#dateRange", {
-        mode: "range",
-        dateFormat: "d M Y",
-        defaultDate: ["today", "today"],
-        locale: "id",
-        onChange: function(selectedDates, dateStr) {
-            if (selectedDates.length === 2) {
-                const startDate = formatDateForAPI(selectedDates[0]);
-                const endDate = formatDateForAPI(selectedDates[1]);
-                
-                // Update display
-                document.getElementById('dateRangeDisplay').textContent = 
-                    `${formatDateForDisplay(startDate)} - ${formatDateForDisplay(endDate)}`;
-                
-                // Fetch data with new date range
-                fetchInventoryData(startDate, endDate);
-            }
+    // Get selected outlet ID - matches the implementation from the sales-by-member report
+    function getSelectedOutletId() {
+        // First check URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const outletIdFromUrl = urlParams.get('outlet_id');
+        
+        if (outletIdFromUrl) {
+            return outletIdFromUrl;
         }
-    });
+        
+        // Then check localStorage
+        const savedOutletId = localStorage.getItem('selectedOutletId');
+        
+        if (savedOutletId) {
+            return savedOutletId;
+        }
+        
+        // Default to outlet ID 1 if nothing is found
+        return 1;
+    }
+
+    // Connect outlet selection to report updates
+    function connectOutletSelectionToReport() {
+        // Listen for outlet changes in localStorage
+        window.addEventListener('storage', function(event) {
+            if (event.key === 'selectedOutletId') {
+                // Reload report with new outlet
+                fetchInventoryData();
+            }
+        });
+        
+        // Also watch for clicks on outlet items in dropdown
+        const outletListContainer = document.getElementById('outletListContainer');
+        if (outletListContainer) {
+            outletListContainer.addEventListener('click', function(event) {
+                // Find the clicked li element
+                let targetElement = event.target;
+                while (targetElement && targetElement !== outletListContainer && targetElement.tagName !== 'LI') {
+                    targetElement = targetElement.parentElement;
+                }
+                
+                // If we clicked on an outlet list item
+                if (targetElement && targetElement.tagName === 'LI') {
+                    // Update report after a short delay to allow existing code to complete
+                    setTimeout(() => {
+                        fetchInventoryData();
+                    }, 100);
+                }
+            });
+        }
+    }
+
+    // Initialize date range picker
+    function initializeDateRangePicker() {
+        flatpickr("#dateRange", {
+            mode: "range",
+            dateFormat: "d M Y",
+            defaultDate: ["today", "today"],
+            locale: "id",
+            onChange: function(selectedDates, dateStr) {
+                if (selectedDates.length === 2) {
+                    const startDate = formatDateForAPI(selectedDates[0]);
+                    const endDate = formatDateForAPI(selectedDates[1]);
+                    
+                    // Update display
+                    document.getElementById('dateRangeDisplay').textContent = 
+                        `${formatDateForDisplay(startDate)} - ${formatDateForDisplay(endDate)}`;
+                    
+                    // Fetch data with new date range
+                    fetchInventoryData(startDate, endDate);
+                }
+            }
+        });
+    }
 
     // Fetch inventory data from API
     async function fetchInventoryData(startDate = '2025-05-14', endDate = '2025-05-14') {
         try {
-            // showAlert('info', 'Memuat data...');
+            // Get loading indicator element safely
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            if (loadingIndicator) loadingIndicator.style.display = 'block';
             
-            const url = `${API_ENDPOINT}?start_date=${startDate}&end_date=${endDate}`;
+            // Get the outlet ID
+            const outletId = getSelectedOutletId();
+            
+            // Build the URL with the outlet ID
+            const url = `${API_ENDPOINT_BASE}/${outletId}?start_date=${startDate}&end_date=${endDate}`;
+            
             const response = await fetch(url, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -277,6 +338,9 @@
         } catch (error) {
             console.error('Error fetching data:', error);
             showAlert('error', 'Gagal terhubung ke server');
+        } finally {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            if (loadingIndicator) loadingIndicator.style.display = 'none';
         }
     }
 
@@ -298,7 +362,7 @@
         // Update stock in and stock out tables
         updateStockTables();
     }
-    
+
     // Update main product table
     function updateProductTable() {
         const productTable = document.getElementById('productTable');
@@ -327,7 +391,7 @@
             `;
         }
     }
-    
+
     // Update stock in and stock out tables
     function updateStockTables() {
         // Get products sorted by stock_masuk (descending)
@@ -384,7 +448,7 @@
             `;
         }
     }
-    
+
     // Filter products based on search
     function filterProducts() {
         const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
@@ -499,16 +563,21 @@
 
         printWindow.document.close();
 
-        // setTimeout(() => {
-        //     printWindow.print();
-        //     printWindow.close();
-        // }, 1000);
+        setTimeout(() => {
+            printWindow.print();
+            printWindow.close();
+        }, 1000);
 
         }, 1000);
     }
-    
+
     // Export report function
     function exportReport() {
+        if (!inventoryData || inventoryData.products.length === 0) {
+            showAlert('error', 'Tidak ada data untuk diekspor');
+            return;
+        }
+        
         showAlert('info', 'Mempersiapkan laporan untuk diekspor...');
         
         setTimeout(() => {
@@ -546,9 +615,8 @@
                 showAlert('error', 'Gagal mengekspor data');
             }
         }, 1000);
-
     }
-    
+
     // Show alert function
     function showAlert(type, message) {
         const alertContainer = document.getElementById('alertContainer');
@@ -582,9 +650,16 @@
             alert.remove();
         }, 5000);
     }
-    
-    // Initialize data load
+
+    // Initialize data load and setup outlet selection
     document.addEventListener('DOMContentLoaded', () => {
+        // Initialize date range picker
+        initializeDateRangePicker();
+        
+        // Connect outlet selection to report updates
+        connectOutletSelectionToReport();
+        
+        // Initial data fetch
         fetchInventoryData();
     });
 </script>

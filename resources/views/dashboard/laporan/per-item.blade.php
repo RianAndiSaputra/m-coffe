@@ -168,7 +168,7 @@
     const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
     let currentStartDate = formatDateLocal(firstDay);
     let currentEndDate = formatDateLocal(today);
-    let outletId = 1;
+    // let outletId = 1;
     
     // Format currency to Indonesian Rupiah
     function formatRupiah(amount) {
@@ -188,11 +188,33 @@
         return `${year}-${month}-${day}`;
     }
 
+    // Get currently selected outlet ID
+    function getSelectedOutletId() {
+        // First check URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const outletIdFromUrl = urlParams.get('outlet_id');
+        
+        if (outletIdFromUrl) {
+            return outletIdFromUrl;
+        }
+        
+        // Then check localStorage
+        const savedOutletId = localStorage.getItem('selectedOutletId');
+        
+        if (savedOutletId) {
+            return savedOutletId;
+        }
+        
+        // Default to outlet ID 1 if nothing is found
+        return 1;
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         const today = new Date();
         const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
         let currentStartDate = formatDateLocal(firstDay);
         let currentEndDate = formatDateLocal(today);
+        const outletId = getSelectedOutletId();
 
         flatpickr("#dateRange", {
             mode: "range",
@@ -203,14 +225,48 @@
                 if (selectedDates.length === 2) {
                     currentStartDate = formatDateLocal(selectedDates[0]);
                     currentEndDate = formatDateLocal(selectedDates[1]);
-                    loadData(outletId, currentStartDate, currentEndDate);
+                    loadData(getSelectedOutletId(), currentStartDate, currentEndDate);
                 }
             }
         });
 
-        // 🚀 Panggil data awal
+        // Panggil data awal
         loadData(outletId, currentStartDate, currentEndDate);
+
+        // Connect outlet selection to report updates
+        connectOutletSelectionToReport();
     });
+
+    // Connect outlet selection dropdown to report updates
+    function connectOutletSelectionToReport() {
+        // Listen for outlet changes in localStorage
+        window.addEventListener('storage', function(event) {
+            if (event.key === 'selectedOutletId') {
+                // Reload report with new outlet
+                loadData(event.newValue, currentStartDate, currentEndDate);
+            }
+        });
+        
+        // Also watch for clicks on outlet items in dropdown
+        const outletListContainer = document.getElementById('outletListContainer');
+        if (outletListContainer) {
+            outletListContainer.addEventListener('click', function(event) {
+                // Find the clicked li element
+                let targetElement = event.target;
+                while (targetElement && targetElement !== outletListContainer && targetElement.tagName !== 'LI') {
+                    targetElement = targetElement.parentElement;
+                }
+                
+                // If we clicked on an outlet list item
+                if (targetElement && targetElement.tagName === 'LI') {
+                    // Update report after a short delay to allow existing code to complete
+                    setTimeout(() => {
+                        loadData(getSelectedOutletId(), currentStartDate, currentEndDate);
+                    }, 100);
+                }
+            });
+        }
+    }
     
     // Load data from API
     function loadData(outletId, startDate, endDate) {

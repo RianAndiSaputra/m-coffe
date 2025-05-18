@@ -124,29 +124,16 @@
 <script>
     // Global variables
     let apiData = null;
-    let categoryChart = null; 
-    const outletId = 1; // Change this to dynamic outlet ID if needed
+    let categoryChart = null;
+    const today = new Date();
+    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+    let currentStartDate = formatDateForApi(firstDay);
+    let currentEndDate = formatDateForApi(today);
 
     // Initialize date range picker
     function getDefaultDateRange() {
-        const today = new Date();
-        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-        return [firstDayOfMonth, today];
+        return [firstDay, today];
     }
-
-    flatpickr("#dateRange", {
-        mode: "range",
-        dateFormat: "d M Y",
-        defaultDate: getDefaultDateRange(), // Set default date range from first day of month to today
-        locale: "id",
-        onChange: function(selectedDates, dateStr) {
-            if (selectedDates.length === 2) {
-                const startDate = formatDateForApi(selectedDates[0]);
-                const endDate = formatDateForApi(selectedDates[1]);
-                fetchData(startDate, endDate);
-            }
-        }
-    });
 
     // Format date for API (YYYY-MM-DD)
     function formatDateForApi(date) {
@@ -156,36 +143,36 @@
         return `${year}-${month}-${day}`;
     }
 
-    // Format currency
-    function formatCurrency(amount) {
-        return new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-        }).format(amount);
-    }
-
-    // Fetch data from API
-    async function fetchData(startDate = null, endDate = null) {
-        try {
-
-            // If no dates provided, use default (first day of month to today)
-            if (!startDate || !endDate) {
-                const defaultRange = getDefaultDateRange();
-                startDate = formatDateForApi(defaultRange[0]);
-                endDate = formatDateForApi(defaultRange[1]);
-                
-                // Update the date picker to show the correct range
-                const datePicker = document.querySelector("#dateRange")._flatpickr;
-                if (datePicker) {
-                    datePicker.setDate([defaultRange[0], defaultRange[1]]);
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize date range picker
+        flatpickr("#dateRange", {
+            mode: "range",
+            dateFormat: "d M Y",
+            defaultDate: getDefaultDateRange(),
+            locale: "id",
+            onChange: function(selectedDates, dateStr) {
+                if (selectedDates.length === 2) {
+                    currentStartDate = formatDateForApi(selectedDates[0]);
+                    currentEndDate = formatDateForApi(selectedDates[1]);
+                    fetchData();
                 }
             }
+        });
 
-            // showAlert('info', 'Memuat data laporan...');
+        // Load initial data
+        fetchData();
+        
+        // Connect outlet selection to report updates
+        connectOutletSelectionToReport();
+    });
+
+    // Fetch data from API
+    async function fetchData() {
+        try {
+            const outletId = getSelectedOutletId();
             
-            const response = await fetch(`http://127.0.0.1:8000/api/reports/sales-by-category/${outletId}?start_date=${startDate}&end_date=${endDate}`, {
+            const response = await fetch(`http://127.0.0.1:8000/api/reports/sales-by-category/${outletId}?start_date=${currentStartDate}&end_date=${currentEndDate}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
                     'Accept': 'application/json'
@@ -209,6 +196,70 @@
             showAlert('error', 'Gagal memuat data: ' + error.message);
         }
     }
+
+    // Format currency
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(amount);
+    }
+
+    // Get currently selected outlet ID
+    function getSelectedOutletId() {
+        // First check URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const outletIdFromUrl = urlParams.get('outlet_id');
+        
+        if (outletIdFromUrl) {
+            return outletIdFromUrl;
+        }
+        
+        // Then check localStorage
+        const savedOutletId = localStorage.getItem('selectedOutletId');
+        
+        if (savedOutletId) {
+            return savedOutletId;
+        }
+        
+        // Default to outlet ID 1 if nothing is found
+        return 1;
+    }
+
+    // Connect outlet selection dropdown to report updates
+    function connectOutletSelectionToReport() {
+        // Listen for outlet changes in localStorage
+        window.addEventListener('storage', function(event) {
+            if (event.key === 'selectedOutletId') {
+                // Reload report with new outlet
+                fetchData();
+            }
+        });
+        
+        // Also watch for clicks on outlet items in dropdown
+        const outletListContainer = document.getElementById('outletListContainer');
+        if (outletListContainer) {
+            outletListContainer.addEventListener('click', function(event) {
+                // Find the clicked li element
+                let targetElement = event.target;
+                while (targetElement && targetElement !== outletListContainer && targetElement.tagName !== 'LI') {
+                    targetElement = targetElement.parentElement;
+                }
+                
+                // If we clicked on an outlet list item
+                if (targetElement && targetElement.tagName === 'LI') {
+                    // Update report after a short delay to allow existing code to complete
+                    setTimeout(() => {
+                        fetchData();
+                    }, 100);
+                }
+            });
+        }
+    }
+
+    
 
     // Update UI with API data
     function updateUI(data) {

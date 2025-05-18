@@ -136,401 +136,487 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 
 <script>
-    // Data laporan dari API
-    let reportData = {
-        approved: [],
-        rejected: []
+// Data laporan dari API
+let reportData = {
+    approved: [],
+    rejected: []
+};
+
+// Fungsi untuk memformat tanggal ke format Indonesia
+function formatDate(date) {
+    if (!date) return '';
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    return new Date(date).toLocaleDateString('id-ID', options);
+}
+
+// Fungsi untuk format ISO date ke format API (YYYY-MM-DD)
+function formatISODate(isoDateString) {
+    if (!isoDateString) return '';
+    const date = new Date(isoDateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+// Fungsi untuk mendapatkan tanggal awal bulan dan hari ini
+function getDefaultDateRange() {
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    return {
+        startDate: firstDayOfMonth,
+        endDate: today
     };
+}
 
-    // Fungsi untuk memformat tanggal ke format Indonesia
-    function formatDate(date) {
-        if (!date) return '';
-        const options = { day: 'numeric', month: 'long', year: 'numeric' };
-        return new Date(date).toLocaleDateString('id-ID', options);
+// Get currently selected outlet ID
+function getSelectedOutletId() {
+    // First check URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const outletIdFromUrl = urlParams.get('outlet_id');
+    
+    if (outletIdFromUrl) {
+        return outletIdFromUrl;
     }
-
-    // Fungsi untuk format ISO date ke format API (YYYY-MM-DD)
-    function formatISODate(isoDateString) {
-        if (!isoDateString) return '';
-        const date = new Date(isoDateString);
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
+    
+    // Then check localStorage
+    const savedOutletId = localStorage.getItem('selectedOutletId');
+    
+    if (savedOutletId) {
+        return savedOutletId;
     }
+    
+    // Default to outlet ID 1 if nothing is found
+    return 1;
+}
 
-    // Fungsi untuk mendapatkan tanggal awal bulan dan hari ini
-    function getDefaultDateRange() {
-        const today = new Date();
-        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-        return {
-            startDate: firstDayOfMonth,
-            endDate: today
-        };
+// Initialize date range picker dengan default awal bulan sampai hari ini
+const defaultRange = getDefaultDateRange();
+const dateRangePicker = flatpickr("#dateRange", {
+    mode: "range",
+    dateFormat: "Y-m-d",
+    defaultDate: [defaultRange.startDate, defaultRange.endDate],
+    locale: "id",
+    onChange: function(selectedDates, dateStr) {
+        if (selectedDates.length === 2) {
+            const startDate = formatISODate(selectedDates[0]);
+            const endDate = formatISODate(selectedDates[1]);
+            
+            // Format untuk display
+            const startDateDisplay = formatDate(selectedDates[0]);
+            const endDateDisplay = formatDate(selectedDates[1]);
+            document.getElementById('dateRangeDisplay').textContent = `${startDateDisplay} - ${endDateDisplay}`;
+            
+            // Fetch data dengan tanggal baru
+            fetchReportData(getSelectedOutletId(), startDate, endDate);
+        }
     }
+});
 
-    // Initialize date range picker dengan default awal bulan sampai hari ini
+// Set default tanggal display saat pertama load
+document.addEventListener('DOMContentLoaded', function() {
     const defaultRange = getDefaultDateRange();
-    const dateRangePicker = flatpickr("#dateRange", {
-        mode: "range",
-        dateFormat: "Y-m-d",
-        defaultDate: [defaultRange.startDate, defaultRange.endDate],
-        locale: "id",
-        onChange: function(selectedDates, dateStr) {
-            if (selectedDates.length === 2) {
-                const startDate = formatISODate(selectedDates[0]);
-                const endDate = formatISODate(selectedDates[1]);
-                
-                // Format untuk display
-                const startDateDisplay = formatDate(selectedDates[0]);
-                const endDateDisplay = formatDate(selectedDates[1]);
-                document.getElementById('dateRangeDisplay').textContent = `${startDateDisplay} - ${endDateDisplay}`;
-                
-                // Fetch data dengan tanggal baru
-                fetchReportData(startDate, endDate);
-            }
+    const startDateDisplay = formatDate(defaultRange.startDate);
+    const endDateDisplay = formatDate(defaultRange.endDate);
+    document.getElementById('dateRangeDisplay').textContent = `${startDateDisplay} - ${endDateDisplay}`;
+    
+    // Format untuk API (YYYY-MM-DD)
+    const startDateAPI = formatISODate(defaultRange.startDate);
+    const endDateAPI = formatISODate(defaultRange.endDate);
+    
+    // Get outlet ID
+    const outletId = getSelectedOutletId();
+    
+    // Update outlet name in UI
+    updateOutletNameDisplay(outletId);
+
+    // Connect outlet selection to report updates
+    connectOutletSelectionToReport();
+    
+    // Fetch data awal
+    fetchReportData(outletId, startDateAPI, endDateAPI);
+});
+
+// Connect outlet selection dropdown to report updates
+function connectOutletSelectionToReport() {
+    // Listen for outlet changes in localStorage
+    window.addEventListener('storage', function(event) {
+        if (event.key === 'selectedOutletId') {
+            // Update outlet name in UI
+            updateOutletNameDisplay(event.newValue);
+            
+            // Get current date range
+            const selectedDates = dateRangePicker.selectedDates;
+            const startDate = formatISODate(selectedDates[0]);
+            const endDate = formatISODate(selectedDates[1]);
+            
+            // Reload report with new outlet
+            fetchReportData(event.newValue, startDate, endDate);
         }
     });
-
-    // Set default tanggal display saat pertama load
-    document.addEventListener('DOMContentLoaded', function() {
-        const defaultRange = getDefaultDateRange();
-        const startDateDisplay = formatDate(defaultRange.startDate);
-        const endDateDisplay = formatDate(defaultRange.endDate);
-        document.getElementById('dateRangeDisplay').textContent = `${startDateDisplay} - ${endDateDisplay}`;
-        
-        // Format untuk API (YYYY-MM-DD)
-        const startDateAPI = formatISODate(defaultRange.startDate);
-        const endDateAPI = formatISODate(defaultRange.endDate);
-        
-        // Fetch data awal
-        fetchReportData(startDateAPI, endDateAPI);
-    });
-
-    // Fungsi untuk fetch data dari API
-    async function fetchReportData(startDate, endDate) {
-        try {
-            // showAlert('info', 'Memuat data laporan...');
-            
-            const outletId = 1; // ID outlet saat ini
-            const response = await fetch(`http://127.0.0.1:8000/api/reports/inventory-approvals/${outletId}?start_date=${startDate}&end_date=${endDate}`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                    'Accept': 'application/json'
-                }
-            });
-            
-            if (!response.ok) {
-                throw new Error('Gagal mengambil data dari server');
+    
+    // Also watch for clicks on outlet items in dropdown
+    const outletListContainer = document.getElementById('outletListContainer');
+    if (outletListContainer) {
+        outletListContainer.addEventListener('click', function(event) {
+            // Find the clicked li element
+            let targetElement = event.target;
+            while (targetElement && targetElement !== outletListContainer && targetElement.tagName !== 'LI') {
+                targetElement = targetElement.parentElement;
             }
             
-            const data = await response.json();
-            reportData = data;
-            
-            // Update UI dengan data baru
-            updateReportUI();
-            showAlert('success', 'Data laporan berhasil dimuat');
-        } catch (error) {
-            console.error('Error fetching report data:', error);
-            showAlert('error', 'Gagal memuat data: ' + error.message);
-        }
+            // If we clicked on an outlet list item
+            if (targetElement && targetElement.tagName === 'LI') {
+                // Update report after a short delay to allow existing code to complete
+                setTimeout(() => {
+                    const outletId = getSelectedOutletId();
+                    updateOutletNameDisplay(outletId);
+                    
+                    // Get current date range
+                    const selectedDates = dateRangePicker.selectedDates;
+                    const startDate = formatISODate(selectedDates[0]);
+                    const endDate = formatISODate(selectedDates[1]);
+                    
+                    // Reload report with new outlet
+                    fetchReportData(outletId, startDate, endDate);
+                }, 100);
+            }
+        });
     }
+}
 
-    // Fungsi untuk update tampilan laporan
-    function updateReportUI() {
-        // Update jumlah pada summary cards
-        document.querySelectorAll('.bg-white.rounded-lg.shadow.p-4')[0].querySelector('h3').textContent = 
-            `${reportData.approved.length} penyesuaian`;
-        document.querySelectorAll('.bg-white.rounded-lg.shadow.p-4')[1].querySelector('h3').textContent = 
-            `${reportData.rejected.length} penyesuaian`;
-        
-        // Reset dan filter data berdasarkan pencarian dan status
-        filterData();
+// Update outlet name display based on outlet ID
+function updateOutletNameDisplay(outletId) {
+    // In a real app, you might fetch outlet details or get them from a global state
+    // For now, we'll just set a placeholder text
+    const outletName = document.getElementById('outletName');
+    if (outletName) {
+        // You could replace this with an API call to get the real outlet name
+        outletName.textContent = `Outlet ${outletId}`;
     }
+    
+    // Update any other UI elements that show outlet name
+    const outletNameHeader = document.getElementById('outletNameHeader');
+    if (outletNameHeader) {
+        outletNameHeader.textContent = `Outlet ${outletId}`;
+    }
+}
 
-    // Filter data function
-    function filterData() {
-        const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
-        const statusFilter = document.getElementById('statusFilter').value;
+// Fungsi untuk fetch data dari API
+async function fetchReportData(outletId, startDate, endDate) {
+    try {
+        showAlert('info', 'Memuat data laporan...');
         
-        // Gabungkan data approved dan rejected
-        let allData = [];
-        
-        if (statusFilter === 'all' || statusFilter === 'approved') {
-            allData = allData.concat(reportData.approved.map(item => ({...item, status: 'approved'})));
-        }
-        
-        if (statusFilter === 'all' || statusFilter === 'rejected') {
-            allData = allData.concat(reportData.rejected.map(item => ({...item, status: 'rejected'})));
-        }
-        
-        // Filter berdasarkan pencarian
-        const filteredData = allData.filter(item => {
-            return (
-                item.product.sku.toLowerCase().includes(searchTerm) ||
-                item.product.name.toLowerCase().includes(searchTerm) ||
-                (item.notes && item.notes.toLowerCase().includes(searchTerm)) ||
-                item.approver.name.toLowerCase().includes(searchTerm)
-            );
+        const response = await fetch(`http://127.0.0.1:8000/api/reports/inventory-approvals/${outletId}?start_date=${startDate}&end_date=${endDate}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Accept': 'application/json'
+            }
         });
         
-        // Update tabel adjustment
-        const adjustmentTable = document.getElementById('adjustmentTable');
-        adjustmentTable.innerHTML = '';
+        if (!response.ok) {
+            throw new Error('Gagal mengambil data dari server');
+        }
         
-        if (filteredData.length === 0) {
-            adjustmentTable.innerHTML = `
+        const data = await response.json();
+        reportData = data;
+        
+        // Update UI dengan data baru
+        updateReportUI();
+        showAlert('success', 'Data laporan berhasil dimuat');
+    } catch (error) {
+        console.error('Error fetching report data:', error);
+        showAlert('error', 'Gagal memuat data: ' + error.message);
+    }
+}
+
+// Fungsi untuk update tampilan laporan
+function updateReportUI() {
+    // Update jumlah pada summary cards
+    document.querySelectorAll('.bg-white.rounded-lg.shadow.p-4')[0].querySelector('h3').textContent = 
+        `${reportData.approved.length} penyesuaian`;
+    document.querySelectorAll('.bg-white.rounded-lg.shadow.p-4')[1].querySelector('h3').textContent = 
+        `${reportData.rejected.length} penyesuaian`;
+    
+    // Reset dan filter data berdasarkan pencarian dan status
+    filterData();
+}
+
+// Filter data function
+function filterData() {
+    const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+    const statusFilter = document.getElementById('statusFilter').value;
+    
+    // Gabungkan data approved dan rejected
+    let allData = [];
+    
+    if (statusFilter === 'all' || statusFilter === 'approved') {
+        allData = allData.concat(reportData.approved.map(item => ({...item, status: 'approved'})));
+    }
+    
+    if (statusFilter === 'all' || statusFilter === 'rejected') {
+        allData = allData.concat(reportData.rejected.map(item => ({...item, status: 'rejected'})));
+    }
+    
+    // Filter berdasarkan pencarian
+    const filteredData = allData.filter(item => {
+        return (
+            item.product.sku.toLowerCase().includes(searchTerm) ||
+            item.product.name.toLowerCase().includes(searchTerm) ||
+            (item.notes && item.notes.toLowerCase().includes(searchTerm)) ||
+            item.approver.name.toLowerCase().includes(searchTerm)
+        );
+    });
+    
+    // Update tabel adjustment
+    const adjustmentTable = document.getElementById('adjustmentTable');
+    adjustmentTable.innerHTML = '';
+    
+    if (filteredData.length === 0) {
+        adjustmentTable.innerHTML = `
+            <tr>
+                <td colspan="6" class="py-4 px-4 text-center text-gray-500">
+                    Tidak ada data yang ditemukan
+                </td>
+            </tr>
+        `;
+    } else {
+        filteredData.forEach(item => {
+            const change = item.quantity_change > 0 ? '+' + item.quantity_change : item.quantity_change;
+            const changeColor = item.quantity_change >= 0 ? 'text-green-500' : 'text-red-500';
+            const formattedDate = formatISODate(item.created_at);
+            
+            adjustmentTable.innerHTML += `
                 <tr>
-                    <td colspan="6" class="py-4 px-4 text-center text-gray-500">
-                        Tidak ada data yang ditemukan
-                    </td>
+                    <td class="py-4 px-4">${formattedDate}</td>
+                    <td class="py-4 px-4">${item.product.sku}</td>
+                    <td class="py-4 px-4">${item.product.name}</td>
+                    <td class="py-4 px-4 text-center ${changeColor}">${change}</td>
+                    <td class="py-4 px-4">${item.notes || '-'}</td>
+                    <td class="py-4 px-4">${item.status}</td>
+                    <td class="py-4 px-4">${item.approver.name}</td>
                 </tr>
             `;
-        } else {
-            filteredData.forEach(item => {
-                const change = item.quantity_change > 0 ? '+' + item.quantity_change : item.quantity_change;
-                const changeColor = item.quantity_change >= 0 ? 'text-green-500' : 'text-red-500';
-                const formattedDate = formatISODate(item.created_at);
-                
-                adjustmentTable.innerHTML += `
-                    <tr>
-                        <td class="py-4 px-4">${formattedDate}</td>
-                        <td class="py-4 px-4">${item.product.sku}</td>
-                        <td class="py-4 px-4">${item.product.name}</td>
-                        <td class="py-4 px-4 text-center ${changeColor}">${change}</td>
-                        <td class="py-4 px-4">${item.notes || '-'}</td>
-                        <td class="py-4 px-4">${item.status}</td>
-                        <td class="py-4 px-4">${item.approver.name}</td>
-                    </tr>
-                `;
-            });
-        }
-        
-        // Update jumlah disetujui dan ditolak berdasarkan hasil filter
-        const approvedCount = filteredData.filter(item => item.status === 'approved').length;
-        const rejectedCount = filteredData.filter(item => item.status === 'rejected').length;
-        
-        document.querySelectorAll('.bg-white.rounded-lg.shadow.p-4')[0].querySelector('h3').textContent = 
-            `${approvedCount} penyesuaian`;
-        document.querySelectorAll('.bg-white.rounded-lg.shadow.p-4')[1].querySelector('h3').textContent = 
-            `${rejectedCount} penyesuaian`;
+        });
+    }
+    
+    // Update jumlah disetujui dan ditolak berdasarkan hasil filter
+    const approvedCount = filteredData.filter(item => item.status === 'approved').length;
+    const rejectedCount = filteredData.filter(item => item.status === 'rejected').length;
+    
+    document.querySelectorAll('.bg-white.rounded-lg.shadow.p-4')[0].querySelector('h3').textContent = 
+        `${approvedCount} penyesuaian`;
+    document.querySelectorAll('.bg-white.rounded-lg.shadow.p-4')[1].querySelector('h3').textContent = 
+        `${rejectedCount} penyesuaian`;
+}
+
+// Search input handler
+document.getElementById('searchInput').addEventListener('keyup', function(e) {
+    filterData();
+});
+
+// Status filter handler
+document.getElementById('statusFilter').addEventListener('change', function(e) {
+    filterData();
+});
+
+// Print report function
+function printReport() {
+    if (!reportData || (!reportData.approved.length && !reportData.rejected.length)) {
+        showAlert('error', 'Tidak ada data untuk dicetak');
+        return;
     }
 
-    // Search input handler
-    document.getElementById('searchInput').addEventListener('keyup', function(e) {
-        filterData();
-    });
+    showAlert('info', 'Mempersiapkan laporan untuk dicetak...');
 
-    // Status filter handler
-    document.getElementById('statusFilter').addEventListener('change', function(e) {
-        filterData();
-    });
+    setTimeout(() => {
+        const printWindow = window.open('', '_blank');
 
-    // Print report function
-    function printReport() {
-        if (!reportData || (!reportData.approved.length && !reportData.rejected.length)) {
-            showAlert('error', 'Tidak ada data untuk dicetak');
-            return;
-        }
+        // Ambil tanggal dari date picker (flatpickr)
+        const selectedDates = dateRangePicker.selectedDates;
+        const startDate = selectedDates[0] || new Date();
+        const endDate = selectedDates[1] || new Date();
 
-        showAlert('info', 'Mempersiapkan laporan untuk dicetak...');
+        const formattedStart = formatDate(startDate);
+        const formattedEnd = formatDate(endDate);
+        const outletName = document.getElementById('outletName')?.textContent || 'Outlet';
 
-        setTimeout(() => {
-            const printWindow = window.open('', '_blank');
-
-            // Ambil tanggal dari date picker (flatpickr)
-            const selectedDates = dateRangePicker.selectedDates;
-            const startDate = selectedDates[0] || new Date();
-            const endDate = selectedDates[1] || new Date();
-
-            const formattedStart = formatDate(startDate);
-            const formattedEnd = formatDate(endDate);
-            const outletName = document.getElementById('outletName')?.textContent || 'Outlet';
-
-            printWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Laporan Persetujuan Penyesuaian Stok</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; margin: 20px; }
-                        h1, h2 { color: #333; }
-                        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                        th { background-color: #f2f2f2; }
-                        .text-right { text-align: right; }
-                        .text-green-500 { color: green; }
-                        .text-red-500 { color: red; }
-                        .report-header {
-                            display: flex;
-                            align-items: center;
-                            gap: 20px;
-                            margin-bottom: 20px;
-                        }
-                        .logo {
-                            width: 60px;
-                            height: auto;
-                        }
-                        .header-info {
-                            margin-bottom: 15px;
-                        }
-                        hr { border: 0; border-top: 1px solid #000; margin: 10px 0; }
-                        .footer { margin-top: 30px; font-size: 0.8em; text-align: center; color: #666; }
-                    </style>
-                </head>
-                <body>
-                    <div class="report-header">
-                        <img src="/images/logo.png" alt="Logo Kifa Bakery" class="logo">
-                        <div>
-                            <h1>LAPORAN PERSETUJUAN PENYESUAIAN STOK</h1>
-                            <div class="header-info">
-                                Outlet: ${outletName}<br>
-                                Periode: ${formattedStart} hingga ${formattedEnd}<br>
-                                Dicetak pada: ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
-                            </div>
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Laporan Persetujuan Penyesuaian Stok</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    h1, h2 { color: #333; }
+                    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                    th { background-color: #f2f2f2; }
+                    .text-right { text-align: right; }
+                    .text-green-500 { color: green; }
+                    .text-red-500 { color: red; }
+                    .report-header {
+                        display: flex;
+                        align-items: center;
+                        gap: 20px;
+                        margin-bottom: 20px;
+                    }
+                    .logo {
+                        width: 60px;
+                        height: auto;
+                    }
+                    .header-info {
+                        margin-bottom: 15px;
+                    }
+                    hr { border: 0; border-top: 1px solid #000; margin: 10px 0; }
+                    .footer { margin-top: 30px; font-size: 0.8em; text-align: center; color: #666; }
+                </style>
+            </head>
+            <body>
+                <div class="report-header">
+                    <img src="/images/logo.png" alt="Logo Kifa Bakery" class="logo">
+                    <div>
+                        <h1>LAPORAN PERSETUJUAN PENYESUAIAN STOK</h1>
+                        <div class="header-info">
+                            Outlet: ${outletName}<br>
+                            Periode: ${formattedStart} hingga ${formattedEnd}<br>
+                            Dicetak pada: ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
                         </div>
                     </div>
-                    <hr>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Tanggal</th>
-                                <th>SKU</th>
-                                <th>Nama Produk</th>
-                                <th class="text-center">Perubahan</th>
-                                <th>Keterangan</th>
-                                <th>Disetujui Oleh</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `);
+                </div>
+                <hr>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>SKU</th>
+                            <th>Nama Produk</th>
+                            <th class="text-center">Perubahan</th>
+                            <th>Keterangan</th>
+                            <th>Disetujui Oleh</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `);
 
-            const allData = [
-                ...reportData.approved.map(item => ({ ...item, status: 'Disetujui' })),
-                ...reportData.rejected.map(item => ({ ...item, status: 'Ditolak' }))
-            ];
+        const allData = [
+            ...reportData.approved.map(item => ({ ...item, status: 'Disetujui' })),
+            ...reportData.rejected.map(item => ({ ...item, status: 'Ditolak' }))
+        ];
 
-            allData.forEach(item => {
-                const change = item.quantity_change > 0 ? '+' + item.quantity_change : item.quantity_change;
-                const colorClass = item.quantity_change >= 0 ? 'text-green-500' : 'text-red-500';
-                const formattedDate = formatISODate(item.created_at);
-                const notes = item.notes || '-';
-
-                printWindow.document.write(`
-                    <tr>
-                        <td>${formattedDate}</td>
-                        <td>${item.product.sku}</td>
-                        <td>${item.product.name}</td>
-                        <td class="text-center ${colorClass}">${change}</td>
-                        <td>${notes}</td>
-                        <td>${item.approver.name}</td>
-                        <td>${item.status}</td>
-                    </tr>
-                `);
-            });
+        allData.forEach(item => {
+            const change = item.quantity_change > 0 ? '+' + item.quantity_change : item.quantity_change;
+            const colorClass = item.quantity_change >= 0 ? 'text-green-500' : 'text-red-500';
+            const formattedDate = formatISODate(item.created_at);
+            const notes = item.notes || '-';
 
             printWindow.document.write(`
-                        </tbody>
-                    </table>
-                    <div class="footer">
-                        Laporan ini dicetak secara otomatis oleh sistem.<br>
-                        © ${new Date().getFullYear()} Kifa Bakery
-                    </div>
-                </body>
-                </html>
+                <tr>
+                    <td>${formattedDate}</td>
+                    <td>${item.product.sku}</td>
+                    <td>${item.product.name}</td>
+                    <td class="text-center ${colorClass}">${change}</td>
+                    <td>${notes}</td>
+                    <td>${item.approver.name}</td>
+                    <td>${item.status}</td>
+                </tr>
             `);
+        });
 
-            printWindow.document.close();
-
-            setTimeout(() => {
-                printWindow.print();
-                printWindow.close();
-            }, 1000);
-        }, 1000);
-
-    }
-
-    // Export report function
-    function exportReport() {
-        showAlert('info', 'Mempersiapkan laporan untuk diekspor...');
-        setTimeout(() => {
-            // Persiapkan data CSV
-            let csvContent = 'Tanggal,SKU,Nama Item,Perubahan,Keterangan,Disetujui Oleh,Status\n';
-            
-            // Gabungkan data approved dan rejected
-            const allData = [
-                ...reportData.approved.map(item => ({...item, status: 'approved'})),
-                ...reportData.rejected.map(item => ({...item, status: 'rejected'}))
-            ];
-            
-            // Tambahkan setiap baris data
-            allData.forEach(item => {
-                const date = formatISODate(item.created_at);
-                const change = item.quantity_change > 0 ? '+' + item.quantity_change : item.quantity_change;
-                const notes = item.notes || '-';
-                const status = item.status === 'approved' ? 'Disetujui' : 'Ditolak';
-                
-                csvContent += `${date},${item.product.sku},"${item.product.name}",${change},"${notes}",${item.approver.name},${status}\n`;
-            });
-            
-            // Create and download CSV file
-            const encodedUri = encodeURI('data:text/csv;charset=utf-8,' + csvContent);
-            const link = document.createElement('a');
-            link.setAttribute('href', encodedUri);
-            link.setAttribute('download', `laporan-persetujuan-stok-${new Date().toISOString().slice(0,10)}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            showAlert('success', 'Laporan berhasil diekspor');
-        }, 1000);
-    }
-
-    // Show alert function
-    function showAlert(type, message) {
-        const alertContainer = document.getElementById('alertContainer');
-        const alert = document.createElement('div');
-        alert.className = `px-4 py-3 rounded-lg shadow-md ${
-            type === 'error' ? 'bg-red-100 text-red-700' : 
-            type === 'success' ? 'bg-orange-100 text-orange-700' : 'bg-orange-100 text-orange-700'
-        }`;
-        alert.innerHTML = `
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <i data-lucide="${
-                        type === 'error' ? 'alert-circle' : 
-                        type === 'success' ? 'check-circle' : 'info'
-                    }" class="w-5 h-5"></i>
-                    <span>${message}</span>
+        printWindow.document.write(`
+                    </tbody>
+                </table>
+                <div class="footer">
+                    Laporan ini dicetak secara otomatis oleh sistem.<br>
+                    © ${new Date().getFullYear()} Kifa Bakery
                 </div>
-                <button onclick="this.parentElement.parentElement.remove()">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-        `;
-        alertContainer.appendChild(alert);
-        
-        // Refresh Lucide icons
-        if (window.lucide) {
-            window.lucide.createIcons();
-        }
-        
-        setTimeout(() => {
-            alert.remove();
-        }, 5000);
-    }
+            </body>
+            </html>
+        `);
 
-    // Fetch data awal saat halaman dimuat
-    // document.addEventListener('DOMContentLoaded', function() {
-    //     // Dapatkan tanggal hari ini dalam format yyyy-mm-dd
-    //     const today = new Date().toISOString().split('T')[0];
-    //     fetchReportData(today, today);
+        printWindow.document.close();
+
+        setTimeout(() => {
+            printWindow.print();
+            printWindow.close();
+        }, 1000);
+    }, 1000);
+}
+
+// Export report function
+function exportReport() {
+    showAlert('info', 'Mempersiapkan laporan untuk diekspor...');
+    setTimeout(() => {
+        // Persiapkan data CSV
+        let csvContent = 'Tanggal,SKU,Nama Item,Perubahan,Keterangan,Disetujui Oleh,Status\n';
         
-    //     // Set default tanggal display
-    //     const todayFormatted = formatDate(new Date());
-    //     document.getElementById('dateRangeDisplay').textContent = `${todayFormatted} - ${todayFormatted}`;
-    // });
+        // Gabungkan data approved dan rejected
+        const allData = [
+            ...reportData.approved.map(item => ({...item, status: 'approved'})),
+            ...reportData.rejected.map(item => ({...item, status: 'rejected'}))
+        ];
+        
+        // Tambahkan setiap baris data
+        allData.forEach(item => {
+            const date = formatISODate(item.created_at);
+            const change = item.quantity_change > 0 ? '+' + item.quantity_change : item.quantity_change;
+            const notes = item.notes || '-';
+            const status = item.status === 'approved' ? 'Disetujui' : 'Ditolak';
+            
+            csvContent += `${date},${item.product.sku},"${item.product.name}",${change},"${notes}",${item.approver.name},${status}\n`;
+        });
+        
+        // Get outlet name for filename
+        const outletName = document.getElementById('outletName')?.textContent || 'Outlet';
+        const outletNameForFile = outletName.replace(/\s+/g, '-').toLowerCase();
+        
+        // Create and download CSV file
+        const encodedUri = encodeURI('data:text/csv;charset=utf-8,' + csvContent);
+        const link = document.createElement('a');
+        link.setAttribute('href', encodedUri);
+        link.setAttribute('download', `laporan-persetujuan-stok-${outletNameForFile}-${new Date().toISOString().slice(0,10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showAlert('success', 'Laporan berhasil diekspor');
+    }, 1000);
+}
+
+// Show alert function
+function showAlert(type, message) {
+    const alertContainer = document.getElementById('alertContainer');
+    const alert = document.createElement('div');
+    alert.className = `px-4 py-3 rounded-lg shadow-md ${
+        type === 'error' ? 'bg-red-100 text-red-700' : 
+        type === 'success' ? 'bg-orange-100 text-orange-700' : 'bg-orange-100 text-orange-700'
+    }`;
+    alert.innerHTML = `
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i data-lucide="${
+                    type === 'error' ? 'alert-circle' : 
+                    type === 'success' ? 'check-circle' : 'info'
+                }" class="w-5 h-5"></i>
+                <span>${message}</span>
+            </div>
+            <button onclick="this.parentElement.parentElement.remove()">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+    `;
+    alertContainer.appendChild(alert);
+    
+    // Refresh Lucide icons
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
+    
+    setTimeout(() => {
+        alert.remove();
+    }, 5000);
+}
 </script>
 
 <style>

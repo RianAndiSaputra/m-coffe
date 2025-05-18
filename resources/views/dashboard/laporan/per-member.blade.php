@@ -135,7 +135,7 @@
     // Global variables
     let apiData = null;
     let filteredMembers = [];
-    const outletId = 1;
+    // const outletId = 1;
     let currentStartDate = null;
     let currentEndDate = null;
 
@@ -158,32 +158,89 @@
         return [firstDayOfMonth, today];
     }
 
-    const dateRangePicker = flatpickr("#dateRange", {
-        mode: "range",
-        dateFormat: "d M Y",
-        defaultDate: getDefaultDateRange(),
-        locale: "id",
-        onChange: function(selectedDates, dateStr) {
-            if (selectedDates.length === 2) {
-                currentStartDate = selectedDates[0];
-                currentEndDate = selectedDates[1];
-                updateDateDisplay();
-                fetchData(formatDateToApi(currentStartDate), formatDateToApi(currentEndDate));
-            }
-        },
-        onReady: function(selectedDates, dateStr, instance) {
-            // Pastikan tanggal default terkirim saat pertama load
-            if (selectedDates.length === 2) {
-                currentStartDate = selectedDates[0];
-                currentEndDate = selectedDates[1];
-                updateDateDisplay();
-                // Panggil fetchData dengan sedikit delay untuk memastikan DOM siap
-                setTimeout(() => {
-                    fetchData(formatDateToApi(currentStartDate), formatDateToApi(currentEndDate));
-                }, 100);
-            }
+    // Get currently selected outlet ID
+    function getSelectedOutletId() {
+        // First check URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const outletIdFromUrl = urlParams.get('outlet_id');
+        
+        if (outletIdFromUrl) {
+            return outletIdFromUrl;
         }
+        
+        // Then check localStorage
+        const savedOutletId = localStorage.getItem('selectedOutletId');
+        
+        if (savedOutletId) {
+            return savedOutletId;
+        }
+        
+        // Default to outlet ID 1 if nothing is found
+        return 1;
+    }
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize date range picker
+        const dateRangePicker = flatpickr("#dateRange", {
+            mode: "range",
+            dateFormat: "d M Y",
+            defaultDate: getDefaultDateRange(),
+            locale: "id",
+            onChange: function(selectedDates, dateStr) {
+                if (selectedDates.length === 2) {
+                    currentStartDate = selectedDates[0];
+                    currentEndDate = selectedDates[1];
+                    updateDateDisplay();
+                    fetchData();
+                }
+            },
+            onReady: function(selectedDates) {
+                if (selectedDates.length === 2) {
+                    currentStartDate = selectedDates[0];
+                    currentEndDate = selectedDates[1];
+                    updateDateDisplay();
+                }
+            }
+        });
+
+        // Load initial data
+        fetchData();
+        
+        // Connect outlet selection to report updates
+        connectOutletSelectionToReport();
     });
+
+    // Connect outlet selection dropdown to report updates
+    function connectOutletSelectionToReport() {
+        // Listen for outlet changes in localStorage
+        window.addEventListener('storage', function(event) {
+            if (event.key === 'selectedOutletId') {
+                // Reload report with new outlet
+                fetchData();
+            }
+        });
+        
+        // Also watch for clicks on outlet items in dropdown
+        const outletListContainer = document.getElementById('outletListContainer');
+        if (outletListContainer) {
+            outletListContainer.addEventListener('click', function(event) {
+                // Find the clicked li element
+                let targetElement = event.target;
+                while (targetElement && targetElement !== outletListContainer && targetElement.tagName !== 'LI') {
+                    targetElement = targetElement.parentElement;
+                }
+                
+                // If we clicked on an outlet list item
+                if (targetElement && targetElement.tagName === 'LI') {
+                    // Update report after a short delay to allow existing code to complete
+                    setTimeout(() => {
+                        fetchData();
+                    }, 100);
+                }
+            });
+        }
+    }
 
     // Fungsi helper untuk update tampilan tanggal
     function updateDateDisplay() {
@@ -195,19 +252,16 @@
     }
 
     // Fetch API data
-    async function fetchData(startDate = null, endDate = null) {
+    async function fetchData() {
         try {
+            const outletId = getSelectedOutletId();
             // Get loading indicator element safely
             const loadingIndicator = document.getElementById('loadingIndicator');
             if (loadingIndicator) loadingIndicator.style.display = 'block';
             
             // If no dates provided, use default (first day of month to today)
-            if (!startDate || !endDate) {
-                const defaultRange = getDefaultDateRange();
-                startDate = formatDateToApi(defaultRange[0]);
-                endDate = formatDateToApi(defaultRange[1]);
-            }
-
+            const startDate = currentStartDate ? formatDateToApi(currentStartDate) : formatDateToApi(getDefaultDateRange()[0]);
+            const endDate = currentEndDate ? formatDateToApi(currentEndDate) : formatDateToApi(getDefaultDateRange()[1]);
             
             const apiUrl = `http://127.0.0.1:8000/api/reports/sales-by-member/${outletId}?start_date=${startDate}&end_date=${endDate}`;
             const response = await fetch(apiUrl, {
