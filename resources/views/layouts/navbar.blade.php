@@ -55,14 +55,35 @@
                 </div>
                 
                 <!-- Dropdown menu -->
-                <div class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 py-1 z-50" id="user-dropdown-menu" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button">
+                <div
+                    class="hidden absolute right-0 mt-2 w-56 rounded-xl shadow-xl bg-white ring-1 ring-black ring-opacity-5 py-2 z-50"
+                    id="user-dropdown-menu"
+                    role="menu"
+                    aria-orientation="vertical"
+                    aria-labelledby="user-menu-button"
+                >
                     <form id="logout-form">
                         @csrf
-                        <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-all" role="menuitem">
-                            Keluar
+                        <button 
+                            type="submit" 
+                            class="flex items-center gap-3 w-full px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 transition-all duration-200 rounded-md"
+                            role="menuitem"
+                        >
+                            <!-- Icon in orange circle -->
+                            <span class="flex items-center justify-center w-9 h-9 rounded-full border border-orange-500 bg-orange-50 text-orange-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
+                                </svg>
+                            </span>
+                            <div class="flex flex-col items-start">
+                                <span class="font-medium">Keluar</span>
+                                <span class="text-xs text-gray-500">Akhiri sesi pengguna</span>
+                            </div>
                         </button>
                     </form>
                 </div>
+
             </div>
         </div>
     </div>
