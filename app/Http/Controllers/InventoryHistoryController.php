@@ -27,6 +27,33 @@ class InventoryHistoryController extends Controller
     }
 
     /**
+     * Get pending stock adjustment notifications for admin by outlet.
+     */
+    public function getPendingStockAdjustments(Request $request)
+    {
+        try {
+            $user = $request->user();
+            // Asumsi user memiliki outlet_id
+            $outletId = $user->outlet_id ?? null;
+            
+            if (!$outletId) {
+                return $this->errorResponse('Outlet tidak ditemukan untuk user ini.');
+            }
+
+            $pendingAdjustments = InventoryHistory::where('outlet_id', $outletId)
+                ->where('type', 'adjustment')
+                ->where('status', 'pending')
+                ->with(['product', 'user'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return $this->successResponse($pendingAdjustments, 'Pending stock adjustment notifications retrieved successfully.');
+        } catch (\Throwable $th) {
+            return $this->errorResponse($th->getMessage());
+        }
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create()

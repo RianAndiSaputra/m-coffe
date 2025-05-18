@@ -18,12 +18,28 @@
             </div>
         </div>
         <div class="flex items-center space-x-3 sm:space-x-4">
-            <!-- Notification button -->
+            <!-- Notification button and dropdown -->
             <div class="relative">
-                <button class="p-1 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-700 transition-all">
+                <button id="notificationBtn" class="p-1 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-700 transition-all">
                     <i data-lucide="bell" class="w-5 h-5 text-gray-500"></i>
-                    <span class="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
+                    <span id="notificationBadge" class="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500 hidden"></span>
                 </button>
+                
+                <!-- Notification dropdown -->
+                <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-72 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 py-1 z-50 max-h-96 overflow-y-auto">
+                    <div class="px-4 py-2 border-b border-gray-100">
+                        <h3 class="text-sm font-medium text-gray-900">Notifikasi</h3>
+                    </div>
+                    <div id="notificationList" class="divide-y divide-gray-100">
+                        <!-- Notifications will be loaded here -->
+                        <div class="px-4 py-3 text-center text-sm text-gray-500">
+                            Memuat notifikasi...
+                        </div>
+                    </div>
+                    <div class="px-4 py-2 border-t border-gray-100 text-center">
+                        <a href="#" class="text-xs text-orange-600 hover:text-orange-800">Lihat Semua</a>
+                    </div>
+                </div>
             </div>
             
             <!-- Profile dropdown -->
@@ -81,6 +97,106 @@
                 }
             });
         }
+
+        // Notification dropdown functionality
+        const notificationBtn = document.getElementById('notificationBtn');
+        const notificationDropdown = document.getElementById('notificationDropdown');
+        const notificationBadge = document.getElementById('notificationBadge');
+        
+        if (notificationBtn && notificationDropdown) {
+            notificationBtn.addEventListener('click', async function(e) {
+                e.stopPropagation();
+                notificationDropdown.classList.toggle('hidden');
+                
+                // Load notifications when dropdown is opened
+                if (!notificationDropdown.classList.contains('hidden')) {
+                    await loadNotifications();
+                }
+            });
+            
+            // Close when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!notificationBtn.contains(e.target) && !notificationDropdown.contains(e.target)) {
+                    notificationDropdown.classList.add('hidden');
+                }
+            });
+        }
+
+        // Function to load notifications from backend
+        async function loadNotifications() {
+            const notificationList = document.getElementById('notificationList');
+            notificationList.innerHTML = '<div class="px-4 py-3 text-center text-sm text-gray-500">Memuat notifikasi...</div>';
+            
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('Token tidak ditemukan');
+                }
+
+                const response = await fetch('/api/notifications/stock-adjustments', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Gagal memuat notifikasi');
+                }
+
+                const data = await response.json();
+                
+                if (data.data && data.data.length > 0) {
+                    notificationList.innerHTML = '';
+                    data.data.forEach(adjustment => {
+                        const notificationItem = document.createElement('div');
+                        notificationItem.className = 'px-4 py-3 hover:bg-gray-50 cursor-pointer';
+                        notificationItem.innerHTML = `
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 pt-0.5">
+                                    <i data-lucide="alert-circle" class="w-5 h-5 text-orange-500"></i>
+                                </div>
+                                <div class="ml-3 flex-1">
+                                    <p class="text-sm font-medium text-gray-900">Penyesuaian Stok</p>
+                                    <p class="text-xs text-gray-500 mt-1">${adjustment.product?.name || 'Produk tidak diketahui'} - ${adjustment.quantity} unit</p>
+                                    <p class="text-xs text-gray-400 mt-1">${formatDate(adjustment.created_at)}</p>
+                                </div>
+                            </div>
+                        `;
+                        notificationList.appendChild(notificationItem);
+                    });
+
+                    // Show badge if there are notifications
+                    notificationBadge.classList.remove('hidden');
+                } else {
+                    notificationList.innerHTML = '<div class="px-4 py-3 text-center text-sm text-gray-500">Tidak ada notifikasi baru</div>';
+                    notificationBadge.classList.add('hidden');
+                }
+
+                // Refresh icons after adding new ones
+                lucide.createIcons();
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+                notificationList.innerHTML = `<div class="px-4 py-3 text-center text-sm text-red-500">${error.message}</div>`;
+            }
+        }
+
+        // Helper function to format date
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            return new Date(dateString).toLocaleDateString('id-ID', options);
+        }
+
+        // Periodically check for new notifications (every 5 minutes)
+        setInterval(async () => {
+            if (!notificationDropdown.classList.contains('hidden')) {
+                await loadNotifications();
+            }
+        }, 300000); // 5 minutes
+
+        // Initial load of notifications
+        loadNotifications();
     });
 
     document.getElementById('logout-form').addEventListener('submit', async function(e) {
@@ -96,5 +212,4 @@
 
         window.location.href = '/'; // Redirect after logout
     });
-
 </script>
