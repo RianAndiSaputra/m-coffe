@@ -161,7 +161,20 @@ const ProductManager = (() => {
 
         connectOutletSelectionToProducts();
     };
+    // fungsi untuk generate barcode
+    const generateBarcode = () => {
+        // Generate random barcode (EAN-13 format)
+        const randomBarcode = Math.floor(1000000000000 + Math.random() * 9000000000000).toString();
+        return randomBarcode;
+    };
+
+    document.getElementById('generateBarcodeBtn')?.addEventListener('click', () => {
+        document.getElementById('barcode').value = generateBarcode();
+    });
     
+    document.getElementById('generateBarcodeBtnEdit')?.addEventListener('click', () => {
+        document.getElementById('editBarcode').value = generateBarcode();
+    });
 
     function setupOutletChangeListener() {
         // Method 1: Polling localStorage setiap 500ms
@@ -570,6 +583,9 @@ const ProductManager = (() => {
                         <p class="font-medium">${product.name || "-"}</p>
                     </div>
                 </td>
+                <td class="py-3 px-4">
+                ${product.barcode ? `<div class="font-medium">${product.barcode}</div>` : ''}
+                </td>
                 <td class="py-3 px-4">${product.sku || "-"}</td>
                 <td class="py-3 px-4">
                     <span class="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
@@ -651,51 +667,51 @@ const ProductManager = (() => {
     const tambahProduk = async () => {
         const btnSimpan = document.getElementById(elements.buttons.save);
         const originalText = btnSimpan.innerHTML;
-
+        const form = document.getElementById(elements.forms.add);
+    
         try {
+            // Set loading state
             btnSimpan.disabled = true;
-            btnSimpan.innerHTML =
-                '<i data-lucide="loader-circle" class="animate-spin mr-2"></i> Menyimpan...';
+            btnSimpan.innerHTML = '<i data-lucide="loader-circle" class="animate-spin mr-2"></i> Menyimpan...';
             if (window.lucide) window.lucide.createIcons();
-
-            const form = document.getElementById(elements.forms.add);
-
+    
+            // Validasi input
             const namaProduk = form.querySelector('[name="name"]').value.trim();
             const harga = form.querySelector('[name="price"]').value.trim();
-            const kategori = form
-                .querySelector('[name="category_id"]')
-                .value.trim();
-            const outletCheckboxes = form.querySelectorAll(
-                'input[name="outlet_ids[]"]:checked'
-            );
-
+            const kategori = form.querySelector('[name="category_id"]').value.trim();
+            const outletCheckboxes = form.querySelectorAll('input[name="outlet_ids[]"]:checked');
+    
             if (!namaProduk) throw new Error("Nama produk harus diisi");
             if (!harga) throw new Error("Harga harus diisi");
             if (!kategori) throw new Error("Kategori harus dipilih");
-            if (outletCheckboxes.length === 0)
-                throw new Error("Pilih minimal satu outlet");
-
+            if (outletCheckboxes.length === 0) throw new Error("Pilih minimal satu outlet");
+    
+            // Prepare form data
             const formData = new FormData(form);
-
+    
+            // Generate barcode jika kosong
+            if (!formData.get("barcode")) {
+                formData.set("barcode", generateBarcode());
+            }
+    
+            // Set default values jika kosong
             if (!formData.get("sku")) formData.set("sku", `SKU-${Date.now()}`);
-
             if (!formData.get("quantity")) formData.set("quantity", "0");
             if (!formData.get("min_stock")) formData.set("min_stock", "0");
             formData.append("outlet_id", currentOutletId.toString());
-
+    
+            // Kirim data ke API
             const response = await fetch("/api/products", {
                 method: "POST",
                 body: formData,
                 headers: {
-                    "X-CSRF-TOKEN": document.querySelector(
-                        'meta[name="csrf-token"]'
-                    ).content,
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
             });
-
+    
             const responseData = await response.json();
-
+    
             if (!response.ok) {
                 if (response.status === 422 && responseData.errors) {
                     const errorMessages = Object.values(responseData.errors)
@@ -703,16 +719,16 @@ const ProductManager = (() => {
                         .join(", ");
                     throw new Error(`Validasi gagal: ${errorMessages}`);
                 }
-                throw new Error(
-                    responseData.message || "Gagal menambahkan produk"
-                );
+                throw new Error(responseData.message || "Gagal menambahkan produk");
             }
-
+    
+            // Success handling
             showAlert("success", "Produk berhasil ditambahkan");
             closeModal("modalTambahProduk");
             loadProducts();
             form.reset();
-
+    
+            // Reset image preview
             const preview = document.getElementById("gambarPreview");
             if (preview) {
                 preview.src = "";
@@ -771,6 +787,7 @@ const ProductManager = (() => {
 
             document.getElementById("editProdukId").textContent = product.id;
             document.getElementById("editNamaProduk").value = product.name;
+            document.getElementById('editBarcode').value = product.barcode || '';
             document.getElementById("editSkuProduk").value = product.sku || "";
             document.getElementById("editDeskripsi").value =
                 product.description || "";
@@ -925,37 +942,28 @@ const ProductManager = (() => {
             const id = document.getElementById("editProdukId").textContent;
             const formData = new FormData();
 
-            const namaProduk = document
-                .getElementById("editNamaProduk")
-                .value.trim();
+            const namaProduk = document.getElementById("editNamaProduk").value.trim();
+            const barcodeValue = document.getElementById('editBarcode').value.trim();
+            if (!barcodeValue) {
+                formData.append("barcode", generateBarcode());
+            } else {
+                formData.append("barcode", barcodeValue);
+            }
             const harga = document.getElementById("editHarga").value.trim();
-            const kategori = document
-                .getElementById("editKategori")
-                .value.trim();
+            const kategori = document.getElementById("editKategori").value.trim();
             const quantity = document.getElementById("editStok").value || 0;
-            const minStock =
-                document.getElementById("editStokMinimum").value || 0;
+            const minStock = document.getElementById("editStokMinimum").value || 0;
 
             if (!namaProduk) throw new Error("Nama produk harus diisi");
             if (!harga) throw new Error("Harga harus diisi");
             if (!kategori) throw new Error("Kategori harus dipilih");
 
             formData.append("name", namaProduk);
-            formData.append(
-                "sku",
-                document.getElementById("editSkuProduk").value.trim() ||
-                    `SKU-${Date.now()}`
-            );
-            formData.append(
-                "description",
-                document.getElementById("editDeskripsi").value
-            );
+            formData.append("sku",document.getElementById("editSkuProduk").value.trim() ||`SKU-${Date.now()}`);
+            formData.append("description",document.getElementById("editDeskripsi").value);
             formData.append("price", harga);
             formData.append("category_id", kategori);
-            formData.append(
-                "is_active",
-                document.getElementById("editStatus").value === "active" ? 1 : 0
-            );
+            formData.append("is_active",document.getElementById("editStatus").value === "active" ? 1 : 0);
 
             formData.append("quantity", quantity);
             formData.append("min_stock", minStock);
