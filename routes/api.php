@@ -66,6 +66,9 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/products/{product}', 'update')->middleware('role:admin');
             Route::delete('/products/{product}', 'destroy')->middleware('role:admin');
             Route::get('/products/outlet/{outletId}', 'getOutletProducts');
+            Route::get('/products/barcode/{barcode}', 'findByBarcode')->middleware('role:admin');
+            Route::get('/products/generate-barcode', 'generateBarcode')->middleware('role:admin');
+            Route::get('/outlets/{outletId}/products/barcode/{barcode}', 'posFindByBarcode')->middleware('role:admin');
         });
 
         Route::controller(InventoryController::class)->group(function () {
@@ -137,6 +140,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::controller(ProductController::class)->group(function () {
             Route::get('/products/outlet/pos/{outletId}', 'getOutletProductsPos');
             Route::get('/products/outlet/{outletId}', 'getOutletProducts');
+            Route::get('/outlets/{outletId}/products/barcode/{barcode}', 'posFindByBarcode');
         });
 
         Route::get('/categories', [CategoryController::class, 'index']);
