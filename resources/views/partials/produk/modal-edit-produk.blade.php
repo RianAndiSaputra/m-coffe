@@ -24,6 +24,16 @@
                     <input type="text" id="editSkuProduk" class="w-full border rounded px-3 py-2 text-sm" placeholder="Kode unik produk">
                 </div>
                 <div class="mb-4">
+                    <label class="block font-medium mb-1">Barcode</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="editBarcode" class="flex-1 border rounded px-3 py-2 text-sm" placeholder="Kode barcode">
+                        <button type="button" id="generateBarcodeBtnEdit" class="px-3 py-2 bg-gray-100 border rounded hover:bg-gray-200 text-sm whitespace-nowrap">
+                            Generate
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Biarkan kosong untuk generate otomatis</p>
+                </div>
+                <div class="mb-4">
                     <label class="block font-medium mb-1">Deskripsi Produk</label>
                     <textarea id="editDeskripsi" class="w-full border rounded px-3 py-2 text-sm" placeholder="Deskripsi produk"></textarea>
                 </div>
@@ -84,7 +94,6 @@
                 <select id="editStatus" class="w-full border rounded px-3 py-2 text-sm">
                     <option value="active">Aktif</option>
                     <option value="inactive">Nonaktif</option>
-                    {{-- <option value="archived">Diarsipkan</option> --}}
                 </select>
             </div>
         </div>
@@ -92,7 +101,9 @@
         <!-- Footer: Tombol Aksi -->
         <div class="p-4 border-t flex justify-between">
             <div>
-                <button id="btnHapusProduk" class="px-4 py-2 text-red-600 hover:text-red-800 text-sm"></button>
+                <button id="btnHapusProduk" class="px-4 py-2 text-red-600 hover:text-red-800 text-sm">
+                    <i data-lucide="trash-2" class="w-4 h-4 mr-1"></i> Hapus Produk
+                </button>
             </div>
             <div class="space-x-2">
                 <button id="btnBatalEdit" class="px-4 py-2 border rounded hover:bg-gray-100">Batal</button>

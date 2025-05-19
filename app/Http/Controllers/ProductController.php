@@ -33,9 +33,9 @@ class ProductController extends Controller
     {
         try {
             $products = Product::with([
-                'category:id,name', // Ambil kategori
-                'inventory', // Ambil relasi hasOne inventory
-                'inventory.outlet:id,name' // Ambil outlet terkait inventory
+                'category:id,name',
+                'inventory',
+                'inventory.outlet:id,name'
             ])->get();
     
             return response()->json([
@@ -44,7 +44,7 @@ class ProductController extends Controller
                 'data' => $products
             ]);
         } catch (\Throwable $th) {
-            \Log::error('Product index error: '.$th->getMessage());
+            Log::error('Product index error: '.$th->getMessage());
             return response()->json([
                 'status' => false,
                 'message' => 'Terjadi kesalahan saat memuat data produk'
@@ -139,17 +139,15 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-
         if ($request->has('image') && $request->image === null) {
             $request->request->remove('image');
         }
-
-        // dd($request->all);
 
         try {
             $request->validate([
                 'name' => 'required|string|max:255',
                 'sku' => 'required|string|max:255',
+                'barcode' => 'nullable|string|max:255|unique:products,barcode',
                 'description' => 'nullable|string|max:255',
                 'price' => 'required|numeric',
                 'category_id' => 'required|exists:categories,id',
@@ -162,6 +160,7 @@ class ProductController extends Controller
             ]);
 
             DB::beginTransaction();
+            
             if ($request->hasFile('image')) {
                 $path = $request->file('image')->store('products', 'uploads');
                 $imagePath = $path;
@@ -169,9 +168,13 @@ class ProductController extends Controller
                 $imagePath = null;
             }
 
+            // Generate barcode jika tidak diisi
+            $barcode = $request->barcode ?? $this->generateUniqueBarcode();
+
             $product = Product::create([
                 'name' => $request->name,
                 'sku' => $request->sku,
+                'barcode' => $barcode,
                 'description' => $request->description,
                 'price' => $request->price,
                 'category_id' => $request->category_id,
@@ -208,17 +211,6 @@ class ProductController extends Controller
                 return $this->errorResponse($th->errors(), 'Validation failed', 422);
             }
             return $this->errorResponse($th->getMessage());
-        // } catch (\Illuminate\Validation\ValidationException $e) {
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => 'Validasi gagal',
-        //         'errors' => collect($e->errors())->map(function ($messages, $field) {
-        //             return [
-        //                 'field' => $field,
-        //                 'messages' => $messages
-        //             ];
-        //         })->values()->all()
-        //     ], 422);
         }
     }
 
@@ -228,7 +220,7 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         try {
-            return $this->successResponse($product, 'Product retrieved successfully');
+            return $this->successResponse($product->load(['category', 'inventory']), 'Product retrieved successfully');
         } catch (\Throwable $th) {
             return $this->errorResponse($th->getMessage());
         }
@@ -247,20 +239,11 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-
-        // dd($request->all());
-
-        // if ($request->isMethod('PUT') && $request->hasFile('gambar')) {
-        //     $request->setMethod('POST');
-        // }
-        // if ($request->isMethod('put') && $request->hasFile('image')) {
-        //     $request->merge(['_method' => 'PUT']);
-        // }
         try {
             $request->validate([
                 'name' => 'required|string|max:255',
-                // 'sku' => 'required|string|max:255|unique:products,sku,' . $product->id,
                 'sku' => 'required|string|max:255',
+                'barcode' => 'nullable|string|max:255|unique:products,barcode,' . $product->id,
                 'description' => 'nullable|string|max:255',
                 'price' => 'required|numeric',
                 'category_id' => 'required|exists:categories,id',
@@ -273,22 +256,17 @@ class ProductController extends Controller
             ]);
 
             DB::beginTransaction();
-            // Handle image update
+            
             if ($request->hasFile('image')) {
-                // Delete old image
-                // if ($product->image) {
-                //     Storage::disk('public')->delete($product->image);
-                // }
-                // Store new image
                 $imagePath = $request->file('image')->store('products', 'uploads');
             } else {
                 $imagePath = $product->image;
             }
 
-            // Update product
             $product->update([
                 'name' => $request->name,
                 'sku' => $request->sku,
+                'barcode' => $request->barcode,
                 'description' => $request->description,
                 'price' => $request->price,
                 'category_id' => $request->category_id,
@@ -300,7 +278,7 @@ class ProductController extends Controller
                 Inventory::updateOrCreate(
                     [
                         'product_id' => $product->id,
-                        'outlet_id' => $outletId // Cari berdasarkan kombinasi ini
+                        'outlet_id' => $outletId
                     ],
                     [
                         'quantity' => $request->quantity,
@@ -309,7 +287,6 @@ class ProductController extends Controller
                 );
             }
 
-            // Hapus outlet yang tidak ada di request
             Inventory::where('product_id', $product->id)
                 ->whereNotIn('outlet_id', $request->outlet_ids)
                 ->delete();
@@ -332,7 +309,6 @@ class ProductController extends Controller
             DB::beginTransaction();
             Inventory::where('product_id', $product->id)->delete();
             $product->delete();
-            // Storage::disk('uploads')->delete($product->image);
             DB::commit();
             return $this->successResponse(null, 'Product deleted successfully');
         } catch (\Throwable $th) {
@@ -347,7 +323,6 @@ class ProductController extends Controller
             $user = $request->user(); 
             $outlet = Outlet::findOrFail($outletId);
 
-            // Cek apakah user adalah kasir
             $isCashier = strtolower($user->role) === 'kasir';
 
             $products = $outlet->products()
@@ -357,7 +332,7 @@ class ProductController extends Controller
                     'inventoryHistory' => function ($query) {
                         $query->select('id', 'product_id', 'quantity_before', 'quantity_after', 'quantity_change', 'type')
                             ->latest()
-                            ->limit(1); // misal ambil 5 data terakhir
+                            ->limit(1);
                     }
                 ])
                 ->when($isCashier, function ($query) {
@@ -369,6 +344,7 @@ class ProductController extends Controller
                         'id' => $product->id,
                         'name' => $product->name,
                         'sku' => $product->sku,
+                        'barcode' => $product->barcode,
                         'description' => $product->description,
                         'price' => $product->price,
                         'image_url' => $product->image_url,
@@ -415,7 +391,6 @@ class ProductController extends Controller
             $user = $request->user();
             $outlet = Outlet::with('cashRegisters')->findOrFail($outletId);
 
-            // Cek apakah user adalah kasir
             $isCashier = strtolower($user->role) === 'kasir';
 
             $products = $outlet->products()
@@ -423,13 +398,14 @@ class ProductController extends Controller
                 ->when($isCashier, function ($query) {
                     $query->where('is_active', true);
                 })
-                ->get()
                 ->orderBy('name', 'asc')
+                ->get()
                 ->map(function ($product) use ($outlet) {
                     return [
                         'id' => $product->id,
                         'name' => $product->name,
                         'sku' => $product->sku,
+                        'barcode' => $product->barcode,
                         'description' => $product->description,
                         'price' => $product->price,
                         'image' => asset('storage/' . $product->image),
@@ -501,4 +477,71 @@ class ProductController extends Controller
     //         return $this->errorResponse($th->getMessage());
     //     }
     // }
+
+     public function findByBarcode(Request $request, $barcode)
+    {
+        try {
+            $product = Product::with(['category', 'inventory'])
+                ->where('barcode', $barcode)
+                ->first();
+
+            if (!$product) {
+                return $this->errorResponse('Product not found', 404);
+            }
+
+            return $this->successResponse($product, 'Product found');
+        } catch (\Throwable $th) {
+            return $this->errorResponse($th->getMessage());
+        }
+    }
+   
+        public function posFindByBarcode(Request $request, $outletId, $barcode)
+    {
+        try {
+            $outlet = Outlet::findOrFail($outletId);
+            $product = $outlet->products()
+                ->where('barcode', $barcode)
+                ->where('is_active', true)
+                ->with(['category'])
+                ->first();
+
+            if (!$product) {
+                return $this->errorResponse('Product not found or inactive', 404);
+            }
+
+            return $this->successResponse([
+                'id' => $product->id,
+                'name' => $product->name,
+                'price' => $product->price,
+                'barcode' => $product->barcode,
+                'quantity' => $product->pivot->quantity ?? 0,
+                'category' => $product->category->name,
+                'image_url' => $product->image_url
+            ], 'Product found');
+        } catch (\Throwable $th) {
+            return $this->errorResponse($th->getMessage());
+        }
+    }
+
+    public function generateBarcode()
+    {
+        try {
+            $barcode = $this->generateUniqueBarcode();
+            return $this->successResponse(['barcode' => $barcode], 'Barcode generated');
+        } catch (\Throwable $th) {
+            return $this->errorResponse($th->getMessage());
+        }
+    }
+
+    /**
+     * Helper function to generate unique barcode
+     */
+    private function generateUniqueBarcode()
+    {
+        do {
+            $barcode = rand(100000000, 999999999); // EAN-13 style
+        } while (Product::where('barcode', $barcode)->exists());
+
+        return $barcode;
+    }
 }

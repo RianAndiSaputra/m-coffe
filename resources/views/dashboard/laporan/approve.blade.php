@@ -31,7 +31,7 @@
     <div class="mb-3 md:mb-0 flex items-start gap-2">
         <i data-lucide="store" class="w-5 h-5 text-gray-600 mt-1"></i>
         <div>
-            <h4 class="text-lg font-semibold text-gray-800">Menampilkan laporan untuk: Kifa Bakery Pusat</h4>
+            <h4 class="text-lg font-semibold text-gray-800">Menampilkan laporan approve</h4>
             <p class="text-sm text-gray-600">Periode: <span id="dateRangeDisplay">01 Mei 2025 - 11 Mei 2025</span></p>
         </div>
     </div>
@@ -169,6 +169,27 @@
         };
     }
 
+    // Get currently selected outlet ID
+    function getSelectedOutletId() {
+        // First check URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const outletIdFromUrl = urlParams.get('outlet_id');
+        
+        if (outletIdFromUrl) {
+            return outletIdFromUrl;
+        }
+        
+        // Then check localStorage
+        const savedOutletId = localStorage.getItem('selectedOutletId');
+        
+        if (savedOutletId) {
+            return savedOutletId;
+        }
+        
+        // Default to outlet ID 1 if nothing is found
+        return 1;
+    }
+
     // Initialize date range picker dengan default awal bulan sampai hari ini
     const defaultRange = getDefaultDateRange();
     const dateRangePicker = flatpickr("#dateRange", {
@@ -187,7 +208,7 @@
                 document.getElementById('dateRangeDisplay').textContent = `${startDateDisplay} - ${endDateDisplay}`;
                 
                 // Fetch data dengan tanggal baru
-                fetchReportData(startDate, endDate);
+                fetchReportData(getSelectedOutletId(), startDate, endDate);
             }
         }
     });
@@ -203,16 +224,89 @@
         const startDateAPI = formatISODate(defaultRange.startDate);
         const endDateAPI = formatISODate(defaultRange.endDate);
         
+        // Get outlet ID
+        const outletId = getSelectedOutletId();
+        
+        // Update outlet name in UI
+        updateOutletNameDisplay(outletId);
+
+        // Connect outlet selection to report updates
+        connectOutletSelectionToReport();
+        
         // Fetch data awal
-        fetchReportData(startDateAPI, endDateAPI);
+        fetchReportData(outletId, startDateAPI, endDateAPI);
     });
 
+    // Connect outlet selection dropdown to report updates
+    function connectOutletSelectionToReport() {
+        // Listen for outlet changes in localStorage
+        window.addEventListener('storage', function(event) {
+            if (event.key === 'selectedOutletId') {
+                // Update outlet name in UI
+                updateOutletNameDisplay(event.newValue);
+                
+                // Get current date range
+                const selectedDates = dateRangePicker.selectedDates;
+                const startDate = formatISODate(selectedDates[0]);
+                const endDate = formatISODate(selectedDates[1]);
+                
+                // Reload report with new outlet
+                fetchReportData(event.newValue, startDate, endDate);
+            }
+        });
+        
+        // Also watch for clicks on outlet items in dropdown
+        const outletListContainer = document.getElementById('outletListContainer');
+        if (outletListContainer) {
+            outletListContainer.addEventListener('click', function(event) {
+                // Find the clicked li element
+                let targetElement = event.target;
+                while (targetElement && targetElement !== outletListContainer && targetElement.tagName !== 'LI') {
+                    targetElement = targetElement.parentElement;
+                }
+                
+                // If we clicked on an outlet list item
+                if (targetElement && targetElement.tagName === 'LI') {
+                    // Update report after a short delay to allow existing code to complete
+                    setTimeout(() => {
+                        const outletId = getSelectedOutletId();
+                        updateOutletNameDisplay(outletId);
+                        
+                        // Get current date range
+                        const selectedDates = dateRangePicker.selectedDates;
+                        const startDate = formatISODate(selectedDates[0]);
+                        const endDate = formatISODate(selectedDates[1]);
+                        
+                        // Reload report with new outlet
+                        fetchReportData(outletId, startDate, endDate);
+                    }, 100);
+                }
+            });
+        }
+    }
+
+    // Update outlet name display based on outlet ID
+    function updateOutletNameDisplay(outletId) {
+        // In a real app, you might fetch outlet details or get them from a global state
+        // For now, we'll just set a placeholder text
+        const outletName = document.getElementById('outletName');
+        if (outletName) {
+            // You could replace this with an API call to get the real outlet name
+            outletName.textContent = `Outlet ${outletId}`;
+        }
+        
+        // Update any other UI elements that show outlet name
+        const outletNameHeader = document.getElementById('outletNameHeader');
+        if (outletNameHeader) {
+            outletNameHeader.textContent = `Outlet ${outletId}`;
+        }
+    }
+
     // Fungsi untuk fetch data dari API
-    async function fetchReportData(startDate, endDate) {
+    async function fetchReportData(outletId, startDate, endDate) {
         try {
-            // showAlert('info', 'Memuat data laporan...');
+            showAlert('info', 'Memuat data laporan...');
             
-            const outletId = 1; // ID outlet saat ini
             const response = await fetch(`http://127.0.0.1:8000/api/reports/inventory-approvals/${outletId}?start_date=${startDate}&end_date=${endDate}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -448,7 +542,6 @@
                 printWindow.close();
             }, 1000);
         }, 1000);
-
     }
 
     // Export report function
@@ -474,11 +567,15 @@
                 csvContent += `${date},${item.product.sku},"${item.product.name}",${change},"${notes}",${item.approver.name},${status}\n`;
             });
             
+            // Get outlet name for filename
+            const outletName = document.getElementById('outletName')?.textContent || 'Outlet';
+            const outletNameForFile = outletName.replace(/\s+/g, '-').toLowerCase();
+            
             // Create and download CSV file
             const encodedUri = encodeURI('data:text/csv;charset=utf-8,' + csvContent);
             const link = document.createElement('a');
             link.setAttribute('href', encodedUri);
-            link.setAttribute('download', `laporan-persetujuan-stok-${new Date().toISOString().slice(0,10)}.csv`);
+            link.setAttribute('download', `laporan-persetujuan-stok-${outletNameForFile}-${new Date().toISOString().slice(0,10)}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -520,17 +617,6 @@
             alert.remove();
         }, 5000);
     }
-
-    // Fetch data awal saat halaman dimuat
-    // document.addEventListener('DOMContentLoaded', function() {
-    //     // Dapatkan tanggal hari ini dalam format yyyy-mm-dd
-    //     const today = new Date().toISOString().split('T')[0];
-    //     fetchReportData(today, today);
-        
-    //     // Set default tanggal display
-    //     const todayFormatted = formatDate(new Date());
-    //     document.getElementById('dateRangeDisplay').textContent = `${todayFormatted} - ${todayFormatted}`;
-    // });
 </script>
 
 <style>

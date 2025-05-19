@@ -603,15 +603,11 @@ const ProductManager = (() => {
                         <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
                     </button>
                     <div class="dropdown-menu hidden absolute right-0 z-20 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-sm">
-                        <button onclick="ProductManager.openEditModal(${
-                            product.id
-                        })" 
+                        <button onclick="ProductManager.openEditModal(${product.id})" 
                                 class="flex items-center w-full px-3 py-2 hover:bg-gray-100 text-left rounded-t-lg">
                             <i data-lucide="edit" class="w-4 h-4 mr-2 text-gray-500"></i> Edit
                         </button>
-                        <button onclick="ProductManager.hapusProduk(${
-                            product.id
-                        })" 
+                        <button onclick="ProductManager.hapusProduk(${product.id})" 
                                 class="flex items-center w-full px-3 py-2 hover:bg-gray-100 text-left text-red-600 rounded-b-lg">
                             <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i> Hapus
                         </button>

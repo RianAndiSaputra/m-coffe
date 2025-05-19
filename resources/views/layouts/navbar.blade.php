@@ -18,12 +18,28 @@
             </div>
         </div>
         <div class="flex items-center space-x-3 sm:space-x-4">
-            <!-- Notification button -->
+            <!-- Notification button and dropdown -->
             <div class="relative">
-                <button class="p-1 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-700 transition-all">
+                <button id="notificationBtn" class="p-1 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-700 transition-all">
                     <i data-lucide="bell" class="w-5 h-5 text-gray-500"></i>
-                    <span class="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
+                    <span id="notificationBadge" class="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500 hidden"></span>
                 </button>
+                
+                <!-- Notification dropdown -->
+                <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-72 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 py-1 z-50 max-h-96 overflow-y-auto">
+                    <div class="px-4 py-2 border-b border-gray-100">
+                        <h3 class="text-sm font-medium text-gray-900">Notifikasi</h3>
+                    </div>
+                    <div id="notificationList" class="divide-y divide-gray-100">
+                        <!-- Notifications will be loaded here -->
+                        <div class="px-4 py-3 text-center text-sm text-gray-500">
+                            Memuat notifikasi...
+                        </div>
+                    </div>
+                    <div class="px-4 py-2 border-t border-gray-100 text-center">
+                        <a href="#" class="text-xs text-orange-600 hover:text-orange-800">Lihat Semua</a>
+                    </div>
+                </div>
             </div>
             
             <!-- Profile dropdown -->
@@ -39,14 +55,35 @@
                 </div>
                 
                 <!-- Dropdown menu -->
-                <div class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 py-1 z-50" id="user-dropdown-menu" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button">
+                <div
+                    class="hidden absolute right-0 mt-2 w-56 rounded-xl shadow-xl bg-white ring-1 ring-black ring-opacity-5 py-2 z-50"
+                    id="user-dropdown-menu"
+                    role="menu"
+                    aria-orientation="vertical"
+                    aria-labelledby="user-menu-button"
+                >
                     <form id="logout-form">
                         @csrf
-                        <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-all" role="menuitem">
-                            Keluar
+                        <button 
+                            type="submit" 
+                            class="flex items-center gap-3 w-full px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 transition-all duration-200 rounded-md"
+                            role="menuitem"
+                        >
+                            <!-- Icon in orange circle -->
+                            <span class="flex items-center justify-center w-9 h-9 rounded-full border border-orange-500 bg-orange-50 text-orange-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
+                                </svg>
+                            </span>
+                            <div class="flex flex-col items-start">
+                                <span class="font-medium">Keluar</span>
+                                <span class="text-xs text-gray-500">Akhiri sesi pengguna</span>
+                            </div>
                         </button>
                     </form>
                 </div>
+
             </div>
         </div>
     </div>
@@ -81,6 +118,106 @@
                 }
             });
         }
+
+        // Notification dropdown functionality
+        const notificationBtn = document.getElementById('notificationBtn');
+        const notificationDropdown = document.getElementById('notificationDropdown');
+        const notificationBadge = document.getElementById('notificationBadge');
+        
+        if (notificationBtn && notificationDropdown) {
+            notificationBtn.addEventListener('click', async function(e) {
+                e.stopPropagation();
+                notificationDropdown.classList.toggle('hidden');
+                
+                // Load notifications when dropdown is opened
+                if (!notificationDropdown.classList.contains('hidden')) {
+                    await loadNotifications();
+                }
+            });
+            
+            // Close when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!notificationBtn.contains(e.target) && !notificationDropdown.contains(e.target)) {
+                    notificationDropdown.classList.add('hidden');
+                }
+            });
+        }
+
+        // Function to load notifications from backend
+        async function loadNotifications() {
+            const notificationList = document.getElementById('notificationList');
+            notificationList.innerHTML = '<div class="px-4 py-3 text-center text-sm text-gray-500">Memuat notifikasi...</div>';
+            
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('Token tidak ditemukan');
+                }
+
+                const response = await fetch('/api/notifications/stock-adjustments', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Gagal memuat notifikasi');
+                }
+
+                const data = await response.json();
+                
+                if (data.data && data.data.length > 0) {
+                    notificationList.innerHTML = '';
+                    data.data.forEach(adjustment => {
+                        const notificationItem = document.createElement('div');
+                        notificationItem.className = 'px-4 py-3 hover:bg-gray-50 cursor-pointer';
+                        notificationItem.innerHTML = `
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 pt-0.5">
+                                    <i data-lucide="alert-circle" class="w-5 h-5 text-orange-500"></i>
+                                </div>
+                                <div class="ml-3 flex-1">
+                                    <p class="text-sm font-medium text-gray-900">Penyesuaian Stok</p>
+                                    <p class="text-xs text-gray-500 mt-1">${adjustment.product?.name || 'Produk tidak diketahui'} - ${adjustment.quantity} unit</p>
+                                    <p class="text-xs text-gray-400 mt-1">${formatDate(adjustment.created_at)}</p>
+                                </div>
+                            </div>
+                        `;
+                        notificationList.appendChild(notificationItem);
+                    });
+
+                    // Show badge if there are notifications
+                    notificationBadge.classList.remove('hidden');
+                } else {
+                    notificationList.innerHTML = '<div class="px-4 py-3 text-center text-sm text-gray-500">Tidak ada notifikasi baru</div>';
+                    notificationBadge.classList.add('hidden');
+                }
+
+                // Refresh icons after adding new ones
+                lucide.createIcons();
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+                notificationList.innerHTML = `<div class="px-4 py-3 text-center text-sm text-red-500">${error.message}</div>`;
+            }
+        }
+
+        // Helper function to format date
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            return new Date(dateString).toLocaleDateString('id-ID', options);
+        }
+
+        // Periodically check for new notifications (every 5 minutes)
+        setInterval(async () => {
+            if (!notificationDropdown.classList.contains('hidden')) {
+                await loadNotifications();
+            }
+        }, 300000); // 5 minutes
+
+        // Initial load of notifications
+        loadNotifications();
     });
 
     document.getElementById('logout-form').addEventListener('submit', async function(e) {
@@ -96,5 +233,4 @@
 
         window.location.href = '/'; // Redirect after logout
     });
-
 </script>

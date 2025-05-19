@@ -28,7 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/outlets/{outlet}', 'show');
     });
     
-    Route::middleware('role:admin,manajer')->group(function () {
+    Route::middleware('role:admin,supervisor')->group(function () {
         
         Route::controller(AuthController::class)->prefix('user')->group(function () {
             Route::post('/register', 'register')->middleware('role:admin');
@@ -66,6 +66,9 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/products/{product}', 'update')->middleware('role:admin');
             Route::delete('/products/{product}', 'destroy')->middleware('role:admin');
             Route::get('/products/outlet/{outletId}', 'getOutletProducts');
+            Route::get('/products/barcode/{barcode}', 'findByBarcode')->middleware('role:admin');
+            Route::get('/products/generate-barcode', 'generateBarcode')->middleware('role:admin');
+            Route::get('/outlets/{outletId}/products/barcode/{barcode}', 'posFindByBarcode')->middleware('role:admin');
         });
 
         Route::controller(InventoryController::class)->group(function () {
@@ -89,6 +92,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/inventory-histories/stock/{outletId}', 'getStock');
             Route::get('/inventory-histories/outlet/{outletId}', 'getHistoryByOutlet');
             Route::get('/inventory-histories/type/{outletId}', 'getInventoryHistoryByType');
+            Route::get('/notifications/stock-adjustments', 'getPendingStockAdjustments');
         });
 
         Route::controller(ShiftController::class)->group(function () {
@@ -121,7 +125,7 @@ Route::middleware('auth:sanctum')->group(function () {
         });
     }); 
     
-    Route::middleware('role:kasir,admin,manajer')->group(function () {
+    Route::middleware('role:kasir,admin,supervisor')->group(function () {
 
         Route::get('/print-template/{outlet_id}', [PrintTemplateController::class, 'show']);
         Route::post('/update-profile', [AuthController::class, 'updateProfile']);
@@ -136,6 +140,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::controller(ProductController::class)->group(function () {
             Route::get('/products/outlet/pos/{outletId}', 'getOutletProductsPos');
             Route::get('/products/outlet/{outletId}', 'getOutletProducts');
+            Route::get('/outlets/{outletId}/products/barcode/{barcode}', 'posFindByBarcode');
         });
 
         Route::get('/categories', [CategoryController::class, 'index']);

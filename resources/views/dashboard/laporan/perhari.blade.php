@@ -110,10 +110,33 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script>
+    // Initialize lucide icons
     lucide.createIcons();
+
     // Global variables
-    let currentOutletId = 1; // Default outlet ID, you can change this as needed
+    let currentOutletId = getSelectedOutletId(); // Get initial outlet ID using function
     let currentData = null;
+
+    // Function to get currently selected outlet ID (sama seperti di riwayat stok)
+    function getSelectedOutletId() {
+        // First check URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const outletIdFromUrl = urlParams.get('outlet_id');
+        
+        if (outletIdFromUrl) {
+            return outletIdFromUrl;
+        }
+        
+        // Then check localStorage
+        const savedOutletId = localStorage.getItem('selectedOutletId');
+        
+        if (savedOutletId) {
+            return savedOutletId;
+        }
+        
+        // Default to outlet ID 1 if nothing is found
+        return 1;
+    }
 
     // Initialize date range picker
     flatpickr("#dateRange", {
@@ -133,8 +156,7 @@
         }
     });
 
-        
-        // Format date for API (YYYY-MM-DD)
+    // Format date for API (YYYY-MM-DD)
     function formatDateForAPI(date) {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0'); // Bulan dimulai dari 0
@@ -147,12 +169,12 @@
         const options = { day: 'numeric', month: 'long', year: 'numeric' };
         return new Date(dateString).toLocaleDateString('id-ID', options);
     }
-    
+
     // Format currency to IDR
     function formatCurrency(amount) {
         return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(amount);
     }
-    
+
     // Get payment method badge class
     function getPaymentMethodBadge(method) {
         switch(method) {
@@ -168,7 +190,7 @@
                 return 'bg-gray-100 text-gray-800';
         }
     }
-    
+
     // Get payment method display text
     function getPaymentMethodText(method) {
         switch(method) {
@@ -184,7 +206,7 @@
                 return method;
         }
     }
-    
+
     // Get status badge class
     function getStatusBadge(status) {
         switch(status) {
@@ -198,7 +220,7 @@
                 return 'bg-gray-100 text-gray-800';
         }
     }
-    
+
     // Get status display text
     function getStatusText(status) {
         switch(status) {
@@ -212,10 +234,13 @@
                 return status;
         }
     }
-    
+
     // Fetch data from API
     async function fetchData(outletId, dateFrom, dateTo) {
         try {
+            // Update outlet info in UI
+            updateOutletInfoDisplay(outletId);
+            
             // showAlert('info', 'Memuat data laporan...');
             
             const response = await fetch(`http://127.0.0.1:8000/api/orders/history?outlet_id=${outletId}&date_from=${dateFrom}&date_to=${dateTo}`, {
@@ -239,7 +264,97 @@
             showAlert('error', error.message);
         }
     }
-    
+
+    // Update outlet info in UI based on selected outlet ID
+    async function updateOutletInfoDisplay(outletId) {
+        try {
+            // Fetch outlet details
+            const response = await fetch(`http://127.0.0.1:8000/api/outlets/${outletId}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Accept': 'application/json'
+                }
+            });
+            
+            const { data, success } = await response.json();
+            
+            // Update UI elements with outlet info
+            if (success && data) {
+                // Update outlet name in header or wherever it appears
+                const outletElements = document.querySelectorAll('.outlet-name');
+                outletElements.forEach(el => {
+                    el.textContent = `Outlet Aktif: ${data.name}`;
+                });
+                
+                // Update outlet address if needed
+                const addressElements = document.querySelectorAll('.outlet-address');
+                addressElements.forEach(el => {
+                    el.textContent = data.address || '';
+                });
+                
+                // Update any other elements that should show outlet info
+                document.getElementById('reportTitle').textContent = `Laporan Penjualan - ${data.name}`;
+            }
+        } catch (error) {
+            console.error('Failed to fetch outlet details:', error);
+        }
+    }
+
+    // Connect to outlet selection dropdown and localStorage changes
+    function connectOutletSelectionToReport() {
+        // Listen for outlet changes in localStorage
+        window.addEventListener('storage', function(event) {
+            if (event.key === 'selectedOutletId') {
+                // Update current outlet ID
+                currentOutletId = event.newValue || 1;
+                
+                // Get current date range
+                const dateRangePicker = document.getElementById('dateRange');
+                const selectedDates = dateRangePicker._flatpickr.selectedDates;
+                
+                if (selectedDates.length === 2) {
+                    const dateFrom = formatDateForAPI(selectedDates[0]);
+                    const dateTo = formatDateForAPI(selectedDates[1]);
+                    
+                    // Reload data with new outlet ID
+                    fetchData(currentOutletId, dateFrom, dateTo);
+                }
+            }
+        });
+        
+        // Also watch for clicks on outlet items in dropdown
+        const outletListContainer = document.getElementById('outletListContainer');
+        if (outletListContainer) {
+            outletListContainer.addEventListener('click', function(event) {
+                // Find the clicked li element
+                let targetElement = event.target;
+                while (targetElement && targetElement !== outletListContainer && targetElement.tagName !== 'LI') {
+                    targetElement = targetElement.parentElement;
+                }
+                
+                // If we clicked on an outlet list item
+                if (targetElement && targetElement.tagName === 'LI') {
+                    // Update outletId after a short delay to allow existing code to complete
+                    setTimeout(() => {
+                        // Update current outlet ID with new selected value
+                        currentOutletId = getSelectedOutletId();
+                        
+                        const dateRangePicker = document.getElementById('dateRange');
+                        const selectedDates = dateRangePicker._flatpickr.selectedDates;
+                        
+                        if (selectedDates.length === 2) {
+                            const dateFrom = formatDateForAPI(selectedDates[0]);
+                            const dateTo = formatDateForAPI(selectedDates[1]);
+                            
+                            // Reload data with new outlet ID
+                            fetchData(currentOutletId, dateFrom, dateTo);
+                        }
+                    }, 100);
+                }
+            });
+        }
+    }
+
     // Render summary cards
     function renderSummaryCards() {
         if (!currentData) return;
@@ -329,7 +444,7 @@
         `;
         lucide.createIcons();
     }
-    
+
     // Render transaction table
     function renderTransactionTable() {
         if (!currentData || !currentData.orders) return;
@@ -365,7 +480,7 @@
         lucide.createIcons();
         });
     }
-    
+
     // Search input handler
     document.getElementById('searchInput').addEventListener('keyup', function(e) {
         const searchTerm = this.value.trim().toLowerCase();
@@ -384,7 +499,7 @@
         //     showAlert('info', `Menampilkan hasil pencarian: ${searchTerm}`);
         // }
     });
-    
+
     // Print report function
     function printReport() {
         if (!currentData) {
@@ -552,7 +667,7 @@
 
         }, 1000);
     }
-    
+
     function exportReport() {
         if (!currentData) {
             showAlert('error', 'Tidak ada data untuk diekspor');
@@ -676,25 +791,25 @@
         const modal = document.getElementById('transactionDetailModal');
         modal.classList.remove('hidden');
     }
-    
+
     // Close modal
     function closeModal() {
         const modal = document.getElementById('transactionDetailModal');
         modal.classList.add('hidden');
     }
-    
+
     // Show alert function
     function showAlert(type, message) {
         const alertContainer = document.getElementById('alertContainer');
         const alert = document.createElement('div');
         alert.className = `px-4 py-3 rounded-lg shadow-md ${type === 'error' ? 'bg-red-100 text-red-700' : 
-                         type === 'success' ? 'bg-orange-100 text-orange-700' : 'bg-orange-100 text-orange-700'}`;
+                        type === 'success' ? 'bg-orange-100 text-orange-700' : 'bg-orange-100 text-orange-700'}`;
         alert.innerHTML = `
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <i data-lucide="${type === 'error' ? 'alert-circle' : 
                                     type === 'success' ? 'check-circle' : 'info'}" 
-                       class="w-5 h-5"></i>
+                    class="w-5 h-5"></i>
                     <span>${message}</span>
                 </div>
                 <button onclick="this.parentElement.parentElement.remove()">
@@ -713,13 +828,19 @@
             alert.remove();
         }, 5000);
     }
-    
+
     // Initialize data on page load
     document.addEventListener('DOMContentLoaded', function() {
         // Set default dates (today)
         const today = new Date();
         const dateFrom = formatDateForAPI(today);
         const dateTo = formatDateForAPI(today);
+        
+        // Get current selected outlet
+        currentOutletId = getSelectedOutletId();
+        
+        // Setup outlet selection connection
+        connectOutletSelectionToReport();
         
         // Fetch initial data
         fetchData(currentOutletId, dateFrom, dateTo);
