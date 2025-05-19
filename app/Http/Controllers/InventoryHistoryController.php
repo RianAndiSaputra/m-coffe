@@ -29,7 +29,7 @@ class InventoryHistoryController extends Controller
     /**
      * Get pending stock adjustment notifications for admin by outlet.
      */
-    public function getPendingStockAdjustments(Request $request)
+    public function getPendingStockAdjustments(Request $request, $outletId)
     {
         try {
             $user = $request->user();

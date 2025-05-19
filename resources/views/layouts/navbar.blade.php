@@ -123,6 +123,7 @@
         const notificationBtn = document.getElementById('notificationBtn');
         const notificationDropdown = document.getElementById('notificationDropdown');
         const notificationBadge = document.getElementById('notificationBadge');
+        const notificationOutletSelect = document.getElementById('notificationOutletSelect');
         
         if (notificationBtn && notificationDropdown) {
             notificationBtn.addEventListener('click', async function(e) {
@@ -143,18 +144,33 @@
             });
         }
 
-        // Function to load notifications from backend
-        async function loadNotifications() {
-            const notificationList = document.getElementById('notificationList');
-            notificationList.innerHTML = '<div class="px-4 py-3 text-center text-sm text-gray-500">Memuat notifikasi...</div>';
-            
+        // Initialize outlet selection for notifications
+        if (notificationOutletSelect) {
+            // Load available outlets
+            loadAvailableOutlets().then(() => {
+                // Set default outlet selection
+                const selectedOutletId = localStorage.getItem('selectedNotificationOutletId') || getSelectedOutletId();
+                notificationOutletSelect.value = selectedOutletId;
+                
+                // Add event listener for outlet change
+                notificationOutletSelect.addEventListener('change', function() {
+                    localStorage.setItem('selectedNotificationOutletId', this.value);
+                    loadNotifications();
+                });
+            });
+        }
+
+        connectOutletSelectionToNotifications();
+
+        // Function to load available outlets
+        async function loadAvailableOutlets() {
             try {
                 const token = localStorage.getItem('token');
                 if (!token) {
                     throw new Error('Token tidak ditemukan');
                 }
 
-                const response = await fetch('/api/notifications/stock-adjustments', {
+                const response = await fetch('/api/outlets', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -163,45 +179,230 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error('Gagal memuat notifikasi');
+                    throw new Error('Gagal memuat daftar outlet');
                 }
 
                 const data = await response.json();
                 
                 if (data.data && data.data.length > 0) {
-                    notificationList.innerHTML = '';
-                    data.data.forEach(adjustment => {
-                        const notificationItem = document.createElement('div');
-                        notificationItem.className = 'px-4 py-3 hover:bg-gray-50 cursor-pointer';
-                        notificationItem.innerHTML = `
-                            <div class="flex items-start">
-                                <div class="flex-shrink-0 pt-0.5">
-                                    <i data-lucide="alert-circle" class="w-5 h-5 text-orange-500"></i>
-                                </div>
-                                <div class="ml-3 flex-1">
-                                    <p class="text-sm font-medium text-gray-900">Penyesuaian Stok</p>
-                                    <p class="text-xs text-gray-500 mt-1">${adjustment.product?.name || 'Produk tidak diketahui'} - ${adjustment.quantity} unit</p>
-                                    <p class="text-xs text-gray-400 mt-1">${formatDate(adjustment.created_at)}</p>
-                                </div>
-                            </div>
-                        `;
-                        notificationList.appendChild(notificationItem);
+                    notificationOutletSelect.innerHTML = '';
+                    
+                    // Add default option
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = 'Semua Outlet';
+                    notificationOutletSelect.appendChild(defaultOption);
+                    
+                    // Add outlet options
+                    data.data.forEach(outlet => {
+                        const option = document.createElement('option');
+                        option.value = outlet.id;
+                        option.textContent = outlet.name;
+                        notificationOutletSelect.appendChild(option);
                     });
-
-                    // Show badge if there are notifications
-                    notificationBadge.classList.remove('hidden');
-                } else {
-                    notificationList.innerHTML = '<div class="px-4 py-3 text-center text-sm text-gray-500">Tidak ada notifikasi baru</div>';
-                    notificationBadge.classList.add('hidden');
                 }
-
-                // Refresh icons after adding new ones
-                lucide.createIcons();
             } catch (error) {
-                console.error('Error loading notifications:', error);
-                notificationList.innerHTML = `<div class="px-4 py-3 text-center text-sm text-red-500">${error.message}</div>`;
+                console.error('Error loading outlets:', error);
             }
         }
+
+        // Function to get selected outlet ID
+        function getSelectedOutletId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const outletIdFromUrl = urlParams.get('outlet_id');
+            
+            if (outletIdFromUrl) {
+                return outletIdFromUrl;
+            }
+            
+            const savedOutletId = localStorage.getItem('selectedOutletId');
+            
+            if (savedOutletId) {
+                return savedOutletId;
+            }
+            
+            return ''; // Default to all outlets
+        }
+
+        // Function to load notifications from backend
+// Modifikasi untuk fungsi loadNotifications
+// Modifikasi untuk fungsi loadNotifications yang lebih defensif
+async function loadNotifications() {
+    const notificationList = document.getElementById('notificationList');
+    if (!notificationList) return;
+    
+    notificationList.innerHTML = '<div class="px-4 py-3 text-center text-sm text-gray-500">Memuat notifikasi...</div>';
+    
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('Token tidak ditemukan');
+        }
+
+        // Get selected outlet ID from dropdown, fallback to global outlet selection if empty
+        let outletId = '';
+        
+        // Periksa dengan aman apakah notificationOutletSelect ada dan punya nilai
+        if (notificationOutletSelect && notificationOutletSelect.value) {
+            outletId = notificationOutletSelect.value;
+            
+            // Hanya periksa selectedOptions jika element benar-benar ada
+            // Dan gunakan try-catch untuk menghindari error
+            try {
+                const isAllOutlets = notificationOutletSelect.selectedOptions && 
+                                    notificationOutletSelect.selectedOptions[0] &&
+                                    notificationOutletSelect.selectedOptions[0].text.includes('Semua');
+                                    
+                // Jika bukan "Semua Outlet" dan outletId kosong, gunakan outlet global
+                if (!isAllOutlets && outletId === '') {
+                    outletId = getSelectedOutletId();
+                }
+            } catch (e) {
+                console.warn('Error checking selectedOptions:', e);
+                // Fallback to global outlet selection if there's an error
+                if (outletId === '') {
+                    outletId = getSelectedOutletId();
+                }
+            }
+        } else {
+            // Jika tidak ada dropdown, gunakan global outlet
+            outletId = getSelectedOutletId();
+        }
+        
+        // Pastikan endpoint sesuai dengan route yang ada
+        const endpoint = `/api/notifications/stock-adjustments/${outletId}`;
+
+        const response = await fetch(endpoint, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Gagal memuat notifikasi');
+        }
+
+        const data = await response.json();
+        
+        if (data.data && data.data.length > 0) {
+            notificationList.innerHTML = '';
+            data.data.forEach(adjustment => {
+                const notificationItem = document.createElement('div');
+                notificationItem.className = 'px-4 py-3 hover:bg-gray-50 cursor-pointer';
+                notificationItem.innerHTML = `
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 pt-0.5">
+                            <i data-lucide="alert-circle" class="w-5 h-5 text-orange-500"></i>
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <p class="text-sm font-medium text-gray-900">Penyesuaian Stok</p>
+                            <p class="text-xs text-gray-500 mt-1">${adjustment.product?.name || 'Produk tidak diketahui'} - ${adjustment.quantity} unit</p>
+                            <p class="text-xs text-gray-400 mt-1">${formatDate(adjustment.created_at)}</p>
+                            ${!outletId ? `<p class="text-xs text-gray-500 mt-1">Outlet: ${adjustment.outlet?.name || 'Tidak diketahui'}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+                notificationList.appendChild(notificationItem);
+            });
+
+            // Update notification badge if it exists
+            if (notificationBadge) {
+                notificationBadge.classList.remove('hidden');
+                notificationBadge.textContent = data.data.length > 9 ? '9+' : data.data.length;
+            }
+        } else {
+            notificationList.innerHTML = '<div class="px-4 py-3 text-center text-sm text-gray-500">Tidak ada notifikasi baru</div>';
+            if (notificationBadge) {
+                notificationBadge.classList.add('hidden');
+            }
+        }
+
+        // Refresh icons if lucide exists
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    } catch (error) {
+        console.error('Error loading notifications:', error);
+        notificationList.innerHTML = `
+            <div class="px-4 py-3 text-center text-sm text-red-500">
+                ${error.message}
+            </div>
+        `;
+    }
+}
+
+// Fungsi yang diperbaiki untuk menghubungkan pemilihan outlet global dengan notifikasi
+function connectOutletSelectionToNotifications() {
+    // Listen for outlet changes in localStorage
+    window.addEventListener('storage', function(event) {
+        if (event.key === 'selectedOutletId') {
+            // Jika dropdown notifikasi ada, perbarui nilainya
+            if (notificationOutletSelect) {
+                try {
+                    const isAllOutlets = notificationOutletSelect.selectedOptions && 
+                                        notificationOutletSelect.selectedOptions[0] &&
+                                        notificationOutletSelect.selectedOptions[0].text === 'Semua Outlet';
+                    
+                    // Jika bukan "Semua Outlet", update dengan nilai outlet global
+                    if (!isAllOutlets) {
+                        notificationOutletSelect.value = event.newValue || '';
+                        loadNotifications();
+                    }
+                } catch (e) {
+                    console.warn('Error in connectOutletSelectionToNotifications:', e);
+                    // Fallback: tetap perbarui nilai dropdown
+                    notificationOutletSelect.value = event.newValue || '';
+                    loadNotifications();
+                }
+            }
+        }
+    });
+    
+    // Juga pantau klik pada item outlet di dropdown global
+    const outletListContainer = document.getElementById('outletListContainer');
+    if (outletListContainer) {
+        outletListContainer.addEventListener('click', function(event) {
+            // Cari elemen li yang diklik
+            let targetElement = event.target;
+            while (targetElement && targetElement !== outletListContainer && targetElement.tagName !== 'LI') {
+                targetElement = targetElement.parentElement;
+            }
+            
+            // Jika kita mengklik item daftar outlet
+            if (targetElement && targetElement.tagName === 'LI') {
+                // Update notifikasi setelah penundaan singkat
+                setTimeout(() => {
+                    // Jika dropdown notifikasi ada
+                    if (notificationOutletSelect) {
+                        try {
+                            const isAllOutlets = notificationOutletSelect.selectedOptions && 
+                                              notificationOutletSelect.selectedOptions[0] &&
+                                              notificationOutletSelect.selectedOptions[0].text === 'Semua Outlet';
+                            
+                            // Jika bukan "Semua Outlet", update dengan nilai outlet global
+                            if (!isAllOutlets) {
+                                const newOutletId = getSelectedOutletId();
+                                notificationOutletSelect.value = newOutletId;
+                                loadNotifications();
+                            }
+                        } catch (e) {
+                            console.warn('Error in outlet list click handler:', e);
+                            // Fallback: tetap perbarui nilai dropdown
+                            const newOutletId = getSelectedOutletId();
+                            notificationOutletSelect.value = newOutletId;
+                            loadNotifications();
+                        }
+                    } else {
+                        // Jika tidak ada dropdown, tetap perbarui notifikasi
+                        loadNotifications();
+                    }
+                }, 100);
+            }
+        });
+    }
+}
 
         // Helper function to format date
         function formatDate(dateString) {

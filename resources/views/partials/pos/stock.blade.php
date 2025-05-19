@@ -24,11 +24,50 @@
                     <div class="mb-4">
                         <label class="block text-base font-medium text-gray-700 mb-2">Nama Produk</label>
                         <div class="relative">
-                            <select id="product_id" class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 appearance-none bg-white pr-10">
+                            <select 
+                                id="product_id" 
+                                class="hidden" <!-- Sembunyikan select asli -->
+                            >
                                 <option value="">Pilih produk</option>
                             </select>
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            
+                            <!-- Custom dropdown trigger -->
+                            <div 
+                                id="productDropdownTrigger" 
+                                class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 bg-white flex justify-between items-center cursor-pointer"
+                                onclick="toggleProductDropdown()"
+                            >
+                                <span id="selectedProductText">Pilih produk</span>
                                 <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400"></i>
+                            </div>
+                            
+                            <!-- Custom dropdown content -->
+                            <div 
+                                id="productDropdown" 
+                                class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-96 overflow-hidden hidden"
+                            >
+                                <!-- Search box -->
+                                <div class="p-2 border-b">
+                                    <div class="relative">
+                                        <input 
+                                            type="text" 
+                                            id="productSearch" 
+                                            class="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500" 
+                                            placeholder="Cari produk..."
+                                            oninput="filterDropdownProducts()"
+                                        >
+                                        <div class="absolute left-3 top-2.5 text-gray-400">
+                                            <i data-lucide="search" class="w-4 h-4"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Product list -->
+                                <div id="productList" class="overflow-y-auto max-h-80">
+                                    <div class="p-4 text-center text-gray-500">
+                                        <i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto"></i> Memuat produk...
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -271,25 +310,21 @@
         }
         return token;
     }
-    
+
+    let allProducts = [];
+
     function loadProducts() {
-        // Get necessary values
-        const outletId = getOutletId();
-        const token = getToken();
-        
-        if (!outletId || !token) {
-            return;
-        }
-        
-        // Update UI to show loading state
-        const productSelect = document.getElementById('product_id');
-        if (!productSelect) {
-            console.error('Product select element not found with ID "product_id"');
-            return;
-        }
-        
-        productSelect.innerHTML = '<option value="">Memuat produk...</option>';
-        productSelect.disabled = true;
+            // Get necessary values
+            const outletId = getOutletId();
+            const token = getToken();
+            
+            if (!outletId || !token) {
+                return;
+            }
+            
+            // Update UI to show loading state
+            const productList = document.getElementById('productList');
+        productList.innerHTML = '<div class="p-4 text-center text-gray-500"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto"></i> Memuat produk...</div>';
         
         const apiUrl = `/api/products/outlet/${outletId}`;
         
@@ -309,38 +344,107 @@
             return response.json();
         })
         .then(data => {
-            productSelect.innerHTML = '<option value="">Pilih produk</option>';
-            productSelect.disabled = false;
-            
             if (data.success && data.data) {
-                const products = Array.isArray(data.data) ? 
+                allProducts = Array.isArray(data.data) ? 
                     data.data.sort((a, b) => a.name.localeCompare(b.name)) : 
                     [];
                 
-                if (products.length === 0) {
-                    productSelect.innerHTML += '<option value="" disabled>Tidak ada produk</option>';
+                // Update select element
+                const selectElement = document.getElementById('product_id');
+                selectElement.innerHTML = '<option value="">Pilih produk</option>';
+                
+                if (allProducts.length === 0) {
+                    productList.innerHTML = '<div class="p-4 text-center text-gray-500">Tidak ada produk</div>';
                     return;
                 }
                 
-                products.forEach(product => {
+                allProducts.forEach(product => {
                     const option = document.createElement('option');
                     option.value = product.id;
                     option.textContent = `${product.name} (${product.sku || 'No SKU'}) - Stok: ${product.quantity || 0}`;
-                    productSelect.appendChild(option);
+                    selectElement.appendChild(option);
                 });
+                
+                filterDropdownProducts(); // Render initial list
             } else {
                 showNotification('error', 'Error', data.message || 'Format data tidak sesuai');
-                productSelect.innerHTML += '<option value="" disabled>Gagal memuat produk</option>';
+                productList.innerHTML = '<div class="p-4 text-center text-gray-500">Gagal memuat produk</div>';
             }
         })
         .catch(error => {
             console.error('Error fetching products:', error);
             showNotification('error', 'Error', 'Gagal memuat daftar produk');
-            productSelect.innerHTML = '<option value="">Error memuat produk</option>';
-            productSelect.disabled = false;
+            productList.innerHTML = '<div class="p-4 text-center text-gray-500">Error memuat produk</div>';
         });
     }
 
+    function filterDropdownProducts() {
+        const searchTerm = document.getElementById('productSearch').value.toLowerCase();
+        const productList = document.getElementById('productList');
+        
+        if (allProducts.length === 0) {
+            productList.innerHTML = '<div class="p-4 text-center text-gray-500">Tidak ada produk</div>';
+            return;
+        }
+        
+        const filteredProducts = allProducts.filter(product => 
+            product.name.toLowerCase().includes(searchTerm) || 
+            (product.sku && product.sku.toLowerCase().includes(searchTerm))
+        );
+        
+        if (filteredProducts.length === 0) {
+            productList.innerHTML = '<div class="p-4 text-center text-gray-500">Produk tidak ditemukan</div>';
+            return;
+        }
+        
+        let html = '';
+        filteredProducts.forEach(product => {
+            html += `
+                <div 
+                    class="px-4 py-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100"
+                    onclick="selectProduct('${product.id}', '${product.name} (${product.sku || 'No SKU'}) - Stok: ${product.quantity || 0}')"
+                >
+                    <div class="font-medium">${product.name}</div>
+                    <div class="text-sm text-gray-500 flex justify-between mt-1">
+                        <span>${product.sku || 'No SKU'}</span>
+                        <span>Stok: ${product.quantity || 0}</span>
+                    </div>
+                </div>
+            `;
+        });
+        
+        productList.innerHTML = html;
+    }
+
+    function toggleProductDropdown() {
+        const dropdown = document.getElementById('productDropdown');
+        if (dropdown.classList.contains('hidden')) {
+            dropdown.classList.remove('hidden');
+            document.getElementById('productSearch').focus();
+        } else {
+            dropdown.classList.add('hidden');
+        }
+    }
+
+    function selectProduct(productId, productText) {
+        document.getElementById('product_id').value = productId;
+        document.getElementById('selectedProductText').textContent = productText;
+        document.getElementById('productDropdown').classList.add('hidden');
+        
+        // Reset search
+        document.getElementById('productSearch').value = '';
+        filterDropdownProducts();
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('productDropdown');
+        const trigger = document.getElementById('productDropdownTrigger');
+        
+        if (!dropdown.contains(event.target) && !trigger.contains(event.target)) {
+            dropdown.classList.add('hidden');
+        }
+    });
     function loadInventoryHistory() {
         const outletId = getOutletId();
         const token = getToken();
@@ -593,5 +697,36 @@
     @keyframes slideOut {
         from { transform: translateX(0); opacity: 1; }
         to { transform: translateX(100%); opacity: 0; }
+    }
+
+    /* Custom dropdown styles */
+    #productDropdown {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    #productList {
+        scrollbar-width: thin;
+        scrollbar-color: #f97316 #f1f1f1;
+    }
+
+    #productList::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    #productList::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    #productList::-webkit-scrollbar-thumb {
+        background-color: #f97316;
+        border-radius: 6px;
+    }
+
+    #productDropdownTrigger {
+        transition: all 0.2s ease;
+    }
+
+    #productDropdownTrigger:hover {
+        border-color: #f97316;
     }
 </style>
