@@ -9,14 +9,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Product extends Model
 {
     use HasFactory, SoftDeletes;
+    
     protected $fillable = [
         'name',
         'sku',
+        'barcode', // Tambahkan barcode ke fillable
         'description',
         'category_id',
         'price',
         'image',
-        // 'outlet_id',
         'is_active',
         'unit'
     ];
@@ -25,7 +26,7 @@ class Product extends Model
         'is_active' => 'boolean',
     ];
 
-    protected $appends = ['image_url']; // Tambahkan atribut image_url ke JSON
+    protected $appends = ['image_url', 'barcode_image_url']; // Tambahkan barcode_image_url
 
     // Accessor untuk image_url
     public function getImageUrlAttribute()
@@ -33,21 +34,33 @@ class Product extends Model
         return $this->image ? asset('uploads/' . $this->image) : null;
     }
 
+    // Accessor untuk barcode image (opsional)
+    public function getBarcodeImageUrlAttribute()
+    {
+        if ($this->barcode) {
+            // Jika menggunakan package barcode generator
+            // return route('barcode.generate', ['code' => $this->barcode]);
+            return null; // Sesuaikan dengan implementasi Anda
+        }
+        return null;
+    }
+
+    // Scope untuk mencari berdasarkan barcode
+    public function scopeByBarcode($query, $barcode)
+    {
+        return $query->where('barcode', $barcode);
+    }
+
+    // ... (method-method relasi yang sudah ada tetap dipertahankan)
     public function outlet()
     {
         return $this->belongsTo(Outlet::class);
     }
 
-    // public function outlets()
-    // {
-    //     return $this->belongsToMany(Outlet::class, 'inventories')
-//         ->withPivot('quantity'); // Ambil kolom quantity dari tabel pivot
-    // }
-
     public function outlets()
     {
         return $this->belongsToMany(Outlet::class, 'inventories')
-            ->withPivot(['quantity', 'min_stock']); // Tambahkan 'min_stock'
+            ->withPivot(['quantity', 'min_stock']);
     }
 
     public function orders()

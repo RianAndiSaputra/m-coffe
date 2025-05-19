@@ -831,8 +831,8 @@
                 </style>
             </head>
             <body>
-                <!-- Header dengan logo -->
-                <div class="receipt-header">
+                <div class="header">
+                    ${templateData.logo_url || templateData.logo_url === '' ? `
                     <div class="logo-container">
                         <img src="${logoPath}" 
                             alt="Logo Toko" 

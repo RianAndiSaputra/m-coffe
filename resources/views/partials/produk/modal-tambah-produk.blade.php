@@ -21,6 +21,16 @@
                             <label class="block font-medium mb-1" for="sku">SKU Produk</label>
                             <input type="text" id="sku" name="sku" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Kode unik produk (opsional)">
                         </div>
+                        <div>
+                            <label class="block font-medium mb-1" for="barcode">Barcode</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="barcode" name="barcode" class="flex-1 border rounded-lg px-4 py-2 text-sm" placeholder="Kode barcode">
+                                <button type="button" id="generateBarcodeBtn" class="px-3 py-2 bg-gray-100 border rounded-lg hover:bg-gray-200 text-sm whitespace-nowrap">
+                                    Generate
+                                </button>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">Biarkan kosong untuk generate otomatis</p>
+                        </div>
                         <div class="md:col-span-2">
                             <label class="block font-medium mb-1" for="deskripsi">Deskripsi Produk</label>
                             <textarea id="deskripsi" name="description" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Deskripsi singkat... (opsional)"></textarea>

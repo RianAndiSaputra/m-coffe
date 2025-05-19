@@ -66,6 +66,7 @@
                 <tr>
                     <th class="py-2 font-semibold">No.</th>
                     <th class="py-2 font-semibold">Nama Produk</th>
+                    <th class="py-2 font-semibold">Bar Code</th>
                     <th class="py-2 font-semibold">SKU</th>
                     <th class="py-2 font-semibold">Kategori</th>
                     <th class="py-2 font-semibold">Harga</th>
