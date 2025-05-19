@@ -49,6 +49,7 @@
         </div>
 
         <!-- Product Dropdown -->
+        @if(auth()->user()->role !== 'supervisor')
         <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="productDropdown">
             <div class="flex items-center justify-between w-full cursor-pointer">
                 <div class="flex items-center">
@@ -85,7 +86,8 @@
                 </a>
             </div>
         </div>
-        
+        @endif
+
         <!-- Stock Dropdown -->
         <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="stockDropdown">
             <div class="flex items-center justify-between w-full cursor-pointer">
@@ -202,6 +204,7 @@
             </div>
         </div>
 
+        @if(auth()->user()->role !== 'supervisor')
         <!-- Settings Dropdown -->
         <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="settingsDropdown">
             <div class="flex items-center justify-between w-full cursor-pointer">
@@ -218,6 +221,7 @@
                 </a>
             </div>
         </div>
+        @endif
     </nav>
     
     <!-- Collapse Button for Desktop -->
