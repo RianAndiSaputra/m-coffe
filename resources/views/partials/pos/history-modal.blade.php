@@ -1003,81 +1003,92 @@
         document.getElementById(id).classList.add('hidden');
     }
 
-    function lihatDetail(nomorInvoice) {
-        const t = semuaTransaksi.find(x => x.invoice === nomorInvoice);
-        console.log('DEBUG bukaModalDetail t =', t);
-        if (!t) return alert('Transaksi tidak ditemukan');
+function lihatDetail(nomorInvoice) {
+    const t = semuaTransaksi.find(x => x.invoice === nomorInvoice);
+    if (!t) return alert('Transaksi tidak ditemukan');
 
-        // Sebelum mengakses properti, pastikan nilai numerik aman dengan helper function
-        const safeNumber = (value) => {
-            // Jika nilai adalah string dengan format angka, konversi ke float
-            if (typeof value === 'string' && !isNaN(value)) {
-                return parseFloat(value);
+    // Helper function yang lebih baik untuk handle number
+    const safeNumber = (value) => {
+        if (value === null || value === undefined) return 0;
+        if (typeof value === 'number') return isNaN(value) ? 0 : value;
+        if (typeof value === 'string') {
+            // Handle string dengan % (persen)
+            if (value.includes('%')) {
+                const num = parseFloat(value.replace('%', '').trim());
+                return isNaN(num) ? 0 : num;
             }
-            // Jika nilai sudah berupa angka, langsung kembalikan
-            else if (typeof value === 'number' && !isNaN(value)) {
-                return value;
-            }
-            // Untuk nilai lain (undefined, null, NaN, dll), kembalikan 0
-            return 0;
-        };
-
-        // Header
-        document.getElementById('modalInvoice').textContent = t.invoice || t.order_number || '-';
-        document.getElementById('modalDate').textContent = formatWaktu(t.waktu || t.created_at || '');
-        
-        const statusEl = document.getElementById('modalStatus');
-        statusEl.textContent = t.status || '-';
-        statusEl.className = `inline-block px-3 py-1 rounded-full text-xs font-medium ${getClassStatus(t.status || '')}`;
-
-        // Items
-        const itemsEl = document.getElementById('modalItems');
-        if (t.items && t.items.length > 0) {
-            itemsEl.innerHTML = t.items.map(i => `
-                <tr>
-                    <td class="px-3 py-2">${i.product || '-'}</td>
-                    <td class="px-3 py-2">${i.quantity || 0}x</td>
-                    <td class="px-3 py-2">Rp ${formatUang(safeNumber(i.price))}</td>
-                    <td class="px-3 py-2">Rp ${formatUang(safeNumber(i.price) * safeNumber(i.quantity))}</td>
-                </tr>
-            `).join('');
-        } else {
-            itemsEl.innerHTML = `
-                <tr>
-                    <td colspan="4" class="px-3 py-2 text-center text-gray-500">Tidak ada item</td>
-                </tr>
-            `;
+            // Handle string angka biasa
+            const num = parseFloat(value.replace(/[^0-9.-]/g, ''));
+            return isNaN(num) ? 0 : num;
         }
+        return 0;
+    };
 
-        // **Ringkasan Harga**
-        // Pastikan nilai numeric diproses dengan benar
-        document.getElementById('modalSubtotal').textContent = `Rp ${formatUang(safeNumber(t.subtotal))}`;
-        document.getElementById('modalTax').textContent = `Rp ${formatUang(safeNumber(t.tax))}`;
-        document.getElementById('modalDiscount').textContent = `Rp ${formatUang(safeNumber(t.discount))}`;
+    // Header
+    document.getElementById('modalInvoice').textContent = t.invoice || t.order_number || '-';
+    document.getElementById('modalDate').textContent = formatWaktu(t.waktu || t.created_at || '');
+    
+    // Status
+    const statusEl = document.getElementById('modalStatus');
+    statusEl.textContent = t.status || '-';
+    statusEl.className = `inline-block px-3 py-1 rounded-full text-xs font-medium ${getClassStatus(t.status || '')}`;
 
-        // **Total**
-        document.getElementById('modalTotal').textContent = `Rp ${formatUang(safeNumber(t.total))}`;
-
-        // **Pembayaran & Kembalian**
-        // Periksa metode pembayaran dan tampilkan total_paid/change sesuai
-        const pembayaranEl = document.getElementById('modalPaymentMethod');
-        if (pembayaranEl) {
-            pembayaranEl.textContent = (t.pembayaran || t.payment_method || '-').toUpperCase();
-        }
-        
-        const totalPaidEl = document.getElementById('modalTotalPaid');
-        const changeEl = document.getElementById('modalChange');
-        
-        if (totalPaidEl) {
-            totalPaidEl.textContent = `Rp ${formatUang(safeNumber(t.total_paid))}`;
-        }
-        
-        if (changeEl) {
-            changeEl.textContent = `Rp ${formatUang(safeNumber(t.change))}`;
-        }
-
-        bukaModal('transactionModal');
+    // Items
+    const itemsEl = document.getElementById('modalItems');
+    if (t.items && t.items.length > 0) {
+        itemsEl.innerHTML = t.items.map(i => `
+            <tr>
+                <td class="px-3 py-2">${i.product || '-'}</td>
+                <td class="px-3 py-2">${i.quantity || 0}x</td>
+                <td class="px-3 py-2">Rp ${formatUang(safeNumber(i.price))}</td>
+                <td class="px-3 py-2">Rp ${formatUang(safeNumber(i.price) * safeNumber(i.quantity))}</td>
+            </tr>
+        `).join('');
+    } else {
+        itemsEl.innerHTML = '<tr><td colspan="4" class="px-3 py-2 text-center text-gray-500">Tidak ada item</td></tr>';
     }
+
+    // Hitung subtotal jika tidak ada
+    const subtotal = t.subtotal !== undefined ? safeNumber(t.subtotal) : 
+                     t.items?.reduce((sum, item) => sum + (safeNumber(item.price) * safeNumber(item.quantity)), 0) || 0;
+
+    // Handle tax (persen atau nominal)
+    let taxValue = 0;
+    if (typeof t.tax === 'string' && t.tax.includes('%')) {
+        // Jika tax dalam persen
+        const taxPercent = safeNumber(t.tax); // sudah dihandle di safeNumber
+        taxValue = subtotal * (taxPercent / 100);
+    } else {
+        // Jika tax nominal langsung
+        taxValue = safeNumber(t.tax);
+    }
+
+    // Handle discount
+    const discountValue = safeNumber(t.discount);
+
+    // Hitung total jika tidak ada
+    const total = t.total !== undefined ? safeNumber(t.total) : subtotal + taxValue - discountValue;
+
+    // Tampilkan nilai
+    document.getElementById('modalSubtotal').textContent = `Rp ${formatUang(subtotal)}`;
+    document.getElementById('modalTax').textContent = `Rp ${formatUang(taxValue)}`;
+    document.getElementById('modalDiscount').textContent = `Rp ${formatUang(discountValue)}`;
+    document.getElementById('modalTotal').textContent = `Rp ${formatUang(total)}`;
+
+    // Pembayaran
+    const pembayaranEl = document.getElementById('modalPaymentMethod');
+    if (pembayaranEl) {
+        pembayaranEl.textContent = (t.pembayaran || t.payment_method || '-').toUpperCase();
+    }
+    
+    // Total paid dan kembalian
+    const totalPaidEl = document.getElementById('modalTotalPaid');
+    const changeEl = document.getElementById('modalChange');
+    if (totalPaidEl) totalPaidEl.textContent = `Rp ${formatUang(safeNumber(t.total_paid))}`;
+    if (changeEl) changeEl.textContent = `Rp ${formatUang(safeNumber(t.change))}`;
+
+    bukaModal('transactionModal');
+}
     
     // Format tanggal untuk backend (YYYY-MM-DD)
     function formatTanggalUntukBackend(tanggal) {
