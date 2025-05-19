@@ -388,6 +388,8 @@
         const total = safeNumber(transaction.total);
         const total_paid = safeNumber(transaction.total_paid);
         const change = safeNumber(transaction.change);
+        const logoUrl = templateData.logo_url || '/images/logo.png';
+
 
         console.log("DEBUG nilai-nilai transaksi:", {
             subtotal, discount, tax, total, total_paid, change,
@@ -460,7 +462,7 @@
             </head>
             <body>
                 <div class="header">
-                    ${templateData.logo_url ? `
+                    ${templateData.logo_url || templateData.logo_url === '' ? `
                     <div class="logo-container">
                         <img src="${templateData.logo_url || 'logo'}" 
                             alt="Logo Outlet" 

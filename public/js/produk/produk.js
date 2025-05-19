@@ -5,7 +5,8 @@
 const ProductManager = (() => {
     // Private variables
     let produkHapusId = null;
-    let currentOutletId = 1;
+    let currentOutletId = localStorage.getItem('selectedOutletId') || 1;
+    let currentOutletName = localStorage.getItem('currentOutletName') || 'Kifa Bakery Pusat';
 
     // DOM Elements
     const elements = {
@@ -68,23 +69,12 @@ const ProductManager = (() => {
     }
 
     // Fungsi untuk mengupdate tampilan nama outlet
-    function updateOutletDisplay(outletId, outletName) {
-        const outletNameElement = document.getElementById("currentOutletName");
-        const outletPlaceholderElement = document.getElementById(
-            "outletNamePlaceholder"
-        );
-
-        if (outletNameElement) {
-            outletNameElement.textContent = outletName;
-        }
-
-        if (outletPlaceholderElement) {
-            outletPlaceholderElement.textContent = outletName;
-        }
-
-        // Save to localStorage for consistency
-        localStorage.setItem("currentOutletName", outletName);
-        localStorage.setItem("selectedOutletId", outletId);
+    function updateOutletDisplay() {
+        const outletTitle = document.getElementById('currentOutletName');
+        const outletDesc = document.getElementById('outletNamePlaceholder');
+        
+        if (outletTitle) outletTitle.textContent = currentOutletName;
+        if (outletDesc) outletDesc.textContent = currentOutletName;
     }
 
     // Fungsi untuk mendapatkan nama outlet (bisa dari API atau object mapping)
@@ -155,6 +145,8 @@ const ProductManager = (() => {
 
     // Initialize the module
     const init = () => {
+        setupOutletChangeListener();
+        loadProducts();
         setupModals();
         createAuthInterceptor();
         setupEventListeners();
@@ -169,6 +161,31 @@ const ProductManager = (() => {
 
         connectOutletSelectionToProducts();
     };
+    
+
+    function setupOutletChangeListener() {
+        // Method 1: Polling localStorage setiap 500ms
+        let lastOutletId = currentOutletId;
+        
+        setInterval(() => {
+            const newOutletId = localStorage.getItem('selectedOutletId') || currentOutletId;
+            if (newOutletId !== lastOutletId) {
+                lastOutletId = newOutletId;
+                loadProducts(newOutletId);
+            }
+        }, 500);
+        
+        // Method 2: Event listener untuk klik di dokumen
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#outletListContainer li')) {
+                // Beri sedikit delay untuk memastikan localStorage sudah terupdate
+                setTimeout(() => {
+                    const newOutletId = localStorage.getItem('selectedOutletId') || currentOutletId;
+                    loadProducts(newOutletId);
+                }, 100);
+            }
+        });
+    }
 
     async function preloadOutlets() {
         try {
@@ -304,11 +321,16 @@ const ProductManager = (() => {
             ?.addEventListener("click", konfirmasiHapusProduk);
 
         // Search input
-        document
-            .getElementById(elements.inputs.search)
-            ?.addEventListener("input", (e) => {
-                filterProducts(e.target.value.toLowerCase());
-            });
+        document.getElementById(elements.inputs.search)?.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            
+            // Jika search kosong, load ulang produk outlet saat ini
+            if (searchTerm.trim() === '') {
+                loadProducts(currentOutletId);
+            } else {
+                filterProducts(searchTerm);
+            }
+        });
 
         // Image preview handlers
         setupImagePreview(elements.inputs.image, "gambarPreview");
@@ -465,34 +487,26 @@ const ProductManager = (() => {
     };
 
     // Load products from API
-    const loadProducts = async (outletId = currentOutletId) => {
+    async function loadProducts(outletId = currentOutletId) {
         try {
-            // Pastikan outletId valid
-            if (!outletId || isNaN(outletId)) {
-                outletId = 1; // Fallback ke default
-                currentOutletId = outletId;
-            }
-
+            currentOutletId = outletId;
+            currentOutletName = await getOutletName(outletId);
+            
             const response = await fetch(`/api/products/outlet/${outletId}`);
-            if (!response.ok) throw new Error(`Error: ${response.status}`);
-
             const responseData = await response.json();
-            if (!responseData.data || !Array.isArray(responseData.data)) {
-                throw new Error("Format data produk tidak valid");
-            }
-
+            
             renderProducts(responseData);
+            updateOutletDisplay();
+            
+            // Simpan ke localStorage
+            localStorage.setItem('selectedOutletId', outletId);
+            localStorage.setItem('currentOutletName', currentOutletName);
+            
         } catch (error) {
-            showAlert("error", `Gagal memuat produk: ${error.message}`);
-
-            if (
-                error.message.includes("token") ||
-                error.message.includes("401")
-            ) {
-                window.location.href = "/login";
-            }
+            console.error("Error loading products:", error);
+            showAlert("error", "Gagal memuat data produk");
         }
-    };
+    }
 
     // Render products to table
     const renderProducts = (responseData) => {
@@ -617,18 +631,20 @@ const ProductManager = (() => {
     // Filter products by search term
     const filterProducts = async (searchTerm) => {
         try {
-            const response = await fetch("/api/products");
+            const outletId = currentOutletId; // Gunakan outlet yang aktif
+            
+            // Ambil data produk hanya untuk outlet yang aktif
+            const response = await fetch(`/api/products/outlet/${outletId}`);
             if (!response.ok) throw new Error("Gagal memuat data produk");
-
+    
             const { data: products } = await response.json();
-
-            const filtered = products.filter(
-                (product) =>
-                    product.name.toLowerCase().includes(searchTerm) ||
-                    product.description?.toLowerCase().includes(searchTerm) ||
-                    product.sku?.toLowerCase().includes(searchTerm)
+    
+            const filtered = products.filter(product => 
+                product.name.toLowerCase().includes(searchTerm) ||
+                (product.description && product.description.toLowerCase().includes(searchTerm)) ||
+                (product.sku && product.sku.toLowerCase().includes(searchTerm))
             );
-
+    
             renderProducts({ data: filtered });
         } catch (error) {
             showAlert("error", error.message);

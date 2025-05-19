@@ -100,10 +100,20 @@ class CategoryController extends Controller
     public function destroy(Category $category)
     {
         try {
+            DB::beginTransaction();
+            
+            // Soft delete semua produk terkait
+            $category->products()->delete();
+            
+            // Soft delete kategori
             $category->delete();
-            return $this->successResponse(null, 'Category deleted successfully');
+            
+            DB::commit();
+            
+            return $this->successResponse(null, 'Category and related products have been archived');
         } catch (\Throwable $th) {
-            return $this->errorResponse($th->getMessage());
+            DB::rollBack();
+            return $this->errorResponse('Failed to archive category: ' . $th->getMessage());
         }
     }
 }

@@ -603,45 +603,49 @@ function showLoading(show) {
         }
     }
 
-    // Confirm category deletion
-    async function konfirmasiHapusKategori() {
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                throw new Error('Token tidak ditemukan');
-            }
-
-            const response = await fetch(`/api/categories/${kategoriHapusId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                }
-            });
-
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                const textResponse = await response.text();
-                throw new Error(`Response bukan JSON: ${textResponse.substring(0, 100)}`);
-            }
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Gagal menghapus kategori');
-            }
-
-            showAlert('success', 'Kategori berhasil dihapus');
-            closeModal('modalKonfirmasiHapus');
-            loadKategories();
-            kategoriHapusId = null;
-        } catch (error) {
-            console.error('Error:', error);
-            showAlert('error', `Gagal menghapus kategori: ${error.message}`);
+// Confirm category deletion
+async function konfirmasiHapusKategori() {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('Token tidak ditemukan');
         }
+
+        const response = await fetch(`/api/categories/${kategoriHapusId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        });
+
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const textResponse = await response.text();
+            throw new Error(`Response bukan JSON: ${textResponse.substring(0, 100)}`);
+        }
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            // Tambahkan penanganan khusus untuk error constraint
+            if (data.message.includes('foreign key constraint')) {
+                throw new Error('Kategori tidak dapat dihapus karena masih memiliki produk terkait. Harap hapus atau pindahkan produk terlebih dahulu.');
+            }
+            throw new Error(data.message || 'Gagal menghapus kategori');
+        }
+
+        showAlert('success', 'Kategori dan semua produk terkait berhasil dihapus');
+        closeModal('modalKonfirmasiHapus');
+        loadKategories();
+        kategoriHapusId = null;
+    } catch (error) {
+        console.error('Error:', error);
+        showAlert('error', error.message);
     }
+}
 </script>
 
 <style>
