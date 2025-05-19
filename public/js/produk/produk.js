@@ -584,9 +584,6 @@ const ProductManager = (() => {
                 </td>
                 <td class="py-3 px-4 relative">
                 <div class="relative inline-block">
-                    ${
-                        userRole !== 'supervisor'
-                            ? `
                     <button onclick="ProductManager.toggleDropdown(this)" 
                             class="p-2 hover:bg-gray-100 rounded-lg">
                         <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
@@ -601,9 +598,6 @@ const ProductManager = (() => {
                             <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i> Hapus
                         </button>
                     </div>
-                            `
-                            : ""
-                    }
                 </div>
             </td>
             `;

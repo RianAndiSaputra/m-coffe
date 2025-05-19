@@ -191,7 +191,8 @@
                             id="searchInput"
                             type="text"
                             class="w-full px-3 py-2 text-sm rounded-md border border-orange-300 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 placeholder-gray-400 transition-all duration-200"
-                            placeholder="Cari produk..."
+                            placeholder="Cari produk atau scan barcode..."
+                            autofocus
                         >
                     </div>
 
@@ -306,6 +307,11 @@
             shift_id: parseInt(localStorage.getItem('shift_id')) || null
         };
         let selectedMember = null;
+        // Variabel untuk deteksi scan
+        let scanTimeout;
+        let lastScanTime = 0;
+        const SCAN_THRESHOLD = 100; // waktu maksimal antara karakter scan (ms)
+        const MIN_BARCODE_LENGTH = 8; // panjang minimal barcode
 
         const outletName = localStorage.getItem('outlet_name') || 'Kifa Bakery Pusat';
     
@@ -437,6 +443,103 @@
             document.getElementById(id).classList.add('hidden');
         }
 
+        // Fungsi untuk menangani scan barcode
+        async function handleBarcodeScan(barcode) {
+            try {
+                // Cari produk berdasarkan barcode
+                const response = await fetch(`${API_BASE_URL}/products/barcode/${barcode}`, {
+                    headers: getAuthHeaders()
+                });
+                
+                if (!response.ok) throw new Error('Produk tidak ditemukan');
+                
+                const product = await response.json();
+                
+                // Cek stok produk
+                if (product.quantity <= 0) {
+                    showNotification('Stok produk habis', 'error');
+                    return;
+                }
+                
+                // Tambahkan ke keranjang
+                const existingItem = cart.find(item => item.id === product.id);
+                
+                if (existingItem) {
+                    if (existingItem.quantity + 1 > product.quantity) {
+                        showNotification('Stok tidak mencukupi', 'error');
+                        return;
+                    }
+                    existingItem.quantity += 1;
+                    existingItem.subtotal = calculateItemSubtotal(existingItem);
+                } else {
+                    cart.push({
+                        id: product.id,
+                        name: product.name,
+                        price: product.price,
+                        quantity: 1,
+                        stock: product.quantity,
+                        discount: 0,
+                        subtotal: product.price
+                    });
+                }
+                
+                // Update tampilan keranjang
+                updateCart();
+                
+                // Kosongkan input dan fokuskan kembali
+                searchInput.value = '';
+                searchInput.focus();
+                
+                // Beri feedback suara (opsional)
+                playBeepSound();
+                
+                showNotification(`${product.name} ditambahkan ke keranjang`, 'success');
+                
+            } catch (error) {
+                console.error('Error handling barcode scan:', error);
+                showNotification('Produk tidak ditemukan', 'error');
+                searchInput.focus();
+            }
+        }
+
+        // Modifikasi event listener searchInput yang sudah ada
+        searchInput.addEventListener('input', function(e) {
+            const value = e.target.value.trim();
+            const now = Date.now();
+            const timeSinceLastChar = now - lastScanTime;
+            
+            // Clear timeout sebelumnya
+            clearTimeout(scanTimeout);
+            
+            if (!value) return;
+            
+            // Deteksi apakah ini scan (input sangat cepat dan panjang)
+            const isScan = value.length >= MIN_BARCODE_LENGTH && timeSinceLastChar < SCAN_THRESHOLD;
+            
+            if (isScan) {
+                // Jika scan, langsung proses barcode
+                handleBarcodeScan(value);
+            } else {
+                // Jika bukan scan, lakukan pencarian biasa dengan debounce
+                scanTimeout = setTimeout(() => {
+                    const activeCategory = document.querySelector('#categoryTabs .nav-link.active')?.getAttribute('data-category') || 'all';
+                    renderProducts(activeCategory, value);
+                }, 300);
+            }
+            
+            lastScanTime = now;
+        });
+
+        // Tambahkan juga handler untuk keypress Enter (untuk scanner yang mengirim Enter)
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const value = e.target.value.trim();
+                if (value.length >= MIN_BARCODE_LENGTH) {
+                    e.preventDefault();
+                    handleBarcodeScan(value);
+                }
+            }
+        });
         // Fetch current shift
         async function fetchCurrentShift() {
             try {
