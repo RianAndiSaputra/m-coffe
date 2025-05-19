@@ -125,65 +125,63 @@ class PrintTemplateController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($outlet_id)
-    {
-        try {
-            $printTemplate = PrintTemplate::where('outlet_id', $outlet_id)->first();
-
-            if (!$printTemplate) {
-                return $this->successResponse(null, 'There is no print template');
-            }
-
-            $printTemplate->load('outlet');
-            return $this->successResponse($printTemplate, 'Succesfully getting print template with outlet');
-        } catch (\Throwable $th) {
-            return $this->errorResponse("Error while getting print template", $th->getMessage());
-        }
-    }
-
     // public function show($outlet_id)
     // {
     //     try {
-    //         // Validasi outlet_id
-    //         if ($outlet_id === 'undefined' || !is_numeric($outlet_id)) {
-    //             return response()->json([
-    //                 'success' => false,
-    //                 'message' => 'Outlet ID tidak valid'
-    //             ], 400);
-    //         }
+    //         $printTemplate = PrintTemplate::where('outlet_id', $outlet_id)->first();
 
-    //         $printTemplate = PrintTemplate::with('outlet')
-    //             ->where('outlet_id', $outlet_id)
-    //             ->first();
-
-    //         // Jika tidak ada template, kembalikan default
     //         if (!$printTemplate) {
-    //             return response()->json([
-    //                 'success' => true,
-    //                 'data' => [
-    //                     'company_name' => config('app.name'),
-    //                     'footer_message' => 'Terima kasih telah berbelanja',
-    //                     'logo_url' => null,
-    //                     'outlet' => null
-    //                 ],
-    //                 'message' => 'Menggunakan template default'
-    //             ]);
+    //             return $this->successResponse(null, 'There is no print template');
     //         }
 
-    //         return response()->json([
-    //             'success' => true,
-    //             'data' => $printTemplate,
-    //             'message' => 'Template berhasil diambil'
-    //         ]);
-
+    //         $printTemplate->load('outlet');
+    //         return $this->successResponse($printTemplate, 'Succesfully getting print template with outlet');
     //     } catch (\Throwable $th) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Terjadi kesalahan',
-    //             'error' => $th->getMessage()
-    //         ], 500);
+    //         return $this->errorResponse("Error while getting print template", $th->getMessage());
     //     }
     // }
+
+    public function show($outlet_id)
+    {
+        try {
+            // Validasi outlet_id
+            if (!$outlet_id || $outlet_id === 'undefined') {
+                return $this->errorResponse('Outlet ID tidak valid');
+            }
+
+            $printTemplate = PrintTemplate::with('outlet')
+                                        ->where('outlet_id', $outlet_id)
+                                        ->first();
+
+            // Jika tidak ada template, kembalikan data default
+            if (!$printTemplate) {
+                // Ambil data outlet untuk default
+                $outlet = \App\Models\Outlet::find($outlet_id);
+                
+                $defaultData = [
+                    'company_name' => $outlet ? $outlet->name : config('app.name', 'Kifa Bakery'),
+                    'company_slogan' => 'Rajanya Roti Hajatan',
+                    'footer_message' => 'Terima kasih telah berbelanja',
+                    'logo' => null,
+                    'logo_url' => null,
+                    'outlet' => $outlet
+                ];
+                
+                return $this->successResponse($defaultData, 'Menggunakan template default');
+            }
+
+            // Format logo URL jika ada
+            if ($printTemplate->logo) {
+                $printTemplate->logo_url = asset('storage/uploads/' . $printTemplate->logo);
+            }
+
+            return $this->successResponse($printTemplate, 'Template berhasil diambil');
+
+        } catch (\Throwable $th) {
+            \Log::error('Get Print Template Error: ' . $th->getMessage());
+            return $this->errorResponse('Terjadi kesalahan', $th->getMessage());
+        }
+    }
 
     /**
      * Show the form for editing the specified resource.

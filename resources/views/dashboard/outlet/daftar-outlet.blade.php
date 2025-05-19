@@ -139,7 +139,7 @@
             try {
                 const token = localStorage.getItem('token');
                 
-                const response = await fetch('http://127.0.0.1:8000/api/outlets', {
+                const response = await fetch('/api/outlets', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -444,7 +444,7 @@
 
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch('http://127.0.0.1:8000/api/outlets', {
+                const response = await fetch('/api/outlets', {
                     method: 'POST',
                     body: formData,
                     headers: {
@@ -524,7 +524,7 @@
 
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`http://127.0.0.1:8000/api/outlets/${outletId}`, {
+                const response = await fetch(`/api/outlets/${outletId}`, {
                     method: 'POST', // Tetap gunakan POST karena Laravel menerima _method
                     body: formData,
                     headers: {

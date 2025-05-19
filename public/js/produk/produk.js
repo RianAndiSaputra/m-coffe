@@ -5,7 +5,8 @@
 const ProductManager = (() => {
     // Private variables
     let produkHapusId = null;
-    let currentOutletId = 1;
+    let currentOutletId = localStorage.getItem('selectedOutletId') || 1;
+    let currentOutletName = localStorage.getItem('currentOutletName') || 'Kifa Bakery Pusat';
 
     // DOM Elements
     const elements = {
@@ -68,23 +69,12 @@ const ProductManager = (() => {
     }
 
     // Fungsi untuk mengupdate tampilan nama outlet
-    function updateOutletDisplay(outletId, outletName) {
-        const outletNameElement = document.getElementById("currentOutletName");
-        const outletPlaceholderElement = document.getElementById(
-            "outletNamePlaceholder"
-        );
-
-        if (outletNameElement) {
-            outletNameElement.textContent = outletName;
-        }
-
-        if (outletPlaceholderElement) {
-            outletPlaceholderElement.textContent = outletName;
-        }
-
-        // Save to localStorage for consistency
-        localStorage.setItem("currentOutletName", outletName);
-        localStorage.setItem("selectedOutletId", outletId);
+    function updateOutletDisplay() {
+        const outletTitle = document.getElementById('currentOutletName');
+        const outletDesc = document.getElementById('outletNamePlaceholder');
+        
+        if (outletTitle) outletTitle.textContent = currentOutletName;
+        if (outletDesc) outletDesc.textContent = currentOutletName;
     }
 
     // Fungsi untuk mendapatkan nama outlet (bisa dari API atau object mapping)
@@ -155,6 +145,8 @@ const ProductManager = (() => {
 
     // Initialize the module
     const init = () => {
+        setupOutletChangeListener();
+        loadProducts();
         setupModals();
         createAuthInterceptor();
         setupEventListeners();
@@ -169,6 +161,69 @@ const ProductManager = (() => {
 
         connectOutletSelectionToProducts();
     };
+    // fungsi untuk generate barcode
+    const generateBarcode = () => {
+        // Generate random barcode (EAN-13 format)
+        const randomBarcode = Math.floor(1000000000000 + Math.random() * 9000000000000).toString();
+        return randomBarcode;
+    };
+
+    document.getElementById('generateBarcodeBtn')?.addEventListener('click', () => {
+        document.getElementById('barcode').value = generateBarcode();
+    });
+    
+    document.getElementById('generateBarcodeBtnEdit')?.addEventListener('click', () => {
+        document.getElementById('editBarcode').value = generateBarcode();
+    });
+
+    function setupOutletChangeListener() {
+        // Method 1: Polling localStorage setiap 500ms
+        let lastOutletId = currentOutletId;
+        
+        setInterval(() => {
+            const newOutletId = localStorage.getItem('selectedOutletId') || currentOutletId;
+            if (newOutletId !== lastOutletId) {
+                lastOutletId = newOutletId;
+                loadProducts(newOutletId);
+            }
+        }, 500);
+        
+        // Method 2: Event listener untuk klik di dokumen
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#outletListContainer li')) {
+                // Beri sedikit delay untuk memastikan localStorage sudah terupdate
+                setTimeout(() => {
+                    const newOutletId = localStorage.getItem('selectedOutletId') || currentOutletId;
+                    loadProducts(newOutletId);
+                }, 100);
+            }
+        });
+    }
+    
+
+    function setupOutletChangeListener() {
+        // Method 1: Polling localStorage setiap 500ms
+        let lastOutletId = currentOutletId;
+        
+        setInterval(() => {
+            const newOutletId = localStorage.getItem('selectedOutletId') || currentOutletId;
+            if (newOutletId !== lastOutletId) {
+                lastOutletId = newOutletId;
+                loadProducts(newOutletId);
+            }
+        }, 500);
+        
+        // Method 2: Event listener untuk klik di dokumen
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#outletListContainer li')) {
+                // Beri sedikit delay untuk memastikan localStorage sudah terupdate
+                setTimeout(() => {
+                    const newOutletId = localStorage.getItem('selectedOutletId') || currentOutletId;
+                    loadProducts(newOutletId);
+                }, 100);
+            }
+        });
+    }
 
     async function preloadOutlets() {
         try {
@@ -304,11 +359,16 @@ const ProductManager = (() => {
             ?.addEventListener("click", konfirmasiHapusProduk);
 
         // Search input
-        document
-            .getElementById(elements.inputs.search)
-            ?.addEventListener("input", (e) => {
-                filterProducts(e.target.value.toLowerCase());
-            });
+        document.getElementById(elements.inputs.search)?.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            
+            // Jika search kosong, load ulang produk outlet saat ini
+            if (searchTerm.trim() === '') {
+                loadProducts(currentOutletId);
+            } else {
+                filterProducts(searchTerm);
+            }
+        });
 
         // Image preview handlers
         setupImagePreview(elements.inputs.image, "gambarPreview");
@@ -465,34 +525,26 @@ const ProductManager = (() => {
     };
 
     // Load products from API
-    const loadProducts = async (outletId = currentOutletId) => {
+    async function loadProducts(outletId = currentOutletId) {
         try {
-            // Pastikan outletId valid
-            if (!outletId || isNaN(outletId)) {
-                outletId = 1; // Fallback ke default
-                currentOutletId = outletId;
-            }
-
+            currentOutletId = outletId;
+            currentOutletName = await getOutletName(outletId);
+            
             const response = await fetch(`/api/products/outlet/${outletId}`);
-            if (!response.ok) throw new Error(`Error: ${response.status}`);
-
             const responseData = await response.json();
-            if (!responseData.data || !Array.isArray(responseData.data)) {
-                throw new Error("Format data produk tidak valid");
-            }
-
+            
             renderProducts(responseData);
+            updateOutletDisplay();
+            
+            // Simpan ke localStorage
+            localStorage.setItem('selectedOutletId', outletId);
+            localStorage.setItem('currentOutletName', currentOutletName);
+            
         } catch (error) {
-            showAlert("error", `Gagal memuat produk: ${error.message}`);
-
-            if (
-                error.message.includes("token") ||
-                error.message.includes("401")
-            ) {
-                window.location.href = "/login";
-            }
+            console.error("Error loading products:", error);
+            showAlert("error", "Gagal memuat data produk");
         }
-    };
+    }
 
     // Render products to table
     const renderProducts = (responseData) => {
@@ -556,6 +608,9 @@ const ProductManager = (() => {
                         <p class="font-medium">${product.name || "-"}</p>
                     </div>
                 </td>
+                <td class="py-3 px-4">
+                ${product.barcode ? `<div class="font-medium">${product.barcode}</div>` : ''}
+                </td>
                 <td class="py-3 px-4">${product.sku || "-"}</td>
                 <td class="py-3 px-4">
                     <span class="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
@@ -589,11 +644,15 @@ const ProductManager = (() => {
                         <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
                     </button>
                     <div class="dropdown-menu hidden absolute right-0 z-20 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-sm">
-                        <button onclick="ProductManager.openEditModal(${product.id})" 
+                        <button onclick="ProductManager.openEditModal(${
+                            product.id
+                        })" 
                                 class="flex items-center w-full px-3 py-2 hover:bg-gray-100 text-left rounded-t-lg">
                             <i data-lucide="edit" class="w-4 h-4 mr-2 text-gray-500"></i> Edit
                         </button>
-                        <button onclick="ProductManager.hapusProduk(${product.id})" 
+                        <button onclick="ProductManager.hapusProduk(${
+                            product.id
+                        })" 
                                 class="flex items-center w-full px-3 py-2 hover:bg-gray-100 text-left text-red-600 rounded-b-lg">
                             <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i> Hapus
                         </button>
@@ -613,18 +672,20 @@ const ProductManager = (() => {
     // Filter products by search term
     const filterProducts = async (searchTerm) => {
         try {
-            const response = await fetch("/api/products");
+            const outletId = currentOutletId; // Gunakan outlet yang aktif
+            
+            // Ambil data produk hanya untuk outlet yang aktif
+            const response = await fetch(`/api/products/outlet/${outletId}`);
             if (!response.ok) throw new Error("Gagal memuat data produk");
-
+    
             const { data: products } = await response.json();
-
-            const filtered = products.filter(
-                (product) =>
-                    product.name.toLowerCase().includes(searchTerm) ||
-                    product.description?.toLowerCase().includes(searchTerm) ||
-                    product.sku?.toLowerCase().includes(searchTerm)
+    
+            const filtered = products.filter(product => 
+                product.name.toLowerCase().includes(searchTerm) ||
+                (product.description && product.description.toLowerCase().includes(searchTerm)) ||
+                (product.sku && product.sku.toLowerCase().includes(searchTerm))
             );
-
+    
             renderProducts({ data: filtered });
         } catch (error) {
             showAlert("error", error.message);
@@ -635,51 +696,51 @@ const ProductManager = (() => {
     const tambahProduk = async () => {
         const btnSimpan = document.getElementById(elements.buttons.save);
         const originalText = btnSimpan.innerHTML;
-
+        const form = document.getElementById(elements.forms.add);
+    
         try {
+            // Set loading state
             btnSimpan.disabled = true;
-            btnSimpan.innerHTML =
-                '<i data-lucide="loader-circle" class="animate-spin mr-2"></i> Menyimpan...';
+            btnSimpan.innerHTML = '<i data-lucide="loader-circle" class="animate-spin mr-2"></i> Menyimpan...';
             if (window.lucide) window.lucide.createIcons();
-
-            const form = document.getElementById(elements.forms.add);
-
+    
+            // Validasi input
             const namaProduk = form.querySelector('[name="name"]').value.trim();
             const harga = form.querySelector('[name="price"]').value.trim();
-            const kategori = form
-                .querySelector('[name="category_id"]')
-                .value.trim();
-            const outletCheckboxes = form.querySelectorAll(
-                'input[name="outlet_ids[]"]:checked'
-            );
-
+            const kategori = form.querySelector('[name="category_id"]').value.trim();
+            const outletCheckboxes = form.querySelectorAll('input[name="outlet_ids[]"]:checked');
+    
             if (!namaProduk) throw new Error("Nama produk harus diisi");
             if (!harga) throw new Error("Harga harus diisi");
             if (!kategori) throw new Error("Kategori harus dipilih");
-            if (outletCheckboxes.length === 0)
-                throw new Error("Pilih minimal satu outlet");
-
+            if (outletCheckboxes.length === 0) throw new Error("Pilih minimal satu outlet");
+    
+            // Prepare form data
             const formData = new FormData(form);
-
+    
+            // Generate barcode jika kosong
+            if (!formData.get("barcode")) {
+                formData.set("barcode", generateBarcode());
+            }
+    
+            // Set default values jika kosong
             if (!formData.get("sku")) formData.set("sku", `SKU-${Date.now()}`);
-
             if (!formData.get("quantity")) formData.set("quantity", "0");
             if (!formData.get("min_stock")) formData.set("min_stock", "0");
             formData.append("outlet_id", currentOutletId.toString());
-
+    
+            // Kirim data ke API
             const response = await fetch("/api/products", {
                 method: "POST",
                 body: formData,
                 headers: {
-                    "X-CSRF-TOKEN": document.querySelector(
-                        'meta[name="csrf-token"]'
-                    ).content,
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
             });
-
+    
             const responseData = await response.json();
-
+    
             if (!response.ok) {
                 if (response.status === 422 && responseData.errors) {
                     const errorMessages = Object.values(responseData.errors)
@@ -687,16 +748,16 @@ const ProductManager = (() => {
                         .join(", ");
                     throw new Error(`Validasi gagal: ${errorMessages}`);
                 }
-                throw new Error(
-                    responseData.message || "Gagal menambahkan produk"
-                );
+                throw new Error(responseData.message || "Gagal menambahkan produk");
             }
-
+    
+            // Success handling
             showAlert("success", "Produk berhasil ditambahkan");
             closeModal("modalTambahProduk");
             loadProducts();
             form.reset();
-
+    
+            // Reset image preview
             const preview = document.getElementById("gambarPreview");
             if (preview) {
                 preview.src = "";
@@ -755,6 +816,7 @@ const ProductManager = (() => {
 
             document.getElementById("editProdukId").textContent = product.id;
             document.getElementById("editNamaProduk").value = product.name;
+            document.getElementById('editBarcode').value = product.barcode || '';
             document.getElementById("editSkuProduk").value = product.sku || "";
             document.getElementById("editDeskripsi").value =
                 product.description || "";
@@ -909,37 +971,28 @@ const ProductManager = (() => {
             const id = document.getElementById("editProdukId").textContent;
             const formData = new FormData();
 
-            const namaProduk = document
-                .getElementById("editNamaProduk")
-                .value.trim();
+            const namaProduk = document.getElementById("editNamaProduk").value.trim();
+            const barcodeValue = document.getElementById('editBarcode').value.trim();
+            if (!barcodeValue) {
+                formData.append("barcode", generateBarcode());
+            } else {
+                formData.append("barcode", barcodeValue);
+            }
             const harga = document.getElementById("editHarga").value.trim();
-            const kategori = document
-                .getElementById("editKategori")
-                .value.trim();
+            const kategori = document.getElementById("editKategori").value.trim();
             const quantity = document.getElementById("editStok").value || 0;
-            const minStock =
-                document.getElementById("editStokMinimum").value || 0;
+            const minStock = document.getElementById("editStokMinimum").value || 0;
 
             if (!namaProduk) throw new Error("Nama produk harus diisi");
             if (!harga) throw new Error("Harga harus diisi");
             if (!kategori) throw new Error("Kategori harus dipilih");
 
             formData.append("name", namaProduk);
-            formData.append(
-                "sku",
-                document.getElementById("editSkuProduk").value.trim() ||
-                    `SKU-${Date.now()}`
-            );
-            formData.append(
-                "description",
-                document.getElementById("editDeskripsi").value
-            );
+            formData.append("sku",document.getElementById("editSkuProduk").value.trim() ||`SKU-${Date.now()}`);
+            formData.append("description",document.getElementById("editDeskripsi").value);
             formData.append("price", harga);
             formData.append("category_id", kategori);
-            formData.append(
-                "is_active",
-                document.getElementById("editStatus").value === "active" ? 1 : 0
-            );
+            formData.append("is_active",document.getElementById("editStatus").value === "active" ? 1 : 0);
 
             formData.append("quantity", quantity);
             formData.append("min_stock", minStock);

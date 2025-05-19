@@ -1,21 +1,22 @@
 <?php
 
-use App\Http\Controllers\ReportController;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CashRegisterController;
-use App\Http\Controllers\CashRegisterTransactionController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PrintController;
+use App\Http\Controllers\ShiftController;
+use App\Http\Controllers\MemberController;
+use App\Http\Controllers\OutletController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\InventoryController;
-use App\Http\Controllers\InventoryHistoryController;
-use App\Http\Controllers\MemberController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\OutletController;
+use App\Http\Controllers\CashRegisterController;
 use App\Http\Controllers\PrintTemplateController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\ShiftController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\InventoryHistoryController;
+use App\Http\Controllers\CashRegisterTransactionController;
 
-// Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     
     Route::controller(AuthController::class)->group(function () {
@@ -26,6 +27,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::controller(OutletController::class)->group(function(){
         Route::get('/outlets/{outlet}', 'show');
+    });
+
+    Route::controller(ShiftController::class)->group(function(){
+        Route::get('/shifts/{shift}', 'show');
     });
     
     Route::middleware('role:admin,supervisor')->group(function () {
@@ -98,7 +103,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::controller(ShiftController::class)->group(function () {
             Route::get('/shifts', 'index');
             Route::post('/shifts', 'store')->middleware('role:admin');
-            Route::get('/shifts/{shift}', 'show');
             Route::put('/shifts/{shift}', 'update')->middleware('role:admin');
             Route::delete('/shifts/{shift}', 'destroy')->middleware('role:admin');
         });
@@ -130,6 +134,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/print-template/{outlet_id}', [PrintTemplateController::class, 'show']);
         Route::post('/update-profile', [AuthController::class, 'updateProfile']);
         Route::get('/members', [MemberController::class, 'index']);
+        Route::post('/print-receipt', [PrintController::class, 'printReceipt']);
+        Route::post('/test-printer', [PrintController::class, 'testPrinter']);
 
         Route::get('/kasir-admin', function () {
             return response()->json([

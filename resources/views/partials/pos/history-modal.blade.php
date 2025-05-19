@@ -102,9 +102,6 @@
      // Variabel global untuk menyimpan data transaksi
     let semuaTransaksi = [];
     let sedangMemuat = false;
-    // const BASE_URL = 'http://127.0.0.1:8000/api'; // Sesuaikan dengan base URL API Anda
-    // const API_BASE_URL = 'http://127.0.0.1:8000/api';
-
 
     // Inisialisasi date range picker
     const dateRangePicker = flatpickr("#dateRange", {
@@ -356,31 +353,326 @@
     }
 
     // Fungsi untuk generate konten struk (dengan perbaikan)
+    // function generateReceiptContent(transaction, templateData) {
+    //     // Format tanggal lebih baik
+    //     const formatDate = (dateString) => {
+    //         if (!dateString) return '';
+    //         const options = { 
+    //             day: '2-digit', 
+    //             month: 'long', 
+    //             year: 'numeric',
+    //             hour: '2-digit',
+    //             minute: '2-digit'
+    //         };
+    //         return new Date(dateString).toLocaleDateString('id-ID', options);
+    //     };
+
+    //     // Helper function untuk menangani nilai yang mungkin undefined
+    //     const safeNumber = (value) => {
+    //         // Memastikan nilai adalah angka yang valid
+    //         return typeof value === 'number' && !isNaN(value) ? value : 0;
+    //     };
+
+    //     // Helper function untuk format uang dengan penanganan nilai undefined
+    //     const formatCurrency = (value) => {
+    //         return safeNumber(value).toLocaleString('id-ID');
+    //     };
+
+    //     // Pastikan properti-properti yang dibutuhkan ada, atau beri nilai default
+    //     const subtotal = safeNumber(transaction.subtotal);
+    //     const discount = safeNumber(transaction.discount);
+    //     const tax = safeNumber(transaction.tax);
+    //     const total = safeNumber(transaction.total);
+    //     const total_paid = safeNumber(transaction.total_paid);
+    //     const change = safeNumber(transaction.change);
+
+    //     console.log("DEBUG nilai-nilai transaksi:", {
+    //         subtotal, discount, tax, total, total_paid, change,
+    //         items: transaction.items
+    //     });
+
+    //     return `
+    //         <!DOCTYPE html>
+    //         <html>
+    //         <head>
+    //             <title>Struk Transaksi #${transaction.invoice}</title>
+    //             <style>
+    //                 body {
+    //                     font-family: 'Courier New', monospace;
+    //                     margin: 0;
+    //                     padding: 20px;
+    //                     max-width: 300px;
+    //                 }
+    //                 .header {
+    //                     display: flex;
+    //                     align-items: center;
+    //                     gap: 15px;
+    //                     margin-bottom: 20px;
+    //                 }
+    //                 .header-text {
+    //                     flex: 1;
+    //                     text-align: right;
+    //                 }
+    //                 .logo-container {
+    //                     display: flex;
+    //                     align-items: center;
+    //                 }
+    //                 .logo {
+    //                     max-width: 50px;
+    //                     height: auto;
+    //                 }
+    //                 .title {
+    //                     font-size: 16px;
+    //                     font-weight: bold;
+    //                     margin-bottom: 4px;
+    //                 }
+    //                 .info {
+    //                     font-size: 12px;
+    //                     margin: 5px 0;
+    //                 }
+    //                 .divider {
+    //                     border-top: 1px dashed #000;
+    //                     margin: 10px 0;
+    //                 }
+    //                 .item {
+    //                     display: flex;
+    //                     justify-content: space-between;
+    //                     font-size: 12px;
+    //                     margin: 5px 0;
+    //                 }
+    //                 .total {
+    //                     font-weight: bold;
+    //                     margin-top: 10px;
+    //                     text-align: right;
+    //                 }
+    //                 .footer {
+    //                     text-align: center;
+    //                     margin-top: 20px;
+    //                     font-size: 12px;
+    //                 }
+    //                 .text-center {
+    //                     text-align: center;
+    //                 }
+    //             </style>
+    //         </head>
+    //         <body>
+    //             <div class="header">
+    //                 ${templateData.logo_url ? `
+    //                 <div class="logo-container">
+    //                     <img src="${templateData.logo_url || 'logo'}" 
+    //                         alt="Logo Outlet" 
+    //                         class="logo"
+    //                         onerror="this.style.display='none'"/>
+    //                 </div>
+    //                 ` : ''}
+    //                 <div class="header-text">
+    //                     <div class="title">${templateData.company_name || 'Toko Saya'}</div>
+    //                     ${templateData.company_slogan ? `<div class="info">${templateData.company_slogan}</div>` : ''}
+    //                     ${templateData.outlet ? `
+    //                         <div class="info">${templateData.outlet.name || ''}</div>
+    //                         <div class="info">Alamat: ${templateData.outlet.address || ''}</div>
+    //                         <div class="info">Telp: ${templateData.outlet.phone || ''}</div>
+    //                     ` : ''}
+    //                 </div>
+    //             </div>
+
+    //             <div class="divider"></div>
+    //             <div class="text-center">
+    //                 <div class="info">STRUK PEMBAYARAN</div>
+    //             </div>
+    //             <div class="divider"></div>
+                
+    //             <div class="info">No. Invoice: ${transaction.invoice}</div>
+    //             <div class="info">Tanggal: ${formatDate(transaction.waktu)}</div>
+    //             <div class="info">Kasir: ${transaction.kasir}</div>
+    //             <div class="divider"></div>
+                
+    //             <div>
+    //                 ${transaction.items && transaction.items.length > 0 ? transaction.items.map(item => {
+    //                     // Pastikan setiap properti item ada dan valid
+    //                     const quantity = safeNumber(item.quantity);
+    //                     const price = safeNumber(item.price);
+    //                     const itemDiscount = safeNumber(item.discount);
+                        
+    //                     return `
+    //                         <div class="item">
+    //                             <div>${quantity}x ${item.product || 'Produk'}</div>
+    //                             <div>
+    //                                 Rp ${formatCurrency(price * quantity)}
+    //                                 ${itemDiscount > 0 ? ` (-${formatCurrency(itemDiscount)})` : ''}
+    //                             </div>
+    //                         </div>
+    //                     `;
+    //                 }).join('') : '<div class="item">Tidak ada item</div>'}
+                    
+    //                 <div class="divider"></div>
+    //                 <div class="item">
+    //                     <div>Subtotal:</div>
+    //                     <div>Rp ${formatCurrency(subtotal)}</div>
+    //                 </div>
+                    
+    //                 ${discount > 0 ? `
+    //                 <div class="item">
+    //                     <div>Diskon:</div>
+    //                     <div>Rp -${formatCurrency(discount)}</div>
+    //                 </div>
+    //                 ` : ''}
+                    
+    //                 ${tax > 0 ? `
+    //                 <div class="item">
+    //                     <div>Pajak:</div>
+    //                     <div>Rp ${formatCurrency(tax)}</div>
+    //                 </div>
+    //                 ` : ''}
+                    
+    //                 <div class="item">
+    //                     <div>Total:</div>
+    //                     <div>Rp ${formatCurrency(total)}</div>
+    //                 </div>
+                    
+    //                 <div class="item">
+    //                     <div>Metode Pembayaran:</div>
+    //                     <div>${transaction.pembayaran === "cash" ? "TUNAI" : 
+    //                         transaction.pembayaran === "qris" ? "QRIS" : 
+    //                         (transaction.pembayaran || 'TIDAK DIKETAHUI').toUpperCase()}</div>
+    //                 </div>
+                    
+    //                 ${transaction.pembayaran === 'cash' ? `
+    //                 <div class="item">
+    //                     <div>Bayar:</div>
+    //                     <div>Rp ${formatCurrency(total_paid)}</div>
+    //                 </div>
+    //                 <div class="item">
+    //                     <div>Kembalian:</div>
+    //                     <div>Rp ${formatCurrency(change)}</div>
+    //                 </div>
+    //                 ` : ''}
+    //             </div>
+                
+    //             <div class="divider"></div>
+    //             ${transaction.member ? `
+    //                 <div class="info">
+    //                     Member: ${transaction.member.name || ''} (${transaction.member.member_code || ''})
+    //                 </div>
+    //             ` : ''}
+                
+    //             <div class="footer">
+    //                 ${templateData.footer_message || 'Terima kasih atas kunjungan Anda'}
+    //             </div>
+    //         </body>
+    //         </html>
+    //     `;
+    // }
+
     function generateReceiptContent(transaction, templateData) {
-        // Format tanggal lebih baik
+        // Format tanggal dengan lebih baik
         const formatDate = (dateString) => {
-            if (!dateString) return '';
-            const options = { 
-                day: '2-digit', 
-                month: 'long', 
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            };
-            return new Date(dateString).toLocaleDateString('id-ID', options);
+            if (!dateString) return 'Tanggal tidak tersedia';
+            try {
+                // Normalisasi string tanggal
+                let normalized = dateString.trim();
+                
+                // Hapus escape characters
+                normalized = normalized.replace(/\\\//g, '/');
+                
+                // Cek apakah format DD/MM/YYYY HH:mm atau DD/MM/YYYY
+                const datePattern = /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{1,2}))?/;
+                const match = normalized.match(datePattern);
+                
+                if (match) {
+                    const [, day, month, year, hour = '00', minute = '00'] = match;
+                    
+                    // Parse ke Date object dengan format ISO (YYYY-MM-DD)
+                    // JavaScript Date menggunakan month 0-based, jadi kurangi 1
+                    const date = new Date(
+                        parseInt(year), 
+                        parseInt(month) - 1, 
+                        parseInt(day), 
+                        parseInt(hour), 
+                        parseInt(minute)
+                    );
+                    
+                    // Validasi apakah tanggal valid
+                    if (isNaN(date.getTime())) {
+                        throw new Error('Invalid date');
+                    }
+                    
+                    return date.toLocaleString('id-ID', {
+                        day: '2-digit',
+                        month: 'long',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        timeZone: 'Asia/Jakarta'
+                    });
+                }
+                
+                // Jika bukan format DD/MM/YYYY, coba parsing biasa
+                // Ganti spasi dengan 'T' untuk format ISO
+                normalized = normalized.includes('T') ? normalized : normalized.replace(' ', 'T');
+                
+                // Tambahkan timezone jika belum ada
+                if (!/[+-]\d{2}:\d{2}$/.test(normalized)) {
+                    normalized += '+07:00'; // Asumsi waktu dalam WIB
+                }
+                
+                const date = new Date(normalized);
+                
+                if (isNaN(date.getTime())) {
+                    throw new Error('Invalid date format');
+                }
+                
+                return date.toLocaleString('id-ID', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    timeZone: 'Asia/Jakarta'
+                });
+            } catch (e) {
+                console.error('Error formatting date:', e, 'Input:', dateString);
+                return 'Tanggal tidak valid';
+            }
         };
 
-        // Helper function untuk menangani nilai yang mungkin undefined
+        // Helper function untuk menangani nilai yang mungkin undefined/null
         const safeNumber = (value) => {
-            // Memastikan nilai adalah angka yang valid
-            return typeof value === 'number' && !isNaN(value) ? value : 0;
+            const num = parseFloat(value);
+            return isNaN(num) ? 0 : num;
         };
 
-        // Helper function untuk format uang dengan penanganan nilai undefined
+        // Format mata uang dengan penanganan error
         const formatCurrency = (value) => {
             return safeNumber(value).toLocaleString('id-ID');
         };
 
+        // Get outlet data from template or use defaults
+        const outletData = templateData.outlet || {
+            name: templateData.company_name || 'Toko Saya',
+            address: '',
+            phone: '',
+            tax: 0
+        };
+
+        // Use logo from template or default
+        const logoPath = templateData.logo_url || '/images/logo.png';
+
+        // Data transaksi yang aman
+        const safeTransaction = {
+            ...transaction,
+            subtotal: safeNumber(transaction.subtotal),
+            discount: safeNumber(transaction.discount),
+            tax: safeNumber(transaction.tax),
+            total: safeNumber(transaction.total),
+            total_paid: safeNumber(transaction.total_paid || transaction.total),
+            change: safeNumber(transaction.change || 0),
+            items: transaction.items || [],
+            pembayaran: transaction.pembayaran || 'cash',
+            waktu: transaction.waktu || new Date().toISOString(),
+            invoice: transaction.invoice || 'NO-INVOICE',
+            kasir: transaction.kasir || 'Kasir'
+        };
         // Pastikan properti-properti yang dibutuhkan ada, atau beri nilai default
         const subtotal = safeNumber(transaction.subtotal);
         const discount = safeNumber(transaction.discount);
@@ -388,179 +680,299 @@
         const total = safeNumber(transaction.total);
         const total_paid = safeNumber(transaction.total_paid);
         const change = safeNumber(transaction.change);
+        const logoUrl = templateData.logo_url || '/images/logo.png';
+
 
         console.log("DEBUG nilai-nilai transaksi:", {
-            subtotal, discount, tax, total, total_paid, change,
-            items: transaction.items
+            subtotal: safeTransaction.subtotal, 
+            discount: safeTransaction.discount, 
+            tax: safeTransaction.tax, 
+            total: safeTransaction.total, 
+            total_paid: safeTransaction.total_paid, 
+            change: safeTransaction.change,
+            items: safeTransaction.items
         });
 
         return `
             <!DOCTYPE html>
             <html>
             <head>
-                <title>Struk Transaksi #${transaction.invoice}</title>
+                <title>Struk Transaksi #${safeTransaction.invoice}</title>
+                <meta charset="UTF-8">
                 <style>
-                    body {
+                    /* Reset dan base styling */
+                    * {
+                        font-weight: 'bold';
+                        font-size: 18px;
                         font-family: 'Courier New', monospace;
-                        margin: 0;
-                        padding: 20px;
-                        max-width: 300px;
                     }
-                    .header {
+                    
+                    body {
+                        font-size: 18px;
+                        color: #000;
+                    }
+                    
+                    /* Header styling */
+                    .receipt-header {
                         display: flex;
                         align-items: center;
-                        gap: 15px;
-                        margin-bottom: 20px;
+                        gap: 10px;
+                        margin-bottom: 15px;
+                        padding-bottom: 10px;
+                        border-bottom: 1px dashed #ccc;
                     }
+                    
+                    .logo-container {
+                        width: 60px;
+                        height: 60px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                    
+                    .logo {
+                        max-width: 100%;
+                        max-height: 100%;
+                        object-fit: contain;
+                    }
+                    
                     .header-text {
                         flex: 1;
                         text-align: right;
                     }
-                    .logo-container {
-                        display: flex;
-                        align-items: center;
-                    }
-                    .logo {
-                        max-width: 50px;
-                        height: auto;
-                    }
-                    .title {
-                        font-size: 16px;
+                    
+                    .company-name {
                         font-weight: bold;
-                        margin-bottom: 4px;
+                        font-size: 18px;
+                        margin-bottom: 3px;
                     }
-                    .info {
-                        font-size: 12px;
-                        margin: 5px 0;
+                    
+                    .company-info {
+                        font-size: 18px;
+                        line-height: 1.3;
                     }
+                    
+                    /* Divider */
                     .divider {
                         border-top: 1px dashed #000;
-                        margin: 10px 0;
+                        margin: 8px 0;
                     }
-                    .item {
+                    
+                    /* Transaction info */
+                    .transaction-info {
+                        margin-bottom: 10px;
+                    }
+                    
+                    .info-row {
                         display: flex;
                         justify-content: space-between;
-                        font-size: 12px;
-                        margin: 5px 0;
+                        margin-bottom: 3px;
                     }
-                    .total {
+                    
+                    .info-label {
                         font-weight: bold;
-                        margin-top: 10px;
+                    }
+                    
+                    /* Items list */
+                    .items-list {
+                        margin: 10px 0;
+                    }
+                    
+                    .item-row {
+                        display: flex;
+                        justify-content: space-between;
+                        margin-bottom: 5px;
+                    }
+                    
+                    .item-name {
+                        flex: 2;
+                    }
+                    
+                    .item-price {
+                        flex: 1;
                         text-align: right;
                     }
-                    .footer {
-                        text-align: center;
-                        margin-top: 20px;
-                        font-size: 12px;
+                    
+                    /* Totals */
+                    .totals {
+                        margin-top: 10px;
                     }
+                    
+                    .total-row {
+                        display: flex;
+                        justify-content: space-between;
+                        margin-bottom: 5px;
+                    }
+                    
+                    .grand-total {
+                        font-weight: bold;
+                        font-size: 15px;
+                        margin-top: 8px;
+                        padding-top: 5px;
+                        border-top: 1px dashed #000;
+                    }
+                    
+                    /* Payment info */
+                    .payment-info {
+                        margin-top: 10px;
+                    }
+                    
+                    /* Footer */
+                    .receipt-footer {
+                        margin-top: 15px;
+                        text-align: center;
+                        font-size: 12px;
+                        line-height: 1.4;
+                    }
+                    
+                    /* Utilities */
                     .text-center {
                         text-align: center;
+                    }
+                    
+                    .text-right {
+                        text-align: right;
+                    }
+                    
+                    .text-bold {
+                        font-weight: bold;
                     }
                 </style>
             </head>
             <body>
-                <div class="header">
-                    ${templateData.logo_url ? `
+                <!-- Header dengan logo -->
+                <div class="receipt-header">
                     <div class="logo-container">
-                        <img src="${templateData.logo_url || 'logo'}" 
-                            alt="Logo Outlet" 
+                        <img src="${logoPath}" 
+                            alt="Logo Toko" 
                             class="logo"
-                            onerror="this.style.display='none'"/>
+                            onerror="this.style.display='none'">
                     </div>
-                    ` : ''}
                     <div class="header-text">
-                        <div class="title">${templateData.company_name || 'Toko Saya'}</div>
-                        ${templateData.company_slogan ? `<div class="info">${templateData.company_slogan}</div>` : ''}
-                        ${templateData.outlet ? `
-                            <div class="info">${templateData.outlet.name || ''}</div>
-                            <div class="info">Alamat: ${templateData.outlet.address || ''}</div>
-                            <div class="info">Telp: ${templateData.outlet.phone || ''}</div>
-                        ` : ''}
+                        <div class="company-name">${templateData.company_name || outletData.name || 'TOKO ANDA'}</div>
+                        <div class="company-info">
+                            ${templateData.company_slogan || ''}
+                            ${outletData.address ? `<br>${outletData.address}` : ''}
+                            ${outletData.phone ? `<br>Telp: ${outletData.phone}` : ''}
+                        </div>
                     </div>
                 </div>
-
-                <div class="divider"></div>
+                
                 <div class="text-center">
-                    <div class="info">STRUK PEMBAYARAN</div>
+                    <div class="info-row">STRUK PEMBAYARAN</div>
                 </div>
                 <div class="divider"></div>
                 
-                <div class="info">No. Invoice: ${transaction.invoice}</div>
-                <div class="info">Tanggal: ${formatDate(transaction.waktu)}</div>
-                <div class="info">Kasir: ${transaction.kasir}</div>
+                <!-- Info transaksi -->
+                <div class="transaction-info">
+                    <div class="info-row">
+                        <span class="info-label">No. Invoice:</span>
+                        <span>${safeTransaction.invoice}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Tanggal:</span>
+                        <span>${formatDate(safeTransaction.waktu)}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Kasir:</span>
+                        <span>${safeTransaction.kasir}</span>
+                    </div>
+                </div>
+                
                 <div class="divider"></div>
                 
-                <div>
-                    ${transaction.items && transaction.items.length > 0 ? transaction.items.map(item => {
-                        // Pastikan setiap properti item ada dan valid
-                        const quantity = safeNumber(item.quantity);
-                        const price = safeNumber(item.price);
-                        const itemDiscount = safeNumber(item.discount);
-                        
-                        return `
-                            <div class="item">
-                                <div>${quantity}x ${item.product || 'Produk'}</div>
-                                <div>
-                                    Rp ${formatCurrency(price * quantity)}
-                                    ${itemDiscount > 0 ? ` (-${formatCurrency(itemDiscount)})` : ''}
+                <!-- Daftar item -->
+                <div class="items-list">
+                    ${safeTransaction.items.length > 0 
+                        ? safeTransaction.items.map(item => {
+                            const safeItem = {
+                                ...item,
+                                quantity: safeNumber(item.quantity),
+                                price: safeNumber(item.price),
+                                discount: safeNumber(item.discount),
+                                product: item.product || 'Produk'
+                            };
+                            
+                            return `
+                                <div class="item-row">
+                                    <div class="item-name">
+                                        ${safeItem.quantity}x ${safeItem.product}
+                                    </div>
+                                    <div class="item-price">
+                                        Rp ${formatCurrency(safeItem.price * safeItem.quantity)}
+                                        ${safeItem.discount > 0 ? `<br><small>Diskon: -Rp ${formatCurrency(safeItem.discount)}</small>` : ''}
+                                    </div>
                                 </div>
-                            </div>
-                        `;
-                    }).join('') : '<div class="item">Tidak ada item</div>'}
-                    
-                    <div class="divider"></div>
-                    <div class="item">
-                        <div>Subtotal:</div>
-                        <div>Rp ${formatCurrency(subtotal)}</div>
+                            `;
+                        }).join('')
+                        : '<div class="text-center">Tidak ada item</div>'
+                    }
+                </div>
+                
+                <div class="divider"></div>
+                
+                <!-- Total pembelian -->
+                <div class="totals">
+                    <div class="total-row">
+                        <span>Subtotal:</span>
+                        <span>Rp ${formatCurrency(safeTransaction.subtotal)}</span>
                     </div>
                     
-                    ${discount > 0 ? `
-                    <div class="item">
-                        <div>Diskon:</div>
-                        <div>Rp -${formatCurrency(discount)}</div>
-                    </div>
-                    ` : ''}
-                    
-                    ${tax > 0 ? `
-                    <div class="item">
-                        <div>Pajak:</div>
-                        <div>Rp ${formatCurrency(tax)}</div>
+                    ${safeTransaction.discount > 0 ? `
+                    <div class="total-row">
+                        <span>Diskon:</span>
+                        <span>- Rp ${formatCurrency(safeTransaction.discount)}</span>
                     </div>
                     ` : ''}
                     
-                    <div class="item">
-                        <div>Total:</div>
-                        <div>Rp ${formatCurrency(total)}</div>
+                    ${safeTransaction.tax > 0 ? `
+                    <div class="total-row">
+                        <span>Pajak:</span>
+                        <span>Rp ${formatCurrency(safeTransaction.tax)}</span>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="total-row grand-total">
+                        <span>TOTAL:</span>
+                        <span>Rp ${formatCurrency(safeTransaction.total)}</span>
+                    </div>
+                </div>
+                
+                <!-- Info pembayaran -->
+                <div class="payment-info">
+                    <div class="total-row">
+                        <span>Metode Bayar:</span>
+                        <span>${safeTransaction.pembayaran === "cash" ? "TUNAI" : 
+                            safeTransaction.pembayaran === "qris" ? "QRIS" : 
+                            (safeTransaction.pembayaran || 'TIDAK DIKETAHUI').toUpperCase()}</span>
                     </div>
                     
-                    <div class="item">
-                        <div>Metode Pembayaran:</div>
-                        <div>${transaction.pembayaran === "cash" ? "TUNAI" : 
-                            transaction.pembayaran === "qris" ? "QRIS" : 
-                            (transaction.pembayaran || 'TIDAK DIKETAHUI').toUpperCase()}</div>
+                    ${safeTransaction.pembayaran === 'cash' ? `
+                    <div class="total-row">
+                        <span>Dibayar:</span>
+                        <span>Rp ${formatCurrency(safeTransaction.total_paid)}</span>
                     </div>
-                    
-                    ${transaction.pembayaran === 'cash' ? `
-                    <div class="item">
-                        <div>Bayar:</div>
-                        <div>Rp ${formatCurrency(total_paid)}</div>
-                    </div>
-                    <div class="item">
-                        <div>Kembalian:</div>
-                        <div>Rp ${formatCurrency(change)}</div>
+                    <div class="total-row">
+                        <span>Kembalian:</span>
+                        <span>Rp ${formatCurrency(safeTransaction.change)}</span>
                     </div>
                     ` : ''}
                 </div>
                 
+                ${safeTransaction.member ? `
                 <div class="divider"></div>
-                ${transaction.member ? `
-                    <div class="info">
-                        Member: ${transaction.member.name || ''} (${transaction.member.member_code || ''})
-                    </div>
+                <div class="info-row">
+                    <span class="info-label">Member:</span>
+                    <span>${safeTransaction.member.name || ''} (${safeTransaction.member.member_code || ''})</span>
+                </div>
                 ` : ''}
                 
-                <div class="footer">
-                    ${templateData.footer_message || 'Terima kasih atas kunjungan Anda'}
+                <!-- Footer -->
+                <div class="divider"></div>
+                <div class="receipt-footer">
+                    ${templateData.footer_message || 'Terima kasih telah berbelanja'}<br>
+                    Barang yang sudah dibeli tidak dapat ditukar<br>
+                    ${new Date().getFullYear()} © ${templateData.company_name || outletData.name || 'TOKO ANDA'}
                 </div>
             </body>
             </html>

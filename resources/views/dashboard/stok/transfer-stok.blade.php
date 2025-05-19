@@ -170,7 +170,7 @@
     // Fungsi untuk memuat data outlet
     async function loadOutlets() {
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/outlets', {
+            const response = await fetch('/api/outlets', {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
                     'Accept': 'application/json'
@@ -274,7 +274,7 @@
         }
         
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/inventories/transfer', {
+            const response = await fetch('/api/inventories/transfer', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -341,7 +341,7 @@
             console.log(`Fetching product data for outlet ID: ${outletId} on date: ${date}`);
             
             // Fetch data dari API dengan parameter outlet dan tanggal
-            const response = await fetch(`http://127.0.0.1:8000/api/products/outlet/${outletId}?date=${date}`, {
+            const response = await fetch(`/api/products/outlet/${outletId}?date=${date}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
                     'Accept': 'application/json'
@@ -486,7 +486,7 @@
     async function updateOutletInfoFromSelection() {
         try {
             const outletId = getSelectedOutletId();
-            const response = await fetch(`http://127.0.0.1:8000/api/outlets/${outletId}`, {
+            const response = await fetch(`/api/outlets/${outletId}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
                     'Accept': 'application/json'

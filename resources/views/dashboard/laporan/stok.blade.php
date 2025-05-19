@@ -31,7 +31,7 @@
     <div class="mb-3 md:mb-0 flex items-start gap-2">
         <i data-lucide="store" class="w-5 h-5 text-gray-600 mt-1"></i>
         <div>
-            <h4 class="text-lg font-semibold text-gray-800" id="outletName">Menampilkan laporan untuk: Kifa Bakery Pusat</h4>
+            <h4 class="text-lg font-semibold text-gray-800"><span id="outletName">Loading...</span></h4>
             <p class="text-sm text-gray-600">Periode: <span id="dateRangeDisplay">s/d {{ date('d M Y') }}</span></p>
         </div>
     </div>
@@ -195,9 +195,6 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 
 <script>
-    // API endpoint base (modified to use dynamic outlet ID)
-    const API_ENDPOINT_BASE = 'http://127.0.0.1:8000/api/reports/monthly-inventory';
-        
     // Inventory data from API
     let inventoryData = {
         outlet: '',
@@ -318,7 +315,7 @@
             const outletId = getSelectedOutletId();
             
             // Build the URL with the outlet ID
-            const url = `${API_ENDPOINT_BASE}/${outletId}?start_date=${startDate}&end_date=${endDate}`;
+            const url = `/api/reports/monthly-inventory/${outletId}?start_date=${startDate}&end_date=${endDate}`;
             
             const response = await fetch(url, {
                 headers: {

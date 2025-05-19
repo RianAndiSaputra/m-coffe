@@ -31,7 +31,7 @@
     <div class="mb-3 md:mb-0 flex items-start gap-2">
         <i data-lucide="store" class="w-5 h-5 text-gray-600 mt-1"></i>
         <div>
-            <h4 class="text-lg font-semibold text-gray-800">Menampilkan laporan approve</h4>
+            <h4 class="text-lg font-semibold text-gray-800">Menampilkan laporan untuk: <span id="outletName">Loading...</span></h4>
             <p class="text-sm text-gray-600">Periode: <span id="dateRangeDisplay">01 Mei 2025 - 11 Mei 2025</span></p>
         </div>
     </div>
@@ -307,7 +307,7 @@
         try {
             showAlert('info', 'Memuat data laporan...');
             
-            const response = await fetch(`http://127.0.0.1:8000/api/reports/inventory-approvals/${outletId}?start_date=${startDate}&end_date=${endDate}`, {
+            const response = await fetch(`/api/reports/inventory-approvals/${outletId}?start_date=${startDate}&end_date=${endDate}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
                     'Accept': 'application/json'

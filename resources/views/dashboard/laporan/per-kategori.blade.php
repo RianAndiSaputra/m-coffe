@@ -172,7 +172,7 @@
         try {
             const outletId = getSelectedOutletId();
             
-            const response = await fetch(`http://127.0.0.1:8000/api/reports/sales-by-category/${outletId}?start_date=${currentStartDate}&end_date=${currentEndDate}`, {
+            const response = await fetch(`/api/reports/sales-by-category/${outletId}?start_date=${currentStartDate}&end_date=${currentEndDate}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
                     'Accept': 'application/json'

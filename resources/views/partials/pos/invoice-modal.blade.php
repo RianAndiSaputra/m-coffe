@@ -255,11 +255,11 @@
 
             // Ambil data dari currentOrder yang sudah disimpan
             const order = currentOrder.data;
-            console.log('Order data for receipt:', order);
+            // console.log('Order data for receipt:', order);
             
             // Fetch receipt template from database
             const templateData = await fetchReceiptTemplate();
-            console.log('Template data for receipt:', templateData);
+            // console.log('Template data for receipt:', templateData);
 
             // Buat window cetak
             const printWindow = window.open('', '_blank', 'width=400,height=600');
@@ -306,22 +306,71 @@
 
     // Function to generate receipt HTML with template
     function generateReceiptWithTemplate(order, templateData) {
-        // Format tanggal dengan lebih baik
+        // Format tanggal
         const formatDate = (dateString) => {
             if (!dateString) return 'Tanggal tidak tersedia';
             try {
-                const options = { 
-                    day: '2-digit', 
-                    month: 'long', 
+                // Normalisasi string tanggal
+                let normalized = dateString.trim();
+
+                normalized = normalized.replace(/\\\//g, '/');
+                
+                // Cek apakah format DD/MM/YYYY HH:mm atau DD/MM/YYYY
+                const datePattern = /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{1,2}))?/;
+                const match = normalized.match(datePattern);
+                
+                if (match) {
+                    const [, day, month, year, hour = '00', minute = '00'] = match;
+                    
+                    // Parse ke Date object dengan format ISO (YYYY-MM-DD)
+                    const date = new Date(
+                        parseInt(year), 
+                        parseInt(month) - 1, 
+                        parseInt(day), 
+                        parseInt(hour), 
+                        parseInt(minute)
+                    );
+                    
+                    // Validasi apakah tanggal valid
+                    if (isNaN(date.getTime())) {
+                        throw new Error('Invalid date');
+                    }
+                    
+                    return date.toLocaleString('id-ID', {
+                        day: '2-digit',
+                        month: 'long',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        timeZone: 'Asia/Jakarta'
+                    });
+                }
+                
+                // Jika bukan format DD/MM/YYYY, coba parsing biasa
+                normalized = normalized.includes('T') ? normalized : normalized.replace(' ', 'T');
+                
+                // Tambahkan timezone jika belum ada
+                if (!/[+-]\d{2}:\d{2}$/.test(normalized)) {
+                    normalized += '+07:00'; // Asumsi waktu dalam WIB
+                }
+                
+                const date = new Date(normalized);
+                
+                if (isNaN(date.getTime())) {
+                    throw new Error('Invalid date format');
+                }
+                
+                return date.toLocaleString('id-ID', {
+                    day: '2-digit',
+                    month: 'long',
                     year: 'numeric',
                     hour: '2-digit',
                     minute: '2-digit',
                     timeZone: 'Asia/Jakarta'
-                };
-                return new Date(dateString).toLocaleDateString('id-ID', options);
+                });
             } catch (e) {
-                console.error('Error formatting date:', e);
-                return dateString || 'Tanggal tidak tersedia';
+                console.error('Error formatting date:', e, 'Input:', dateString);
+                return 'Tanggal tidak valid';
             }
         };
 
@@ -372,17 +421,12 @@
                 <style>
                     /* Reset dan base styling */
                     * {
-                        margin: 0;
-                        padding: 0;
-                        box-sizing: border-box;
+                        font-weight: 'bold'
                         font-family: 'Courier New', monospace;
                     }
                     
                     body {
-                        padding: 15px;
-                        max-width: 300px;
-                        margin: 0 auto;
-                        font-size: 14px;
+                        font-size: 18px;
                         color: #000;
                     }
                     
@@ -412,18 +456,17 @@
                     
                     .header-text {
                         flex: 1;
+                        text-align: right;
                     }
                     
                     .company-name {
                         font-weight: bold;
-                        font-size: 16px;
+                        font-size: 18px;
                         margin-bottom: 3px;
-                        text-align: center;
                     }
                     
                     .company-info {
-                        font-size: 12px;
-                        text-align: center;
+                        font-size: 18px;
                         line-height: 1.3;
                     }
                     
@@ -657,5 +700,3 @@
         showPaymentModal(cartItems, total);
     }
 </script>
-
-{{-- invoice modal --}}

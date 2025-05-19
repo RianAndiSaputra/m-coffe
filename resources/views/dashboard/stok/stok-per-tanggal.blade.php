@@ -144,7 +144,7 @@
     function fetchOutlets() {
         console.log("Fetching available outlets");
         
-        fetch('http://127.0.0.1:8000/api/outlets', {
+        fetch('/api/outlets', {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 'Accept': 'application/json'
@@ -239,7 +239,7 @@
             loadingIndicator.classList.remove('hidden');
         }
         
-        const apiUrl = `http://127.0.0.1:8000/api/reports/inventory-by-date/${outletId}?date=${date}`;
+        const apiUrl = `/api/reports/inventory-by-date/${outletId}?date=${date}`;
         console.log('API URL:', apiUrl);
         
         fetch(apiUrl, {

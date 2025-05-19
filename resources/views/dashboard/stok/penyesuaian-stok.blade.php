@@ -656,7 +656,7 @@
         console.log("Request data:", requestData);
         
         // Kirim data ke API
-        fetch('http://127.0.0.1:8000/api/inventory-histories', {
+        fetch('/api/inventory-histories', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

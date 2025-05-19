@@ -253,7 +253,7 @@
             if (loadingIndicator) loadingIndicator.classList.remove('hidden');
             if (memberTableBody) memberTableBody.innerHTML = '';
 
-            const response = await fetch('http://127.0.0.1:8000/api/members', {
+            const response = await fetch('/api/members', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json'
@@ -369,7 +369,7 @@
         
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://127.0.0.1:8000/api/members/${memberIdToDelete}`, {
+            const response = await fetch(`/api/members/${memberIdToDelete}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -438,7 +438,7 @@
         const token = localStorage.getItem('token');
         
         try {
-            const response = await fetch(`http://127.0.0.1:8000/api/members/${memberId}`, {
+            const response = await fetch(`/api/members/${memberId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -497,7 +497,7 @@
         const token = localStorage.getItem('token');
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/members', {
+            const response = await fetch('/api/members', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -366,7 +366,7 @@
         const invoiceChangeRow = document.getElementById('invoiceChangeRow');
         
         // API Configuration
-        const API_BASE_URL = 'http://127.0.0.1:8000/api';
+        const API_BASE_URL = 'http://127.0.0.1:8000';
         const API_TOKEN = localStorage.getItem('token') || '';
         
         // Format currency input
@@ -543,7 +543,7 @@
         // Fetch current shift
         async function fetchCurrentShift() {
             try {
-                const response = await fetch(`${API_BASE_URL}/shifts/${outletInfo.shift_id}`, {
+                const response = await fetch(`/api/shifts/${outletInfo.shift_id}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -570,7 +570,7 @@
         // Fetch outlet information
         async function fetchOutletInfo() {
             try {
-                const response = await fetch(`${API_BASE_URL}/outlets/${outletInfo.id}`, {
+                const response = await fetch(`/api/outlets/${outletInfo.id}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -613,7 +613,7 @@
                     throw new Error('Token tidak ditemukan');
                 }
                 
-                const response = await fetch(`${API_BASE_URL}/products/outlet/${outletInfo.id}`, {
+                const response = await fetch(`/api/products/outlet/${outletInfo.id}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1051,7 +1051,7 @@
             }
             
             // Fetch from the main members endpoint
-            fetch(`${API_BASE_URL}/members`, {
+            fetch(`/api/members`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1377,7 +1377,7 @@
                 }
                 
                 // Send transaction to server
-                const response = await fetch(`${API_BASE_URL}/orders`, {
+                const response = await fetch(`/api/orders`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1429,6 +1429,37 @@
             } catch (error) {
                 console.error('Error processing payment:', error);
                 showNotification(error.message || 'Gagal memproses pembayaran', 'error');
+            }
+        }
+
+        function showLoading(message) {
+            // Remove existing loading if any
+            const existing = document.querySelector('.loading-overlay');
+            if (existing) {
+                existing.remove();
+            }
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'loading-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            overlay.innerHTML = `
+                <div class="bg-white p-6 rounded-lg shadow-lg text-center max-w-sm mx-4">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                    <p class="text-gray-700 font-medium">${message}</p>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            return overlay;
+        }
+
+        function hideLoading(overlay) {
+            if (overlay && overlay.parentNode) {
+                overlay.parentNode.removeChild(overlay);
+            }
+            
+            // Fallback: remove any loading overlay
+            const existingLoading = document.querySelector('.loading-overlay');
+            if (existingLoading) {
+                existingLoading.remove();
             }
         }
         

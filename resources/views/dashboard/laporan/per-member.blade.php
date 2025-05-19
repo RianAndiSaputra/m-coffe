@@ -263,7 +263,7 @@
             const startDate = currentStartDate ? formatDateToApi(currentStartDate) : formatDateToApi(getDefaultDateRange()[0]);
             const endDate = currentEndDate ? formatDateToApi(currentEndDate) : formatDateToApi(getDefaultDateRange()[1]);
             
-            const apiUrl = `http://127.0.0.1:8000/api/reports/sales-by-member/${outletId}?start_date=${startDate}&end_date=${endDate}`;
+            const apiUrl = `/api/reports/sales-by-member/${outletId}?start_date=${startDate}&end_date=${endDate}`;
             const response = await fetch(apiUrl, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,

@@ -31,7 +31,7 @@
     <div class="mb-3 md:mb-0 flex items-start gap-2">
         <i data-lucide="store" class="w-5 h-5 text-gray-600 mt-1"></i>
         <div>
-            <h4 class="text-lg font-semibold text-gray-800">Menampilkan laporan untuk: <span id="outletName">Kifa Bakery Pusat</span></h4>
+            <h4 class="text-lg font-semibold text-gray-800">Menampilkan laporan untuk: <span id="outletName"></span></h4>
             <p class="text-sm text-gray-600">Periode: <span id="dateRangeDisplay">01 Mei 2025 - 14 Mei 2025</span></p>
         </div>
     </div>
@@ -505,7 +505,7 @@
         showLoading(true);
         // showAlert('info', 'Memuat data...');
         
-        const url = `http://127.0.0.1:8000/api/inventory-histories/type/${outletId}?start_date=${startDate}&end_date=${endDate}`;
+        const url = `/api/inventory-histories/type/${outletId}?start_date=${startDate}&end_date=${endDate}`;
         
         console.log('Request URL:', url); // Untuk debugging
         
@@ -555,10 +555,10 @@
             const outletName = data.data.outlet_name;
             document.getElementById('outletName').textContent = outletName;
             document.getElementById('outletName2').textContent = outletName;
-            document.getElementById('outletNameHeader').textContent = outletName;
+            // document.getElementById('outletNameHeader').textContent = outletName;
         } else {
             // Fallback if outlet name not in response
-            const fallbackOutletName = 'Kifa Bakery';
+            const fallbackOutletName = 'Riwayat Stok';
             document.getElementById('outletName').textContent = fallbackOutletName;
             document.getElementById('outletName2').textContent = fallbackOutletName;
             // document.getElementById('outletNameHeader').textContent = fallbackOutletName;

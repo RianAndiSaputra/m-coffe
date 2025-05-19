@@ -581,7 +581,7 @@
             const outletNameDisplay = document.querySelector('#outletDropdownButton span');
 
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/outlets', {
+                const response = await fetch('/api/outlets', {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`,
                         'Accept': 'application/json'

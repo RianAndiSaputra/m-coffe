@@ -262,7 +262,7 @@ async function updateOutletNameDisplay(outletId) {
         }
         
         // Jika gagal, ambil dari API
-        const response = await fetch(`http://127.0.0.1:8000/api/outlets/${outletId}`, {
+        const response = await fetch(`/api/outlets/${outletId}`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 'Accept': 'application/json'
@@ -586,7 +586,7 @@ async function updateOutletNameDisplay(outletId) {
             console.log(`Fetching inventory data for outlet ${currentOutletId} on date ${currentDate}`);
             
             // Make API request
-            const response = await fetch(`http://127.0.0.1:8000/api/adjust-inventory/${currentOutletId}?date=${currentDate}`, {
+            const response = await fetch(`/api/adjust-inventory/${currentOutletId}?date=${currentDate}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
                     'Accept': 'application/json'
@@ -704,8 +704,8 @@ async function updateOutletNameDisplay(outletId) {
         try {
             // Tentukan endpoint berdasarkan jenis aksi
             const endpoint = isApproved 
-                ? 'http://127.0.0.1:8000/api/inventory-histories/approval' 
-                : 'http://127.0.0.1:8000/api/inventory-histories/reject';
+                ? '/api/inventory-histories/approval' 
+                : '/api/inventory-histories/reject';
                 
             const payload = isApproved
                 ? { inventory_history_id: id, approved: true }

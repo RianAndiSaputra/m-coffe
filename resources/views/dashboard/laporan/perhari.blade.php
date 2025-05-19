@@ -243,7 +243,7 @@
             
             // showAlert('info', 'Memuat data laporan...');
             
-            const response = await fetch(`http://127.0.0.1:8000/api/orders/history?outlet_id=${outletId}&date_from=${dateFrom}&date_to=${dateTo}`, {
+            const response = await fetch(`/api/orders/history?outlet_id=${outletId}&date_from=${dateFrom}&date_to=${dateTo}`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 'Accept': 'application/json'
@@ -269,7 +269,7 @@
     async function updateOutletInfoDisplay(outletId) {
         try {
             // Fetch outlet details
-            const response = await fetch(`http://127.0.0.1:8000/api/outlets/${outletId}`, {
+            const response = await fetch(`/api/outlets/${outletId}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
                     'Accept': 'application/json'

@@ -150,7 +150,7 @@
             const outletId = getCurrentOutletId();
             
             // Get cash register for this outlet
-            const registerResponse = await fetch(`http://127.0.0.1:8000/api/cash-registers/${outletId}`, {
+            const registerResponse = await fetch(`/api/cash-registers/${outletId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -223,7 +223,7 @@
         }
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/cash-register-transactions/add-cash', {
+            const response = await fetch('/api/cash-register-transactions/add-cash', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -300,7 +300,7 @@
         }
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/cash-register-transactions/subtract-cash', {
+            const response = await fetch('/api/cash-register-transactions/subtract-cash', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

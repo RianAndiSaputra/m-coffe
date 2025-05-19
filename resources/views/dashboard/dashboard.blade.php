@@ -247,7 +247,7 @@
         console.log(`Fetching dashboard data for outlet ID: ${outletId} from ${startDate} to ${endDate}`);
         
         // Make API request with dynamic outlet ID
-        fetch(`http://127.0.0.1:8000/api/reports/dashboard-summary/${outletId}?start_date=${startDate}&end_date=${endDate}`, {
+        fetch(`/api/reports/dashboard-summary/${outletId}?start_date=${startDate}&end_date=${endDate}`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 'Accept': 'application/json'

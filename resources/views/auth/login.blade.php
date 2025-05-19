@@ -255,9 +255,9 @@
                 }
 
                 // Jika ada data shift, simpan juga
-                if (data.data.shift) {
-                    localStorage.setItem('shift_id', data.data.shift.id);
-                    localStorage.setItem('shift_data', JSON.stringify(data.data.shift));
+                if (data.data.user.last_shift) {
+                    localStorage.setItem('shift_id', data.data.user.last_shift.id);
+                    localStorage.setItem('shift_data', JSON.stringify(data.data.user.last_shift));
                 }
 
                 // Arahkan ke halaman sesuai role

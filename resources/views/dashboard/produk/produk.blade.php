@@ -4,7 +4,7 @@
 
 @section('content')
 <!-- Notification container -->
-<div id="alertContainer" class="fixed top-4 right-4 z-50 space-y-3 w-80">
+<div id="alertContainer" class="fixed top-4 right-4 z-[1000] space-y-3 w-80">
     <!-- Alerts will appear here dynamically -->
 </div>
 
@@ -27,8 +27,12 @@
     <div class="mb-4 md:mb-0 flex items-start gap-2">
         <i data-lucide="store" class="w-5 h-5 text-gray-600"></i>
         <div>
-            <h2 class="text-lg font-semibold text-gray-800">Outlet Aktif: Kifa Bakery Pusat</h2>
-            <p class="text-sm text-gray-600">Data yang ditampilkan adalah untuk outlet Kifa Bakery Pusat.</p>
+            <h2 class="text-lg font-semibold text-gray-800" id="activeOutletTitle">
+                Outlet Aktif: <span id="currentOutletName">Loading ...</span>
+            </h2>
+            <p class="text-sm text-gray-600" id="activeOutletDesc">
+                Data yang ditampilkan adalah untuk outlet <span id="outletNamePlaceholder">Loading ...</span>.
+            </p>
         </div>
     </div>
     <div class="flex items-center space-x-2">
@@ -62,6 +66,7 @@
                 <tr>
                     <th class="py-2 font-semibold">No.</th>
                     <th class="py-2 font-semibold">Nama Produk</th>
+                    <th class="py-2 font-semibold">Bar Code</th>
                     <th class="py-2 font-semibold">SKU</th>
                     <th class="py-2 font-semibold">Kategori</th>
                     <th class="py-2 font-semibold">Harga</th>

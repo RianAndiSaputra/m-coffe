@@ -155,7 +155,7 @@
             
             console.log(`Fetching inventory history for outlet ID: ${outletId} on date: ${date}`);
             
-            const response = await fetch(`http://127.0.0.1:8000/api/inventory-histories/outlet/${outletId}?date=${date}`, {
+            const response = await fetch(`/api/inventory-histories/outlet/${outletId}?date=${date}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
                     'Accept': 'application/json'
@@ -228,7 +228,7 @@
     async function updateOutletInfoFromSelection() {
         try {
             const outletId = getSelectedOutletId();
-            const response = await fetch(`http://127.0.0.1:8000/api/outlets/${outletId}`, {
+            const response = await fetch(`/api/outlets/${outletId}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
                     'Accept': 'application/json'

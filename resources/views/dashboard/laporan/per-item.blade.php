@@ -272,7 +272,7 @@
     function loadData(outletId, startDate, endDate) {
         // showAlert('info', 'Memuat data laporan...');
         
-        const url = `http://127.0.0.1:8000/api/reports/monthly-sales/${outletId}?start_date=${startDate}&end_date=${endDate}`;
+        const url = `/api/reports/monthly-sales/${outletId}?start_date=${startDate}&end_date=${endDate}`;
         
         fetch(url, {
             headers: {
