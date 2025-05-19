@@ -673,6 +673,15 @@
             invoice: transaction.invoice || 'NO-INVOICE',
             kasir: transaction.kasir || 'Kasir'
         };
+        // Pastikan properti-properti yang dibutuhkan ada, atau beri nilai default
+        const subtotal = safeNumber(transaction.subtotal);
+        const discount = safeNumber(transaction.discount);
+        const tax = safeNumber(transaction.tax);
+        const total = safeNumber(transaction.total);
+        const total_paid = safeNumber(transaction.total_paid);
+        const change = safeNumber(transaction.change);
+        const logoUrl = templateData.logo_url || '/images/logo.png';
+
 
         console.log("DEBUG nilai-nilai transaksi:", {
             subtotal: safeTransaction.subtotal, 
@@ -831,8 +840,8 @@
                 </style>
             </head>
             <body>
-                <div class="header">
-                    ${templateData.logo_url || templateData.logo_url === '' ? `
+                <!-- Header dengan logo -->
+                <div class="receipt-header">
                     <div class="logo-container">
                         <img src="${logoPath}" 
                             alt="Logo Toko" 
