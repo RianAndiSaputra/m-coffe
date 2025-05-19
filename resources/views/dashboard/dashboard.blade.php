@@ -219,18 +219,32 @@
         
         // Function to fetch dashboard data
     function fetchDashboardData() {
-        // Get current outlet ID from localStorage (matches your existing implementation)
+        // Get current outlet ID from localStorage
         const outletId = getSelectedOutletId();
         
-        // Get current date range from URL or use default
+        // Get current date range from URL or use default (first day of current month to today)
         const urlParams = new URLSearchParams(window.location.search);
-        const startDate = urlParams.get('start_date') || '2025-04-30';
-        const endDate = urlParams.get('end_date') || '2025-05-13';
+        
+        // Get today's date and first day of current month
+        const today = new Date();
+        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        
+        // Format dates as YYYY-MM-DD
+        const formatYMD = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+        
+        // Use URL parameters if available, otherwise use defaults
+        const startDate = urlParams.get('start_date') || formatYMD(firstDayOfMonth);
+        const endDate = urlParams.get('end_date') || formatYMD(today);
         
         // Update date display
         updateDateDisplay(startDate, endDate);
         
-        console.log(`Fetching dashboard data for outlet ID: ${outletId}`);
+        console.log(`Fetching dashboard data for outlet ID: ${outletId} from ${startDate} to ${endDate}`);
         
         // Make API request with dynamic outlet ID
         fetch(`http://127.0.0.1:8000/api/reports/dashboard-summary/${outletId}?start_date=${startDate}&end_date=${endDate}`, {
@@ -493,10 +507,9 @@
             startDate = new Date(startDateParam);
             endDate = new Date(endDateParam);
         } else {
-            // Default to two weeks
-            startDate = new Date();
-            endDate = new Date();
-            endDate.setDate(startDate.getDate() + 14);
+            // Default to beginning of month until today
+            startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1); // First day of current month
+            endDate = new Date(); // Today
         }
         
         // Toggle dropdown
@@ -620,6 +633,9 @@
         cancelDateRange.addEventListener('click', function() {
             datePickerDropdown.classList.add('hidden');
         });
+        
+        // Initial date display update
+        updateDateDisplay(formatYMD(startDate), formatYMD(endDate));
     }
 </script>
 @endsection

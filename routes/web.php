@@ -16,15 +16,15 @@ Route::post('/login', [AuthController::class, 'login']);
     Route::middleware('auth')->group(function(){
         Route::get('/dashboard', function () {
             return view('dashboard.dashboard');
-        })->name('dashboard')->middleware('role:admin,manajer');
+        })->name('dashboard')->middleware('role:admin,supervisor');
 
         Route::get('/per-kategori', function () {
             return view('dashboard.laporan.per-kategori');
-        })->name('per-kategori')->middleware('role:admin,manajer');
+        })->name('per-kategori')->middleware('role:admin,supervisor');
 
         Route::get('/list-produk', function () {
             return view('dashboard.produk.produk');
-        })->name('list.produk')->middleware('role:admin,manajer');
+        })->name('list.produk')->middleware('role:admin,supervisor');
         Route::get('/pos', function () {
             return view('pos.index');
         })->name('index')->middleware('role:kasir');
