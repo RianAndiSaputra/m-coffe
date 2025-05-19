@@ -89,6 +89,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/inventory-histories/stock/{outletId}', 'getStock');
             Route::get('/inventory-histories/outlet/{outletId}', 'getHistoryByOutlet');
             Route::get('/inventory-histories/type/{outletId}', 'getInventoryHistoryByType');
+            Route::get('/notifications/stock-adjustments', 'getPendingStockAdjustments');
         });
 
         Route::controller(ShiftController::class)->group(function () {
