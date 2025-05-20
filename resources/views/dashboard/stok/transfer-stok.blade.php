@@ -203,8 +203,23 @@
         return icons[categoryName] || 'package';
     }
 
+        // Fungsi untuk update informasi outlet
+    function updateOutletInfo(outlet) {
+        // Update elemen yang menampilkan nama outlet
+        const outletNameElements = document.querySelectorAll('.outlet-name');
+        outletNameElements.forEach(el => {
+            el.textContent = `Outlet Aktif: ${outlet.name || 'Tidak diketahui'}`;
+        });
+        
+        // Update elemen yang menampilkan alamat outlet
+        const outletAddressElements = document.querySelectorAll('.outlet-address');
+        outletAddressElements.forEach(el => {
+            el.textContent = outlet.address || '';
+        });
+    }
+
     // Fungsi untuk membuka modal transfer
-    async function openModalTransfer(productId, sku, produk, outletId, outletName, stok) {
+    async function openModalTransfer(productId, sku, produk, outletId, outlet, stok) {
         const modal = document.getElementById('modalTransferStock');
         
         // Set data ke form
@@ -213,7 +228,7 @@
         document.getElementById('transferProduk').textContent = produk;
         document.getElementById('stokTersedia').textContent = stok;
         document.getElementById('stokTersediaLabel').textContent = stok;
-        document.getElementById('outletAsal').textContent = outletName;
+        document.getElementById('outletAsal').textContent = outlet;
         document.getElementById('sourceOutletId').value = outletId;
         document.getElementById('jumlahTransfer').max = stok;
         document.getElementById('jumlahTransfer').value = '';
@@ -287,7 +302,7 @@
                     quantity: quantity,
                     user_id: userId,
                     notes: notes,
-                    date: document.getElementById('reportDateInput').value // Tambahkan tanggal transfer
+                    // date: document.getElementById('reportDateInput').value
                 })
             });
             
@@ -301,8 +316,8 @@
             showAlert('success', 'Transfer stok berhasil dilakukan');
             
             // Refresh data stok dengan tanggal dan outlet yang sedang dipilih
-            const currentDate = document.getElementById('reportDateInput').value;
-            loadProductData(currentDate);
+            // const currentDate = document.getElementById('reportDateInput').value;
+            loadProductData();
         } catch (error) {
             console.error('Transfer error:', error);
             showAlert('error', error.message || 'Gagal melakukan transfer');
@@ -379,21 +394,6 @@
                 window.lucide.createIcons();
             }
         }
-    }
-
-    // Fungsi untuk update informasi outlet
-    function updateOutletInfo(outlet) {
-        // Update elemen yang menampilkan nama outlet
-        const outletNameElements = document.querySelectorAll('.outlet-name');
-        outletNameElements.forEach(el => {
-            el.textContent = `Outlet Aktif: ${outlet.name || 'Tidak diketahui'}`;
-        });
-        
-        // Update elemen yang menampilkan alamat outlet
-        const outletAddressElements = document.querySelectorAll('.outlet-address');
-        outletAddressElements.forEach(el => {
-            el.textContent = outlet.address || '';
-        });
     }
 
     // Fungsi untuk coba lagi jika gagal
