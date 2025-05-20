@@ -12,6 +12,13 @@
       <form id="formEditMember">
         <input type="hidden" id="memberIdToEdit">
         
+        <!-- Kode Member -->
+        <div>
+          <label class="block font-medium mb-1">Kode Member <span class="text-red-500">*</span></label>
+          <input type="text" id="editKodeMember" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Kode member" required>
+          <p id="errorEditKode" class="text-red-500 text-xs mt-1 hidden">Kode member wajib diisi</p>
+        </div>
+
         <!-- Nama -->
         <div>
           <label class="block font-medium mb-1">Nama <span class="text-red-500">*</span></label>
@@ -21,33 +28,31 @@
 
         <!-- Telepon -->
         <div>
-          <label class="block font-medium mb-1">Telp <span class="text-red-500">*</span></label>
-          <input type="text" id="editTeleponMember" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="No. telp member" required>
-          <p id="errorEditTelepon" class="text-red-500 text-xs mt-1 hidden">Nomor telepon wajib diisi</p>
+          <label class="block font-medium mb-1">Telp</label>
+          <input type="text" id="editTeleponMember" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="No. telp member">
         </div>
 
         <!-- Email -->
         <div>
           <label class="block font-medium mb-1">Email</label>
-          <input type="email" id="editEmailMember" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Email member (opsional)">
+          <input type="email" id="editEmailMember" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Email member">
           <p id="errorEditEmail" class="text-red-500 text-xs mt-1 hidden">Format email tidak valid</p>
         </div>
 
         <!-- Alamat -->
         <div>
           <label class="block font-medium mb-1">Alamat</label>
-          <textarea id="editAlamatMember" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Alamat member (opsional)"></textarea>
+          <textarea id="editAlamatMember" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Alamat member"></textarea>
         </div>
 
         <!-- Jenis Kelamin -->
         <div>
-          <label class="block font-medium mb-1">Jenis Kelamin <span class="text-red-500">*</span></label>
-          <select id="editJenisKelamin" class="w-full border rounded-lg px-4 py-2 text-sm" required>
+          <label class="block font-medium mb-1">Jenis Kelamin</label>
+          <select id="editJenisKelamin" class="w-full border rounded-lg px-4 py-2 text-sm">
             <option value="">Pilih gender</option>
             <option value="male">Laki-laki</option>
             <option value="female">Perempuan</option>
           </select>
-          <p id="errorEditJenisKelamin" class="text-red-500 text-xs mt-1 hidden">Jenis kelamin wajib dipilih</p>
         </div>
       </form>
     </div>
@@ -64,9 +69,36 @@
 </div>
 
 <script>
+  // Fungsi untuk membuka modal edit dengan data member
+  function openEditMemberModal(member) {
+    document.getElementById('memberIdToEdit').value = member.id;
+    document.getElementById('editKodeMember').value = member.member_code || '';
+    document.getElementById('editNamaMember').value = member.name || '';
+    document.getElementById('editTeleponMember').value = member.phone || '';
+    document.getElementById('editEmailMember').value = member.email || '';
+    document.getElementById('editAlamatMember').value = member.address || '';
+    document.getElementById('editJenisKelamin').value = member.gender || '';
+
+    // Buka modal
+    document.getElementById('modalEditMember').classList.remove('hidden');
+    document.getElementById('modalEditMember').classList.add('flex');
+  }
+
   // Fungsi untuk validasi form edit
   function validateEditForm() {
     let isValid = true;
+
+    // Validasi kode member
+    const kodeMember = document.getElementById('editKodeMember');
+    const errorKode = document.getElementById('errorEditKode');
+    if (!kodeMember.value.trim()) {
+      errorKode.classList.remove('hidden');
+      kodeMember.classList.add('border-red-500');
+      isValid = false;
+    } else {
+      errorKode.classList.add('hidden');
+      kodeMember.classList.remove('border-red-500');
+    }
 
     // Validasi nama member
     const namaMember = document.getElementById('editNamaMember');
@@ -78,18 +110,6 @@
     } else {
       errorNama.classList.add('hidden');
       namaMember.classList.remove('border-red-500');
-    }
-
-    // Validasi telepon
-    const teleponMember = document.getElementById('editTeleponMember');
-    const errorTelepon = document.getElementById('errorEditTelepon');
-    if (!teleponMember.value.trim()) {
-      errorTelepon.classList.remove('hidden');
-      teleponMember.classList.add('border-red-500');
-      isValid = false;
-    } else {
-      errorTelepon.classList.add('hidden');
-      teleponMember.classList.remove('border-red-500');
     }
 
     // Validasi email (jika diisi)
@@ -104,29 +124,19 @@
       emailMember.classList.remove('border-red-500');
     }
 
-    // Validasi jenis kelamin
-    const jenisKelamin = document.getElementById('editJenisKelamin');
-    const errorJenisKelamin = document.getElementById('errorEditJenisKelamin');
-    if (!jenisKelamin.value) {
-      errorJenisKelamin.classList.remove('hidden');
-      jenisKelamin.classList.add('border-red-500');
-      isValid = false;
-    } else {
-      errorJenisKelamin.classList.add('hidden');
-      jenisKelamin.classList.remove('border-red-500');
-    }
-
     return isValid;
   }
 
   // Fungsi untuk submit form edit
-  function submitEditMember() {
+  async function submitEditMember() {
     if (!validateEditForm()) {
       return;
     }
 
     const btnEdit = document.getElementById('btnEditMember');
     const originalText = btnEdit.innerHTML;
+    
+    // Tampilkan loading state
     btnEdit.innerHTML = `
       <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -136,31 +146,65 @@
     `;
     btnEdit.disabled = true;
 
-    setTimeout(() => {
+    try {
       const formData = {
-        id: document.getElementById('memberIdToEdit').value,
-        nama: document.getElementById('editNamaMember').value,
-        telepon: document.getElementById('editTeleponMember').value,
-        email: document.getElementById('editEmailMember').value,
-        alamat: document.getElementById('editAlamatMember').value,
-        jenis_kelamin: document.getElementById('editJenisKelamin').value
+        name: document.getElementById('editNamaMember').value,
+        member_code: document.getElementById('editKodeMember').value,
+        phone: document.getElementById('editTeleponMember').value || null,
+        email: document.getElementById('editEmailMember').value || null,
+        address: document.getElementById('editAlamatMember').value || null,
+        gender: document.getElementById('editJenisKelamin').value || null
       };
 
-      console.log('Data member yang akan diupdate:', formData);
+      const memberId = document.getElementById('memberIdToEdit').value;
 
-      // Tutup modal
+      // Kirim data ke API
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/members/${memberId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Gagal memperbarui member');
+      }
+
+      // Jika sukses
+      showAlert('success', 'Member berhasil diperbarui');
       closeModalEdit();
 
-      // Tombol kembali ke normal
+      // Refresh data member jika diperlukan
+      if (typeof loadMembers === 'function') {
+        loadMembers();
+      }
+
+    } catch (error) {
+      console.error('Error:', error);
+      showAlert('error', error.message);
+    } finally {
+      // Kembalikan tombol ke state awal
       btnEdit.innerHTML = originalText;
       btnEdit.disabled = false;
-    }, 1500);
+    }
   }
 
-  // Event listener tombol edit
-  document.getElementById('btnEditMember')?.addEventListener('click', function () {
-    submitEditMember(new Event('submit'));
-  });
+  // Fungsi untuk menutup modal edit
+  function closeModalEdit() {
+    document.getElementById('modalEditMember').classList.add('hidden');
+    document.getElementById('modalEditMember').classList.remove('flex');
+  }
+
+  // Event listener untuk tombol edit
+  document.getElementById('btnEditMember')?.addEventListener('click', submitEditMember);
+
+  // Event listener untuk tombol batal
+  document.getElementById('btnBatalModalEdit')?.addEventListener('click', closeModalEdit);
 
   // Submit form saat tekan enter
   document.querySelectorAll('#modalEditMember input').forEach(input => {

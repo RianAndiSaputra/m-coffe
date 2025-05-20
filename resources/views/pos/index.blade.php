@@ -312,7 +312,7 @@
         let scanTimeout;
         let lastScanTime = 0;
         const SCAN_THRESHOLD = 100; // waktu maksimal antara karakter scan (ms)
-        const MIN_BARCODE_LENGTH = 13; // panjang minimal barcode
+        const MIN_BARCODE_LENGTH = 3; // panjang minimal barcode
 
         const outletName = localStorage.getItem('outlet_name') || 'Kifa Bakery Pusat';
     

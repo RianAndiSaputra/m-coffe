@@ -36,11 +36,11 @@
         <!-- Summary Cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border-b">
             <div class="bg-orange-50 p-4 rounded-lg">
-                <div class="text-sm text-orange-600 font-medium">Total Transaksi</div>
+                <div class="text-sm text-orange-600 font-medium">jumlah Transaksi</div>
                 <div id="totalOrders" class="text-2xl font-bold text-orange-700">0</div>
             </div>
             <div class="bg-green-50 p-4 rounded-lg">
-                <div class="text-sm text-green-600 font-medium">Total Pendapatan</div>
+                <div class="text-sm text-green-600 font-medium">Total Transaksi</div>
                 <div id="totalRevenue" class="text-2xl font-bold text-green-700">Rp 0</div>
             </div>
             <div class="bg-blue-50 p-4 rounded-lg">

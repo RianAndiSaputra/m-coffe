@@ -725,14 +725,24 @@ const ProductManager = (() => {
     
             // Validasi input
             const namaProduk = form.querySelector('[name="name"]').value.trim();
+            const sku = form.querySelector('[name="sku"]').value.trim();
             const harga = form.querySelector('[name="price"]').value.trim();
             const kategori = form.querySelector('[name="category_id"]').value.trim();
             const outletCheckboxes = form.querySelectorAll('input[name="outlet_ids[]"]:checked');
-    
+            
+
             if (!namaProduk) throw new Error("Nama produk harus diisi");
+            if (!sku) throw new Error("SKU harus diisi");
             if (!harga) throw new Error("Harga harus diisi");
             if (!kategori) throw new Error("Kategori harus dipilih");
             if (outletCheckboxes.length === 0) throw new Error("Pilih minimal satu outlet");
+            
+
+            // Optional: Validasi format SKU jika diperlukan
+            // Contoh: SKU harus alfanumerik dan panjang minimal 3 karakter
+            // if (!/^[a-zA-Z0-9]{3,}$/.test(sku)) {
+            //     throw new Error("SKU harus alfanumerik dan minimal 3 karakter");
+            // }
     
             // Prepare form data
             const formData = new FormData(form);

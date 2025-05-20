@@ -495,7 +495,7 @@ class ProductController extends Controller
         }
     }
    
-        public function posFindByBarcode(Request $request, $outletId, $barcode)
+    public function posFindByBarcode(Request $request, $outletId, $barcode)
     {
         try {
             $outlet = Outlet::findOrFail($outletId);
