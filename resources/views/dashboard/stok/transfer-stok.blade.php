@@ -371,9 +371,24 @@
 
             // Update informasi outlet
             updateOutletInfo(result.outlet || {});
+
+            const outletResponse = await fetch(`/api/outlets/${outletId}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Accept': 'application/json'
+                }
+            });
+            const outletResult = await outletResponse.json();
+            
+            if (!outletResult.success) {
+                throw new Error(outletResult.message || 'Gagal memuat detail outlet');
+            }
+
+            // Update informasi outlet dengan data yang benar
+            updateOutletInfo(outletResult.data || {});
             
             // Render tabel produk
-            renderProductTable(result.data, outletId, result.outlet?.name || 'Outlet');
+            renderProductTable(result.data, outletId, outletResult.data?.name || 'Outlet');
         } catch (error) {
             console.error('Error loading data:', error);
             document.getElementById('productTableBody').innerHTML = `
@@ -464,10 +479,15 @@
                         </div>
                     </td>
                     <td class="py-4">
-                        <button onclick="openModalTransfer('${product.id}', '${product.sku}', '${product.name}', ${outletId}, '${outletName}', ${product.quantity})" 
-                            class="px-3 py-1.5 text-sm font-medium text-white bg-orange-500 rounded-md hover:bg-orange-600 flex items-center gap-2"
-                            ${product.quantity <= 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
-                            <i data-lucide="truck" class="w-4 h-4"></i> Transfer
+                        <button onclick="openModalTransfer(
+                            '${product.id}', 
+                            '${product.sku}', 
+                            '${product.name}', 
+                            ${outletId}, 
+                            '${outletName.replace(/'/g, "\\'")}', // Handle apostrophes
+                            ${product.quantity})" 
+                            class="...">
+                            <i data-lucide="truck" class="..."></i> Transfer
                         </button>
                     </td>
                 </tr>
