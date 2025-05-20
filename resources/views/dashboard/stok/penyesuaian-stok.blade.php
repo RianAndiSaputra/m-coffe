@@ -15,7 +15,7 @@
 <!-- Page Title + Action -->
 <div class="mb-6">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <h1 class="text-2xl font-extrabold text-gray-800">MANAJEMEN STOK</h1>
+        <h1 class="text-2xl font-extrabold text-gray-800">Penyesuaian Stok</h1>
         <div class="relative w-full md:w-64">
         <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>

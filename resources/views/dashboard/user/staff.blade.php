@@ -978,6 +978,18 @@
         });
     }
 
+     document.getElementById('btnBatalModalTambahStaff').addEventListener('click', closeModalTambahStaff);
+
+  function closeModalTambahStaff() {
+    document.getElementById('modalTambahStaff').classList.add('hidden');
+  }
+
+  document.getElementById('btnBatalModalEditStaff').addEventListener('click', closeModalEditStaff);
+
+function closeModalEditStaff() {
+  document.getElementById('modalEditStaff').classList.add('hidden');
+}
+
     function hapusStaff() {
         if (!staffIdToDelete) return;
 

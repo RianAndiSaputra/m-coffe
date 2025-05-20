@@ -49,19 +49,21 @@
         <!-- Shift -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block font-medium mb-1">Waktu Mulai</label>
-            <input type="time" id="waktuMulai" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="--.--">
+            <label class="block font-medium mb-1">Waktu Mulai <span class="text-red-500">*</span></label>
+            <input type="time" id="waktuMulai" class="w-full border rounded-lg px-4 py-2 text-sm" required>
+            <p id="errorWaktuMulai" class="text-red-500 text-xs mt-1 hidden">Waktu mulai wajib diisi</p>
           </div>
           <div>
-            <label class="block font-medium mb-1">Waktu Selesai</label>
-            <input type="time" id="waktuSelesai" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="--.--">
+            <label class="block font-medium mb-1">Waktu Selesai <span class="text-red-500">*</span></label>
+            <input type="time" id="waktuSelesai" class="w-full border rounded-lg px-4 py-2 text-sm" required>
+            <p id="errorWaktuSelesai" class="text-red-500 text-xs mt-1 hidden">Waktu selesai wajib diisi</p>
           </div>
         </div>
 
-     <!-- Outlet -->
+        <!-- Outlet -->
         <div>
-          <label class="block font-medium mb-1">Outlet</label>
-          <select id="outletStaff" data-url="{{ url('/api/outlets') }}" class="w-full border rounded-lg px-4 py-2 text-sm">
+          <label class="block font-medium mb-1">Outlet <span class="text-red-500">*</span></label>
+          <select id="outletStaff" data-url="{{ url('/api/outlets') }}" class="w-full border rounded-lg px-4 py-2 text-sm" required>
             <option value="" disabled selected>Memuat outlet...</option>
           </select>
           <p id="errorOutletStaff" class="text-red-500 text-xs mt-1 hidden">Outlet wajib dipilih</p>

@@ -66,7 +66,7 @@ class MemberController extends Controller
             return $this->successResponse($member, "Member created successfully");
         } catch (\Throwable $th) {
             DB::rollBack();
-            return $this->errorResponse($th->getMessage());
+            return $this->errorResponse('Terjadi kesalahan saat menyimpan data. Silakan coba lagi.');
         }
     }
 

@@ -815,8 +815,8 @@
                 
                 const matchesCategory = filterCategory === 'all' || productCategory === filterCategory;
                 const matchesSearch =
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (product.barcode && product.barcode.toLowerCase().includes(searchTerm.toLowerCase()));
+                    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    (product.barcode && product.barcode.toLowerCase().includes(searchTerm.toLowerCase()));
 
                 return matchesCategory && matchesSearch;
             });
@@ -871,18 +871,13 @@
                 `;
                 
                 productsContainer.appendChild(productElement);
-                
-
             });
-            
-            console.log('filteredProducts: ',filteredProducts)
             
             // Refresh Lucide icons
             lucide.createIcons();
             
             // Add event listeners to all "Add to Cart" buttons
             document.querySelectorAll('.btn-add-to-cart').forEach(button => {
-                // Di event listener tombol tambah ke keranjang
                 button.addEventListener('click', function() {
                     const productCard = this.closest('.product-card');
                     const productName = productCard.querySelector('.product-name').textContent.split(' (')[0];
@@ -911,13 +906,28 @@
                             name: product.name,
                             price: product.price,
                             quantity: 1,
-                            stock: product.quantity, // Simpan stok saat ini
+                            stock: product.quantity,
                             discount: 0,
                             subtotal: product.price
                         });
                     }
                     
+                    // Update stok produk secara realtime
+                    product.quantity -= 1;
+                    
+                    // Update tampilan keranjang
                     updateCart();
+                    
+                    // Render ulang produk untuk update stok secara instan
+                    const activeFilter = document.querySelector('.category-filter button.active')?.dataset.filter || 'all';
+                    const currentSearch = document.getElementById('searchProduct')?.value || '';
+                    renderProducts(activeFilter, currentSearch);
+                    
+                    // Update tombol jika stok habis
+                    if (product.quantity <= 0) {
+                        this.innerHTML = 'Habis';
+                        this.className = 'bg-gray-100 text-gray-500 border border-gray-300 rounded px-4 py-2 text-sm w-24';
+                    }
                 });
             });
         }
