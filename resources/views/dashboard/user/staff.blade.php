@@ -38,7 +38,7 @@
     <div class="mb-3 md:mb-0 flex items-start gap-2">
         <i data-lucide="users" class="w-5 h-5 text-gray-600 mt-1"></i>
         <div>
-            <h2 class="text-lg font-semibold text-gray-800">Daftar Staff</h2>
+            <h2 class="text-lg font-semibold text-gray-800 outlet-name">Loading...</h2>
             <p class="text-sm text-gray-600">Kelola staff dan penugasan shift.</p>
         </div>
     </div>
@@ -93,7 +93,6 @@
 @include('partials.staf.modal-edit')
 
 <script>
-    // Global variables
     let currentOutletId = 1; // Default outlet ID, adjust as needed
     let staffIdToDelete = null;
     let currentEditStaffId = null;
@@ -106,8 +105,32 @@
     const staffTableBody = document.getElementById('staffTableBody');
     const searchInput = document.getElementById('searchInput');
 
+    // Function to get currently selected outlet ID
+    function getSelectedOutletId() {
+        // First check URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const outletIdFromUrl = urlParams.get('outlet_id');
+        
+        if (outletIdFromUrl) {
+            return outletIdFromUrl;
+        }
+        
+        // Then check localStorage
+        const savedOutletId = localStorage.getItem('selectedOutletId');
+        
+        if (savedOutletId) {
+            return savedOutletId;
+        }
+        
+        // Default to outlet ID 1 if nothing is found
+        return 1;
+    }
+
     // Initialize the page
     document.addEventListener('DOMContentLoaded', function() {
+        // Get dynamic outlet ID
+        currentOutletId = getSelectedOutletId();
+        
         // Load staff data
         loadStaffData();
         
@@ -119,71 +142,169 @@
         // Setup event listeners
         setupEventListeners();
         setupRealTimeSearch();
+        
+        // Connect outlet selection to staff management
+        connectOutletSelectionToStaff();
+        
+        // Update outlet info display
+        updateOutletInfoDisplay();
     });
+
+    // Connect to outlet selection dropdown
+    function connectOutletSelectionToStaff() {
+        // Listen for outlet changes in localStorage
+        window.addEventListener('storage', function(event) {
+            if (event.key === 'selectedOutletId') {
+                currentOutletId = event.newValue;
+                loadStaffData();
+                updateOutletInfoDisplay();
+            }
+        });
+        
+        // Also watch for clicks on outlet items in dropdown
+        const outletListContainer = document.getElementById('outletListContainer');
+        if (outletListContainer) {
+            outletListContainer.addEventListener('click', function(event) {
+                // Find the clicked li element
+                let targetElement = event.target;
+                while (targetElement && targetElement !== outletListContainer && targetElement.tagName !== 'LI') {
+                    targetElement = targetElement.parentElement;
+                }
+                
+                // If we clicked on an outlet list item
+                if (targetElement && targetElement.tagName === 'LI') {
+                    // Update staff data after a short delay to allow your existing code to complete
+                    setTimeout(() => {
+                        currentOutletId = getSelectedOutletId();
+                        loadStaffData();
+                        updateOutletInfoDisplay();
+                    }, 100);
+                }
+            });
+        }
+        
+        // Watch for direct outlet selection (if there's a direct outlet selector on this page)
+        const outletSelector = document.getElementById('outletSelector');
+        if (outletSelector) {
+            outletSelector.addEventListener('change', function(event) {
+                currentOutletId = event.target.value;
+                localStorage.setItem('selectedOutletId', currentOutletId);
+                loadStaffData();
+                updateOutletInfoDisplay();
+            });
+        }
+    }
+
+    // Update outlet info display
+    async function updateOutletInfoDisplay() {
+        try {
+            const response = await fetch(`/api/outlets/${currentOutletId}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Accept': 'application/json'
+                }
+            });
+            
+            const { data, success } = await response.json();
+            
+            if (success && data) {
+                // Update outlet name displays
+                const outletElements = document.querySelectorAll('.outlet-name');
+                outletElements.forEach(el => {
+                    el.textContent = `Daftar staff: ${data.name}`;
+                });
+                
+                // Update outlet address displays
+                const addressElements = document.querySelectorAll('.outlet-address');
+                addressElements.forEach(el => {
+                    el.textContent = data.address || '';
+                });
+                
+                // Update page title if exists
+                const pageTitleElement = document.querySelector('.page-title');
+                if (pageTitleElement) {
+                    pageTitleElement.textContent = `Staff Management - ${data.name}`;
+                }
+                
+                // Update any outlet info cards
+                const outletInfoCards = document.querySelectorAll('.outlet-info-card');
+                outletInfoCards.forEach(card => {
+                    const nameElement = card.querySelector('.outlet-card-name');
+                    const addressElement = card.querySelector('.outlet-card-address');
+                    
+                    if (nameElement) nameElement.textContent = data.name;
+                    if (addressElement) addressElement.textContent = data.address || 'Alamat tidak tersedia';
+                });
+            }
+        } catch (error) {
+            console.error('Failed to fetch outlet details:', error);
+        }
+    }
 
     async function loadProductData(outletId) {
         try {
+            // Update current outlet ID
+            currentOutletId = outletId;
+            
             // Sembunyikan dropdown outlet setelah memilih
             const outletDropdown = document.getElementById('outletDropdown');
             if (outletDropdown) outletDropdown.classList.add('hidden');
             
-            // Ambil tanggal terpilih atau gunakan hari ini
-            const datePicker = document.getElementById('reportDateInput');
-            const selectedDate = datePicker ? datePicker.value : new Date().toISOString().split('T')[0];
+            // Load staff data for the selected outlet
+            loadStaffData();
             
-            // Panggil fungsi yang sudah ada untuk memuat data inventory
-            loadStaffData(selectedDate);
+            // Update outlet info display
+            updateOutletInfoDisplay();
             
             // Jika perlu menyimpan outlet yang dipilih
             localStorage.setItem('selectedOutletId', outletId);
-            currentOutletId = outletId;
             
         } catch (error) {
             console.error('Error loading product data:', error);
-            showAlert('error', 'Gagal memuat data produk');
+            showAlert('error', 'Gagal memuat data outlet');
         }
     }
 
     // Tambahkan fungsi ini di bagian setup atau fungsi inisialisasi
     async function loadOutlets() {
-    try {
-        const outletSelect = document.getElementById('outletStaff');
-        const url = outletSelect.getAttribute('data-url');
-        
-        // Set loading state
-        outletSelect.innerHTML = '<option value="" disabled selected>Memuat outlet...</option>';
-        
-        const response = await fetch(url, {
-        headers: {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        try {
+            const outletSelect = document.getElementById('outletStaff');
+            const url = outletSelect.getAttribute('data-url');
+            
+            // Set loading state
+            outletSelect.innerHTML = '<option value="" disabled selected>Memuat outlet...</option>';
+            
+            const response = await fetch(url, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            
+            if (!response.ok) throw new Error('Gagal memuat outlet');
+            
+            const data = await response.json();
+            
+            if (data.success && data.data.length > 0) {
+                outletSelect.innerHTML = '<option value="" disabled selected>Pilih Outlet</option>';
+                
+                data.data.forEach(outlet => {
+                    outletSelect.innerHTML += `<option value="${outlet.id}">${outlet.name}</option>`;
+                });
+                
+                // Set default value to current outlet
+                if (currentOutletId) {
+                    outletSelect.value = currentOutletId;
+                }
+            } else {
+                outletSelect.innerHTML = '<option value="" disabled selected>Tidak ada outlet tersedia</option>';
+            }
+        } catch (error) {
+            console.error('Error loading outlets:', error);
+            const outletSelect = document.getElementById('outletStaff');
+            outletSelect.innerHTML = '<option value="" disabled selected>Gagal memuat outlet</option>';
+            showAlert('error', 'Gagal memuat daftar outlet');
         }
-        });
-        
-        if (!response.ok) throw new Error('Gagal memuat outlet');
-        
-        const data = await response.json();
-        
-        if (data.success && data.data.length > 0) {
-        outletSelect.innerHTML = '<option value="" disabled selected>Pilih Outlet</option>';
-        
-        data.data.forEach(outlet => {
-            outletSelect.innerHTML += `<option value="${outlet.id}">${outlet.name}</option>`;
-        });
-        
-        // Set default value jika currentOutletId ada
-        if (currentOutletId) {
-            outletSelect.value = currentOutletId;
-        }
-        } else {
-        outletSelect.innerHTML = '<option value="" disabled selected>Tidak ada outlet tersedia</option>';
-        }
-    } catch (error) {
-        console.error('Error loading outlets:', error);
-        const outletSelect = document.getElementById('outletStaff');
-        outletSelect.innerHTML = '<option value="" disabled selected>Gagal memuat outlet</option>';
-        showAlert('error', 'Gagal memuat daftar outlet');
-    }
     }
 
     async function loadOutletsForEdit() {
@@ -192,10 +313,10 @@
             const url = outletSelect.getAttribute('data-url');
             
             const response = await fetch(url, {
-            headers: {
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
             });
             
             if (!response.ok) throw new Error('Gagal memuat outlet');
@@ -203,20 +324,20 @@
             const data = await response.json();
             
             if (data.success && data.data.length > 0) {
-            outletSelect.innerHTML = '';
-            
-            data.data.forEach(outlet => {
-                outletSelect.innerHTML += `<option value="${outlet.id}">${outlet.name}</option>`;
-            });
+                outletSelect.innerHTML = '';
+                
+                data.data.forEach(outlet => {
+                    outletSelect.innerHTML += `<option value="${outlet.id}">${outlet.name}</option>`;
+                });
             } else {
-            outletSelect.innerHTML = '<option value="" disabled selected>Tidak ada outlet tersedia</option>';
+                outletSelect.innerHTML = '<option value="" disabled selected>Tidak ada outlet tersedia</option>';
             }
         } catch (error) {
             console.error('Error loading outlets:', error);
             const outletSelect = document.getElementById('editOutletStaff');
             outletSelect.innerHTML = '<option value="" disabled selected>Gagal memuat outlet</option>';
         }
-        }
+    }
 
     // Setup event listeners
     function setupEventListeners() {
@@ -233,6 +354,23 @@
 
     // Load staff data from API
     function loadStaffData() {
+        // Show loading state in the table
+        staffTableBody.innerHTML = `
+            <tr>
+                <td colspan="4" class="py-8 text-center text-gray-500">
+                    <div class="flex items-center justify-center gap-2">
+                        <svg class="animate-spin h-5 w-5 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Memuat data staff...
+                    </div>
+                </td>
+            </tr>
+        `;
+
+        console.log(`Loading staff data for outlet ID: ${currentOutletId}`);
+        
         fetch(`/api/user/all/${currentOutletId}`, {
             headers: {
                 'Accept': 'application/json',
@@ -248,13 +386,47 @@
         .then(data => {
             if (data.success) {
                 renderStaffTable(data.data);
+                
+                // Update outlet information if available in response
+                if (data.data.length > 0 && data.data[0].outlet) {
+                    updateOutletInfoFromData(data.data[0].outlet);
+                }
             } else {
                 showAlert('error', 'Gagal memuat data staff');
+                staffTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="py-4 text-center text-red-500">
+                            Gagal memuat data staff
+                        </td>
+                    </tr>
+                `;
             }
         })
         .catch(error => {
             console.error('Error loading staff data:', error);
             showAlert('error', 'Gagal memuat data staff');
+            staffTableBody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="py-4 text-center text-red-500">
+                        Terjadi kesalahan saat memuat data
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    // Update outlet info from staff data response
+    function updateOutletInfoFromData(outletData) {
+        // Update outlet name displays
+        const outletElements = document.querySelectorAll('.outlet-name');
+        outletElements.forEach(el => {
+            el.textContent = `Daftar staff: ${outletData.name}`;
+        });
+        
+        // Update outlet address displays
+        const addressElements = document.querySelectorAll('.outlet-address');
+        addressElements.forEach(el => {
+            el.textContent = outletData.address || '';
         });
     }
 
@@ -265,11 +437,20 @@
         if (staffList.length === 0) {
             staffTableBody.innerHTML = `
                 <tr>
-                    <td colspan="4" class="py-4 text-center text-gray-500">
-                        Tidak ada data staff
+                    <td colspan="4" class="py-8 text-center text-gray-500">
+                        <div class="flex flex-col items-center gap-2">
+                            <i data-lucide="users" class="w-8 h-8 text-gray-400"></i>
+                            <span>Tidak ada data staff untuk outlet ini</span>
+                            <span class="text-sm text-gray-400">Klik "Tambah Staff" untuk menambahkan staff baru</span>
+                        </div>
                     </td>
                 </tr>
             `;
+            
+            // Refresh Lucide icons for the empty state
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
             return;
         }
         
@@ -285,7 +466,7 @@
                 '--:-- - --:--';
             
             staffTableBody.innerHTML += `
-                <tr data-id="${staff.id}">
+                <tr data-id="${staff.id}" class="border-b hover:bg-gray-50 transition-colors">
                     <td class="py-4">
                         <div class="flex items-center gap-4">
                             <div class="bg-orange-100 p-2 rounded-full">
@@ -294,24 +475,27 @@
                             <div>
                                 <div class="font-semibold text-base text-gray-900">${staff.name}</div>
                                 <div class="text-sm text-gray-500">${staff.email}</div>
+                                ${staff.outlet ? `<div class="text-xs text-gray-400">Outlet: ${staff.outlet.name}</div>` : ''}
                             </div>
                         </div>
                     </td>
                     <td class="py-4">
                         <span class="px-3 py-1.5 text-sm font-medium ${roleClass} rounded-full capitalize">${staff.role}</span>
                     </td>
-                    <td class="py-4">${shiftTime}</td>
+                    <td class="py-4">
+                        <span class="text-sm text-gray-600">${shiftTime}</span>
+                    </td>
                     <td class="py-4 relative">
                         <div class="relative inline-block">
-                            <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded-lg">
+                            <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                                 <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
                             </button>
                             <!-- Dropdown -->
                             <div class="dropdown-menu hidden absolute right-0 z-20 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-base">
-                                <button onclick="editStaff(${staff.id})" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left rounded-t-lg">
+                                <button onclick="editStaff(${staff.id})" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left rounded-t-lg transition-colors">
                                     <i data-lucide="pencil" class="w-5 h-5 mr-3 text-gray-500"></i> Edit
                                 </button>
-                                <button onclick="showConfirmDelete(${staff.id})" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left text-red-600 rounded-b-lg">
+                                <button onclick="showConfirmDelete(${staff.id})" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left text-red-600 rounded-b-lg transition-colors">
                                     <i data-lucide="trash-2" class="w-5 h-5 mr-3"></i> Hapus
                                 </button>
                             </div>

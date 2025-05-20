@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Inventory;
-use App\Models\InventoryHistory;
 use App\Models\Outlet;
 use App\Models\Product;
+use Milon\Barcode\DNS1D;
+use App\Models\Inventory;
 use App\Traits\ApiResponse;
-use Illuminate\Container\Attributes\Log;
 use Illuminate\Http\Request;
+use App\Models\InventoryHistory;
+use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log as FacadesLog;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+// use Illuminate\Container\Attributes\Log;
+use Illuminate\Support\Facades\Log;
+
 
 class ProductController extends Controller
 {
@@ -439,46 +443,7 @@ class ProductController extends Controller
         }
     }
 
-    // public function getOutletProductsPos(Request $request)
-    // {
-    //     try {
-    //         $user = $request->user(); // Dapatkan user saat ini
-    //         $outlet = Outlet::findOrFail($user->outlet_id);
-
-    //         // Cek apakah user adalah kasir
-    //         $isCashier = $user->role === 'kasir';
-    //         $products = $outlet->products()
-    //             ->with(['category'])
-    //             ->withPivot(['quantity', 'min_stock'])
-    //             ->when($isCashier, function ($query) {
-    //                 return $query->where('is_active', true); // Hanya produk aktif untuk kasir
-    //             })
-    //             ->get()
-    //             ->map(function ($product) {
-    //                 return [
-    //                     'id' => $product->id,
-    //                     'name' => $product->name,
-    //                     'sku' => $product->sku,
-    //                     'description' => $product->description,
-    //                     'price' => $product->price,
-    //                     'image' => asset('storage/' . $product->image),
-    //                     'is_active' => $product->is_active,
-    //                     'category' => [
-    //                         'id' => $product->category->id,
-    //                         'name' => $product->category->name,
-    //                     ],
-    //                     'min_stock' => $product->pivot->min_stock,
-    //                     'quantity' => $product->pivot->quantity,
-    //                 ];
-    //             });
-
-    //         return $this->successResponse($products, 'Products retrieved successfully');
-    //     } catch (\Throwable $th) {
-    //         return $this->errorResponse($th->getMessage());
-    //     }
-    // }
-
-     public function findByBarcode(Request $request, $barcode)
+    public function findByBarcode(Request $request, $barcode)
     {
         try {
             $product = Product::with(['category', 'inventory'])
@@ -498,28 +463,76 @@ class ProductController extends Controller
     public function posFindByBarcode(Request $request, $outletId, $barcode)
     {
         try {
-            $outlet = Outlet::findOrFail($outletId);
-            $product = $outlet->products()
+            // Validasi barcode
+            if (empty($barcode) || strlen($barcode) < 8) {
+                return $this->errorResponse('Invalid barcode format', 400);
+            }
+
+            // Method 1: Jika menggunakan many-to-many dengan pivot table
+            $product = Outlet::findOrFail($outletId)
+                ->products()
                 ->where('barcode', $barcode)
                 ->where('is_active', true)
+                ->wherePivot('quantity', '>', 0) // Gunakan wherePivot untuk pivot table
                 ->with(['category'])
                 ->first();
 
+            // Method 2: Alternative jika struktur berbeda
+            
+            // $product = Product::where('barcode', $barcode)
+            //     ->where('is_active', true)
+            //     ->whereHas('outlets', function($query) use ($outletId) {
+            //         $query->where('outlet_id', $outletId)
+            //             ->where('quantity', '>', 0);
+            //     })
+            //     ->with(['category'])
+            //     ->first();
+            
+
             if (!$product) {
-                return $this->errorResponse('Product not found or inactive', 404);
+                // Log untuk debugging
+                Log::warning('Product not found', [
+                    'barcode' => $barcode,
+                    'outlet' => $outletId,
+                    'user' => auth()->id()
+                ]);
+                
+                return $this->errorResponse('Product not found or out of stock', 404);
             }
+
+            // Log sukses
+            Log::info('Barcode scanned successfully', [
+                'barcode' => $barcode,
+                'product_id' => $product->id,
+                'outlet' => $outletId,
+                'user' => auth()->id()
+            ]);
 
             return $this->successResponse([
                 'id' => $product->id,
                 'name' => $product->name,
                 'price' => $product->price,
                 'barcode' => $product->barcode,
-                'quantity' => $product->pivot->quantity ?? 0,
-                'category' => $product->category->name,
-                'image_url' => $product->image_url
+                'stock' => $product->pivot->quantity,
+                'min_stock' => $product->min_stock,
+                'category' => $product->category->name ?? 'Uncategorized',
+                'image_url' => $product->image_url ? asset('storage/'.$product->image_url) : null
             ], 'Product found');
+
+        } catch (ModelNotFoundException $e) {
+            Log::error('Outlet not found', [
+                'outlet_id' => $outletId,
+                'error' => $e->getMessage()
+            ]);
+            return $this->errorResponse('Outlet not found', 404);
         } catch (\Throwable $th) {
-            return $this->errorResponse($th->getMessage());
+            Log::error('Server error in posFindByBarcode', [
+                'barcode' => $barcode,
+                'outlet' => $outletId,
+                'error' => $th->getMessage(),
+                'trace' => $th->getTraceAsString()
+            ]);
+            return $this->errorResponse('Server error: '.$th->getMessage(), 500);
         }
     }
 
@@ -543,5 +556,30 @@ class ProductController extends Controller
         } while (Product::where('barcode', $barcode)->exists());
 
         return $barcode;
+    }
+
+    public function generateBarcodeImage($code)
+    {
+        try {
+            $barcode = new DNS1D();
+            $barcode->setStorPath(public_path('barcodes'));
+
+            $barcodeDir = public_path('barcodes');
+            if (!File::exists($barcodeDir)) {
+                File::makeDirectory($barcodeDir, 0755, true);
+            }
+
+            $barcodeImage = $barcode->getBarcodePNG($code, 'C39');
+            $filePath = public_path("barcodes/{$code}.png");
+            File::put($filePath, base64_decode($barcodeImage));
+            
+            return response()->json([
+                'status' => true,
+                'message' => 'Barcode image generated successfully',
+                'image_url' => asset("barcodes/{$code}.png")
+            ]);
+        } catch (\Throwable $th) {
+            return $this->errorResponse($th->getMessage());
+        }
     }
 }

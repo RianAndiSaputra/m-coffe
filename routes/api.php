@@ -32,6 +32,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::controller(ShiftController::class)->group(function(){
         Route::get('/shifts/{shift}', 'show');
     });
+
+    Route::get('/products/barcode-image/{code}', [ProductController::class, 'generateBarcodeImage']);
     
     Route::middleware('role:admin,supervisor')->group(function () {
         
