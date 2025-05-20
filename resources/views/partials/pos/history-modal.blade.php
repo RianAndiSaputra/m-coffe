@@ -703,11 +703,11 @@
                     /* Reset dan base styling */
                     * {
                         font-weight: 'bold';
-                        font-size: 18px;
                         font-family: 'Courier New', monospace;
                     }
                     
                     body {
+                        font-weight: 'bold';
                         font-size: 18px;
                         color: #000;
                     }
@@ -723,21 +723,27 @@
                     }
                     
                     .logo-container {
-                        width: 60px;
-                        height: 60px;
+                        width: 70px;  /* Sedikit lebih besar untuk thermal printer */
+                        height: 70px;
                         display: flex;
                         align-items: center;
                         justify-content: center;
+                        padding: 3px;  /* Padding untuk mencegah clipping */
+                        background-color: white;  /* Pastikan background putih */
                     }
                     
                     .logo {
                         max-width: 100%;
                         max-height: 100%;
                         object-fit: contain;
+                        filter: grayscale(100%) contrast(200%);  /* Buat hitam putih dengan kontras tinggi */
+                        -webkit-filter: grayscale(100%) contrast(200%);
                     }
                     
                     .header-text {
                         flex: 1;
+                        font-weight: bold;
+                        font-size: 18px;
                         text-align: right;
                     }
                     
@@ -749,6 +755,7 @@
                     
                     .company-info {
                         font-size: 18px;
+                        font-weight: bold;
                         line-height: 1.3;
                     }
                     
@@ -761,6 +768,7 @@
                     /* Transaction info */
                     .transaction-info {
                         margin-bottom: 10px;
+                        font-weight: bold;
                     }
                     
                     .info-row {
@@ -785,16 +793,20 @@
                     }
                     
                     .item-name {
+                        font-weight: bold;
+                        font-size: 18px;
                         flex: 2;
                     }
                     
                     .item-price {
                         flex: 1;
+                        font-weight: bold;
                         text-align: right;
                     }
                     
                     /* Totals */
                     .totals {
+                        font-weight: bold;
                         margin-top: 10px;
                     }
                     
@@ -806,7 +818,7 @@
                     
                     .grand-total {
                         font-weight: bold;
-                        font-size: 15px;
+                        font-size: 20px;
                         margin-top: 8px;
                         padding-top: 5px;
                         border-top: 1px dashed #000;
@@ -814,11 +826,13 @@
                     
                     /* Payment info */
                     .payment-info {
+                        font-weight: bold;
                         margin-top: 10px;
                     }
                     
                     /* Footer */
                     .receipt-footer {
+                        font-weight: bold;
                         margin-top: 15px;
                         text-align: center;
                         font-size: 12px;
@@ -846,7 +860,8 @@
                         <img src="${logoPath}" 
                             alt="Logo Toko" 
                             class="logo"
-                            onerror="this.style.display='none'">
+                            onerror="this.style.display='none'"
+                            style="width: auto; height: auto; max-width: 65px; max-height: 65px;">
                     </div>
                     <div class="header-text">
                         <div class="company-name">${templateData.company_name || outletData.name || 'TOKO ANDA'}</div>
@@ -1003,92 +1018,92 @@
         document.getElementById(id).classList.add('hidden');
     }
 
-function lihatDetail(nomorInvoice) {
-    const t = semuaTransaksi.find(x => x.invoice === nomorInvoice);
-    if (!t) return alert('Transaksi tidak ditemukan');
+    function lihatDetail(nomorInvoice) {
+        const t = semuaTransaksi.find(x => x.invoice === nomorInvoice);
+        if (!t) return alert('Transaksi tidak ditemukan');
 
-    // Helper function yang lebih baik untuk handle number
-    const safeNumber = (value) => {
-        if (value === null || value === undefined) return 0;
-        if (typeof value === 'number') return isNaN(value) ? 0 : value;
-        if (typeof value === 'string') {
-            // Handle string dengan % (persen)
-            if (value.includes('%')) {
-                const num = parseFloat(value.replace('%', '').trim());
+        // Helper function yang lebih baik untuk handle number
+        const safeNumber = (value) => {
+            if (value === null || value === undefined) return 0;
+            if (typeof value === 'number') return isNaN(value) ? 0 : value;
+            if (typeof value === 'string') {
+                // Handle string dengan % (persen)
+                if (value.includes('%')) {
+                    const num = parseFloat(value.replace('%', '').trim());
+                    return isNaN(num) ? 0 : num;
+                }
+                // Handle string angka biasa
+                const num = parseFloat(value.replace(/[^0-9.-]/g, ''));
                 return isNaN(num) ? 0 : num;
             }
-            // Handle string angka biasa
-            const num = parseFloat(value.replace(/[^0-9.-]/g, ''));
-            return isNaN(num) ? 0 : num;
+            return 0;
+        };
+
+        // Header
+        document.getElementById('modalInvoice').textContent = t.invoice || t.order_number || '-';
+        document.getElementById('modalDate').textContent = formatWaktu(t.waktu || t.created_at || '');
+        
+        // Status
+        const statusEl = document.getElementById('modalStatus');
+        statusEl.textContent = t.status || '-';
+        statusEl.className = `inline-block px-3 py-1 rounded-full text-xs font-medium ${getClassStatus(t.status || '')}`;
+
+        // Items
+        const itemsEl = document.getElementById('modalItems');
+        if (t.items && t.items.length > 0) {
+            itemsEl.innerHTML = t.items.map(i => `
+                <tr>
+                    <td class="px-3 py-2">${i.product || '-'}</td>
+                    <td class="px-3 py-2">${i.quantity || 0}x</td>
+                    <td class="px-3 py-2">Rp ${formatUang(safeNumber(i.price))}</td>
+                    <td class="px-3 py-2">Rp ${formatUang(safeNumber(i.price) * safeNumber(i.quantity))}</td>
+                </tr>
+            `).join('');
+        } else {
+            itemsEl.innerHTML = '<tr><td colspan="4" class="px-3 py-2 text-center text-gray-500">Tidak ada item</td></tr>';
         }
-        return 0;
-    };
 
-    // Header
-    document.getElementById('modalInvoice').textContent = t.invoice || t.order_number || '-';
-    document.getElementById('modalDate').textContent = formatWaktu(t.waktu || t.created_at || '');
-    
-    // Status
-    const statusEl = document.getElementById('modalStatus');
-    statusEl.textContent = t.status || '-';
-    statusEl.className = `inline-block px-3 py-1 rounded-full text-xs font-medium ${getClassStatus(t.status || '')}`;
+        // Hitung subtotal jika tidak ada
+        const subtotal = t.subtotal !== undefined ? safeNumber(t.subtotal) : 
+                        t.items?.reduce((sum, item) => sum + (safeNumber(item.price) * safeNumber(item.quantity)), 0) || 0;
 
-    // Items
-    const itemsEl = document.getElementById('modalItems');
-    if (t.items && t.items.length > 0) {
-        itemsEl.innerHTML = t.items.map(i => `
-            <tr>
-                <td class="px-3 py-2">${i.product || '-'}</td>
-                <td class="px-3 py-2">${i.quantity || 0}x</td>
-                <td class="px-3 py-2">Rp ${formatUang(safeNumber(i.price))}</td>
-                <td class="px-3 py-2">Rp ${formatUang(safeNumber(i.price) * safeNumber(i.quantity))}</td>
-            </tr>
-        `).join('');
-    } else {
-        itemsEl.innerHTML = '<tr><td colspan="4" class="px-3 py-2 text-center text-gray-500">Tidak ada item</td></tr>';
+        // Handle tax (persen atau nominal)
+        let taxValue = 0;
+        if (typeof t.tax === 'string' && t.tax.includes('%')) {
+            // Jika tax dalam persen
+            const taxPercent = safeNumber(t.tax); // sudah dihandle di safeNumber
+            taxValue = subtotal * (taxPercent / 100);
+        } else {
+            // Jika tax nominal langsung
+            taxValue = safeNumber(t.tax);
+        }
+
+        // Handle discount
+        const discountValue = safeNumber(t.discount);
+
+        // Hitung total jika tidak ada
+        const total = t.total !== undefined ? safeNumber(t.total) : subtotal + taxValue - discountValue;
+
+        // Tampilkan nilai
+        document.getElementById('modalSubtotal').textContent = `Rp ${formatUang(subtotal)}`;
+        document.getElementById('modalTax').textContent = `Rp ${formatUang(taxValue)}`;
+        document.getElementById('modalDiscount').textContent = `Rp ${formatUang(discountValue)}`;
+        document.getElementById('modalTotal').textContent = `Rp ${formatUang(total)}`;
+
+        // Pembayaran
+        const pembayaranEl = document.getElementById('modalPaymentMethod');
+        if (pembayaranEl) {
+            pembayaranEl.textContent = (t.pembayaran || t.payment_method || '-').toUpperCase();
+        }
+        
+        // Total paid dan kembalian
+        const totalPaidEl = document.getElementById('modalTotalPaid');
+        const changeEl = document.getElementById('modalChange');
+        if (totalPaidEl) totalPaidEl.textContent = `Rp ${formatUang(safeNumber(t.total_paid))}`;
+        if (changeEl) changeEl.textContent = `Rp ${formatUang(safeNumber(t.change))}`;
+
+        bukaModal('transactionModal');
     }
-
-    // Hitung subtotal jika tidak ada
-    const subtotal = t.subtotal !== undefined ? safeNumber(t.subtotal) : 
-                     t.items?.reduce((sum, item) => sum + (safeNumber(item.price) * safeNumber(item.quantity)), 0) || 0;
-
-    // Handle tax (persen atau nominal)
-    let taxValue = 0;
-    if (typeof t.tax === 'string' && t.tax.includes('%')) {
-        // Jika tax dalam persen
-        const taxPercent = safeNumber(t.tax); // sudah dihandle di safeNumber
-        taxValue = subtotal * (taxPercent / 100);
-    } else {
-        // Jika tax nominal langsung
-        taxValue = safeNumber(t.tax);
-    }
-
-    // Handle discount
-    const discountValue = safeNumber(t.discount);
-
-    // Hitung total jika tidak ada
-    const total = t.total !== undefined ? safeNumber(t.total) : subtotal + taxValue - discountValue;
-
-    // Tampilkan nilai
-    document.getElementById('modalSubtotal').textContent = `Rp ${formatUang(subtotal)}`;
-    document.getElementById('modalTax').textContent = `Rp ${formatUang(taxValue)}`;
-    document.getElementById('modalDiscount').textContent = `Rp ${formatUang(discountValue)}`;
-    document.getElementById('modalTotal').textContent = `Rp ${formatUang(total)}`;
-
-    // Pembayaran
-    const pembayaranEl = document.getElementById('modalPaymentMethod');
-    if (pembayaranEl) {
-        pembayaranEl.textContent = (t.pembayaran || t.payment_method || '-').toUpperCase();
-    }
-    
-    // Total paid dan kembalian
-    const totalPaidEl = document.getElementById('modalTotalPaid');
-    const changeEl = document.getElementById('modalChange');
-    if (totalPaidEl) totalPaidEl.textContent = `Rp ${formatUang(safeNumber(t.total_paid))}`;
-    if (changeEl) changeEl.textContent = `Rp ${formatUang(safeNumber(t.change))}`;
-
-    bukaModal('transactionModal');
-}
     
     // Format tanggal untuk backend (YYYY-MM-DD)
     function formatTanggalUntukBackend(tanggal) {

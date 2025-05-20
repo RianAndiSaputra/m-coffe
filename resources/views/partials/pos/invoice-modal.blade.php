@@ -421,11 +421,12 @@
                 <style>
                     /* Reset dan base styling */
                     * {
-                        font-weight: 'bold'
+                        font-weight: 'bold';
                         font-family: 'Courier New', monospace;
                     }
                     
                     body {
+                        font-weight: 'bold';
                         font-size: 18px;
                         color: #000;
                     }
@@ -441,21 +442,27 @@
                     }
                     
                     .logo-container {
-                        width: 60px;
-                        height: 60px;
+                        width: 70px;
+                        height: 70px;
                         display: flex;
                         align-items: center;
                         justify-content: center;
+                        padding: 3px;  
+                        background-color: white; 
                     }
                     
                     .logo {
                         max-width: 100%;
                         max-height: 100%;
                         object-fit: contain;
+                        filter: grayscale(100%) contrast(300%);
+                        -webkit-filter: grayscale(100%) contrast(300%);
                     }
                     
                     .header-text {
                         flex: 1;
+                        font-weight: bold;
+                        font-size: 18px;
                         text-align: right;
                     }
                     
@@ -467,6 +474,7 @@
                     
                     .company-info {
                         font-size: 18px;
+                        font-weight: bold;
                         line-height: 1.3;
                     }
                     
@@ -479,6 +487,7 @@
                     /* Transaction info */
                     .transaction-info {
                         margin-bottom: 10px;
+                        font-weight: bold;
                     }
                     
                     .info-row {
@@ -503,16 +512,20 @@
                     }
                     
                     .item-name {
+                        font-weight: bold;
+                        font-size: 18px;
                         flex: 2;
                     }
                     
                     .item-price {
                         flex: 1;
+                        font-weight: bold;
                         text-align: right;
                     }
                     
                     /* Totals */
                     .totals {
+                        font-weight: bold;
                         margin-top: 10px;
                     }
                     
@@ -524,7 +537,7 @@
                     
                     .grand-total {
                         font-weight: bold;
-                        font-size: 15px;
+                        font-size: 20px;
                         margin-top: 8px;
                         padding-top: 5px;
                         border-top: 1px dashed #000;
@@ -532,11 +545,13 @@
                     
                     /* Payment info */
                     .payment-info {
+                        font-weight: bold;
                         margin-top: 10px;
                     }
                     
                     /* Footer */
                     .receipt-footer {
+                        font-weight: bold;
                         margin-top: 15px;
                         text-align: center;
                         font-size: 12px;
@@ -555,6 +570,12 @@
                     .text-bold {
                         font-weight: bold;
                     }
+                    @media print {
+                        .logo {
+                            -webkit-filter: grayscale(100%);
+                            filter: grayscale(100%);
+                        }
+                    }
                 </style>
             </head>
             <body>
@@ -564,7 +585,8 @@
                         <img src="${logoPath}" 
                             alt="Logo Toko" 
                             class="logo"
-                            onerror="this.style.display='none'">
+                            onerror="this.style.display='none'"
+                            style="width: auto; height: auto; max-width: 65px; max-height: 65px;">
                     </div>
                     <div class="header-text">
                         <div class="company-name">${templateData.company_name || outletData.name || 'TOKO ANDA'}</div>

@@ -16,8 +16,8 @@
     <div class="mb-3 md:mb-0 flex items-start gap-2">
         <i data-lucide="store" class="w-5 h-5 text-gray-600"></i>
         <div>
-            <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">Outlet Aktif: {{ $outlet->name ?? 'Kifa Bakery Pusat' }}</h2>
-            <p class="text-sm text-gray-600">Data riwayat transaksi kas untuk outlet {{ $outlet->name ?? 'Kifa Bakery Pusat' }}.</p>
+            <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2 outlet-name">Outlet Aktif:</h2>
+            <p class="text-sm text-gray-600 outlet-name"">Data riwayat transaksi kas untuk outlet .</p>
         </div>
     </div>
 </div>
@@ -79,8 +79,28 @@
             return;
         }
 
-        const outletId = "{{ $outlet_id ?? 1 }}"; // Ganti dengan ID outlet aktif
         let selectedDate = null;
+
+        // Function to get currently selected outlet ID
+        function getSelectedOutletId() {
+            // First check URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const outletIdFromUrl = urlParams.get('outlet_id');
+            
+            if (outletIdFromUrl) {
+                return outletIdFromUrl;
+            }
+            
+            // Then check localStorage
+            const savedOutletId = localStorage.getItem('selectedOutletId');
+            
+            if (savedOutletId) {
+                return savedOutletId;
+            }
+            
+            // Default to outlet ID 1 if nothing is found
+            return 1;
+        }
 
         // Inisialisasi datepicker
         flatpickr("#cashDateInput", {
@@ -88,6 +108,7 @@
             defaultDate: "today",
             onChange: function(selectedDates, dateStr) {
                 selectedDate = dateStr;
+                const outletId = getSelectedOutletId();
                 fetchCashHistory(outletId, dateStr);
             },
             onReady: function() {
@@ -109,55 +130,138 @@
 
         // Fungsi untuk mengambil data riwayat kas
         function fetchCashHistory(outletId, date = null) {
-    // Tampilkan loading
-    document.getElementById('cash-history-table').innerHTML = `
-        <tr class="border-b hover:bg-gray-50">
-            <td colspan="5" class="py-4 text-center text-gray-500">Memuat data...</td>
-        </tr>
-    `;
-
-    // Siapkan query parameters
-    let params = {
-        source: 'cash',
-        outlet_id: outletId
-    };
-
-    if (date) {
-        params.date = date;
-    }
-
-    // Panggil API untuk mendapatkan riwayat kas
-    axios.get('/api/cash-register-transactions', { 
-        params,
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => {
-        const data = response.data.data;
-        renderCashHistory(data);
-    })
-    .catch(error => {
-        console.error('Error fetching cash history:', error);
-        if (error.response && error.response.status === 401) {
-            localStorage.removeItem('token');
+            console.log(`Fetching cash history for outlet ID: ${outletId} on date: ${date}`);
+            
+            // Tampilkan loading
             document.getElementById('cash-history-table').innerHTML = `
                 <tr class="border-b hover:bg-gray-50">
-                    <td colspan="5" class="py-4 text-center text-red-500">Sesi login telah berakhir. Silakan login kembali.</td>
+                    <td colspan="5" class="py-4 text-center text-gray-500">Memuat data...</td>
                 </tr>
             `;
-        } else {
-            document.getElementById('cash-history-table').innerHTML = `
-                <tr class="border-b hover:bg-gray-50">
-                    <td colspan="5" class="py-4 text-center text-red-500">Terjadi kesalahan saat memuat data</td>
-                </tr>
-            `;
-        }
-    });
-}
 
+            // Siapkan query parameters
+            let params = {
+                source: 'cash',
+                outlet_id: outletId
+            };
+
+            if (date) {
+                params.date = date;
+            }
+
+            // Panggil API untuk mendapatkan riwayat kas
+            axios.get('/api/cash-register-transactions', { 
+                params,
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                const data = response.data.data;
+                
+                // Update info outlet
+                if (data.length > 0 && data[0].outlet) {
+                    updateOutletInfo(data[0].outlet);
+                } else {
+                    // No data available, still update outlet name based on selected outlet
+                    updateOutletInfoFromSelection();
+                }
+                
+                renderCashHistory(data);
+            })
+            .catch(error => {
+                console.error('Error fetching cash history:', error);
+                if (error.response && error.response.status === 401) {
+                    localStorage.removeItem('token');
+                    document.getElementById('cash-history-table').innerHTML = `
+                        <tr class="border-b hover:bg-gray-50">
+                            <td colspan="5" class="py-4 text-center text-red-500">Sesi login telah berakhir. Silakan login kembali.</td>
+                        </tr>
+                    `;
+                } else {
+                    document.getElementById('cash-history-table').innerHTML = `
+                        <tr class="border-b hover:bg-gray-50">
+                            <td colspan="5" class="py-4 text-center text-red-500">Terjadi kesalahan saat memuat data: ${error.response?.data?.message || error.message}</td>
+                        </tr>
+                    `;
+                }
+                
+                // Still try to update outlet info from selection
+                updateOutletInfoFromSelection();
+            });
+        }
+
+        // Update outlet info from API response
+        function updateOutletInfo(outlet) {
+            const outletElements = document.querySelectorAll('.outlet-name');
+            outletElements.forEach(el => {
+                el.textContent = `Menampilkan riwayat kas untuk: ${outlet.name}`;
+            });
+            
+            const addressElements = document.querySelectorAll('.outlet-address');
+            addressElements.forEach(el => {
+                el.textContent = outlet.address || '';
+            });
+        }
+
+        // Update outlet info when no data is available
+        async function updateOutletInfoFromSelection() {
+            try {
+                const outletId = getSelectedOutletId();
+                const response = await axios.get(`/api/outlets/${outletId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.data.success && response.data.data) {
+                    updateOutletInfo(response.data.data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch outlet details:', error);
+            }
+        }
+
+        // Connect to outlet selection dropdown
+        function connectOutletSelectionToCashHistory() {
+            // Listen for outlet changes in localStorage
+            window.addEventListener('storage', function(event) {
+                if (event.key === 'selectedOutletId') {
+                    // Get current date
+                    const datePicker = document.getElementById('cashDateInput');
+                    const currentDate = selectedDate || new Date().toISOString().split('T')[0];
+                    
+                    // Reload history with new outlet
+                    const outletId = getSelectedOutletId();
+                    fetchCashHistory(outletId, currentDate);
+                }
+            });
+            
+            // Also watch for clicks on outlet items in dropdown
+            const outletListContainer = document.getElementById('outletListContainer');
+            if (outletListContainer) {
+                outletListContainer.addEventListener('click', function(event) {
+                    // Find the clicked li element
+                    let targetElement = event.target;
+                    while (targetElement && targetElement !== outletListContainer && targetElement.tagName !== 'LI') {
+                        targetElement = targetElement.parentElement;
+                    }
+                    
+                    // If we clicked on an outlet list item
+                    if (targetElement && targetElement.tagName === 'LI') {
+                        // Update history after a short delay to allow existing code to complete
+                        setTimeout(() => {
+                            const currentDate = selectedDate || new Date().toISOString().split('T')[0];
+                            const outletId = getSelectedOutletId();
+                            fetchCashHistory(outletId, currentDate);
+                        }, 100);
+                    }
+                });
+            }
+        }
 
         // Fungsi untuk menampilkan data dalam tabel
         function renderCashHistory(data) {
@@ -209,28 +313,51 @@
             });
         }
 
-        // Fungsi untuk memuat data
-        function loadCashHistory() {
-            const outletId = document.getElementById('outlet_id').value; // Pastikan ada input outlet_id di form
+        // Show alert function for error/success messages
+        function showAlert(type, message) {
+            const alertContainer = document.getElementById('alertContainer');
+            if (!alertContainer) return;
+
+            const alert = document.createElement('div');
+            alert.className = `px-4 py-3 rounded-lg shadow-md ${type === 'error' ? 'bg-red-100 text-red-700' : 
+                            type === 'success' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`;
+            alert.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="${type === 'error' ? 'alert-circle' : 
+                                        type === 'success' ? 'check-circle' : 'info'}" 
+                        class="w-5 h-5"></i>
+                        <span>${message}</span>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            `;
+            alertContainer.appendChild(alert);
             
-            fetch(`/cash-register-transactions/history?outlet_id=${outletId}`)
-                .then(response => response.json())
-                .then(result => {
-                    if (result.success) {
-                        renderCashHistory(result.data);
-                    } else {
-                        console.error('Error:', result.message);
-                        renderCashHistory([]);
-                    }
-                })
-                .catch(error => {
-                    console.error('Fetch error:', error);
-                    renderCashHistory([]);
-                });
+            // Make sure Lucide icons are initialized for the new alert
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
         }
 
-        // Load data saat halaman dimuat
-        fetchCashHistory(outletId);
+        // Initialize with current date and outlet
+        const initialDate = new Date().toISOString().split('T')[0];
+        const initialOutletId = getSelectedOutletId();
+        
+        // Load initial data
+        fetchCashHistory(initialOutletId, initialDate);
+        
+        // Connect outlet selection to cash history updates
+        connectOutletSelectionToCashHistory();
     });
 </script>
 

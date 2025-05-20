@@ -199,31 +199,6 @@ const ProductManager = (() => {
             }
         });
     }
-    
-
-    function setupOutletChangeListener() {
-        // Method 1: Polling localStorage setiap 500ms
-        let lastOutletId = currentOutletId;
-        
-        setInterval(() => {
-            const newOutletId = localStorage.getItem('selectedOutletId') || currentOutletId;
-            if (newOutletId !== lastOutletId) {
-                lastOutletId = newOutletId;
-                loadProducts(newOutletId);
-            }
-        }, 500);
-        
-        // Method 2: Event listener untuk klik di dokumen
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('#outletListContainer li')) {
-                // Beri sedikit delay untuk memastikan localStorage sudah terupdate
-                setTimeout(() => {
-                    const newOutletId = localStorage.getItem('selectedOutletId') || currentOutletId;
-                    loadProducts(newOutletId);
-                }, 100);
-            }
-        });
-    }
 
     async function preloadOutlets() {
         try {
@@ -550,11 +525,11 @@ const ProductManager = (() => {
     const renderProducts = (responseData) => {
         const tbody = document.getElementById(elements.containers.tableBody);
         if (!tbody) return;
-
+    
         tbody.innerHTML = "";
-
+    
         const products = responseData?.data || [];
-
+    
         if (products.length === 0) {
             tbody.innerHTML = `
                 <tr class="border-b">
@@ -565,12 +540,12 @@ const ProductManager = (() => {
             `;
             return;
         }
-
+    
         products.forEach((product, index) => {
             // Handle inventory data - several possible structures
             let quantity = 0;
             let min_stock = 0;
-
+    
             // Case 1: Inventory data in nested object
             if (product.inventory) {
                 quantity = product.inventory.quantity || 0;
@@ -593,7 +568,7 @@ const ProductManager = (() => {
                 quantity = mainInventory.quantity || 0;
                 min_stock = mainInventory.min_stock || 0;
             }
-
+    
             const row = document.createElement("tr");
             row.className = "border-b hover:bg-gray-50";
             row.innerHTML = `
@@ -609,7 +584,16 @@ const ProductManager = (() => {
                     </div>
                 </td>
                 <td class="py-3 px-4">
-                ${product.barcode ? `<div class="font-medium">${product.barcode}</div>` : ''}
+                    ${product.barcode ? 
+                        `<div class="font-medium">${product.barcode}</div>
+                         <svg class="barcode mt-1" 
+                              jsbarcode-format="CODE128"
+                              jsbarcode-value="${product.barcode}"
+                              jsbarcode-width="1.5"
+                              jsbarcode-height="30"
+                              jsbarcode-fontSize="8"
+                              jsbarcode-displayValue="true"></svg>` 
+                        : ''}
                 </td>
                 <td class="py-3 px-4">${product.sku || "-"}</td>
                 <td class="py-3 px-4">
@@ -638,31 +622,34 @@ const ProductManager = (() => {
                     </span>
                 </td>
                 <td class="py-3 px-4 relative">
-                <div class="relative inline-block">
-                    <button onclick="ProductManager.toggleDropdown(this)" 
-                            class="p-2 hover:bg-gray-100 rounded-lg">
-                        <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
-                    </button>
-                    <div class="dropdown-menu hidden absolute right-0 z-20 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-sm">
-                        <button onclick="ProductManager.openEditModal(${
-                            product.id
-                        })" 
-                                class="flex items-center w-full px-3 py-2 hover:bg-gray-100 text-left rounded-t-lg">
-                            <i data-lucide="edit" class="w-4 h-4 mr-2 text-gray-500"></i> Edit
+                    <div class="relative inline-block">
+                        <button onclick="ProductManager.toggleDropdown(this)" 
+                                class="p-2 hover:bg-gray-100 rounded-lg">
+                            <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
                         </button>
-                        <button onclick="ProductManager.hapusProduk(${
-                            product.id
-                        })" 
-                                class="flex items-center w-full px-3 py-2 hover:bg-gray-100 text-left text-red-600 rounded-b-lg">
-                            <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i> Hapus
-                        </button>
+                        <div class="dropdown-menu hidden absolute right-0 z-20 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-sm">
+                            <button onclick="ProductManager.openEditModal(${product.id})" 
+                                    class="flex items-center w-full px-3 py-2 hover:bg-gray-100 text-left rounded-t-lg">
+                                <i data-lucide="edit" class="w-4 h-4 mr-2 text-gray-500"></i> Edit
+                            </button>
+                            <button onclick="ProductManager.openBarcodeModal(${product.id}, '${product.barcode || ''}', '${product.name || ''}')" 
+                                    class="flex items-center w-full px-3 py-2 hover:bg-gray-100 text-left">
+                                <i data-lucide="barcode" class="w-4 h-4 mr-2 text-gray-500"></i> Cetak Barcode
+                            </button>
+                            <button onclick="ProductManager.hapusProduk(${product.id})" 
+                                    class="flex items-center w-full px-3 py-2 hover:bg-gray-100 text-left text-red-600 rounded-b-lg">
+                                <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i> Hapus
+                            </button>
+                        </div>
                     </div>
-                </div>
-            </td>
+                </td>
             `;
             tbody.appendChild(row);
         });
-
+    
+        // Render semua barcode setelah elemen ditambahkan ke DOM
+        JsBarcode(".barcode").init();
+    
         if (window.lucide) window.lucide.createIcons();
     };
 

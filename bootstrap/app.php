@@ -14,6 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
+            'DNS1D' => Milon\Barcode\Facades\DNS1DFacade::class,
+            'DNS2D' => Milon\Barcode\Facades\DNS2DFacade::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
