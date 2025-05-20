@@ -73,7 +73,7 @@
             <!-- Card: Distribusi Outlet -->
             <div class="p-4 border rounded shadow">
                 <h3 class="font-semibold mb-2">Distribusi Outlet</h3>
-                <div id="editOutletList" class="space-y-2 text-sm">
+                <div id="editOutletList" class="space-y-2 text-sm" >
                     <!-- Daftar outlet akan diisi via JavaScript -->
                 </div>
             </div>
@@ -101,9 +101,9 @@
         <!-- Footer: Tombol Aksi -->
         <div class="p-4 border-t flex justify-between">
             <div>
-                <button id="btnHapusProduk" class="px-4 py-2 text-red-600 hover:text-red-800 text-sm">
+                {{-- <button id="btnHapusProduk" class="px-4 py-2 text-red-600 hover:text-red-800 text-sm">
                     <i data-lucide="trash-2" class="w-4 h-4 mr-1"></i> Hapus Produk
-                </button>
+                </button> --}}
             </div>
             <div class="space-x-2">
                 <button id="btnBatalEdit" class="px-4 py-2 border rounded hover:bg-gray-100">Batal</button>

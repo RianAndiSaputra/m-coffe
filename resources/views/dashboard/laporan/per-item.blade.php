@@ -361,9 +361,9 @@
             }
         });
         
-        if (searchTerm) {
-            showAlert('info', `Menampilkan ${foundCount} hasil pencarian: "${searchTerm}"`);
-        }
+        // if (searchTerm) {
+        //     showAlert('info', `Menampilkan ${foundCount} hasil pencarian: "${searchTerm}"`);
+        // }
     });
     
     // Print report function

@@ -19,7 +19,7 @@
                 type="text" 
                 placeholder="Cari Produk..." 
                 class="w-full pl-10 pr-4 py-3 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                {{-- id="searchKategori" --}}
+                id="searchProduct"
             />
         </div>
     </div>
@@ -77,27 +77,6 @@
             </tbody>
         </table>
     </div>
-
-    <!-- Pagination -->
-    {{-- <div class="flex items-center justify-between mt-4">
-        <div class="text-sm text-gray-600">
-            Menampilkan 1 sampai 3 dari 15 entri
-        </div>
-        <div class="flex space-x-1">
-            <button class="px-3 py-1 border rounded text-sm hover:bg-gray-50">
-                Previous
-            </button>
-            <button class="px-3 py-1 border rounded text-sm bg-orange-600 text-white hover:bg-orange-700">
-                1
-            </button>
-            <button class="px-3 py-1 border rounded text-sm hover:bg-gray-50">
-                2
-            </button>
-            <button class="px-3 py-1 border rounded text-sm hover:bg-gray-50">
-                Next
-            </button>
-        </div>
-    </div> --}}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -172,6 +151,26 @@
         }
     }
 
+    // Function untuk melakukan pencarian
+    function searchProducts() {
+        const searchTerm = document.getElementById('searchProduct').value.toLowerCase();
+        const rows = document.querySelectorAll('#historyTableBody tr');
+        
+        rows.forEach(row => {
+            // Skip loading row or no data row
+            if (row.id === 'loadingRow' || row.textContent.includes('Tidak ada riwayat')) {
+                return;
+            }
+            
+            const productName = row.querySelector('td:nth-child(2) span').textContent.toLowerCase();
+            if (productName.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
     // Update tampilan
     async function updateHistoryTable(date) {
         const tbody = document.getElementById('historyTableBody');
@@ -205,7 +204,7 @@
                     <td class="py-4">
                         <div class="flex items-center space-x-2">
                             <img src="https://via.placeholder.com/40" alt="gambar" class="w-8 h-8 bg-gray-100 rounded object-cover" />
-                            <span>${history.product.name}</span>
+                            <span class="product-name">${history.product.name}</span>
                         </div>
                     </td>
                     <td>${history.quantity_before}</td>
@@ -221,6 +220,12 @@
                     <td class="text-xs text-gray-500">${history.notes || '-'}</td>
                 </tr>
             `).join('');
+            
+            // Apply search filter if there's any search term
+            const searchTerm = document.getElementById('searchProduct').value;
+            if (searchTerm) {
+                searchProducts();
+            }
         }
     }
 
@@ -312,6 +317,9 @@
         
         // Connect outlet selection to history updates
         connectOutletSelectionToHistory();
+        
+        // Add event listener for search input
+        document.getElementById('searchProduct').addEventListener('input', searchProducts);
     });
 
     function showAlert(type, message) {

@@ -10,6 +10,13 @@
     <!-- Scrollable Content -->
     <div class="overflow-y-auto p-6 space-y-4 flex-1">
       <form id="formTambahMember">
+        <!-- Kode Member -->
+        <div>
+          <label class="block font-medium mb-1">Kode Member <span class="text-red-500">*</span></label>
+          <input type="text" id="kodeMember" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Kode member" required>
+          <p id="errorKode" class="text-red-500 text-xs mt-1 hidden">Kode member wajib diisi</p>
+        </div>
+
         <!-- Nama -->
         <div>
           <label class="block font-medium mb-1">Nama <span class="text-red-500">*</span></label>
@@ -66,6 +73,18 @@
     function validateForm() {
       let isValid = true;
 
+      // Validasi kode member
+      const kodeMember = document.getElementById('kodeMember');
+      const errorKode = document.getElementById('errorKode');
+      if (!kodeMember.value.trim()) {
+        errorKode.classList.remove('hidden');
+        kodeMember.classList.add('border-red-500');
+        isValid = false;
+      } else {
+        errorKode.classList.add('hidden');
+        kodeMember.classList.remove('border-red-500');
+      }
+
       // Validasi nama member 
       const namaMember = document.getElementById('namaMember');
       const errorNama = document.getElementById('errorNama');
@@ -119,6 +138,7 @@
 
     // Fungsi untuk reset form
     function resetForm() {
+      document.getElementById('kodeMember').value = '';
       document.getElementById('namaMember').value = '';
       document.getElementById('teleponMember').value = '';
       document.getElementById('emailMember').value = '';
@@ -131,12 +151,13 @@
     }
 
     // Fungsi untuk submit form
-    function submitForm() {
+    async function submitForm() {
       if (!validateForm()) return;
 
       const btnTambah = document.getElementById('btnTambahMember');
       const originalText = btnTambah.innerHTML;
 
+      // Tampilkan loading state
       btnTambah.innerHTML = `
         <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -146,25 +167,51 @@
       `;
       btnTambah.disabled = true;
 
-      setTimeout(() => {
+      try {
         const formData = {
+          member_code: document.getElementById('kodeMember').value,
           nama: document.getElementById('namaMember').value,
           telepon: document.getElementById('teleponMember').value,
-          email: document.getElementById('emailMember').value,
-          alamat: document.getElementById('alamatMember').value,
+          email: document.getElementById('emailMember').value || null,
+          alamat: document.getElementById('alamatMember').value || null,
           jenis_kelamin: document.getElementById('jenisKelamin').value
         };
 
-        console.log('Data member yang akan dikirim:', formData);
+        // Kirim data ke API
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/members', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(formData)
+        });
 
-        // Reset form dan tutup modal
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || 'Gagal menambahkan member');
+        }
+
+        // Jika sukses
+        showAlert('success', 'Member berhasil ditambahkan');
         resetForm();
         closeModalTambah();
 
+        // Refresh data member jika diperlukan
+        if (typeof loadMembers === 'function') {
+          loadMembers();
+        }
+
+      } catch (error) {
+        console.error('Error:', error);
+        showAlert('error', error.message);
+      } finally {
         // Kembalikan tombol ke state awal
         btnTambah.innerHTML = originalText;
         btnTambah.disabled = false;
-      }, 1500);
+      }
     }
 
     // Event listener untuk tombol tambah
@@ -178,4 +225,13 @@
         }
       });
     });
+
+    // Fungsi untuk menutup modal
+    function closeModalTambah() {
+      document.getElementById('modalTambahMember').classList.add('hidden');
+      resetForm();
+    }
+
+    // Event listener untuk tombol batal
+    document.getElementById('btnBatalModalTambah').addEventListener('click', closeModalTambah);
 </script>

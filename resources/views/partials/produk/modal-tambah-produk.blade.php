@@ -18,8 +18,8 @@
                             <input type="text" id="nama" name="name" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Contoh: Es Kopi Susu" required>
                         </div>
                         <div>
-                            <label class="block font-medium mb-1" for="sku">SKU Produk</label>
-                            <input type="text" id="sku" name="sku" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Kode unik produk (opsional)">
+                            <label class="block font-medium mb-1" for="sku">SKU Produk <span class="text-red-500">*</span></label>
+                            <input type="text" id="sku" name="sku" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Kode unik produk (wajib diisi)" required>
                         </div>
                         <div>
                             <label class="block font-medium mb-1" for="barcode">Barcode</label>
@@ -73,8 +73,8 @@
 
                 <!-- Card: Distribusi Outlet -->
                 <div class="p-5 border rounded-lg shadow-sm">
-                    <h3 class="font-semibold mb-4 text-gray-700">Distribusi Outlet</h3>
-                    <div id="outletCheckboxes" class="space-y-2 text-sm">
+                    <h3 class="font-semibold mb-4 text-gray-700">Distribusi Outlet <span class="text-red-500">*</span></h3>
+                    <div id="outletCheckboxes" class="space-y-2 text-sm" required>
                         <!-- Checkboxes will be added dynamically -->
                         <p class="text-gray-500 italic">Loading outlets...</p>
                     </div>

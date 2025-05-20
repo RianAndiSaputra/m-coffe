@@ -37,8 +37,8 @@
         <h3 class="font-semibold mb-4 text-gray-700">Informasi Tambahan</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block font-medium mb-1">Email</label>
-            <input type="email" id="emailOutlet" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Masukkan email">
+            <label class="block font-medium mb-1">Email <span class="text-red-500">*</span> </label>
+            <input type="email" id="emailOutlet" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Masukkan email (wajib diisi)">
             <p id="errorEmail" class="text-red-500 text-xs mt-1 hidden">Format email tidak valid</p>
           </div>
           <div>
@@ -69,8 +69,8 @@
 
       <!-- Foto Outlet -->
       <div class="p-5 bg-gray-100 border rounded-lg shadow-sm">
-        <h3 class="font-semibold mb-4 text-gray-700">Foto Qris</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+        <h3 class="font-semibold mb-4 text-gray-700">Foto Qris <span class="text-red-500">*</span></h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start" required>
           <!-- Preview Foto -->
           <div>
             <p class="text-sm text-gray-600 mb-1">Foto Qris:</p>
@@ -199,6 +199,8 @@ function validateForm() {
   
   return isValid;
 }
+
+
 
 // Fungsi untuk reset form
 function resetForm() {
