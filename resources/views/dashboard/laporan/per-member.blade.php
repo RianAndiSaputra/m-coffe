@@ -180,6 +180,104 @@
     }
 
     // Initialize the page
+    function filterData() {
+        if (!apiData || !apiData.data) return;
+        
+        const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+        const data = apiData.data;
+        
+        // Filter members based on search term
+        filteredMembers = data.members.filter(member => 
+            (member.member_name && member.member_name.toLowerCase().includes(searchTerm))
+        );
+        
+        // Update member tables
+        const container = document.getElementById('memberTablesContainer');
+        container.innerHTML = '';
+        
+        if (filteredMembers.length === 0) {
+            container.innerHTML = '<div class="text-center py-8"><p class="text-gray-600">Tidak ada data member yang sesuai dengan pencarian</p></div>';
+            return;
+        }
+        
+        filteredMembers.forEach(member => {
+            // Create member card
+            const memberCard = document.createElement('div');
+            memberCard.className = 'bg-gray-50 rounded-lg p-4 mb-4';
+            
+            // Display member info
+            const memberName = member.member_name || 'Member Umum';
+            memberCard.innerHTML = `
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800">${memberName}</h3>
+                        <div class="flex flex-wrap gap-x-4 gap-y-1 mt-1">
+                            ${member.member_id ? `<p class="text-sm text-gray-600">ID: ${member.member_id}</p>` : ''}
+                            <p class="text-sm text-gray-600">Total Belanja: <span class="font-semibold">Rp ${formatNumber(member.total_spent)}</span></p>
+                        </div>
+                    </div>
+                    <div class="mt-2 md:mt-0">
+                        <p class="text-sm text-gray-600">Total Transaksi: <span class="font-semibold">${member.total_orders}</span></p>
+                    </div>
+                </div>
+            `;
+            container.appendChild(memberCard);
+            
+            // Create transactions table for this member
+            const tableDiv = document.createElement('div');
+            tableDiv.className = 'overflow-x-auto';
+            tableDiv.innerHTML = `
+                <table class="w-full text-sm">
+                    <thead class="text-left text-gray-700 bg-gray-100">
+                        <tr>
+                            <th class="py-3 font-bold px-4">Produk</th>
+                            <th class="py-3 font-bold px-4">SKU</th>
+                            <th class="py-3 font-bold px-4">Kategori</th>
+                            <th class="py-3 font-bold px-4 text-right">Qty</th>
+                            <th class="py-3 font-bold px-4 text-right">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-700 divide-y" id="products-${member.member_id || 'umum'}">
+                        <!-- Products will be inserted here -->
+                    </tbody>
+                </table>
+            `;
+            container.appendChild(tableDiv);
+            
+            // Add products for this member
+            const tbody = document.getElementById(`products-${member.member_id || 'umum'}`);
+            
+            let memberTotalQty = 0;
+            let memberTotalSpent = 0;
+            
+            member.products.forEach(product => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="py-4 px-4">${product.product_name}</td>
+                    <td class="py-4 px-4">${product.sku}</td>
+                    <td class="py-4 px-4">${product.category}</td>
+                    <td class="py-4 px-4 text-right">${product.quantity}</td>
+                    <td class="py-4 px-4 text-right">Rp ${formatNumber(product.total_spent)}</td>
+                `;
+                tbody.appendChild(row);
+                
+                memberTotalQty += parseInt(product.quantity);
+                memberTotalSpent += parseFloat(product.total_spent);
+            });
+            
+            // Add summary row
+            const totalRow = document.createElement('tr');
+            totalRow.className = 'bg-gray-100 font-bold';
+            totalRow.innerHTML = `
+                <td class="py-3 px-4" colspan="3">Total</td>
+                <td class="py-3 px-4 text-right">${memberTotalQty}</td>
+                <td class="py-3 px-4 text-right">Rp ${formatNumber(memberTotalSpent)}</td>
+            `;
+            tbody.appendChild(totalRow);
+        });
+    }
+
+    // Initialize the page
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize date range picker
         const dateRangePicker = flatpickr("#dateRange", {
@@ -203,6 +301,14 @@
                 }
             }
         });
+
+        // Connect search input to filter function
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                filterData();
+            });
+        }
 
         // Load initial data
         fetchData();
@@ -331,102 +437,103 @@
     }
 
     // Filter data function
-    function filterData() {
-        if (!apiData || !apiData.data) return;
+// Filter data function
+function filterData() {
+    if (!apiData || !apiData.data) return;
+    
+    const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+    const data = apiData.data;
+    
+    // Filter members based on search term
+    filteredMembers = data.members.filter(member => 
+        (member.member_name && member.member_name.toLowerCase().includes(searchTerm))
+    );
+    
+    // Update member tables
+    const container = document.getElementById('memberTablesContainer');
+    container.innerHTML = '';
+    
+    if (filteredMembers.length === 0) {
+        container.innerHTML = '<div class="text-center py-8"><p class="text-gray-600">Tidak ada data member yang sesuai dengan pencarian</p></div>';
+        return;
+    }
+    
+    filteredMembers.forEach(member => {
+        // Create member card
+        const memberCard = document.createElement('div');
+        memberCard.className = 'bg-gray-50 rounded-lg p-4 mb-4';
         
-        const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
-        const data = apiData.data;
-        
-        // Filter members based on search term
-        filteredMembers = data.members.filter(member => 
-            (member.member_name && member.member_name.toLowerCase().includes(searchTerm))
-        );
-        
-        // Update member tables
-        const container = document.getElementById('memberTablesContainer');
-        container.innerHTML = '';
-        
-        if (filteredMembers.length === 0) {
-            container.innerHTML = '<div class="text-center py-8"><p class="text-gray-600">Tidak ada data member yang sesuai dengan pencarian</p></div>';
-            return;
-        }
-        
-        filteredMembers.forEach(member => {
-            // Create member card
-            const memberCard = document.createElement('div');
-            memberCard.className = 'bg-gray-50 rounded-lg p-4 mb-4';
-            
-            // Display member info
-            const memberName = member.member_name || 'Member Umum';
-            memberCard.innerHTML = `
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-                    <div>
-                        <h3 class="text-xl font-bold text-gray-800">${memberName}</h3>
-                        <div class="flex flex-wrap gap-x-4 gap-y-1 mt-1">
-                            ${member.member_id ? `<p class="text-sm text-gray-600">ID: ${member.member_id}</p>` : ''}
-                            <p class="text-sm text-gray-600">Total Belanja: <span class="font-semibold">Rp ${formatNumber(member.total_spent)}</span></p>
-                        </div>
-                    </div>
-                    <div class="mt-2 md:mt-0">
-                        <p class="text-sm text-gray-600">Total Transaksi: <span class="font-semibold">${member.total_orders}</span></p>
+        // Display member info
+        const memberName = member.member_name || 'Member Umum';
+        memberCard.innerHTML = `
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800">${memberName}</h3>
+                    <div class="flex flex-wrap gap-x-4 gap-y-1 mt-1">
+                        ${member.member_id ? `<p class="text-sm text-gray-600">ID: ${member.member_id}</p>` : ''}
+                        <p class="text-sm text-gray-600">Total Belanja: <span class="font-semibold">Rp ${formatNumber(member.total_spent)}</span></p>
                     </div>
                 </div>
+                <div class="mt-2 md:mt-0">
+                    <p class="text-sm text-gray-600">Total Transaksi: <span class="font-semibold">${member.total_orders}</span></p>
+                </div>
+            </div>
+        `;
+        container.appendChild(memberCard);
+        
+        // Create transactions table for this member
+        const tableDiv = document.createElement('div');
+        tableDiv.className = 'overflow-x-auto';
+        tableDiv.innerHTML = `
+            <table class="w-full text-sm">
+                <thead class="text-left text-gray-700 bg-gray-100">
+                    <tr>
+                        <th class="py-3 font-bold px-4">Produk</th>
+                        <th class="py-3 font-bold px-4">SKU</th>
+                        <th class="py-3 font-bold px-4">Kategori</th>
+                        <th class="py-3 font-bold px-4 text-right">Qty</th>
+                        <th class="py-3 font-bold px-4 text-right">Total</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-700 divide-y" id="products-${member.member_id || 'umum'}">
+                    <!-- Products will be inserted here -->
+                </tbody>
+            </table>
+        `;
+        container.appendChild(tableDiv);
+        
+        // Add products for this member
+        const tbody = document.getElementById(`products-${member.member_id || 'umum'}`);
+        
+        let memberTotalQty = 0;
+        let memberTotalSpent = 0;
+        
+        member.products.forEach(product => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="py-4 px-4">${product.product_name}</td>
+                <td class="py-4 px-4">${product.sku}</td>
+                <td class="py-4 px-4">${product.category}</td>
+                <td class="py-4 px-4 text-right">${product.quantity}</td>
+                <td class="py-4 px-4 text-right">Rp ${formatNumber(product.total_spent)}</td>
             `;
-            container.appendChild(memberCard);
+            tbody.appendChild(row);
             
-            // Create transactions table for this member
-            const tableDiv = document.createElement('div');
-            tableDiv.className = 'overflow-x-auto';
-            tableDiv.innerHTML = `
-                <table class="w-full text-sm">
-                    <thead class="text-left text-gray-700 bg-gray-100">
-                        <tr>
-                            <th class="py-3 font-bold px-4">Produk</th>
-                            <th class="py-3 font-bold px-4">SKU</th>
-                            <th class="py-3 font-bold px-4">Kategori</th>
-                            <th class="py-3 font-bold px-4 text-right">Qty</th>
-                            <th class="py-3 font-bold px-4 text-right">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-gray-700 divide-y" id="products-${member.member_id || 'umum'}">
-                        <!-- Products will be inserted here -->
-                    </tbody>
-                </table>
-            `;
-            container.appendChild(tableDiv);
-            
-            // Add products for this member
-            const tbody = document.getElementById(`products-${member.member_id || 'umum'}`);
-            
-            let memberTotalQty = 0;
-            let memberTotalSpent = 0;
-            
-            member.products.forEach(product => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="py-4 px-4">${product.product_name}</td>
-                    <td class="py-4 px-4">${product.sku}</td>
-                    <td class="py-4 px-4">${product.category}</td>
-                    <td class="py-4 px-4 text-right">${product.quantity}</td>
-                    <td class="py-4 px-4 text-right">Rp ${formatNumber(product.total_spent)}</td>
-                `;
-                tbody.appendChild(row);
-                
-                memberTotalQty += parseInt(product.quantity);
-                memberTotalSpent += parseFloat(product.total_spent);
-            });
-            
-            // Add summary row
-            const totalRow = document.createElement('tr');
-            totalRow.className = 'bg-gray-100 font-bold';
-            totalRow.innerHTML = `
-                <td class="py-3 px-4" colspan="3">Total</td>
-                <td class="py-3 px-4 text-right">${memberTotalQty}</td>
-                <td class="py-3 px-4 text-right">Rp ${formatNumber(memberTotalSpent)}</td>
-            `;
-            tbody.appendChild(totalRow);
+            memberTotalQty += parseInt(product.quantity);
+            memberTotalSpent += parseFloat(product.total_spent);
         });
-    }
+        
+        // Add summary row
+        const totalRow = document.createElement('tr');
+        totalRow.className = 'bg-gray-100 font-bold';
+        totalRow.innerHTML = `
+            <td class="py-3 px-4" colspan="3">Total</td>
+            <td class="py-3 px-4 text-right">${memberTotalQty}</td>
+            <td class="py-3 px-4 text-right">Rp ${formatNumber(memberTotalSpent)}</td>
+        `;
+        tbody.appendChild(totalRow);
+    });
+}
 
     // Format number with thousand separators
     function formatNumber(num) {
