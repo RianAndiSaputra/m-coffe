@@ -193,7 +193,7 @@ class AuthController extends Controller
             return $this->successResponse($user, 'User created successfully');
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->errorResponse($e->getMessage());
+           return $this->errorResponse('Terjadi kesalahan saat menyimpan data. Silakan periksa kembali input Anda.');
         }
     }
 

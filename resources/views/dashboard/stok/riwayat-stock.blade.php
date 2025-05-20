@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Manajemen Riwayat Stok')
+@section('title', 'Riwayat Stok')
 
 @section('content')
 
