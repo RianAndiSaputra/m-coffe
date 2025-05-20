@@ -86,8 +86,6 @@
                                     <option value="purchase">Pembelian</option>
                                     <option value="sale">Penjualan</option>
                                     <option value="adjustment">Penyesuaian</option>
-                                    {{-- <option value="stocktake">Stok Opname</option>
-                                    <option value="transfer">Transfer</option> --}}
                                     <option value="other">Lainnya</option>
                                 </select>
                                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -124,14 +122,12 @@
                                 <label class="text-sm font-medium text-gray-700 mr-2">Dari:</label>
                                 <div class="relative">
                                     <input type="date" id="date_from" class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500">
-                                    <i data-lucide="calendar" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"></i>
                                 </div>
                             </div>
                             <div class="flex items-center">
                                 <label class="text-sm font-medium text-gray-700 mr-2">Sampai:</label>
                                 <div class="relative">
                                     <input type="date" id="date_to" class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500">
-                                    <i data-lucide="calendar" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"></i>
                                 </div>
                             </div>
                             <button onclick="loadInventoryHistory()" class="px-4 py-1.5 text-sm bg-orange-500 text-white rounded-lg hover:bg-orange-600 flex items-center gap-1">
@@ -223,13 +219,11 @@
             notification.classList.add('translate-x-0', 'opacity-100');
         }, 10);
         
-        // Auto remove after 5 seconds
         setTimeout(() => {
             notification.classList.add('translate-x-96', 'opacity-0');
             setTimeout(() => notification.remove(), 300);
         }, 5000);
         
-        // Initialize icons in the new notification
         lucide.createIcons();
     }
 
@@ -238,19 +232,8 @@
         document.getElementById(modalId).classList.remove('hidden');
         if (modalId === 'stockModal') {
             loadProducts();
+            setDefaultDates();
             
-            // Set default dates for history filter
-            const today = new Date();
-            const lastMonth = new Date(today);
-            lastMonth.setMonth(today.getMonth() - 1);
-            
-            const dateFromInput = document.getElementById('date_from');
-            const dateToInput = document.getElementById('date_to');
-            
-            if (dateFromInput) dateFromInput.valueAsDate = lastMonth;
-            if (dateToInput) dateToInput.valueAsDate = today;
-            
-            // If active tab is history, load the history
             if (document.getElementById('historyContent') && 
                 !document.getElementById('historyContent').classList.contains('hidden')) {
                 loadInventoryHistory();
@@ -285,7 +268,6 @@
                 document.getElementById('historyContent').classList.remove('hidden');
                 document.getElementById('adjustContent').classList.add('hidden');
                 
-                // Load history data when switching to history tab
                 loadInventoryHistory();
             });
         }
@@ -314,18 +296,16 @@
     let allProducts = [];
 
     function loadProducts() {
-            // Get necessary values
-            const outletId = getOutletId();
-            const token = getToken();
-            
-            if (!outletId || !token) {
-                return;
-            }
-            
-            // Update UI to show loading state
-            const productList = document.getElementById('productList');
-        productList.innerHTML = '<div class="p-4 text-center text-gray-500"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto"></i> Memuat produk...</div>';
+        const outletId = getOutletId();
+        const token = getToken();
         
+        if (!outletId || !token) {
+            return;
+        }
+        
+        const productList = document.getElementById('productList');
+        productList.innerHTML = '<div class="p-4 text-center text-gray-500"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto"></i> Memuat produk...</div>';
+    
         const apiUrl = `/api/products/outlet/${outletId}`;
         
         fetch(apiUrl, {
@@ -349,7 +329,6 @@
                     data.data.sort((a, b) => a.name.localeCompare(b.name)) : 
                     [];
                 
-                // Update select element
                 const selectElement = document.getElementById('product_id');
                 selectElement.innerHTML = '<option value="">Pilih produk</option>';
                 
@@ -365,7 +344,7 @@
                     selectElement.appendChild(option);
                 });
                 
-                filterDropdownProducts(); // Render initial list
+                filterDropdownProducts();
             } else {
                 showNotification('error', 'Error', data.message || 'Format data tidak sesuai');
                 productList.innerHTML = '<div class="p-4 text-center text-gray-500">Gagal memuat produk</div>';
@@ -430,8 +409,6 @@
         document.getElementById('product_id').value = productId;
         document.getElementById('selectedProductText').textContent = productText;
         document.getElementById('productDropdown').classList.add('hidden');
-        
-        // Reset search
         document.getElementById('productSearch').value = '';
         filterDropdownProducts();
     }
@@ -445,16 +422,51 @@
             dropdown.classList.add('hidden');
         }
     });
+
+    // Format date to YYYY-MM-DD
+    function formatDate(date) {
+        const d = new Date(date);
+        let month = '' + (d.getMonth() + 1);
+        let day = '' + d.getDate();
+        const year = d.getFullYear();
+
+        if (month.length < 2) month = '0' + month;
+        if (day.length < 2) day = '0' + day;
+
+        return [year, month, day].join('-');
+    }
+
+    // Set default dates (last month to today)
+    function setDefaultDates() {
+        const today = new Date();
+        const lastMonth = new Date(today);
+        lastMonth.setMonth(today.getMonth() - 1);
+        
+        document.getElementById('date_from').value = formatDate(lastMonth);
+        document.getElementById('date_to').value = formatDate(today);
+    }
+
     function loadInventoryHistory() {
         const outletId = getOutletId();
         const token = getToken();
         const dateFrom = document.getElementById('date_from').value;
         const dateTo = document.getElementById('date_to').value;
         
+        // Validate dates
+        if (!dateFrom || !dateTo) {
+            showNotification('warning', 'Peringatan', 'Silakan pilih rentang tanggal');
+            return;
+        }
+        
+        if (new Date(dateFrom) > new Date(dateTo)) {
+            showNotification('warning', 'Peringatan', 'Tanggal awal tidak boleh lebih besar dari tanggal akhir');
+            return;
+        }
+        
         if (!outletId || !token) return;
         
-        // Update table with loading message
-        document.getElementById('historyTableBody').innerHTML = `
+        const historyTableBody = document.getElementById('historyTableBody');
+        historyTableBody.innerHTML = `
             <tr class="border-b">
                 <td colspan="6" class="px-4 py-8 text-center text-gray-500">
                     <div class="flex justify-center items-center gap-2">
@@ -465,20 +477,46 @@
             </tr>
         `;
         
-        fetch(`/api/adjust-inventory/${outletId}?date_from=${dateFrom}&date_to=${dateTo}`, {
+        // Add time to date range to cover the entire day
+        const fromDate = new Date(dateFrom);
+        fromDate.setHours(0, 0, 0, 0);
+        
+        const toDate = new Date(dateTo);
+        toDate.setHours(23, 59, 59, 999);
+        
+        // Format dates for API
+        const formattedFrom = fromDate.toISOString();
+        const formattedTo = toDate.toISOString();
+        
+        fetch(`/api/adjust-inventory/${outletId}?date_from=${encodeURIComponent(formattedFrom)}&date_to=${encodeURIComponent(formattedTo)}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
-            const historyTableBody = document.getElementById('historyTableBody');
             historyTableBody.innerHTML = '';
             
-            if (data.success && data.data.length > 0) {
-                data.data.forEach(history => {
+            if (data.success && data.data && data.data.length > 0) {
+                // Filter data by date range on client side as additional check
+                const filteredData = data.data.filter(item => {
+                    const itemDate = new Date(item.created_at);
+                    return itemDate >= fromDate && itemDate <= toDate;
+                });
+                
+                if (filteredData.length === 0) {
+                    showNoDataMessage(historyTableBody);
+                    return;
+                }
+                
+                filteredData.forEach(history => {
                     const row = document.createElement('tr');
                     row.className = 'border-b hover:bg-gray-50';
                     
@@ -492,7 +530,7 @@
                         minute: '2-digit'
                     });
                     
-                    // Map status to Indonesian
+                    // Map status
                     let statusText = 'Menunggu';
                     let statusClass = 'text-yellow-600';
                     let statusIcon = 'clock';
@@ -507,14 +545,12 @@
                         statusIcon = 'x-circle';
                     }
                     
-                    // Map type to Indonesian
+                    // Map type
                     const typeMap = {
                         'shipment': 'Kiriman',
                         'purchase': 'Pembelian',
                         'sale': 'Penjualan',
                         'adjustment': 'Penyesuaian',
-                        'stocktake': 'Stok Opname',
-                        'transfer': 'Transfer',
                         'other': 'Lainnya'
                     };
                     
@@ -534,27 +570,14 @@
                     historyTableBody.appendChild(row);
                 });
                 
-                // Initialize icons in the table
                 lucide.createIcons();
             } else {
-                historyTableBody.innerHTML = `
-                    <tr class="border-b">
-                        <td colspan="6" class="px-4 py-8 text-center text-gray-500">
-                            <div class="flex flex-col items-center gap-2">
-                                <i data-lucide="inbox" class="w-8 h-8 text-gray-400"></i>
-                                <span>Tidak ada data penyesuaian stok untuk periode yang dipilih.</span>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-                
-                // Initialize icons in the empty state
-                lucide.createIcons();
+                showNoDataMessage(historyTableBody);
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            document.getElementById('historyTableBody').innerHTML = `
+            historyTableBody.innerHTML = `
                 <tr class="border-b">
                     <td colspan="6" class="px-4 py-8 text-center text-red-500">
                         <div class="flex flex-col items-center gap-2">
@@ -565,17 +588,24 @@
                 </tr>
             `;
             
-            // Initialize icons in the error state
             lucide.createIcons();
         });
     }
-    
-    // Function to filter history based on date inputs
-    function filterHistory() {
-        loadInventoryHistory();
+
+    function showNoDataMessage(container) {
+        container.innerHTML = `
+            <tr class="border-b">
+                <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+                    <div class="flex flex-col items-center gap-2">
+                        <i data-lucide="inbox" class="w-8 h-8 text-gray-400"></i>
+                        <span>Tidak ada data penyesuaian stok untuk periode yang dipilih.</span>
+                    </div>
+                </td>
+            </tr>
+        `;
+        lucide.createIcons();
     }
 
-    // Submit stock adjustment
     function submitStockAdjustment() {
         const outletId = getOutletId();
         const token = getToken();
@@ -632,11 +662,12 @@
                 
                 // Reset form
                 document.getElementById('product_id').value = '';
+                document.getElementById('selectedProductText').textContent = 'Pilih produk';
                 document.getElementById('quantity_change').value = '';
                 document.getElementById('adjust_type').value = '';
                 document.getElementById('notes').value = '';
                 
-                // Switch to history tab to show the result
+                // Switch to history tab
                 document.getElementById('historyTab').click();
             } else {
                 showNotification('error', 'Error', data.message || 'Terjadi kesalahan');
@@ -650,21 +681,8 @@
         });
     }
 
-    // Initialize everything when the page loads
+    // Initialize when page loads
     document.addEventListener('DOMContentLoaded', function() {
-        // Call loadProducts if we're on a page with that functionality
-        const productSelect = document.getElementById('product_id');
-        if (productSelect) {
-            loadProducts();
-        }
-        
-        // Set up date filter listeners if present
-        const filterButton = document.getElementById('filterButton');
-        if (filterButton) {
-            filterButton.addEventListener('click', filterHistory);
-        }
-        
-        // Initialize all Lucide icons
         lucide.createIcons();
     });
 </script>
@@ -680,7 +698,6 @@
         background-color: #f3f4f6;
     }
     
-    /* Modern select dropdown styling */
     select {
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
         background-repeat: no-repeat;
@@ -688,18 +705,6 @@
         background-size: 1em;
     }
     
-    /* Notification animation */
-    @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-    
-    @keyframes slideOut {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-    }
-
-    /* Custom dropdown styles */
     #productDropdown {
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
