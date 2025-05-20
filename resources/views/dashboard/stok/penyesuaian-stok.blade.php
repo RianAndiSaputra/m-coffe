@@ -214,7 +214,7 @@
         const selectedDate = document.getElementById('dateSelector').value;
         
         // Tampilkan nama outlet di UI
-        document.getElementById('outletName').textContent = `Menampilkan stok untuk : Outlet ${outletId}`;
+        // document.getElementById('outletName').textContent = `Menampilkan stok untuk : Outlet ${outletId}`;
         
         // Fix the URL format - ensure outletId parameter is separate from the date
         const apiUrl = `/api/products/outlet/${outletId}?date=${selectedDate}`;

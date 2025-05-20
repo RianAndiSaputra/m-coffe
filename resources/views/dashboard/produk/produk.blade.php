@@ -27,7 +27,7 @@
     <div class="mb-4 md:mb-0 flex items-start gap-2">
         <i data-lucide="store" class="w-5 h-5 text-gray-600"></i>
         <div>
-            <h2 class="text-lg font-semibold text-gray-800" id="activeOutletTitle">
+            <h2 class="text-lg font-semibold text-gray-800">
                 Outlet Aktif: <span id="currentOutletName">Loading ...</span>
             </h2>
             <p class="text-sm text-gray-600" id="activeOutletDesc">

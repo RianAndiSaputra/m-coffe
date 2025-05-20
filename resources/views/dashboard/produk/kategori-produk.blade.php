@@ -44,8 +44,8 @@
     <div class="mb-4 md:mb-0 flex items-start gap-2">
         <i data-lucide="store" class="w-5 h-5 text-gray-600"></i>
         <div>
-            <h2 class="text-lg font-semibold text-gray-800">Mengelola kategori untuk: Kifa Bakery Pusat</h2>
-            <p class="text-sm text-gray-600">Data yang ditampilkan adalah untuk outlet Kifa Bakery Pusat.</p>
+            <h2 class="text-lg font-semibold text-gray-800">Menampilkan daftar kategori</h2>
+            <p class="text-sm text-gray-600">Data yang ditampilkan adalah kategori produk.</p>
         </div>
     </div>
 </div>
