@@ -6,7 +6,7 @@
 
 <!-- Alert Notification -->
 <div id="alertContainer" class="fixed top-4 right-4 z-50 space-y-3 w-80">
-    <!-- Alert akan muncul di sini secara dinamis -->
+    <!-- Alert will appear here dynamically -->
 </div>
 
 <!-- Modal Konfirmasi Hapus -->
@@ -39,16 +39,16 @@
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <h1 class="text-2xl font-bold text-gray-800">Manajemen Member</h1>
         <div class="flex items-center gap-2 w-full md:w-auto">
-            <!-- Input dengan ikon pencarian -->
+            <!-- Search input with icon -->
             <div class="relative w-full md:w-64">
               <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
               </span>
-              <input id="searchInput" type="text" placeholder="Pencarian...."
+              <input id="searchInput" type="text" placeholder="Search..."
                   class="w-full pl-10 pr-4 py-3 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" />
           </div>
 
-            <!-- Tombol Tambah Member -->
+            <!-- Add Member Button -->
             <button onclick="openModalTambah()"
                 class="px-5 py-3 text-base font-medium text-white bg-orange-500 rounded-lg hover:bg-orange-600 shadow">
                 + Tambah Member
@@ -57,9 +57,9 @@
     </div>
 </div>
 
-<!-- Card: Member Info + Aksi -->
+<!-- Card: Member Info + Action -->
 <div class="bg-white rounded-md p-4 shadow-md mb-4 flex flex-col md:flex-row md:items-center md:justify-between">
-    <!-- Kiri: Judul -->
+    <!-- Left: Title -->
     <div class="mb-3 md:mb-0 flex items-start gap-2">
         <i data-lucide="users" class="w-5 h-5 text-gray-600 mt-1"></i>
         <div>
@@ -69,7 +69,7 @@
     </div>
 </div>
 
-<!-- Card: Tabel Member -->
+<!-- Card: Member Table -->
 <div class="bg-white rounded-lg shadow-lg p-6">
     <!-- Table -->
     <div class="overflow-x-auto">
@@ -87,7 +87,7 @@
                 </tr>
             </thead>
             <tbody id="memberTableBody" class="text-gray-700 divide-y">
-                <!-- Data akan diisi secara dinamis -->
+                <!-- Data will be filled dynamically -->
             </tbody>
         </table>
         
@@ -100,16 +100,17 @@
 
 @include('partials.member.tambah-member')
 @include('partials.member.edit-member')
+@include('partials.member.history-member')
 
 <script>
-    // Variabel global
+    // Global variables
     let memberIdToDelete = null;
     let allMembers = [];
     let filteredMembers = [];
     let debounceTimer;
     let alertTimeout;
 
-    // Inisialisasi saat DOM siap
+    // Initialize when DOM is ready
     document.addEventListener('DOMContentLoaded', function() {
         initializeLucide();
         initializeEventListeners();
@@ -123,25 +124,25 @@
     }
 
     function initializeEventListeners() {
-        // Event listener untuk modal hapus
+        // Delete modal event listeners
         const btnBatalHapus = document.getElementById('btnBatalHapus');
         const btnKonfirmasiHapus = document.getElementById('btnKonfirmasiHapus');
         if (btnBatalHapus) btnBatalHapus.addEventListener('click', closeConfirmDelete);
         if (btnKonfirmasiHapus) btnKonfirmasiHapus.addEventListener('click', hapusMember);
 
-        // Event listener untuk modal tambah/edit
+        // Modal event listeners
         const batalTambah = document.getElementById('btnBatalModalTambah');
         const batalEdit = document.getElementById('btnBatalModalEdit');
         if (batalTambah) batalTambah.addEventListener('click', closeModalTambah);
         if (batalEdit) batalEdit.addEventListener('click', closeModalEdit);
 
-        // Event listener untuk form
+        // Form event listeners
         const formTambah = document.getElementById('formTambahMember');
         const formEdit = document.getElementById('formEditMember');
         if (formTambah) formTambah.addEventListener('submit', handleFormSubmit);
         if (formEdit) formEdit.addEventListener('submit', handleEditSubmit);
 
-        // Event listener untuk pencarian
+        // Search event listeners
         const searchInput = document.getElementById('searchInput');
         if (searchInput) {
             searchInput.addEventListener('input', handleSearchInput);
@@ -173,10 +174,10 @@
     }
 
     function showAlert(type, message) {
-        // Hapus alert yang sedang aktif
+        // Clear existing alerts
         clearExistingAlerts();
         
-        // Hapus timeout sebelumnya jika ada
+        // Clear previous timeout
         if (alertTimeout) {
             clearTimeout(alertTimeout);
         }
@@ -218,7 +219,7 @@
         alertContainer.prepend(alertElement);
         if (window.lucide) window.lucide.createIcons();
         
-        // Set timeout untuk auto close
+        // Auto close after 5 seconds
         alertTimeout = setTimeout(() => closeAlert(alertId), 5000);
     }
 
@@ -267,7 +268,7 @@
                 filteredMembers = [...allMembers];
                 renderMembers();
             } else {
-                throw new Error(data.message || 'Gagal memuat data member');
+                throw new Error(data.message || 'Failed to load member data');
             }
         } catch (error) {
             console.error('Error loading members:', error);
@@ -290,7 +291,7 @@
                     <td colspan="8" class="py-8 text-center">
                         <div class="flex flex-col items-center justify-center gap-2">
                             <i data-lucide="search-x" class="w-8 h-8 text-gray-400"></i>
-                            <p class="text-gray-500 font-medium">Tidak ada member yang ditemukan</p>
+                            <p class="text-gray-500 font-medium">No members found</p>
                         </div>
                     </td>
                 </tr>
@@ -318,7 +319,7 @@
                 <td class="py-4">${member.member_code}</td>
                 <td class="py-4">${member.email || '-'}</td>
                 <td class="py-4">${member.address || '-'}</td>
-                <td class="py-4">${member.gender === 'male' ? 'Laki-laki' : member.gender === 'female' ? 'Perempuan' : '-'}</td>
+                <td class="py-4">${member.gender === 'male' ? 'Male' : member.gender === 'female' ? 'Female' : '-'}</td>
                 <td class="py-4">${member.orders_count || 0}</td>
                 <td class="py-4 relative">
                     <div class="relative inline-block">
@@ -326,15 +327,15 @@
                             <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
                         </button>
                         <div class="dropdown-menu hidden absolute right-0 z-50 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-base">
-                            <div class="px-4 py-2 font-bold text-left border-b">Aksi</div>
-                            <button onclick="historyMember(${member.id})" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left">
+                            <div class="px-4 py-2 font-bold text-left border-b">Actions</div>
+                            <button onclick="showMemberHistory(${member.id})" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left">
                                 <i data-lucide="history" class="w-5 h-5 mr-3 text-gray-500"></i> History
                             </button>
                             <button onclick="editMember(${member.id})" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left">
                                 <i data-lucide="pencil" class="w-5 h-5 mr-3 text-gray-500"></i> Edit
                             </button>
                             <button onclick="showConfirmDelete(${member.id})" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left text-red-600">
-                                <i data-lucide="trash-2" class="w-5 h-5 mr-3"></i> Hapus
+                                <i data-lucide="trash-2" class="w-5 h-5 mr-3"></i> Delete
                             </button>
                         </div>
                     </div>
@@ -381,10 +382,10 @@
             const data = await response.json();
 
             if (response.ok) {
-                showAlert('success', 'Member berhasil dihapus!');
+                showAlert('success', 'Member deleted successfully!');
                 loadMembers();
             } else {
-                throw new Error(data.message || 'Gagal menghapus member');
+                throw new Error(data.message || 'Failed to delete member');
             }
         } catch (error) {
             console.error('Error deleting member:', error);
@@ -394,9 +395,15 @@
         }
     }
 
-    function historyMember(id) {
-        console.log('Melihat history member ID:', id);
-        showAlert('success', `Melihat history member ID: ${id}`);
+    // History Member Functionality
+    function showMemberHistory(id) {
+        // Call the historyMember function from the included modal
+        if (window.historyMember) {
+            window.historyMember(id);
+        } else {
+            console.error('History member modal not loaded');
+            showAlert('error', 'History feature not available');
+        }
     }
 
     function editMember(id) {
@@ -431,7 +438,7 @@
         if (!btnEdit) return;
         
         const originalText = btnEdit.innerHTML;
-        btnEdit.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Menyimpan...`;
+        btnEdit.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Saving...`;
         btnEdit.disabled = true;
         
         const memberId = document.getElementById('memberIdToEdit')?.value;
@@ -457,11 +464,11 @@
             const data = await response.json();
             
             if (response.ok) {
-                showAlert('success', 'Data member berhasil diperbarui!');
+                showAlert('success', 'Member updated successfully!');
                 loadMembers();
                 closeModalEdit();
             } else {
-                throw new Error(data.message || 'Gagal memperbarui member');
+                throw new Error(data.message || 'Failed to update member');
             }
         } catch (error) {
             console.error('Error updating member:', error);
@@ -473,7 +480,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        // Event listener untuk form
+        // Form event listeners
         document.getElementById('formTambahMember')?.addEventListener('submit', function (e) {
         e.preventDefault();
         submitForm();
@@ -491,7 +498,7 @@
         if (!btnTambah) return;
         
         const originalText = btnTambah.innerHTML;
-        btnTambah.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Menyimpan...`;
+        btnTambah.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Saving...`;
         btnTambah.disabled = true;
 
         const token = localStorage.getItem('token');
@@ -516,12 +523,12 @@
             const result = await response.json();
 
             if (response.ok) {
-                showAlert('success', 'Member baru berhasil ditambahkan!');
+                showAlert('success', 'Member added successfully!');
                 resetForm();
                 closeModalTambah();
                 loadMembers();
             } else {
-                throw new Error(result.message || 'Gagal menambahkan member');
+                throw new Error(result.message || 'Failed to add member');
             }
         } catch (error) {
             console.error('Error adding member:', error);
@@ -536,22 +543,22 @@
         const menu = button.nextElementSibling;
         if (!menu) return;
 
-        // Tutup semua dropdown lain
+        // Close all other dropdowns
         document.querySelectorAll('.dropdown-menu').forEach(m => {
             if (m !== menu) {
                 m.classList.add('hidden');
             }
         });
 
-        // Toggle dropdown terkait tombol yang diklik
+        // Toggle current dropdown
         menu.classList.toggle('hidden');
 
-        // Hitung posisi relatif terhadap viewport
+        // Calculate position relative to viewport
         const buttonRect = button.getBoundingClientRect();
         const spaceBelow = window.innerHeight - buttonRect.bottom;
         const spaceRight = window.innerWidth - buttonRect.right;
-        const menuHeight = menu.offsetHeight || 176; // Approximate height of the menu
-        const menuWidth = menu.offsetWidth || 160; // Approximate width of the menu
+        const menuHeight = menu.offsetHeight || 176;
+        const menuWidth = menu.offsetWidth || 160;
         
         // Reset positioning
         menu.style.position = 'fixed';
@@ -560,34 +567,34 @@
         menu.style.left = '';
         menu.style.right = '';
 
-        // Posisi vertikal
+        // Vertical position
         if (spaceBelow < menuHeight) {
-            // Jika tidak cukup ruang di bawah, tampilkan di atas
+            // If not enough space below, show above
             menu.style.bottom = `${window.innerHeight - buttonRect.top + 5}px`;
             menu.classList.add('dropdown-animation-up');
             menu.classList.remove('dropdown-animation-down');
         } else {
-            // Jika cukup ruang di bawah, tampilkan di bawah
+            // If enough space below, show below
             menu.style.top = `${buttonRect.bottom + 5}px`;
             menu.classList.add('dropdown-animation-down');
             menu.classList.remove('dropdown-animation-up');
         }
 
-        // Posisi horizontal
+        // Horizontal position
         if (spaceRight < menuWidth) {
-            // Jika tidak cukup ruang di kanan, tampilkan di kiri
+            // If not enough space on right, show left
             menu.style.right = `${window.innerWidth - buttonRect.left}px`;
             menu.classList.add('dropdown-animation-right');
             menu.classList.remove('dropdown-animation-left');
         } else {
-            // Jika cukup ruang di kanan, tampilkan di kanan
+            // If enough space on right, show right
             menu.style.left = `${buttonRect.left}px`;
             menu.classList.add('dropdown-animation-left');
             menu.classList.remove('dropdown-animation-right');
         }
     }
 
-    // Tutup semua dropdown jika klik di luar
+    // Close all dropdowns when clicking outside
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.relative.inline-block')) {
             document.querySelectorAll('.dropdown-menu').forEach(menu => {
@@ -652,22 +659,22 @@
     }
 
     function validateForm() {
-        // Implementasi validasi form
+        // Form validation implementation
         return true;
     }
 
     function validateEditForm() {
-        // Implementasi validasi form edit
+        // Edit form validation implementation
         return true;
     }
 
     function resetForm() {
-        // Implementasi reset form
+        // Form reset implementation
     }
 </script>
 
 <style>
-    /* Animasi untuk alert */
+    /* Alert animations */
     @keyframes fadeInUp {
         from {
             opacity: 0;
@@ -698,7 +705,7 @@
         animation: fadeOut 0.3s ease-out forwards;
     }
     
-    /* Styling untuk dropdown */
+    /* Dropdown styling */
     .dropdown-menu {
         position: fixed;
         z-index: 9999;
@@ -714,7 +721,7 @@
         overflow: visible !important;
     }
     
-    /* Animasi untuk dropdowns */
+    /* Dropdown animations */
     @keyframes dropdownFadeIn {
         from {
             opacity: 0;
@@ -784,7 +791,7 @@
         animation: spin 1s linear infinite;
     }
 
-    /* Style untuk tabel */
+    /* Table styling */
     .table-container {
         position: relative;
     }

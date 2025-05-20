@@ -542,6 +542,8 @@ const ProductManager = (() => {
         }
     
         products.forEach((product, index) => {
+            const barcodeId = `barcode-${index}`;
+            
             // Handle inventory data - several possible structures
             let quantity = 0;
             let min_stock = 0;
@@ -568,7 +570,10 @@ const ProductManager = (() => {
                 quantity = mainInventory.quantity || 0;
                 min_stock = mainInventory.min_stock || 0;
             }
-    
+                
+            
+
+
             const row = document.createElement("tr");
             row.className = "border-b hover:bg-gray-50";
             row.innerHTML = `
@@ -584,8 +589,10 @@ const ProductManager = (() => {
                     </div>
                 </td>
                 <td class="py-3 px-4">
+                                
+
                     ${product.barcode ? 
-                        `<div class="font-medium">${product.barcode}</div>
+                        `<svg id="${barcodeId}"></svg>
                          <svg class="barcode mt-1" 
                               jsbarcode-format="CODE128"
                               jsbarcode-value="${product.barcode}"
@@ -645,7 +652,19 @@ const ProductManager = (() => {
                 </td>
             `;
             tbody.appendChild(row);
+            if (product.barcode) {
+                JsBarcode(`#${barcodeId}`, product.barcode, {
+                    format: "CODE128",
+                    lineColor: "#000",
+                    width: 2,
+                    height: 100,
+                    displayValue: true
+                });
+            }
+
         });
+        
+        
     
         // Render semua barcode setelah elemen ditambahkan ke DOM
         JsBarcode(".barcode").init();

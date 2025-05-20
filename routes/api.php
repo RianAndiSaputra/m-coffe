@@ -73,7 +73,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/products/{product}', 'update')->middleware('role:admin');
             Route::delete('/products/{product}', 'destroy')->middleware('role:admin');
             Route::get('/products/outlet/{outletId}', 'getOutletProducts');
-            Route::get('/products/barcode/{barcode}', 'findByBarcode')->middleware('role:admin');
+            Route::get('/products/barcode/{barcode}', 'findByBarcode')->middleware('role:kasir');
             Route::get('/products/generate-barcode', 'generateBarcode')->middleware('role:admin');
             Route::get('/outlets/{outletId}/products/barcode/{barcode}', 'posFindByBarcode')->middleware('role:admin');
         });
@@ -132,6 +132,8 @@ Route::middleware('auth:sanctum')->group(function () {
     }); 
     
     Route::middleware('role:kasir,admin,supervisor')->group(function () {
+        
+        Route::get('/products/barcode/{barcode}', [ProductController::class, 'findByBarcode'])->middleware('role:kasir');
 
         Route::get('/print-template/{outlet_id}', [PrintTemplateController::class, 'show']);
         Route::post('/update-profile', [AuthController::class, 'updateProfile']);
