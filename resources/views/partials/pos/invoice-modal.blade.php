@@ -641,7 +641,7 @@
                     ${safeOrder.tax > 0 ? `
                     <div class="total-row">
                         <span>Pajak:</span>
-                        <span>Rp ${formatCurrency(safeOrder.tax)}</span>
+                        <span>${formatCurrency(safeOrder.tax)}%</span>
                     </div>
                     ` : ''}
                     

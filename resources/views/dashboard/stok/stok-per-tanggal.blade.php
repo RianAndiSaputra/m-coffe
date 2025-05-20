@@ -262,7 +262,7 @@
                 inventoryData = data.data.inventory_items;
                 updateOutletInfo(data.data);
                 renderInventoryTable(inventoryData);
-                showAlert('success', `Data stok berhasil diperbarui`);
+                // showAlert('success', `Data stok berhasil diperbarui`);
             } else {
                 showAlert('error', 'Gagal mengambil data: ' + (data.message || 'Terjadi kesalahan'));
             }

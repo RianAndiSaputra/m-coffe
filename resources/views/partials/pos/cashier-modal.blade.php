@@ -442,7 +442,7 @@
         
         // Set up form submit handlers
         document.getElementById('tambahKasForm')?.addEventListener('submit', submitTambahKas);
-        document.getElementById('withdrawForm')?.addEventListener('submit', submitWithdrawKas);
+        // document.getElementById('withdrawForm')?.addEventListener('submit', submitWithdrawKas);
         
         // Set up click handlers
         const btnCashier = document.getElementById('btnCashier');
