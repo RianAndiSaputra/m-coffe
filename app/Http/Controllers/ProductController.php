@@ -446,6 +446,7 @@ class ProductController extends Controller
     public function findByBarcode(Request $request, $barcode)
     {
         try {
+
             $product = Product::with(['category', 'inventory'])
                 ->where('barcode', $barcode)
                 ->first();

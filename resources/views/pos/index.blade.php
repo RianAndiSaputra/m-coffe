@@ -313,6 +313,9 @@
         let lastScanTime = 0;
         const SCAN_THRESHOLD = 100; // waktu maksimal antara karakter scan (ms)
         const MIN_BARCODE_LENGTH = 3; // panjang minimal barcode
+        let barcodeScanInProgress = false;
+        let barcodeBuffer = '';
+        let barcodeCompleteTimeout = null;
 
         const outletName = localStorage.getItem('outlet_name') || 'Kifa Bakery Pusat';
     
@@ -446,136 +449,113 @@
 
         // Fungsi untuk menangani scan barcode
         async function handleBarcodeScan(barcode) {
-        try {
-            const response = await fetch(`/api/products/barcode/${barcode}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${API_TOKEN}`,
-                    'Accept': 'application/json'
-                },
-                credentials: 'include'
-            });
-            
-            if (!response.ok) throw new Error('Produk tidak ditemukan');
-            
-            const result = await response.json();
-            
-            // Validasi response
-            if (!result.success || !result.data) {
-                throw new Error(result.message || 'Data produk tidak valid');
-            }
-            
-            const product = result.data;
-            
-            // Parse data penting
-            const productPrice = parseFloat(product.price) || 0;
-            const productStock = product.inventory ? (parseInt(product.inventory.quantity) || 0) : 0;
-            const minStock = product.inventory ? (parseInt(product.inventory.min_stock) || 0) : 0;
-            
-            // Cek stok produk
-            if (productStock <= 0) {
-                showNotification('Stok produk habis', 'error');
-                return;
-            }
-            
-            // Tambahkan ke keranjang
-            const existingItem = cart.find(item => item.id === product.id);
-            
-            if (existingItem) {
-                if (existingItem.quantity + 1 > productStock) {
-                    showNotification('Stok tidak mencukupi', 'error');
+            try {
+                const response = await fetch(`/api/products/barcode/${barcode}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_TOKEN}`,
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) throw new Error('Produk tidak ditemukan');
+                
+                const result = await response.json();
+                
+                // Validasi response
+                if (!result.success || !result.data) {
+                    throw new Error(result.message || 'Data produk tidak valid');
+                }
+                
+                const product = result.data;
+                
+                // Parse data penting
+                const productPrice = parseFloat(product.price) || 0;
+                const productStock = product.inventory ? (parseInt(product.inventory.quantity) || 0) : 0;
+                const minStock = product.inventory ? (parseInt(product.inventory.min_stock) || 0) : 0;
+                
+                // Cek stok produk
+                if (productStock <= 0) {
+                    showNotification('Stok produk habis', 'error');
                     return;
                 }
-                existingItem.quantity += 1;
-                existingItem.subtotal = calculateItemSubtotal(existingItem);
-            } else {
-                cart.push({
-                    id: product.id,
-                    name: product.name,
-                    price: productPrice,
-                    quantity: 1,
-                    stock: productStock,
-                    min_stock: minStock,
-                    discount: 0,
-                    subtotal: productPrice
-                });
+                
+                // Tambahkan ke keranjang
+                const existingItem = cart.find(item => item.id === product.id);
+                
+                if (existingItem) {
+                    if (existingItem.quantity + 1 > productStock) {
+                        showNotification('Stok tidak mencukupi', 'error');
+                        return;
+                    }
+                    existingItem.quantity += 1;
+                    existingItem.subtotal = calculateItemSubtotal(existingItem);
+                } else {
+                    cart.push({
+                        id: product.id,
+                        name: product.name,
+                        price: productPrice,
+                        quantity: 1,
+                        stock: productStock,
+                        min_stock: minStock,
+                        discount: 0,
+                        subtotal: productPrice
+                    });
+                }
+                
+                updateCart();
+                searchInput.value = '';
+                searchInput.focus();
+                showNotification(`${product.name} ditambahkan ke keranjang`, 'success');
+                
+            } catch (error) {
+                console.error('Error handling barcode scan:', error);
+                showNotification(error.message || 'Gagal memproses barcode', 'error');
+                searchInput.focus();
             }
-            
-            updateCart();
-            searchInput.value = '';
-            searchInput.focus();
-            showNotification(`${product.name} ditambahkan ke keranjang`, 'success');
-            
-        } catch (error) {
-            console.error('Error handling barcode scan:', error);
-            showNotification(error.message || 'Gagal memproses barcode', 'error');
-            searchInput.focus();
         }
-    }
-
 
         // Modifikasi event listener searchInput yang sudah ada
         searchInput.addEventListener('input', function(e) {
-
-    // Tambahan fitur pencarian dari barcode dan notifikasi stok
-    const searchTerm = this.value.trim();
-    const matchedProduct = products.find(product =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (product.barcode && product.barcode.toLowerCase() === searchTerm.toLowerCase())
-    );
-
-    if (matchedProduct) {
-        if (matchedProduct.quantity <= 0) {
-            showNotification(`"${matchedProduct.name}" stok habis`, 'error');
-        } else {
-            const existingItem = cart.find(item => item.id === matchedProduct.id);
-
-            if (existingItem) {
-                if (existingItem.quantity + 1 > matchedProduct.quantity) {
-                    showNotification('Stok tidak mencukupi', 'error');
-                } else {
-                    existingItem.quantity += 1;
-                    existingItem.subtotal = calculateItemSubtotal(existingItem);
-                    updateCart();
-                    showNotification(`"${matchedProduct.name}" ditambahkan ke keranjang`, 'success');
-                }
-            } 
-            // else {
-            //     cart.push({
-            //         id: matchedProduct.id,
-            //         name: matchedProduct.name,
-            //         price: matchedProduct.price,
-            //         quantity: 1,
-            //         stock: matchedProduct.quantity,
-            //         discount: 0,
-            //         subtotal: matchedProduct.price
-            //     });
-            //     updateCart();
-            //     showNotification(`"${matchedProduct.name}" ditambahkan ke keranjang`, 'success');
-            // }
-        }
-    }
-
             const value = e.target.value.trim();
             const now = Date.now();
             const timeSinceLastChar = now - lastScanTime;
             
             // Clear timeout sebelumnya
             clearTimeout(scanTimeout);
+            clearTimeout(barcodeCompleteTimeout);
             
-            if (!value) return;
+            if (!value) {
+                barcodeScanInProgress = false;
+                barcodeBuffer = '';
+                return;
+            }
             
-            // Deteksi apakah ini scan (input sangat cepat dan panjang)
-            const isScan = value.length >= MIN_BARCODE_LENGTH && timeSinceLastChar < SCAN_THRESHOLD;
-            
-            if (isScan) {
-                // Jika scan, langsung proses barcode
-                handleBarcodeScan(value);
-                renderProducts(activeCategory, value);
+            // Deteksi apakah ini awal dari scan barcode
+            if (!barcodeScanInProgress && timeSinceLastChar < SCAN_THRESHOLD) {
+                barcodeScanInProgress = true;
+                barcodeBuffer = value;
+            } else if (barcodeScanInProgress) {
+                // Jika scan sedang berlangsung, tambahkan ke buffer
+                // (tidak perlu, karena nilai lengkap sudah ada di value)
+                barcodeBuffer = value;
+                
+                // Set timeout untuk menandai bahwa scan sudah selesai
+                barcodeCompleteTimeout = setTimeout(() => {
+                    if (barcodeBuffer.length >= MIN_BARCODE_LENGTH) {
+                        // Proses barcode lengkap
+                        handleBarcodeScan(barcodeBuffer);
+                        searchInput.value = '';  // Kosongkan input setelah diproses
+                    }
+                    
+                    // Reset status scan
+                    barcodeScanInProgress = false;
+                    barcodeBuffer = '';
+                }, 50); // Waktu tunggu singkat untuk memastikan semua karakter sudah masuk
             } else {
-                // handleBarcodeScan(value);
-                // Jika bukan scan, lakukan pencarian biasa dengan debounce
+                // Ini adalah input manual biasa (pencarian)
                 scanTimeout = setTimeout(() => {
                     const activeCategory = document.querySelector('#categoryTabs .nav-link.active')?.getAttribute('data-category') || 'all';
                     renderProducts(activeCategory, value);
@@ -651,6 +631,27 @@
             } catch (error) {
                 console.error('Error fetching outlet info:', error);
             }
+        }
+
+        function syncProductStock() {
+            // Reset stok produk ke stok asli (sebelum keranjang)
+            products.forEach(product => {
+                product.originalStock = product.originalStock || product.quantity;
+                product.quantity = product.originalStock;
+            });
+            
+            // Kurangi stok berdasarkan item di keranjang
+            cart.forEach(item => {
+                const product = products.find(p => p.id === item.id);
+                if (product) {
+                    product.quantity -= item.quantity;
+                }
+            });
+            
+            // Render ulang produk dengan stok yang sudah diperbarui
+            const activeFilter = document.querySelector('.category-filter button.active')?.dataset.filter || 'all';
+            const currentSearch = document.getElementById('searchProduct')?.value || '';
+            renderProducts(activeFilter, currentSearch);
         }
     
         // Fetch products from API
@@ -934,785 +935,785 @@
         
         // Update cart display
         function updateCart() {
-                cartItemsContainer.innerHTML = '';
-    
-    let rawSubtotal = 0;
-    let totalDiscount = 0;
-    let orderSubtotal = 0;
-    let tax = 0;
-    let grandTotal = 0;
-    
-    if (cart.length === 0) {
-        emptyCartElement.classList.remove('hidden');
-        cartItemsContainer.appendChild(emptyCartElement);
-        subtotalElement.textContent = 'Rp 0';
-        totalDiscountElement.textContent = 'Rp 0';
-        taxAmountElement.textContent = 'Rp 0';
-        totalElement.textContent = 'Rp 0';
-        return;
-    } else {
-        emptyCartElement.classList.add('hidden');
-    }
-    
-    cart.forEach((item, index) => {
-        // Pastikan semua properti ada
-        const itemPrice = item.price || 0;
-        const itemQuantity = item.quantity || 0;
-        const itemDiscount = item.discount || 0;
+            cartItemsContainer.innerHTML = '';
         
-        const itemTotal = itemPrice * itemQuantity;
-        const itemSubtotal = itemTotal - itemDiscount;
+            let rawSubtotal = 0;
+            let totalDiscount = 0;
+            let orderSubtotal = 0;
+            let tax = 0;
+            let grandTotal = 0;
+            
+            if (cart.length === 0) {
+                emptyCartElement.classList.remove('hidden');
+                cartItemsContainer.appendChild(emptyCartElement);
+                subtotalElement.textContent = 'Rp 0';
+                totalDiscountElement.textContent = 'Rp 0';
+                taxAmountElement.textContent = 'Rp 0';
+                totalElement.textContent = 'Rp 0';
+                return;
+            } else {
+                emptyCartElement.classList.add('hidden');
+            }
         
-        rawSubtotal += itemTotal;
-        totalDiscount += itemDiscount;
-        orderSubtotal += itemSubtotal;
-        
-        item.subtotal = itemSubtotal;
-        
-        const cartItemElement = document.createElement('div');
-        cartItemElement.className = 'cart-item hover:bg-gray-50';
-
+        cart.forEach((item, index) => {
+                // Pastikan semua properti ada
+                const itemPrice = item.price || 0;
+                const itemQuantity = item.quantity || 0;
+                const itemDiscount = item.discount || 0;
                 
-                cartItemElement.innerHTML = `
-                    <div class="cart-item-grid">
-                        <div class="product-info">
-                            <div class="product-name font-medium text-gray-800">${item.name}</div>
-                            <div class="product-price text-sm text-gray-500">Rp ${item.price.toLocaleString('id-ID')}</div>
-                        </div>
-                        
-                        <div class="quantity-control">
-                            <div class="qty-control">
-                                <button class="btn-decrease px-2 py-1 border border-gray-300 bg-gray-100 rounded hover:bg-gray-200" data-index="${index}">
-                                    <i data-lucide="minus" class="w-3 h-3"></i>
-                                </button>
-                                <input type="text" class="qty-input" value="${item.quantity}" data-index="${index}">
-                                <button class="btn-increase px-2 py-1 border border-gray-300 bg-gray-100 rounded hover:bg-gray-200" data-index="${index}">
-                                    <i data-lucide="plus" class="w-3 h-3"></i>
+                const itemTotal = itemPrice * itemQuantity;
+                const itemSubtotal = itemTotal - itemDiscount;
+                
+                rawSubtotal += itemTotal;
+                totalDiscount += itemDiscount;
+                orderSubtotal += itemSubtotal;
+                
+                item.subtotal = itemSubtotal;
+                
+                const cartItemElement = document.createElement('div');
+                cartItemElement.className = 'cart-item hover:bg-gray-50';
+
+                    
+                    cartItemElement.innerHTML = `
+                        <div class="cart-item-grid">
+                            <div class="product-info">
+                                <div class="product-name font-medium text-gray-800">${item.name}</div>
+                                <div class="product-price text-sm text-gray-500">Rp ${item.price.toLocaleString('id-ID')}</div>
+                            </div>
+                            
+                            <div class="quantity-control">
+                                <div class="qty-control">
+                                    <button class="btn-decrease px-2 py-1 border border-gray-300 bg-gray-100 rounded hover:bg-gray-200" data-index="${index}">
+                                        <i data-lucide="minus" class="w-3 h-3"></i>
+                                    </button>
+                                    <input type="text" class="qty-input" value="${item.quantity}" data-index="${index}">
+                                    <button class="btn-increase px-2 py-1 border border-gray-300 bg-gray-100 rounded hover:bg-gray-200" data-index="${index}">
+                                        <i data-lucide="plus" class="w-3 h-3"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="discount-control">
+                                <input type="text" class="discount-input" value="Rp ${item.discount.toLocaleString('id-ID')}" data-index="${index}" placeholder="Rp 0">
+                            </div>
+                            
+                            <div class="subtotal text-right font-medium">
+                                Rp ${itemSubtotal.toLocaleString('id-ID')}
+                            </div>
+                            
+                            <div class="delete-btn">
+                                <button class="btn-remove text-gray-400 hover:text-red-500" data-index="${index}">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
                             </div>
                         </div>
-                        
-                        <div class="discount-control">
-                            <input type="text" class="discount-input" value="Rp ${item.discount.toLocaleString('id-ID')}" data-index="${index}" placeholder="Rp 0">
-                        </div>
-                        
-                        <div class="subtotal text-right font-medium">
-                            Rp ${itemSubtotal.toLocaleString('id-ID')}
-                        </div>
-                        
-                        <div class="delete-btn">
-                            <button class="btn-remove text-gray-400 hover:text-red-500" data-index="${index}">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
+                    `;
+                    
+                    cartItemsContainer.appendChild(cartItemElement);
+                });
                 
-                cartItemsContainer.appendChild(cartItemElement);
-            });
-            
-            // Calculate tax and grand total
-            tax = orderSubtotal * (outletInfo.tax / 100);
-            grandTotal = orderSubtotal + tax;
-            
-            subtotalElement.textContent = `Rp ${rawSubtotal.toLocaleString('id-ID')}`;
-            totalDiscountElement.textContent = `Rp ${totalDiscount.toLocaleString('id-ID')}`;
-            taxAmountElement.textContent = `Rp ${tax.toLocaleString('id-ID')}`;
-            totalElement.textContent = `Rp ${grandTotal.toLocaleString('id-ID')}`;
-            
-            lucide.createIcons();
-            
-            // Add event listeners to quantity controls
-            document.querySelectorAll('.btn-decrease').forEach(button => {
-                button.addEventListener('click', function() {
-                    const index = parseInt(this.getAttribute('data-index'));
-                    if (cart[index].quantity > 1) {
-                        cart[index].quantity -= 1;
+                // Calculate tax and grand total
+                tax = orderSubtotal * (outletInfo.tax / 100);
+                grandTotal = orderSubtotal + tax;
+                
+                subtotalElement.textContent = `Rp ${rawSubtotal.toLocaleString('id-ID')}`;
+                totalDiscountElement.textContent = `Rp ${totalDiscount.toLocaleString('id-ID')}`;
+                taxAmountElement.textContent = `Rp ${tax.toLocaleString('id-ID')}`;
+                totalElement.textContent = `Rp ${grandTotal.toLocaleString('id-ID')}`;
+                
+                lucide.createIcons();
+                
+                // Add event listeners to quantity controls
+                document.querySelectorAll('.btn-decrease').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        if (cart[index].quantity > 1) {
+                            cart[index].quantity -= 1;
+                            cart[index].subtotal = calculateItemSubtotal(cart[index]);
+                            updateCart();
+                        }
+                    });
+                });
+                
+                // Di bagian event listener tombol tambah quantity
+                document.querySelectorAll('.btn-increase').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        const item = cart[index];
+                        
+                        if (item.quantity + 1 > item.stock) {
+                            showNotification('Stok tidak mencukupi', 'error');
+                            return;
+                        }
+                        
+                        item.quantity += 1;
+                        item.subtotal = calculateItemSubtotal(item);
+                        updateCart();
+                    });
+                });
+                
+                document.querySelectorAll('.qty-input').forEach(input => {
+                    input.addEventListener('change', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        const newQty = parseInt(this.value) || 1;
+                        const item = cart[index];
+
+                        if (newQty > item.stock) {
+                            showNotification(`Stok hanya tersedia ${item.stock}`, 'error');
+                            this.value = item.quantity;
+                            return;
+                        }
                         cart[index].subtotal = calculateItemSubtotal(cart[index]);
                         updateCart();
-                    }
-                });
-            });
-            
-            // Di bagian event listener tombol tambah quantity
-            document.querySelectorAll('.btn-increase').forEach(button => {
-                button.addEventListener('click', function() {
-                    const index = parseInt(this.getAttribute('data-index'));
-                    const item = cart[index];
-                    
-                    if (item.quantity + 1 > item.stock) {
-                        showNotification('Stok tidak mencukupi', 'error');
-                        return;
-                    }
-                    
-                    item.quantity += 1;
-                    item.subtotal = calculateItemSubtotal(item);
-                    updateCart();
-                });
-            });
-            
-            document.querySelectorAll('.qty-input').forEach(input => {
-                input.addEventListener('change', function() {
-                    const index = parseInt(this.getAttribute('data-index'));
-                    const newQty = parseInt(this.value) || 1;
-                    const item = cart[index];
-
-                            if (newQty > item.stock) {
-            showNotification(`Stok hanya tersedia ${item.stock}`, 'error');
-            this.value = item.quantity;
-            return;
-        }
-                    cart[index].subtotal = calculateItemSubtotal(cart[index]);
-                    updateCart();
-                });
-            });
-            
-            // Add event listeners to discount inputs
-            document.querySelectorAll('.discount-input').forEach(input => {
-                // Format on blur
-                input.addEventListener('blur', function() {
-                    const formattedValue = formatCurrencyInput(this.value);
-                    this.value = formattedValue ? `Rp ${formattedValue}` : 'Rp 0';
-                    
-                    const index = parseInt(this.getAttribute('data-index'));
-                    const discount = parseCurrencyInput(this.value);
-                    cart[index].discount = discount;
-                    cart[index].subtotal = calculateItemSubtotal(cart[index]);
-                    updateCart();
-                });
-                
-                // Remove formatting on focus for easier editing
-                input.addEventListener('focus', function() {
-                    const numValue = parseCurrencyInput(this.value);
-                    this.value = numValue.toString();
-                });
-                
-                // Handle change event
-                input.addEventListener('change', function() {
-                    const index = parseInt(this.getAttribute('data-index'));
-                    const discount = parseCurrencyInput(this.value);
-                    cart[index].discount = discount;
-                    cart[index].subtotal = calculateItemSubtotal(cart[index]);
-                    updateCart();
-                });
-            });
-            
-            document.querySelectorAll('.btn-remove').forEach(button => {
-                button.addEventListener('click', function() {
-                    const index = parseInt(this.getAttribute('data-index'));
-                    cart.splice(index, 1);
-                    updateCart();
-                });
-            });
-        }
-        
-        function calculateItemSubtotal(item) {
-            const basePrice = item.price * item.quantity;
-            const discountAmount = item.discount || 0;
-            return Math.max(0, basePrice - discountAmount);
-        }
-
-        // Search members
-        memberSearchInput.addEventListener('input', function() {
-            const query = this.value.trim();
-            
-            if (query.length < 2) {
-                memberResultsContainer.innerHTML = '';
-                hideMemberDropdown();
-                return;
-            }
-            
-            // Fetch from the main members endpoint
-            fetch(`/api/members`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${API_TOKEN}`,
-                    'Accept': 'application/json'
-                },
-                credentials: 'include'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.data.length > 0) {
-                    // Filter members based on the search query
-                    const filteredMembers = data.data.filter(member => 
-                        member.name.toLowerCase().includes(query.toLowerCase()) || 
-                        (member.member_code && member.member_code.toLowerCase().includes(query.toLowerCase()))
-                    );
-                    
-                    memberResultsContainer.innerHTML = '';
-                    
-                    if (filteredMembers.length > 0) {
-                        filteredMembers.forEach(member => {
-                            const memberItem = document.createElement('div');
-                            memberItem.className = 'member-item';
-                            memberItem.innerHTML = `
-                                <div class="font-medium">${member.name}</div>
-                                <div class="text-sm text-gray-500">${member.member_code || 'No Code'}</div>
-                            `;
-                            
-                            memberItem.addEventListener('click', function() {
-                                selectMember(member);
-                                hideMemberDropdown();
-                            });
-                            
-                            memberResultsContainer.appendChild(memberItem);
-                        });
-                        
-                        showMemberDropdown();
-                    } else {
-                        memberResultsContainer.innerHTML = '<div class="member-item text-gray-500">Tidak ditemukan</div>';
-                        showMemberDropdown();
-                    }
-                } else {
-                    memberResultsContainer.innerHTML = '<div class="member-item text-gray-500">Tidak ditemukan</div>';
-                    showMemberDropdown();
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching members:', error);
-                memberResultsContainer.innerHTML = '<div class="member-item text-gray-500">Terjadi kesalahan</div>';
-                showMemberDropdown();
-            });
-        });
-                
-                // Select member
-        function selectMember(member) {
-            selectedMember = member;
-            memberNameElement.textContent = `${member.name} (${member.member_code})`;
-            selectedMemberContainer.classList.remove('hidden');
-            memberSearchInput.value = '';
-            hideMemberDropdown();
-        }
-                
-                // Remove member
-        removeMemberButton.addEventListener('click', function() {
-            selectedMember = null;
-            selectedMemberContainer.classList.add('hidden');
-        });
-
-        memberSearchInput.addEventListener('click', function() {
-            if (this.value.trim().length >= 2) {
-                showMemberDropdown();
-            }
-        });
-
-        // Tampilkan dropdown ketika input mendapatkan fokus
-        memberSearchInput.addEventListener('focus', function() {
-            if (this.value.trim().length >= 2) {
-                showMemberDropdown();
-            }
-        });
-
-        // Tutup dropdown ketika klik di luar dropdown
-        document.addEventListener('click', function(event) {
-            if (!memberSearchInput.contains(event.target) && !memberDropdownList.contains(event.target)) {
-                hideMemberDropdown();
-            }
-        });
-
-        // Navigasi dropdown dengan keyboard
-        memberSearchInput.addEventListener('keydown', function(event) {
-            const items = memberResultsContainer.querySelectorAll('.member-item');
-            const activeItem = memberResultsContainer.querySelector('.member-item.active');
-            
-            if (items.length === 0) return;
-            
-            if (event.key === 'ArrowDown') {
-                event.preventDefault();
-                
-                if (!activeItem) {
-                    items[0].classList.add('active');
-                } else {
-                    const nextItem = activeItem.nextElementSibling;
-                    if (nextItem) {
-                        activeItem.classList.remove('active');
-                        nextItem.classList.add('active');
-                    }
-                }
-            } else if (event.key === 'ArrowUp') {
-                event.preventDefault();
-                
-                if (!activeItem) {
-                    items[items.length - 1].classList.add('active');
-                } else {
-                    const prevItem = activeItem.previousElementSibling;
-                    if (prevItem) {
-                        activeItem.classList.remove('active');
-                        prevItem.classList.add('active');
-                    }
-                }
-            } else if (event.key === 'Enter') {
-                if (activeItem) {
-                    event.preventDefault();
-                    
-                    // Simulate click on the active item
-                    activeItem.click();
-                }
-            } else if (event.key === 'Escape') {
-                hideMemberDropdown();
-            }
-        });
-        
-        // Render payment methods
-        function renderPaymentMethods() {
-            paymentMethodsContainer.innerHTML = '';
-            
-            const methods = [
-                { id: 'cash', name: 'Tunai', icon: 'wallet' },
-                { id: 'qris', name: 'QRIS', icon: 'qr-code' },
-                { id: 'transfer', name: 'Transfer Bank', icon: 'banknote' }
-            ];
-            
-            methods.forEach(method => {
-                const methodElement = document.createElement('div');
-                methodElement.className = 'payment-method';
-                methodElement.innerHTML = `
-                    <div class="flex items-center">
-                        <i data-lucide="${method.icon}" class="w-5 h-5 mr-3 text-gray-600"></i>
-                        <span class="font-medium">${method.name}</span>
-                    </div>
-                `;
-                
-                methodElement.addEventListener('click', function() {
-                    document.querySelectorAll('.payment-method').forEach(m => {
-                        m.classList.remove('selected');
                     });
-                    this.classList.add('selected');
-                    document.getElementById('paymentMethod').value = method.id;
-                    
-                    // Handle cash section
-                    if (method.id === 'cash') {
-                        cashPaymentSection.style.display = 'block';
-                        document.getElementById('transferDetails').classList.add('hidden');
-                        document.getElementById('qrisDetails').classList.add('hidden');
-                    } else {
-                        cashPaymentSection.style.display = 'none';
-                        amountReceivedInput.value = '';
-                        changeAmountInput.value = '';
-                    }
-                    
-                    // Handle transfer details
-                    if (method.id === 'transfer') {
-                        document.getElementById('transferDetails').classList.remove('hidden');
-                        document.getElementById('qrisDetails').classList.add('hidden');
-                        
-                        document.getElementById('bankAccountName').textContent = 
-                            outletInfo.bank_account?.atas_nama || '-';
-                        document.getElementById('bankName').textContent = 
-                            outletInfo.bank_account?.bank || '-';
-                        document.getElementById('bankAccountNumber').textContent = 
-                            outletInfo.bank_account?.nomor || '-';
-                    } 
-                    // Handle QRIS details
-                    else if (method.id === 'qris') {
-                        document.getElementById('transferDetails').classList.add('hidden');
-                        document.getElementById('qrisDetails').classList.remove('hidden');
-                        
-                        const qrisContainer = document.getElementById('qrisImageContainer');
-                        qrisContainer.innerHTML = '';
-                        
-                        if (outletInfo.qris) {
-                            const img = document.createElement('img');
-                            img.src = outletInfo.qris;
-                            img.alt = 'QRIS Payment';
-                            img.className = 'w-48 h-48 object-contain';
-                            qrisContainer.appendChild(img);
-                        } else {
-                            qrisContainer.innerHTML = `
-                                <div class="text-center py-8 text-gray-400">
-                                    <i data-lucide="image-off" class="w-12 h-12 mx-auto mb-2"></i>
-                                    <p>QR Code tidak tersedia</p>
-                                </div>
-                            `;
-                            lucide.createIcons();
-                        }
-                    } 
-                    else {
-                        document.getElementById('transferDetails').classList.add('hidden');
-                        document.getElementById('qrisDetails').classList.add('hidden');
-                    }
                 });
                 
-                paymentMethodsContainer.appendChild(methodElement);
-            });
+                // Add event listeners to discount inputs
+                document.querySelectorAll('.discount-input').forEach(input => {
+                    // Format on blur
+                    input.addEventListener('blur', function() {
+                        const formattedValue = formatCurrencyInput(this.value);
+                        this.value = formattedValue ? `Rp ${formattedValue}` : 'Rp 0';
+                        
+                        const index = parseInt(this.getAttribute('data-index'));
+                        const discount = parseCurrencyInput(this.value);
+                        cart[index].discount = discount;
+                        cart[index].subtotal = calculateItemSubtotal(cart[index]);
+                        updateCart();
+                    });
+                    
+                    // Remove formatting on focus for easier editing
+                    input.addEventListener('focus', function() {
+                        const numValue = parseCurrencyInput(this.value);
+                        this.value = numValue.toString();
+                    });
+                    
+                    // Handle change event
+                    input.addEventListener('change', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        const discount = parseCurrencyInput(this.value);
+                        cart[index].discount = discount;
+                        cart[index].subtotal = calculateItemSubtotal(cart[index]);
+                        updateCart();
+                    });
+                });
+                
+                document.querySelectorAll('.btn-remove').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        cart.splice(index, 1);
+                        updateCart();
+                    });
+                });
+            }
             
-            // Add hidden input for selected payment method
-            const methodInput = document.createElement('input');
-            methodInput.type = 'hidden';
-            methodInput.id = 'paymentMethod';
-            methodInput.value = '';
-            paymentMethodsContainer.appendChild(methodInput);
-            
-            lucide.createIcons();
-        }
+            function calculateItemSubtotal(item) {
+                const basePrice = item.price * item.quantity;
+                const discountAmount = item.discount || 0;
+                return Math.max(0, basePrice - discountAmount);
+            }
 
-        function setupPaymentButton() {
-            // Remove old event listener if it exists
-            const btn = document.getElementById('btnProcessPayment');
-            btn.removeEventListener('click', processPaymentHandler);
-            
-            // Add new event listener
-            btn.addEventListener('click', processPaymentHandler);
-        }
-        
-        // Show payment modal
-        function showPaymentModal() {
-            if (cart.length === 0) {
-                showNotification('Keranjang belanja kosong', 'warning');
-                return;
-            }
-            
-            // Calculate totals
-            const rawSubtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            const totalDiscount = cart.reduce((sum, item) => sum + (item.discount || 0), 0);
-            const orderSubtotal = rawSubtotal - totalDiscount;
-            const tax = orderSubtotal * (outletInfo.tax / 100);
-            const grandTotal = orderSubtotal + tax;
-            
-            // Update payment modal values
-            // paymentSubtotalElement.textContent = formatCurrency(rawSubtotal);
-            // paymentDiscountElement.textContent = formatCurrency(totalDiscount);
-            // paymentTaxElement.textContent = formatCurrency(tax);
-            paymentGrandTotalElement.textContent = formatCurrency(grandTotal);
-            
-            // Reset payment inputs
-            amountReceivedInput.value = '';
-            changeAmountInput.value = '';
-            notesInput.value = '';
-            
-            // Render payment methods
-            renderPaymentMethods();
-            
-            // Add event listener for amount received input
-            amountReceivedInput.addEventListener('input', function() {
-                const received = parseCurrencyInput(this.value);
-                const change = received - grandTotal;
+            // Search members
+            memberSearchInput.addEventListener('input', function() {
+                const query = this.value.trim();
                 
-                if (change >= 0) {
-                    changeAmountInput.value = formatCurrency(change);
-                } else {
-                    changeAmountInput.value = 'Rp 0';
-                }
-            });
-            
-            // CRITICAL FIX: Clone and replace the payment button to remove all event listeners
-            const oldButton = document.getElementById('btnProcessPayment');
-            const newButton = oldButton.cloneNode(true);
-            oldButton.parentNode.replaceChild(newButton, oldButton);
-            
-            // Add the event listener to the fresh button
-            document.getElementById('btnProcessPayment').addEventListener('click', function() {
-                processPayment(grandTotal);
-            });
-            
-            openModal('paymentModal');
-        }
-        
-        async function processPayment(grandTotal) {
-            const paymentMethod = document.getElementById('paymentMethod').value;
-            const amountReceived = parseCurrencyInput(amountReceivedInput.value);
-            const notes = notesInput.value;
-            
-            if (!paymentMethod) {
-                showNotification('Pilih metode pembayaran terlebih dahulu', 'warning');
-                return;
-            }
-            
-            if (paymentMethod === 'cash' && amountReceived < grandTotal) {
-                showNotification('Jumlah uang tidak mencukupi', 'warning');
-                return;
-            }
-            
-            try {
-                // Prepare transaction data
-                const transactionData = {
-                    outlet_id: outletInfo.id,
-                    shift_id: outletInfo.shift_id,
-                    items: cart.map(item => ({
-                        product_id: item.id,
-                        quantity: item.quantity,
-                        discount: item.discount,
-                        price: item.price
-                    })),
-                    payment_method: paymentMethod,
-                    notes: notes,
-                    tax: outletInfo.tax,
-                    discount: cart.reduce((sum, item) => sum + (item.discount || 0), 0),
-                    member_id: selectedMember ? selectedMember.id : null
-                };
-                
-                // For cash payments, include amount received
-                if (paymentMethod === 'cash') {
-                    transactionData.total_paid = amountReceived;
+                if (query.length < 2) {
+                    memberResultsContainer.innerHTML = '';
+                    hideMemberDropdown();
+                    return;
                 }
                 
-                // Send transaction to server
-                const response = await fetch(`/api/orders`, {
-                    method: 'POST',
+                // Fetch from the main members endpoint
+                fetch(`/api/members`, {
+                    method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${API_TOKEN}`,
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify(transactionData),
                     credentials: 'include'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.data.length > 0) {
+                        // Filter members based on the search query
+                        const filteredMembers = data.data.filter(member => 
+                            member.name.toLowerCase().includes(query.toLowerCase()) || 
+                            (member.member_code && member.member_code.toLowerCase().includes(query.toLowerCase()))
+                        );
+                        
+                        memberResultsContainer.innerHTML = '';
+                        
+                        if (filteredMembers.length > 0) {
+                            filteredMembers.forEach(member => {
+                                const memberItem = document.createElement('div');
+                                memberItem.className = 'member-item';
+                                memberItem.innerHTML = `
+                                    <div class="font-medium">${member.name}</div>
+                                    <div class="text-sm text-gray-500">${member.member_code || 'No Code'}</div>
+                                `;
+                                
+                                memberItem.addEventListener('click', function() {
+                                    selectMember(member);
+                                    hideMemberDropdown();
+                                });
+                                
+                                memberResultsContainer.appendChild(memberItem);
+                            });
+                            
+                            showMemberDropdown();
+                        } else {
+                            memberResultsContainer.innerHTML = '<div class="member-item text-gray-500">Tidak ditemukan</div>';
+                            showMemberDropdown();
+                        }
+                    } else {
+                        memberResultsContainer.innerHTML = '<div class="member-item text-gray-500">Tidak ditemukan</div>';
+                        showMemberDropdown();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching members:', error);
+                    memberResultsContainer.innerHTML = '<div class="member-item text-gray-500">Terjadi kesalahan</div>';
+                    showMemberDropdown();
+                });
+            });
+                    
+                    // Select member
+            function selectMember(member) {
+                selectedMember = member;
+                memberNameElement.textContent = `${member.name} (${member.member_code})`;
+                selectedMemberContainer.classList.remove('hidden');
+                memberSearchInput.value = '';
+                hideMemberDropdown();
+            }
+                    
+                    // Remove member
+            removeMemberButton.addEventListener('click', function() {
+                selectedMember = null;
+                selectedMemberContainer.classList.add('hidden');
+            });
+
+            memberSearchInput.addEventListener('click', function() {
+                if (this.value.trim().length >= 2) {
+                    showMemberDropdown();
+                }
+            });
+
+            // Tampilkan dropdown ketika input mendapatkan fokus
+            memberSearchInput.addEventListener('focus', function() {
+                if (this.value.trim().length >= 2) {
+                    showMemberDropdown();
+                }
+            });
+
+            // Tutup dropdown ketika klik di luar dropdown
+            document.addEventListener('click', function(event) {
+                if (!memberSearchInput.contains(event.target) && !memberDropdownList.contains(event.target)) {
+                    hideMemberDropdown();
+                }
+            });
+
+            // Navigasi dropdown dengan keyboard
+            memberSearchInput.addEventListener('keydown', function(event) {
+                const items = memberResultsContainer.querySelectorAll('.member-item');
+                const activeItem = memberResultsContainer.querySelector('.member-item.active');
+                
+                if (items.length === 0) return;
+                
+                if (event.key === 'ArrowDown') {
+                    event.preventDefault();
+                    
+                    if (!activeItem) {
+                        items[0].classList.add('active');
+                    } else {
+                        const nextItem = activeItem.nextElementSibling;
+                        if (nextItem) {
+                            activeItem.classList.remove('active');
+                            nextItem.classList.add('active');
+                        }
+                    }
+                } else if (event.key === 'ArrowUp') {
+                    event.preventDefault();
+                    
+                    if (!activeItem) {
+                        items[items.length - 1].classList.add('active');
+                    } else {
+                        const prevItem = activeItem.previousElementSibling;
+                        if (prevItem) {
+                            activeItem.classList.remove('active');
+                            prevItem.classList.add('active');
+                        }
+                    }
+                } else if (event.key === 'Enter') {
+                    if (activeItem) {
+                        event.preventDefault();
+                        
+                        // Simulate click on the active item
+                        activeItem.click();
+                    }
+                } else if (event.key === 'Escape') {
+                    hideMemberDropdown();
+                }
+            });
+            
+            // Render payment methods
+            function renderPaymentMethods() {
+                paymentMethodsContainer.innerHTML = '';
+                
+                const methods = [
+                    { id: 'cash', name: 'Tunai', icon: 'wallet' },
+                    { id: 'qris', name: 'QRIS', icon: 'qr-code' },
+                    { id: 'transfer', name: 'Transfer Bank', icon: 'banknote' }
+                ];
+                
+                methods.forEach(method => {
+                    const methodElement = document.createElement('div');
+                    methodElement.className = 'payment-method';
+                    methodElement.innerHTML = `
+                        <div class="flex items-center">
+                            <i data-lucide="${method.icon}" class="w-5 h-5 mr-3 text-gray-600"></i>
+                            <span class="font-medium">${method.name}</span>
+                        </div>
+                    `;
+                    
+                    methodElement.addEventListener('click', function() {
+                        document.querySelectorAll('.payment-method').forEach(m => {
+                            m.classList.remove('selected');
+                        });
+                        this.classList.add('selected');
+                        document.getElementById('paymentMethod').value = method.id;
+                        
+                        // Handle cash section
+                        if (method.id === 'cash') {
+                            cashPaymentSection.style.display = 'block';
+                            document.getElementById('transferDetails').classList.add('hidden');
+                            document.getElementById('qrisDetails').classList.add('hidden');
+                        } else {
+                            cashPaymentSection.style.display = 'none';
+                            amountReceivedInput.value = '';
+                            changeAmountInput.value = '';
+                        }
+                        
+                        // Handle transfer details
+                        if (method.id === 'transfer') {
+                            document.getElementById('transferDetails').classList.remove('hidden');
+                            document.getElementById('qrisDetails').classList.add('hidden');
+                            
+                            document.getElementById('bankAccountName').textContent = 
+                                outletInfo.bank_account?.atas_nama || '-';
+                            document.getElementById('bankName').textContent = 
+                                outletInfo.bank_account?.bank || '-';
+                            document.getElementById('bankAccountNumber').textContent = 
+                                outletInfo.bank_account?.nomor || '-';
+                        } 
+                        // Handle QRIS details
+                        else if (method.id === 'qris') {
+                            document.getElementById('transferDetails').classList.add('hidden');
+                            document.getElementById('qrisDetails').classList.remove('hidden');
+                            
+                            const qrisContainer = document.getElementById('qrisImageContainer');
+                            qrisContainer.innerHTML = '';
+                            
+                            if (outletInfo.qris) {
+                                const img = document.createElement('img');
+                                img.src = outletInfo.qris;
+                                img.alt = 'QRIS Payment';
+                                img.className = 'w-48 h-48 object-contain';
+                                qrisContainer.appendChild(img);
+                            } else {
+                                qrisContainer.innerHTML = `
+                                    <div class="text-center py-8 text-gray-400">
+                                        <i data-lucide="image-off" class="w-12 h-12 mx-auto mb-2"></i>
+                                        <p>QR Code tidak tersedia</p>
+                                    </div>
+                                `;
+                                lucide.createIcons();
+                            }
+                        } 
+                        else {
+                            document.getElementById('transferDetails').classList.add('hidden');
+                            document.getElementById('qrisDetails').classList.add('hidden');
+                        }
+                    });
+                    
+                    paymentMethodsContainer.appendChild(methodElement);
                 });
                 
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
+                // Add hidden input for selected payment method
+                const methodInput = document.createElement('input');
+                methodInput.type = 'hidden';
+                methodInput.id = 'paymentMethod';
+                methodInput.value = '';
+                paymentMethodsContainer.appendChild(methodInput);
+                
+                lucide.createIcons();
+            }
+
+            function setupPaymentButton() {
+                // Remove old event listener if it exists
+                const btn = document.getElementById('btnProcessPayment');
+                btn.removeEventListener('click', processPaymentHandler);
+                
+                // Add new event listener
+                btn.addEventListener('click', processPaymentHandler);
+            }
+            
+            // Show payment modal
+            function showPaymentModal() {
+                if (cart.length === 0) {
+                    showNotification('Keranjang belanja kosong', 'warning');
+                    return;
                 }
                 
-                const data = await response.json();
-                console.log('Payment response:', data); // Debugging
+                // Calculate totals
+                const rawSubtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                const totalDiscount = cart.reduce((sum, item) => sum + (item.discount || 0), 0);
+                const orderSubtotal = rawSubtotal - totalDiscount;
+                const tax = orderSubtotal * (outletInfo.tax / 100);
+                const grandTotal = orderSubtotal + tax;
                 
-                if (data.success) {
-                    // Simpan data transaksi ke variabel global
-                    currentOrder = {
-                        id: data.data.id, // Pastikan ini sesuai dengan struktur response API
-                        items: cart,
+                // Update payment modal values
+                // paymentSubtotalElement.textContent = formatCurrency(rawSubtotal);
+                // paymentDiscountElement.textContent = formatCurrency(totalDiscount);
+                // paymentTaxElement.textContent = formatCurrency(tax);
+                paymentGrandTotalElement.textContent = formatCurrency(grandTotal);
+                
+                // Reset payment inputs
+                amountReceivedInput.value = '';
+                changeAmountInput.value = '';
+                notesInput.value = '';
+                
+                // Render payment methods
+                renderPaymentMethods();
+                
+                // Add event listener for amount received input
+                amountReceivedInput.addEventListener('input', function() {
+                    const received = parseCurrencyInput(this.value);
+                    const change = received - grandTotal;
+                    
+                    if (change >= 0) {
+                        changeAmountInput.value = formatCurrency(change);
+                    } else {
+                        changeAmountInput.value = 'Rp 0';
+                    }
+                });
+                
+                // CRITICAL FIX: Clone and replace the payment button to remove all event listeners
+                const oldButton = document.getElementById('btnProcessPayment');
+                const newButton = oldButton.cloneNode(true);
+                oldButton.parentNode.replaceChild(newButton, oldButton);
+                
+                // Add the event listener to the fresh button
+                document.getElementById('btnProcessPayment').addEventListener('click', function() {
+                    processPayment(grandTotal);
+                });
+                
+                openModal('paymentModal');
+            }
+            
+            async function processPayment(grandTotal) {
+                const paymentMethod = document.getElementById('paymentMethod').value;
+                const amountReceived = parseCurrencyInput(amountReceivedInput.value);
+                const notes = notesInput.value;
+                
+                if (!paymentMethod) {
+                    showNotification('Pilih metode pembayaran terlebih dahulu', 'warning');
+                    return;
+                }
+                
+                if (paymentMethod === 'cash' && amountReceived < grandTotal) {
+                    showNotification('Jumlah uang tidak mencukupi', 'warning');
+                    return;
+                }
+                
+                try {
+                    // Prepare transaction data
+                    const transactionData = {
+                        outlet_id: outletInfo.id,
+                        shift_id: outletInfo.shift_id,
+                        items: cart.map(item => ({
+                            product_id: item.id,
+                            quantity: item.quantity,
+                            discount: item.discount,
+                            price: item.price
+                        })),
                         payment_method: paymentMethod,
-                        total: grandTotal,
-                        data: data.data,
-                        outlet: outletInfo  // Simpan seluruh data response
+                        notes: notes,
+                        tax: outletInfo.tax,
+                        discount: cart.reduce((sum, item) => sum + (item.discount || 0), 0),
+                        member_id: selectedMember ? selectedMember.id : null
                     };
                     
-                    // Debugging
-                    console.log('Current order stored:', currentOrder);
+                    // For cash payments, include amount received
+                    if (paymentMethod === 'cash') {
+                        transactionData.total_paid = amountReceived;
+                    }
                     
-                    // Show invoice
-                    showInvoice(data.data, amountReceived, paymentMethod);
+                    // Send transaction to server
+                    const response = await fetch(`/api/orders`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${API_TOKEN}`,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(transactionData),
+                        credentials: 'include'
+                    });
                     
-                    // Clear cart
-                    cart = [];
-                    updateCart();
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
+                    }
                     
-                    // Clear member
-                    selectedMember = null;
-                    selectedMemberContainer.classList.add('hidden');
+                    const data = await response.json();
+                    console.log('Payment response:', data); // Debugging
                     
-                    // Close payment modal
-                    closeModal('paymentModal');
-                } else {
-                    throw new Error(data.message || 'Failed to process payment');
+                    if (data.success) {
+                        // Simpan data transaksi ke variabel global
+                        currentOrder = {
+                            id: data.data.id, // Pastikan ini sesuai dengan struktur response API
+                            items: cart,
+                            payment_method: paymentMethod,
+                            total: grandTotal,
+                            data: data.data,
+                            outlet: outletInfo  // Simpan seluruh data response
+                        };
+                        
+                        // Debugging
+                        console.log('Current order stored:', currentOrder);
+                        
+                        // Show invoice
+                        showInvoice(data.data, amountReceived, paymentMethod);
+                        
+                        // Clear cart
+                        cart = [];
+                        updateCart();
+                        
+                        // Clear member
+                        selectedMember = null;
+                        selectedMemberContainer.classList.add('hidden');
+                        
+                        // Close payment modal
+                        closeModal('paymentModal');
+                    } else {
+                        throw new Error(data.message || 'Failed to process payment');
+                    }
+                } catch (error) {
+                    console.error('Error processing payment:', error);
+                    showNotification(error.message || 'Gagal memproses pembayaran', 'error');
                 }
-            } catch (error) {
-                console.error('Error processing payment:', error);
-                showNotification(error.message || 'Gagal memproses pembayaran', 'error');
             }
-        }
 
-        function showLoading(message) {
-            // Remove existing loading if any
-            const existing = document.querySelector('.loading-overlay');
-            if (existing) {
-                existing.remove();
+            function showLoading(message) {
+                // Remove existing loading if any
+                const existing = document.querySelector('.loading-overlay');
+                if (existing) {
+                    existing.remove();
+                }
+                
+                const overlay = document.createElement('div');
+                overlay.className = 'loading-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                overlay.innerHTML = `
+                    <div class="bg-white p-6 rounded-lg shadow-lg text-center max-w-sm mx-4">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                        <p class="text-gray-700 font-medium">${message}</p>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+                return overlay;
             }
-            
-            const overlay = document.createElement('div');
-            overlay.className = 'loading-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-            overlay.innerHTML = `
-                <div class="bg-white p-6 rounded-lg shadow-lg text-center max-w-sm mx-4">
-                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                    <p class="text-gray-700 font-medium">${message}</p>
-                </div>
-            `;
-            document.body.appendChild(overlay);
-            return overlay;
-        }
 
-        function hideLoading(overlay) {
-            if (overlay && overlay.parentNode) {
-                overlay.parentNode.removeChild(overlay);
+            function hideLoading(overlay) {
+                if (overlay && overlay.parentNode) {
+                    overlay.parentNode.removeChild(overlay);
+                }
+                
+                // Fallback: remove any loading overlay
+                const existingLoading = document.querySelector('.loading-overlay');
+                if (existingLoading) {
+                    existingLoading.remove();
+                }
             }
             
-            // Fallback: remove any loading overlay
-            const existingLoading = document.querySelector('.loading-overlay');
-            if (existingLoading) {
-                existingLoading.remove();
+            // Show invoice
+            function showInvoice(order, amountReceived, paymentMethod) {
+                // Set invoice number and date
+                // invoiceNumberElement.textContent = order.order_number;
+                // invoiceDateElement.textContent = new Date(order.created_at).toLocaleString('id-ID');
+                
+                // // Show member if exists
+                // if (order.member) {
+                //     invoiceMemberElement.classList.remove('hidden');
+                //     memberNameDisplayElement.textContent = order.member.name;
+                //     memberCodeDisplayElement.textContent = order.member.member_code;
+                // } else {
+                //     invoiceMemberElement.classList.add('hidden');
+                // }
+                
+                // // Clear previous items
+                // invoiceItemsContainer.innerHTML = '';
+                
+                // // Add items to invoice
+                // order.items.forEach(item => {
+                //     const itemElement = document.createElement('tr');
+                //     itemElement.className = 'border-b border-gray-200';
+                //     itemElement.innerHTML = `
+                //         <td class="py-2">${item.product}</td>
+                //         <td class="py-2 text-right">${formatCurrency(item.price)}</td>
+                //         <td class="py-2 text-right">${item.quantity}</td>
+                //         <td class="py-2 text-right">${formatCurrency(item.discount)}</td>
+                //         <td class="py-2 text-right">${formatCurrency(item.quantity * item.price - item.discount)}</td>
+                //     `;
+                //     invoiceItemsContainer.appendChild(itemElement);
+                // });
+                
+                // // Set invoice totals
+                // invoiceSubtotalElement.textContent = formatCurrency(order.subtotal);
+                // invoiceDiscountElement.textContent = formatCurrency(order.discount);
+                // invoiceTaxElement.textContent = formatCurrency(order.tax);
+                // invoiceGrandTotalElement.textContent = formatCurrency(order.total);
+                // invoicePaymentMethodElement.textContent = paymentMethod === 'cash' ? 'Tunai' : 
+                //                                       paymentMethod === 'qris' ? 'QRIS' : 'Transfer Bank';
+                
+                // // Show/hide cash and change rows based on payment method
+                // if (paymentMethod === 'cash') {
+                //     invoiceCashRow.style.display = '';
+                //     invoiceChangeRow.style.display = '';
+                //     invoiceCashElement.textContent = formatCurrency(amountReceived);
+                //     invoiceChangeElement.textContent = formatCurrency(order.change);
+                // } else {
+                //     invoiceCashRow.style.display = 'none';
+                //     invoiceChangeRow.style.display = 'none';
+                // }
+                
+                // Open invoice modal
+                openModal('successPaymentModal');
             }
-        }
-        
-        // Show invoice
-        function showInvoice(order, amountReceived, paymentMethod) {
-            // Set invoice number and date
-            // invoiceNumberElement.textContent = order.order_number;
-            // invoiceDateElement.textContent = new Date(order.created_at).toLocaleString('id-ID');
             
-            // // Show member if exists
-            // if (order.member) {
-            //     invoiceMemberElement.classList.remove('hidden');
-            //     memberNameDisplayElement.textContent = order.member.name;
-            //     memberCodeDisplayElement.textContent = order.member.member_code;
-            // } else {
-            //     invoiceMemberElement.classList.add('hidden');
-            // }
+            // Print invoice
+            function printInvoice() {
+                window.print();
+            }
             
-            // // Clear previous items
-            // invoiceItemsContainer.innerHTML = '';
+            // Event listeners
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value;
+                const activeCategory = document.querySelector('#categoryTabs .nav-link.active')?.getAttribute('data-category') || 'all';
+                renderProducts(activeCategory, searchTerm);
+            });
             
-            // // Add items to invoice
-            // order.items.forEach(item => {
-            //     const itemElement = document.createElement('tr');
-            //     itemElement.className = 'border-b border-gray-200';
-            //     itemElement.innerHTML = `
-            //         <td class="py-2">${item.product}</td>
-            //         <td class="py-2 text-right">${formatCurrency(item.price)}</td>
-            //         <td class="py-2 text-right">${item.quantity}</td>
-            //         <td class="py-2 text-right">${formatCurrency(item.discount)}</td>
-            //         <td class="py-2 text-right">${formatCurrency(item.quantity * item.price - item.discount)}</td>
-            //     `;
-            //     invoiceItemsContainer.appendChild(itemElement);
-            // });
+            document.getElementById('btnPaymentModal').addEventListener('click', showPaymentModal);
             
-            // // Set invoice totals
-            // invoiceSubtotalElement.textContent = formatCurrency(order.subtotal);
-            // invoiceDiscountElement.textContent = formatCurrency(order.discount);
-            // invoiceTaxElement.textContent = formatCurrency(order.tax);
-            // invoiceGrandTotalElement.textContent = formatCurrency(order.total);
-            // invoicePaymentMethodElement.textContent = paymentMethod === 'cash' ? 'Tunai' : 
-            //                                       paymentMethod === 'qris' ? 'QRIS' : 'Transfer Bank';
+            // Initialize
+            window.clearCart = function() {
+                cart = [];
+                updateCart();
+                showNotification('Keranjang telah dikosongkan', 'info');
+            };
             
-            // // Show/hide cash and change rows based on payment method
-            // if (paymentMethod === 'cash') {
-            //     invoiceCashRow.style.display = '';
-            //     invoiceChangeRow.style.display = '';
-            //     invoiceCashElement.textContent = formatCurrency(amountReceived);
-            //     invoiceChangeElement.textContent = formatCurrency(order.change);
-            // } else {
-            //     invoiceCashRow.style.display = 'none';
-            //     invoiceChangeRow.style.display = 'none';
-            // }
+            window.refreshProducts = function() {
+                fetchProducts();
+            };
             
-            // Open invoice modal
-            openModal('successPaymentModal');
-        }
-        
-        // Print invoice
-        function printInvoice() {
-            window.print();
-        }
-        
-        // Event listeners
-        searchInput.addEventListener('input', function() {
-            const searchTerm = this.value;
-            const activeCategory = document.querySelector('#categoryTabs .nav-link.active')?.getAttribute('data-category') || 'all';
-            renderProducts(activeCategory, searchTerm);
-        });
-        
-        document.getElementById('btnPaymentModal').addEventListener('click', showPaymentModal);
-        
-        // Initialize
-        window.clearCart = function() {
-            cart = [];
+            // Load data
+            fetchOutletInfo();
             updateCart();
-            showNotification('Keranjang telah dikosongkan', 'info');
-        };
-        
-        window.refreshProducts = function() {
+            loadProductsFromLocalStorage();
             fetchProducts();
-        };
-        
-        // Load data
-        fetchOutletInfo();
-        updateCart();
-        loadProductsFromLocalStorage();
-        fetchProducts();
-    });
-
-    // Logout function
-    document.getElementById('logoutButton').addEventListener('click', function() {
-        fetch('/api/logout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + localStorage.getItem('token')
-            },
-            credentials: 'include'
-        })
-        .then(res => {
-            if (!res.ok) {
-                throw new Error(`Logout failed with status ${res.status}`);
-            }
-            return res.json();
-        })
-        .then(() => {
-            localStorage.removeItem('token');
-            window.location.href = '/';
-        })
-        .catch(err => {
-            console.error('Logout error:', err);
-            showNotification('Gagal logout!', 'error');
         });
-    });
 
-    //history-modal
-    document.getElementById('btnHistoryModal').addEventListener('click', function() {
-        openModal('historyModal');
-        
-    });
-
-    document.getElementById('btnStockModal').addEventListener('click', function() {
-        openModal('stockModal');
-        
-    });
-
-    document.getElementById('btnIncomeModal').addEventListener('click', function() {
-        openModal('incomeModal');
-        
-    });
-
-    document.getElementById('btnCashierModal').addEventListener('click', function() {
-        openModal('cashierModal');
-        
-    });
-
-    // Load user data
-    document.addEventListener("DOMContentLoaded", function() {
-        const token = localStorage.getItem("token");
-        const userLabel = document.getElementById("userLabel");
-
-        if (!token) {
-            console.warn("Token tidak ditemukan di localStorage.");
-            userLabel.innerText = "Belum login";
-            return;
-        }
-
-        fetch("/api/me", {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            },
-            credentials: 'include'
-        })
-        .then(response => {
-            if (response.status === 401) {
+        // Logout function
+        document.getElementById('logoutButton').addEventListener('click', function() {
+            fetch('/api/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                },
+                credentials: 'include'
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`Logout failed with status ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(() => {
                 localStorage.removeItem('token');
-                window.location.href = '/login';
+                window.location.href = '/';
+            })
+            .catch(err => {
+                console.error('Logout error:', err);
+                showNotification('Gagal logout!', 'error');
+            });
+        });
+
+        //history-modal
+        document.getElementById('btnHistoryModal').addEventListener('click', function() {
+            openModal('historyModal');
+            
+        });
+
+        document.getElementById('btnStockModal').addEventListener('click', function() {
+            openModal('stockModal');
+            
+        });
+
+        document.getElementById('btnIncomeModal').addEventListener('click', function() {
+            openModal('incomeModal');
+            
+        });
+
+        document.getElementById('btnCashierModal').addEventListener('click', function() {
+            openModal('cashierModal');
+            
+        });
+
+        // Load user data
+        document.addEventListener("DOMContentLoaded", function() {
+            const token = localStorage.getItem("token");
+            const userLabel = document.getElementById("userLabel");
+
+            if (!token) {
+                console.warn("Token tidak ditemukan di localStorage.");
+                userLabel.innerText = "Belum login";
                 return;
             }
-            
-            if (!response.ok) {
-                throw new Error(`HTTP status ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success && data.data) {
-                const user = data.data;
-                userLabel.innerText = user.name || user.email || "Pengguna";
-            } else {
-                userLabel.innerText = "User tidak ditemukan";
-            }
-        })
-        .catch(error => {
-            console.error("Error saat ambil data user:", error);
-            userLabel.innerText = "Gagal ambil user";
+
+            fetch("/api/me", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                credentials: 'include'
+            })
+            .then(response => {
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login';
+                    return;
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP status ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success && data.data) {
+                    const user = data.data;
+                    userLabel.innerText = user.name || user.email || "Pengguna";
+                } else {
+                    userLabel.innerText = "User tidak ditemukan";
+                }
+            })
+            .catch(error => {
+                console.error("Error saat ambil data user:", error);
+                userLabel.innerText = "Gagal ambil user";
+            });
         });
-    });
 </script>
 
 </body>
