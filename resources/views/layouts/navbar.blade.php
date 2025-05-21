@@ -292,6 +292,7 @@ async function loadNotifications() {
                 const notificationItem = document.createElement('div');
                 notificationItem.className = 'px-4 py-3 hover:bg-gray-50 cursor-pointer';
                 notificationItem.innerHTML = `
+                <a href= "/approve-stok"
                     <div class="flex items-start">
                         <div class="flex-shrink-0 pt-0.5">
                             <i data-lucide="alert-circle" class="w-5 h-5 text-orange-500"></i>
@@ -303,6 +304,7 @@ async function loadNotifications() {
                             ${!outletId ? `<p class="text-xs text-gray-500 mt-1">Outlet: ${adjustment.outlet?.name || 'Tidak diketahui'}</p>` : ''}
                         </div>
                     </div>
+                </a>
                 `;
                 notificationList.appendChild(notificationItem);
             });

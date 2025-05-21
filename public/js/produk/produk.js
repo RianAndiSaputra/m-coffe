@@ -525,11 +525,11 @@ const ProductManager = (() => {
     const renderProducts = (responseData) => {
         const tbody = document.getElementById(elements.containers.tableBody);
         if (!tbody) return;
-    
+
         tbody.innerHTML = "";
-    
+
         const products = responseData?.data || [];
-    
+
         if (products.length === 0) {
             tbody.innerHTML = `
                 <tr class="border-b">
@@ -540,14 +540,12 @@ const ProductManager = (() => {
             `;
             return;
         }
-    
+
         products.forEach((product, index) => {
-            const barcodeId = `barcode-${index}`;
-            
             // Handle inventory data - several possible structures
             let quantity = 0;
             let min_stock = 0;
-    
+
             // Case 1: Inventory data in nested object
             if (product.inventory) {
                 quantity = product.inventory.quantity || 0;
@@ -571,9 +569,6 @@ const ProductManager = (() => {
                 min_stock = mainInventory.min_stock || 0;
             }
                 
-            
-
-
             const row = document.createElement("tr");
             row.className = "border-b hover:bg-gray-50";
             row.innerHTML = `
@@ -582,25 +577,22 @@ const ProductManager = (() => {
                     <img src="${
                         product.image_url || "/images/default-product.png"
                     }" 
-                         alt="${product.name}" 
-                         class="w-10 h-10 bg-gray-100 rounded object-cover" />
+                        alt="${product.name}" 
+                        class="w-10 h-10 bg-gray-100 rounded object-cover" />
                     <div>
                         <p class="font-medium">${product.name || "-"}</p>
                     </div>
                 </td>
                 <td class="py-3 px-4">
-                                
-
                     ${product.barcode ? 
-                        `<svg id="${barcodeId}"></svg>
-                         <svg class="barcode mt-1" 
-                              jsbarcode-format="CODE128"
-                              jsbarcode-value="${product.barcode}"
-                              jsbarcode-width="1.5"
-                              jsbarcode-height="30"
-                              jsbarcode-fontSize="8"
-                              jsbarcode-displayValue="true"></svg>` 
-                        : ''}
+                        `<svg class="barcode" 
+                            jsbarcode-format="CODE128"
+                            jsbarcode-value="${product.barcode}"
+                            jsbarcode-width="1.5"
+                            jsbarcode-height="30"
+                            jsbarcode-fontSize="8"
+                            jsbarcode-displayValue="true"></svg>` 
+                        : '-'}
                 </td>
                 <td class="py-3 px-4">${product.sku || "-"}</td>
                 <td class="py-3 px-4">
@@ -639,8 +631,8 @@ const ProductManager = (() => {
                                     class="flex items-center w-full px-3 py-2 hover:bg-gray-100 text-left rounded-t-lg">
                                 <i data-lucide="edit" class="w-4 h-4 mr-2 text-gray-500"></i> Edit
                             </button>
-                            <button onclick="ProductManager.openBarcodeModal(${product.id}, '${product.barcode || ''}', '${product.name || ''}')" 
-                                    class="flex items-center w-full px-3 py-2 hover:bg-gray-100 text-left">
+                            <button onclick="BarcodePrinter.print('${product.barcode || ''}', '${product.name || ''}')" 
+                                class="flex items-center w-full px-3 py-2 hover:bg-gray-100 text-left">
                                 <i data-lucide="barcode" class="w-4 h-4 mr-2 text-gray-500"></i> Cetak Barcode
                             </button>
                             <button onclick="ProductManager.hapusProduk(${product.id})" 
@@ -652,23 +644,11 @@ const ProductManager = (() => {
                 </td>
             `;
             tbody.appendChild(row);
-            if (product.barcode) {
-                JsBarcode(`#${barcodeId}`, product.barcode, {
-                    format: "CODE128",
-                    lineColor: "#000",
-                    width: 2,
-                    height: 100,
-                    displayValue: true
-                });
-            }
-
         });
         
-        
-    
-        // Render semua barcode setelah elemen ditambahkan ke DOM
+        // Initialize all barcodes after DOM is updated
         JsBarcode(".barcode").init();
-    
+
         if (window.lucide) window.lucide.createIcons();
     };
 

@@ -48,11 +48,13 @@
                   class="w-full pl-10 pr-4 py-3 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" />
           </div>
 
+            @if(auth()->check() && auth()->user()->role !== 'supervisor')
             <!-- Add Member Button -->
             <button onclick="openModalTambah()"
                 class="px-5 py-3 text-base font-medium text-white bg-orange-500 rounded-lg hover:bg-orange-600 shadow">
                 + Tambah Member
             </button>
+            @endif
         </div>
     </div>
 </div>
@@ -284,6 +286,11 @@
         if (!tableBody) return;
         
         tableBody.innerHTML = '';
+        
+        // Get the current user role from somewhere in your application
+        // This should be set when the user logs in
+        const currentUserRole = getCurrentUserRole(); // You need to implement this function
+        const isSupervisor = currentUserRole === 'supervisor';
 
         if (filteredMembers.length === 0) {
             tableBody.innerHTML = `
@@ -303,7 +310,9 @@
         filteredMembers.forEach((member, index) => {
             const row = document.createElement('tr');
             row.className = 'hover:bg-gray-50';
-            row.innerHTML = `
+            
+            // Basic member information cells remain the same
+            let rowContent = `
                 <td class="py-4">${index + 1}</td>
                 <td class="py-4">
                     <div class="flex items-center gap-4">
@@ -321,30 +330,59 @@
                 <td class="py-4">${member.address || '-'}</td>
                 <td class="py-4">${member.gender === 'male' ? 'Male' : member.gender === 'female' ? 'Female' : '-'}</td>
                 <td class="py-4">${member.orders_count || 0}</td>
-                <td class="py-4 relative">
-                    <div class="relative inline-block">
-                        <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded-lg">
-                            <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
-                        </button>
-                        <div class="dropdown-menu hidden absolute right-0 z-50 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-base">
-                            <div class="px-4 py-2 font-bold text-left border-b">Actions</div>
-                            <button onclick="showMemberHistory(${member.id})" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left">
-                                <i data-lucide="history" class="w-5 h-5 mr-3 text-gray-500"></i> History
+            `;
+            
+            // Only show action buttons if user is NOT a supervisor
+            if (!isSupervisor) {
+                rowContent += `
+                    <td class="py-4 relative">
+                        <div class="relative inline-block">
+                            <button onclick="toggleDropdown(this)" class="p-2 hover:bg-gray-100 rounded-lg">
+                                <i data-lucide="more-vertical" class="w-5 h-5 text-gray-500"></i>
                             </button>
-                            <button onclick="editMember(${member.id})" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left">
-                                <i data-lucide="pencil" class="w-5 h-5 mr-3 text-gray-500"></i> Edit
-                            </button>
-                            <button onclick="showConfirmDelete(${member.id})" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left text-red-600">
-                                <i data-lucide="trash-2" class="w-5 h-5 mr-3"></i> Delete
+                            <div class="dropdown-menu hidden absolute right-0 z-50 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl text-base">
+                                <div class="px-4 py-2 font-bold text-left border-b">Actions</div>
+                                <button onclick="showMemberHistory(${member.id})" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left">
+                                    <i data-lucide="history" class="w-5 h-5 mr-3 text-gray-500"></i> History
+                                </button>
+                                <button onclick="editMember(${member.id})" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left">
+                                    <i data-lucide="pencil" class="w-5 h-5 mr-3 text-gray-500"></i> Edit
+                                </button>
+                                <button onclick="showConfirmDelete(${member.id})" class="flex items-center w-full px-4 py-2.5 hover:bg-gray-100 text-left text-red-600">
+                                    <i data-lucide="trash-2" class="w-5 h-5 mr-3"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    </td>
+                `;
+            } else {
+                // For supervisors, add an empty cell or a cell with limited options
+                // rowContent += `<td class="py-4">-</td>`;
+                // Alternatively, you could show only the history button:
+                
+                rowContent += `
+                    <td class="py-4 relative">
+                        <div class="relative inline-block">
+                            <button onclick="showMemberHistory(${member.id})" class="p-2 hover:bg-gray-100 rounded-lg">
+                                <i data-lucide="history" class="w-5 h-5 text-gray-500"></i>
                             </button>
                         </div>
-                    </div>
-                </td>
-            `;
+                    </td>
+                `;
+                
+            }
+            
+            row.innerHTML = rowContent;
             tableBody.appendChild(row);
         });
 
         if (window.lucide) window.lucide.createIcons();
+    }
+
+    //fungsi panggil role di localStorage
+    function getCurrentUserRole() {
+        // Example implementation:
+        return localStorage.getItem('role') || 'default';
     }
 
     function showConfirmDelete(id) {
