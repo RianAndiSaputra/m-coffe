@@ -631,8 +631,8 @@ const ProductManager = (() => {
                                     class="flex items-center w-full px-3 py-2 hover:bg-gray-100 text-left rounded-t-lg">
                                 <i data-lucide="edit" class="w-4 h-4 mr-2 text-gray-500"></i> Edit
                             </button>
-                            <button onclick="ProductManager.openBarcodeModal(${product.id}, '${product.barcode || ''}', '${product.name || ''}')" 
-                                    class="flex items-center w-full px-3 py-2 hover:bg-gray-100 text-left">
+                            <button onclick="BarcodePrinter.print('${product.barcode || ''}', '${product.name || ''}')" 
+                                class="flex items-center w-full px-3 py-2 hover:bg-gray-100 text-left">
                                 <i data-lucide="barcode" class="w-4 h-4 mr-2 text-gray-500"></i> Cetak Barcode
                             </button>
                             <button onclick="ProductManager.hapusProduk(${product.id})" 
