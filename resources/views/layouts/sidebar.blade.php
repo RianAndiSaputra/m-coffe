@@ -49,7 +49,7 @@
         </div>
 
         <!-- Product Dropdown -->
-        @if(auth()->user()->role !== 'supervisor')
+        @if(auth()->check() && auth()->user()->role !== 'supervisor')
         <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="productDropdown">
             <div class="flex items-center justify-between w-full cursor-pointer">
                 <div class="flex items-center">
@@ -106,6 +106,7 @@
                     <i data-lucide="calendar" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Stok Pertanggal</span>
                 </a>
+                @if(auth()->check() && auth()->user()->role !== 'supervisor')
                 <a href="/penyesuaian-stok" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="edit" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Penyesuaian Stok</span>
@@ -118,6 +119,7 @@
                     <i data-lucide="check-circle" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Approve Stok</span>
                 </a>
+                @endif
             </div>
         </div>
 
@@ -135,10 +137,12 @@
                     <i data-lucide="user" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Member</span>
                 </a>
+                @if(auth()->check() && auth()->user()->role !== 'supervisor')
                 <a href="/staff" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="users" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Staff</span>
                 </a>
+                @endif
             </div>
         </div>
 
@@ -204,7 +208,7 @@
             </div>
         </div>
 
-        @if(auth()->user()->role !== 'supervisor')
+        @if(auth()->check() && auth()->user()->role !== 'supervisor')
         <!-- Settings Dropdown -->
         <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="settingsDropdown">
             <div class="flex items-center justify-between w-full cursor-pointer">
