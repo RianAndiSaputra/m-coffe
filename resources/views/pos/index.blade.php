@@ -793,144 +793,144 @@
             });
         }
         
-        // Render products to the DOM
-        function renderProducts(filterCategory = 'all', searchTerm = '') {
-            productsContainer.innerHTML = '';
-            
-            if (!products || products.length === 0) {
-                productsContainer.innerHTML = `
-                    <div class="empty-cart p-8 text-center">
-                        <i data-lucide="package-x" class="w-12 h-12 mx-auto text-gray-300"></i>
-                        <p class="text-gray-500 text-lg font-medium mt-4">Tidak ada produk tersedia</p>
-                        <p class="text-gray-400 text-sm mt-1">Silakan perbarui data produk</p>
-                    </div>
-                `;
-                lucide.createIcons();
-                return;
-            }
-            
-            const filteredProducts = products.filter(product => {
-                const productCategory = product.category && product.category.name ? 
-                                    product.category.name.toLowerCase() : 'uncategorized';
-                
-                const matchesCategory = filterCategory === 'all' || productCategory === filterCategory;
-                const matchesSearch =
-                    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    (product.barcode && product.barcode.toLowerCase().includes(searchTerm.toLowerCase()));
-
-                return matchesCategory && matchesSearch;
-            });
-            
-            if (filteredProducts.length === 0) {
-                productsContainer.innerHTML = `
-                    <div class="empty-cart p-8 text-center">
-                        <i data-lucide="search-x" class="w-12 h-12 mx-auto text-gray-300"></i>
-                        <p class="text-gray-500 text-lg font-medium mt-4">Produk tidak ditemukan</p>
-                        <p class="text-gray-400 text-sm mt-1">Coba kata kunci atau kategori lain</p>
-                    </div>
-                `;
-                lucide.createIcons();
-                return;
-            }
-            
-            filteredProducts.forEach((product, index) => {
-                const barcodeId = `barcode-${index}`;
-                const productElement = document.createElement('div');
-                productElement.className = 'product-item mb-3';
-                
-                const categoryName = product.category && product.category.name ? 
-                                    product.category.name : 'Uncategorized';
-                
-                productElement.setAttribute('data-category', categoryName.toLowerCase());
-                productElement.setAttribute('data-name', product.name.toLowerCase());
-                
-                // Determine stock status
-                const quantity = product.quantity || 0;
-                const isOutOfStock = quantity <= 0;
-                const isLowStock = quantity > 0 && quantity <= (product.min_stock || 5);
-                
-                productElement.innerHTML = `
-                    <div class="product-card flex justify-between items-center p-4 bg-white border border-gray-200 rounded-lg hover:shadow-sm transition-all">
-                        <div>
-                            <div class="product-name text-base font-medium">${product.name} (${quantity})</div>
-                            <div class="product-price text-orange-500 font-semibold text-base">Rp ${product.price.toLocaleString('id-ID')}</div>
-                            ${isLowStock ? '<span class="low-stock bg-yellow-100 px-2 py-1 rounded text-sm text-yellow-800 font-medium mt-1 inline-block">Produk menipis</span>' : ''}
-                        </div>
-                        <div class="flex items-center">
-                            <span class="product-category text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full mr-3">
-                                ${categoryName.toUpperCase()}
-                            </span>
-                            ${isOutOfStock ? 
-                                '<button class="bg-gray-100 text-gray-500 border border-gray-300 rounded px-4 py-2 text-sm w-24">Habis</button>' : 
-                                `<button class="btn-add-to-cart bg-orange-500 text-white border-none rounded px-4 py-2 text-sm flex items-center justify-center w-24 hover:bg-orange-600 transition-colors">
-                                    <i data-lucide="plus" class="w-4 h-4 mr-1"></i> Tambah
-                                </button>`
-                            }
-                        </div>
-                    </div>
-                `;
-                
-                productsContainer.appendChild(productElement);
-            });
-            
-            // Refresh Lucide icons
+    // Render products to the DOM
+    function renderProducts(filterCategory = 'all', searchTerm = '') {
+        productsContainer.innerHTML = '';
+        
+        if (!products || products.length === 0) {
+            productsContainer.innerHTML = `
+                <div class="empty-cart p-8 text-center">
+                    <i data-lucide="package-x" class="w-12 h-12 mx-auto text-gray-300"></i>
+                    <p class="text-gray-500 text-lg font-medium mt-4">Tidak ada produk tersedia</p>
+                    <p class="text-gray-400 text-sm mt-1">Silakan perbarui data produk</p>
+                </div>
+            `;
             lucide.createIcons();
+            return;
+        }
+        
+        const filteredProducts = products.filter(product => {
+            const productCategory = product.category && product.category.name ? 
+                                product.category.name.toLowerCase() : 'uncategorized';
             
-            // Add event listeners to all "Add to Cart" buttons
-            document.querySelectorAll('.btn-add-to-cart').forEach(button => {
-                button.addEventListener('click', function() {
-                    const productCard = this.closest('.product-card');
-                    const productName = productCard.querySelector('.product-name').textContent.split(' (')[0];
-                    const product = products.find(p => p.name === productName);
-                    
-                    if (!product) return;
-                    
-                    // Validasi stok
-                    if (product.quantity <= 0) {
-                        showNotification('Stok produk habis', 'error');
+            const matchesCategory = filterCategory === 'all' || productCategory === filterCategory;
+            const matchesSearch =
+                product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (product.barcode && product.barcode.toLowerCase().includes(searchTerm.toLowerCase()));
+
+            return matchesCategory && matchesSearch;
+        });
+        
+        if (filteredProducts.length === 0) {
+            productsContainer.innerHTML = `
+                <div class="empty-cart p-8 text-center">
+                    <i data-lucide="search-x" class="w-12 h-12 mx-auto text-gray-300"></i>
+                    <p class="text-gray-500 text-lg font-medium mt-4">Produk tidak ditemukan</p>
+                    <p class="text-gray-400 text-sm mt-1">Coba kata kunci atau kategori lain</p>
+                </div>
+            `;
+            lucide.createIcons();
+            return;
+        }
+        
+        filteredProducts.forEach((product, index) => {
+            const barcodeId = `barcode-${index}`;
+            const productElement = document.createElement('div');
+            productElement.className = 'product-item mb-3';
+            
+            const categoryName = product.category && product.category.name ? 
+                                product.category.name : 'Uncategorized';
+            
+            productElement.setAttribute('data-category', categoryName.toLowerCase());
+            productElement.setAttribute('data-name', product.name.toLowerCase());
+            
+            // Hitung stok yang tersisa (total stok - yang sudah di keranjang)
+            const cartItem = cart.find(item => item.id === product.id);
+            const reservedInCart = cartItem ? cartItem.quantity : 0;
+            const availableStock = (product.quantity || 0) - reservedInCart;
+            
+            const isOutOfStock = availableStock <= 0;
+            const isLowStock = availableStock > 0 && availableStock <= (product.min_stock || 5);
+            
+            productElement.innerHTML = `
+                <div class="product-card flex justify-between items-center p-4 bg-white border border-gray-200 rounded-lg hover:shadow-sm transition-all">
+                    <div>
+                        <div class="product-name text-base font-medium">${product.name} (${availableStock})</div>
+                        <div class="product-price text-orange-500 font-semibold text-base">Rp ${product.price.toLocaleString('id-ID')}</div>
+                        ${isLowStock ? '<span class="low-stock bg-yellow-100 px-2 py-1 rounded text-sm text-yellow-800 font-medium mt-1 inline-block">Produk menipis</span>' : ''}
+                    </div>
+                    <div class="flex items-center">
+                        <span class="product-category text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full mr-3">
+                            ${categoryName.toUpperCase()}
+                        </span>
+                        ${isOutOfStock ? 
+                            '<button class="bg-gray-100 text-gray-500 border border-gray-300 rounded px-4 py-2 text-sm w-24">Habis</button>' : 
+                            `<button class="btn-add-to-cart bg-orange-500 text-white border-none rounded px-4 py-2 text-sm flex items-center justify-center w-24 hover:bg-orange-600 transition-colors">
+                                <i data-lucide="plus" class="w-4 h-4 mr-1"></i> Tambah
+                            </button>`
+                        }
+                    </div>
+                </div>
+            `;
+            
+            productsContainer.appendChild(productElement);
+        });
+        
+        // Refresh Lucide icons
+        lucide.createIcons();
+        
+        // Add event listeners to all "Add to Cart" buttons
+        document.querySelectorAll('.btn-add-to-cart').forEach(button => {
+            button.addEventListener('click', function() {
+                const productCard = this.closest('.product-card');
+                const productName = productCard.querySelector('.product-name').textContent.split(' (')[0];
+                const product = products.find(p => p.name === productName);
+                
+                if (!product) return;
+                
+                // Hitung stok yang tersedia
+                const cartItem = cart.find(item => item.id === product.id);
+                const reservedInCart = cartItem ? cartItem.quantity : 0;
+                const availableStock = (product.quantity || 0) - reservedInCart;
+                
+                // Validasi stok
+                if (availableStock <= 0) {
+                    showNotification('Stok produk habis', 'error');
+                    return;
+                }
+
+                const existingItem = cart.find(item => item.id === product.id);
+                
+                if (existingItem) {
+                    // Cek apakah penambahan melebihi stok yang tersedia
+                    if (existingItem.quantity + 1 > product.quantity) {
+                        showNotification('Stok tidak mencukupi', 'error');
                         return;
                     }
-
-                    const existingItem = cart.find(item => item.id === product.id);
-                    
-                    if (existingItem) {
-                        if (existingItem.quantity + 1 > product.quantity) {
-                            showNotification('Stok tidak mencukupi', 'error');
-                            return;
-                        }
-                        existingItem.quantity += 1;
-                        existingItem.subtotal = calculateItemSubtotal(existingItem);
-                    } else {
-                        cart.push({
-                            id: product.id,
-                            name: product.name,
-                            price: product.price,
-                            quantity: 1,
-                            stock: product.quantity,
-                            discount: 0,
-                            subtotal: product.price
-                        });
-                    }
-                    
-                    // Update stok produk secara realtime
-                    product.quantity -= 1;
-                    
-                    // Update tampilan keranjang
-                    updateCart();
-                    
-                    // Render ulang produk untuk update stok secara instan
-                    const activeFilter = document.querySelector('.category-filter button.active')?.dataset.filter || 'all';
-                    const currentSearch = document.getElementById('searchProduct')?.value || '';
-                    renderProducts(activeFilter, currentSearch);
-                    
-                    // Update tombol jika stok habis
-                    if (product.quantity <= 0) {
-                        this.innerHTML = 'Habis';
-                        this.className = 'bg-gray-100 text-gray-500 border border-gray-300 rounded px-4 py-2 text-sm w-24';
-                    }
-                });
+                    existingItem.quantity += 1;
+                    existingItem.subtotal = calculateItemSubtotal(existingItem);
+                } else {
+                    cart.push({
+                        id: product.id,
+                        name: product.name,
+                        price: product.price,
+                        quantity: 1,
+                        stock: product.quantity,
+                        discount: 0,
+                        subtotal: product.price
+                    });
+                }
+                
+                // Update tampilan keranjang
+                updateCart();
+                
+                // Render ulang produk untuk update stok secara instan
+                const activeFilter = document.querySelector('.category-filter button.active')?.dataset.filter || 'all';
+                const currentSearch = document.getElementById('searchProduct')?.value || '';
+                renderProducts(activeFilter, currentSearch);
             });
-        }
+        });
+    }
         
         // Update cart display
         function updateCart() {
