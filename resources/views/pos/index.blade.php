@@ -1023,19 +1023,28 @@
                 
                 lucide.createIcons();
                 
-                // Add event listeners to quantity controls
-                document.querySelectorAll('.btn-decrease').forEach(button => {
-                    button.addEventListener('click', function() {
+                document.querySelectorAll('.qty-input').forEach(input => {
+                    input.addEventListener('change', function() {
                         const index = parseInt(this.getAttribute('data-index'));
-                        if (cart[index].quantity > 1) {
-                            cart[index].quantity -= 1;
-                            cart[index].subtotal = calculateItemSubtotal(cart[index]);
-                            updateCart();
+                        const newQty = parseInt(this.value) || 1;
+                        const item = cart[index];
+
+                        if (newQty > item.stock) {
+                            showNotification(`Stok hanya tersedia ${item.stock}`, 'error');
+                            this.value = item.quantity;
+                            return;
                         }
+                        
+                        cart[index].quantity = newQty;
+                        cart[index].subtotal = calculateItemSubtotal(cart[index]);
+                        
+                        syncProductStock();
+                        
+                        updateCart();
                     });
                 });
                 
-                // Di bagian event listener tombol tambah quantity
+                // Modifikasi event listener untuk btn-increase
                 document.querySelectorAll('.btn-increase').forEach(button => {
                     button.addEventListener('click', function() {
                         const index = parseInt(this.getAttribute('data-index'));
@@ -1048,22 +1057,39 @@
                         
                         item.quantity += 1;
                         item.subtotal = calculateItemSubtotal(item);
+                        
+                        // Sinkronkan stok produk setelah menambah quantity
+                        syncProductStock();
+                        
                         updateCart();
                     });
                 });
                 
-                document.querySelectorAll('.qty-input').forEach(input => {
-                    input.addEventListener('change', function() {
+                // Modifikasi event listener untuk btn-decrease
+                document.querySelectorAll('.btn-decrease').forEach(button => {
+                    button.addEventListener('click', function() {
                         const index = parseInt(this.getAttribute('data-index'));
-                        const newQty = parseInt(this.value) || 1;
-                        const item = cart[index];
-
-                        if (newQty > item.stock) {
-                            showNotification(`Stok hanya tersedia ${item.stock}`, 'error');
-                            this.value = item.quantity;
-                            return;
+                        if (cart[index].quantity > 1) {
+                            cart[index].quantity -= 1;
+                            cart[index].subtotal = calculateItemSubtotal(cart[index]);
+                            
+                            // Sinkronkan stok produk setelah mengurangi quantity
+                            syncProductStock();
+                            
+                            updateCart();
                         }
-                        cart[index].subtotal = calculateItemSubtotal(cart[index]);
+                    });
+                });
+                
+                // Modifikasi event listener untuk btn-remove
+                document.querySelectorAll('.btn-remove').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        cart.splice(index, 1);
+                        
+                        // Sinkronkan stok produk setelah menghapus item dari cart
+                        syncProductStock();
+                        
                         updateCart();
                     });
                 });
@@ -1094,14 +1120,6 @@
                         const discount = parseCurrencyInput(this.value);
                         cart[index].discount = discount;
                         cart[index].subtotal = calculateItemSubtotal(cart[index]);
-                        updateCart();
-                    });
-                });
-                
-                document.querySelectorAll('.btn-remove').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const index = parseInt(this.getAttribute('data-index'));
-                        cart.splice(index, 1);
                         updateCart();
                     });
                 });
