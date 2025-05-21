@@ -632,27 +632,6 @@
                 console.error('Error fetching outlet info:', error);
             }
         }
-
-        function syncProductStock() {
-            // Reset stok produk ke stok asli (sebelum keranjang)
-            products.forEach(product => {
-                product.originalStock = product.originalStock || product.quantity;
-                product.quantity = product.originalStock;
-            });
-            
-            // Kurangi stok berdasarkan item di keranjang
-            cart.forEach(item => {
-                const product = products.find(p => p.id === item.id);
-                if (product) {
-                    product.quantity -= item.quantity;
-                }
-            });
-            
-            // Render ulang produk dengan stok yang sudah diperbarui
-            const activeFilter = document.querySelector('.category-filter button.active')?.dataset.filter || 'all';
-            const currentSearch = document.getElementById('searchProduct')?.value || '';
-            renderProducts(activeFilter, currentSearch);
-        }
     
         // Fetch products from API
         async function fetchProducts() {
@@ -751,6 +730,67 @@
             categories = ['all', ...uniqueCategories];
         }
         
+        // Fungsi untuk sinkronkan stok produk setelah perubahan di keranjang
+        function syncProductStock() {
+            // Update stok produk di array products berdasarkan isi keranjang
+            products.forEach(product => {
+                const cartItem = cart.find(item => item.id === product.id);
+                if (cartItem) {
+                    // Hitung stok tersedia (stok asli - yang ada di keranjang)
+                    product.availableStock = product.quantity - cartItem.quantity;
+                } else {
+                    product.availableStock = product.quantity;
+                }
+            });
+            
+            // Render ulang produk untuk update tampilan stok
+            const activeCategory = document.querySelector('#categoryTabs .nav-link.active')?.getAttribute('data-category') || 'all';
+            const searchTerm = searchInput.value;
+            renderProducts(activeCategory, searchTerm);
+        }
+
+        // Fungsi untuk menambah quantity item di keranjang
+        function increaseQuantity(index) {
+            const item = cart[index];
+            const product = products.find(p => p.id === item.id);
+            
+            if (!product) return;
+            
+            // Hitung stok tersedia
+            const availableStock = product.quantity - (item.quantity || 0);
+            
+            if (availableStock <= 0) {
+                showNotification('Stok produk habis', 'error');
+                return;
+            }
+            
+            item.quantity += 1;
+            item.subtotal = calculateItemSubtotal(item);
+            
+            // Sinkronkan stok
+            syncProductStock();
+            updateCart();
+        }
+
+        // Fungsi untuk mengurangi quantity item di keranjang
+        function decreaseQuantity(index) {
+            const item = cart[index];
+            
+            if (item.quantity > 1) {
+                item.quantity -= 1;
+                item.subtotal = calculateItemSubtotal(item);
+                
+                // Sinkronkan stok
+                syncProductStock();
+                updateCart();
+            } else {
+                // Jika quantity = 1, hapus item dari keranjang
+                cart.splice(index, 1);
+                syncProductStock();
+                updateCart();
+            }
+        }
+
         // Render categories to the tabs
         function renderCategories() {
             categoryTabs.innerHTML = '';
