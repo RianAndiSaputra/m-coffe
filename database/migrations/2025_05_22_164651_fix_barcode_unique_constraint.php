@@ -12,9 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->string('barcode')->unique()->nullable()->after('sku');
-            // 'after('sku')' berarti kolom akan ditambahkan setelah kolom sku
-            // Anda bisa mengganti ini dengan kolom lain atau menghapusnya
+            $table->dropUnique(['barcode']);
+        
+            // Tambahkan constraint baru yang mengabaikan deleted_at=null
+            $table->unique(['barcode', 'deleted_at']);
         });
     }
 
@@ -24,7 +25,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->dropColumn('barcode');
+            $table->dropUnique(['barcode', 'deleted_at']);
+            $table->unique(['barcode']);
         });
     }
 };

@@ -15,7 +15,9 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 // use Illuminate\Container\Attributes\Log;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Validation\Rule;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Validation\ValidationException;
 
 class ProductController extends Controller
 {
@@ -151,8 +153,12 @@ class ProductController extends Controller
             $request->validate([
                 'name' => 'required|string|max:255',
                 'sku' => 'required|string|max:255',
-                // 'barcode' => 'nullable|string|max:255|unique:products,barcode',
-                'barcode' => 'nullable|string|max:255',
+                'barcode' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                    Rule::unique('products', 'barcode')->whereNull('deleted_at')
+                ],
                 'description' => 'nullable|string|max:255',
                 'price' => 'required|numeric',
                 'category_id' => 'required|exists:categories,id',
@@ -163,6 +169,12 @@ class ProductController extends Controller
                 'quantity' => 'required|numeric',
                 'min_stock' => 'required|numeric',
             ]);
+
+            if ($request->barcode && Product::where('barcode', $request->barcode)->exists()) {
+                throw ValidationException::withMessages([
+                    'barcode' => 'Barcode sudah digunakan oleh produk aktif'
+                ]);
+            }
 
             DB::beginTransaction();
             

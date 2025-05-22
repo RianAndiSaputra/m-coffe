@@ -507,6 +507,7 @@
                     });
                 }
                 
+                syncProductStock();
                 updateCart();
                 searchInput.focus();
                 showNotification(`${product.name} ditambahkan ke keranjang`, 'success');

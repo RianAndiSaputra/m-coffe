@@ -683,88 +683,103 @@ const ProductManager = (() => {
         const btnSimpan = document.getElementById(elements.buttons.save);
         const originalText = btnSimpan.innerHTML;
         const form = document.getElementById(elements.forms.add);
-    
+
         try {
             // Set loading state
             btnSimpan.disabled = true;
             btnSimpan.innerHTML = '<i data-lucide="loader-circle" class="animate-spin mr-2"></i> Menyimpan...';
             if (window.lucide) window.lucide.createIcons();
-    
-            // Validasi input
-            const namaProduk = form.querySelector('[name="name"]').value.trim();
-            const sku = form.querySelector('[name="sku"]').value.trim();
-            const harga = form.querySelector('[name="price"]').value.trim();
-            const kategori = form.querySelector('[name="category_id"]').value.trim();
-            const outletCheckboxes = form.querySelectorAll('input[name="outlet_ids[]"]:checked');
-            
 
-            if (!namaProduk) throw new Error("Nama produk harus diisi");
-            if (!sku) throw new Error("SKU harus diisi");
-            if (!harga) throw new Error("Harga harus diisi");
-            if (!kategori) throw new Error("Kategori harus dipilih");
-            if (outletCheckboxes.length === 0) throw new Error("Pilih minimal satu outlet");
-            
-
-            // Optional: Validasi format SKU jika diperlukan
-            // Contoh: SKU harus alfanumerik dan panjang minimal 3 karakter
-            // if (!/^[a-zA-Z0-9]{3,}$/.test(sku)) {
-            //     throw new Error("SKU harus alfanumerik dan minimal 3 karakter");
-            // }
-    
             // Prepare form data
             const formData = new FormData(form);
-    
-            // Generate barcode jika kosong
-            if (!formData.get("barcode")) {
-                formData.set("barcode", generateBarcode());
-            }
-    
-            // Set default values jika kosong
-            if (!formData.get("sku")) formData.set("sku", `SKU-${Date.now()}`);
-            if (!formData.get("quantity")) formData.set("quantity", "0");
-            if (!formData.get("min_stock")) formData.set("min_stock", "0");
+            !formData.get("barcode") && formData.set("barcode", generateBarcode());
+            !formData.get("sku") && formData.set("sku", `SKU-${Date.now()}`);
+            !formData.get("quantity") && formData.set("quantity", "0");
+            !formData.get("min_stock") && formData.set("min_stock", "0");
             formData.append("outlet_id", currentOutletId.toString());
-    
-            // Kirim data ke API
+
             const response = await fetch("/api/products", {
                 method: "POST",
                 body: formData,
                 headers: {
                     "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            });
-    
-            const responseData = await response.json();
-    
-            if (!response.ok) {
-                if (response.status === 422 && responseData.errors) {
-                    const errorMessages = Object.values(responseData.errors)
-                        .flat()
-                        .join(", ");
-                    throw new Error(`Validasi gagal: ${errorMessages}`);
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
                 }
-                throw new Error(responseData.message || "Gagal menambahkan produk");
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                let errorMessage = "Terjadi kesalahan";
+
+                if (typeof data.message === 'string') {
+                    errorMessage = data.message;
+                } 
+                else if (typeof data.error === 'string') {
+                    errorMessage = data.error;
+                }
+                else if (data.message && typeof data.message === 'object') {
+                    // Mapping field dan error ke bahasa Indonesia
+                    const fieldLabels = {
+                        name: "Nama Produk",
+                        price: "Harga",
+                        category_id: "Kategori",
+                        outlet_ids: "Outlet",
+                        barcode: "Barcode",
+                        sku: "SKU",
+                        quantity: "Jumlah",
+                        min_stock: "Stok Minimal"
+                    };
+
+                    const translateError = (msg) => {
+                        if (msg.includes("required")) return "wajib diisi.";
+                        if (msg.includes("already been taken")) return "sudah digunakan.";
+                        if (msg.includes("must be a number")) return "harus berupa angka.";
+                        return msg;
+                    };
+
+                    const messages = Object.entries(data.message).map(([field, errors]) => {
+                        const label = fieldLabels[field] || field;
+                        const translatedErrors = errors.map(translateError).join(", ");
+                        return `${label}: ${translatedErrors}`;
+                    });
+
+                    errorMessage = messages.join("<br>");
+                } 
+                else if (data.errors) {
+                    errorMessage = Object.values(data.errors).flat().join(', ');
+                }
+
+                throw new Error(errorMessage);
             }
-    
-            // Success handling
-            showAlert("success", "Produk berhasil ditambahkan");
+
+            // Success
+            showAlert("success", data.message || "Produk berhasil ditambahkan");
             closeModal("modalTambahProduk");
             loadProducts();
             form.reset();
-    
-            // Reset image preview
+            
             const preview = document.getElementById("gambarPreview");
-            if (preview) {
-                preview.src = "";
-                preview.classList.add("hidden");
-            }
+            preview && (preview.src = "") && preview.classList.add("hidden");
+
         } catch (error) {
-            showAlert("error", error.message);
+            console.error("Error:", error);
+            
+            let userMessage = "Terjadi kesalahan saat menyimpan produk";
+            
+            if (error instanceof TypeError) {
+                userMessage = "Gagal terhubung ke server";
+            } 
+            else if (error instanceof Error) {
+                userMessage = error.message;
+            }
+            
+            showAlert("error", userMessage);
+            
         } finally {
             btnSimpan.disabled = false;
             btnSimpan.innerHTML = originalText;
-            if (window.lucide) window.lucide.createIcons();
+            window.lucide?.createIcons();
         }
     };
 
