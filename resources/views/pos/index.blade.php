@@ -450,6 +450,8 @@
         // Fungsi untuk menangani scan barcode
         async function handleBarcodeScan(barcode) {
             try {
+                searchInput.value = ''; // Kosongkan input
+                
                 const response = await fetch(`/api/products/barcode/${barcode}`, {
                     method: 'GET',
                     headers: {
@@ -460,35 +462,35 @@
                     credentials: 'include'
                 });
                 
-                if (!response.ok) throw new Error('Produk tidak ditemukan');
+                if (!response.ok) {
+                    throw new Error('Produk tidak ditemukan');
+                }
                 
                 const result = await response.json();
                 
-                // Validasi response
                 if (!result.success || !result.data) {
                     throw new Error(result.message || 'Data produk tidak valid');
                 }
                 
                 const product = result.data;
                 
-                // Parse data penting
-                const productPrice = parseFloat(product.price) || 0;
-                const productStock = product.inventory ? (parseInt(product.inventory.quantity) || 0) : 0;
-                const minStock = product.inventory ? (parseInt(product.inventory.min_stock) || 0) : 0;
-                
-                // Cek stok produk
-                if (productStock <= 0) {
-                    showNotification('Stok produk habis', 'error');
-                    return;
+                // CEK STATUS PRODUK (PERUBAHAN UTAMA)
+                if (!product.is_active) {
+                    throw new Error('Produk ini tidak aktif dan tidak dapat dijual');
                 }
                 
-                // Tambahkan ke keranjang
+                const productPrice = parseFloat(product.price) || 0;
+                const productStock = product.inventory ? (parseInt(product.inventory.quantity) || 0) : 0;
+                
+                if (productStock <= 0) {
+                    throw new Error('Stok produk habis');
+                }
+                
                 const existingItem = cart.find(item => item.id === product.id);
                 
                 if (existingItem) {
                     if (existingItem.quantity + 1 > productStock) {
-                        showNotification('Stok tidak mencukupi', 'error');
-                        return;
+                        throw new Error('Stok tidak mencukupi');
                     }
                     existingItem.quantity += 1;
                     existingItem.subtotal = calculateItemSubtotal(existingItem);
@@ -499,14 +501,13 @@
                         price: productPrice,
                         quantity: 1,
                         stock: productStock,
-                        min_stock: minStock,
                         discount: 0,
-                        subtotal: productPrice
+                        subtotal: productPrice,
+                        is_active: product.is_active // Tambahkan status aktif ke item cart
                     });
                 }
                 
                 updateCart();
-                searchInput.value = '';
                 searchInput.focus();
                 showNotification(`${product.name} ditambahkan ke keranjang`, 'success');
                 
@@ -875,7 +876,6 @@
             }
             
             filteredProducts.forEach((product, index) => {
-                const barcodeId = `barcode-${index}`;
                 const productElement = document.createElement('div');
                 productElement.className = 'product-item mb-3';
                 
@@ -889,30 +889,54 @@
                 const cartItem = cart.find(item => item.id === product.id);
                 const reservedInCart = cartItem ? cartItem.quantity : 0;
                 const availableStock = (product.quantity || 0) - reservedInCart;
+
+                // Debug: Console log untuk pengecekan status produk
+                console.log(`Product: ${product.name}`, {
+                    is_active: product.is_active,
+                    type: typeof product.is_active
+                });
                 
-                const isOutOfStock = availableStock <= 0;
-                const isLowStock = availableStock > 0 && availableStock <= (product.min_stock || 5);
-                
-                productElement.innerHTML = `
-                    <div class="product-card flex justify-between items-center p-4 bg-white border border-gray-200 rounded-lg hover:shadow-sm transition-all">
-                        <div>
-                            <div class="product-name text-base font-medium">${product.name} (${availableStock})</div>
-                            <div class="product-price text-orange-500 font-semibold text-base">Rp ${product.price.toLocaleString('id-ID')}</div>
-                            ${isLowStock ? '<span class="low-stock bg-yellow-100 px-2 py-1 rounded text-sm text-yellow-800 font-medium mt-1 inline-block">Produk menipis</span>' : ''}
-                        </div>
-                        <div class="flex items-center">
-                            <span class="product-category text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full mr-3">
-                                ${categoryName.toUpperCase()}
-                            </span>
-                            ${isOutOfStock ? 
-                                '<button class="bg-gray-100 text-gray-500 border border-gray-300 rounded px-4 py-2 text-sm w-24">Habis</button>' : 
-                                `<button class="btn-add-to-cart bg-orange-500 text-white border-none rounded px-4 py-2 text-sm flex items-center justify-center w-24 hover:bg-orange-600 transition-colors">
-                                    <i data-lucide="plus" class="w-4 h-4 mr-1"></i> Tambah
-                                </button>`
-                            }
-                        </div>
+                // Tampilkan berbeda untuk produk tidak aktif
+                if (product.is_active === false) {
+            productElement.innerHTML = `
+                <div class="product-card flex justify-between items-center p-4 bg-gray-100 border border-gray-300 rounded-lg opacity-75">
+                    <div>
+                        <div class="product-name text-base font-medium text-gray-500 line-through">${product.name}</div>
+                        <div class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full mb-1 inline-block">TIDAK AKTIF</div>
+                        <div class="product-price text-gray-500 font-semibold text-base">Rp ${parseFloat(product.price).toLocaleString('id-ID')}</div>
                     </div>
-                `;
+                    <button class="bg-gray-300 text-gray-600 border border-gray-400 rounded px-4 py-2 text-sm w-24 cursor-not-allowed" disabled>
+                        <i data-lucide="x-circle" class="w-4 h-4 inline mr-1"></i> Tidak Aktif
+                    </button>
+                </div>
+            `;
+            productsContainer.appendChild(productElement);
+            return;
+        }
+                
+        const isOutOfStock = availableStock <= 0;
+        const isLowStock = availableStock > 0 && availableStock <= (product.min_stock || 5);
+        
+        productElement.innerHTML = `
+            <div class="product-card flex justify-between items-center p-4 bg-white border border-gray-200 rounded-lg hover:shadow-sm transition-all">
+                <div>
+                    <div class="product-name text-base font-medium">${product.name} (${availableStock})</div>
+                    <div class="product-price text-orange-500 font-semibold text-base">Rp ${parseFloat(product.price).toLocaleString('id-ID')}</div>
+                    ${isLowStock ? '<span class="low-stock bg-yellow-100 px-2 py-1 rounded text-sm text-yellow-800 font-medium mt-1 inline-block">Produk menipis</span>' : ''}
+                </div>
+                <div class="flex items-center">
+                    <span class="product-category text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full mr-3">
+                        ${categoryName.toUpperCase()}
+                    </span>
+                    ${isOutOfStock ? 
+                        '<button class="bg-gray-100 text-gray-500 border border-gray-300 rounded px-4 py-2 text-sm w-24">Habis</button>' : 
+                        `<button class="btn-add-to-cart bg-orange-500 text-white border-none rounded px-4 py-2 text-sm flex items-center justify-center w-24 hover:bg-orange-600 transition-colors">
+                            <i data-lucide="plus" class="w-4 h-4 mr-1"></i> Tambah
+                        </button>`
+                    }
+                </div>
+            </div>
+        `;
                 
                 productsContainer.appendChild(productElement);
             });
@@ -922,12 +946,15 @@
             
             // Add event listeners to all "Add to Cart" buttons
             document.querySelectorAll('.btn-add-to-cart').forEach(button => {
-                button.addEventListener('click', function() {
-                    const productCard = this.closest('.product-card');
-                    const productName = productCard.querySelector('.product-name').textContent.split(' (')[0];
-                    const product = products.find(p => p.name === productName);
-                    
-                    if (!product) return;
+            button.addEventListener('click', function() {
+                const productCard = this.closest('.product-card');
+                const productName = productCard.querySelector('.product-name').textContent.split(' (')[0];
+                const product = products.find(p => p.name === productName);
+                
+                if (!product || product.is_active === false) {
+                    showNotification('Produk tidak tersedia', 'error');
+                    return;
+                }
                     
                     // Hitung stok yang tersedia
                     const cartItem = cart.find(item => item.id === product.id);
@@ -958,7 +985,8 @@
                             quantity: 1,
                             stock: product.quantity,
                             discount: 0,
-                            subtotal: product.price
+                            subtotal: product.price,
+                            is_active: product.is_active
                         });
                     }
                     
@@ -966,7 +994,7 @@
                     updateCart();
                     
                     // Render ulang produk untuk update stok secara instan
-                    const activeFilter = document.querySelector('.category-filter button.active')?.dataset.filter || 'all';
+                    const activeFilter = document.querySelector('#categoryTabs .nav-link.active')?.getAttribute('data-category') || 'all';
                     const currentSearch = document.getElementById('searchProduct')?.value || '';
                     renderProducts(activeFilter, currentSearch);
                 });
