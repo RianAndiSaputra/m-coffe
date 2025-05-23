@@ -658,17 +658,17 @@
             submitButton.disabled = false;
             
             if (data.success) {
+                // Show success notification
                 showNotification('success', 'Berhasil', data.message || 'Penyesuaian stok berhasil disimpan');
                 
-                // Reset form
-                document.getElementById('product_id').value = '';
-                document.getElementById('selectedProductText').textContent = 'Pilih produk';
-                document.getElementById('quantity_change').value = '';
-                document.getElementById('adjust_type').value = '';
-                document.getElementById('notes').value = '';
+                // Close the modal first
+                closeModal('stockModal');
                 
-                // Switch to history tab
-                document.getElementById('historyTab').click();
+                // Auto refresh the page after a short delay to allow notification to be seen
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500); // 1.5 second delay to show the success notification
+                
             } else {
                 showNotification('error', 'Error', data.message || 'Terjadi kesalahan');
             }
