@@ -148,11 +148,16 @@ class ProductController extends Controller
         if ($request->has('image') && $request->image === null) {
             $request->request->remove('image');
         }
-
+    
         try {
             $request->validate([
                 'name' => 'required|string|max:255',
-                'sku' => 'required|string|max:255',
+                'sku' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('products', 'sku')->whereNull('deleted_at')
+                ],
                 'barcode' => [
                     'nullable',
                     'string',
@@ -169,13 +174,20 @@ class ProductController extends Controller
                 'quantity' => 'required|numeric',
                 'min_stock' => 'required|numeric',
             ]);
-
+    
+            // Validasi manual untuk SKU dan barcode
+            if ($request->sku && Product::where('sku', $request->sku)->exists()) {
+                throw ValidationException::withMessages([
+                    'sku' => 'SKU sudah digunakan oleh produk aktif'
+                ]);
+            }
+    
             if ($request->barcode && Product::where('barcode', $request->barcode)->exists()) {
                 throw ValidationException::withMessages([
                     'barcode' => 'Barcode sudah digunakan oleh produk aktif'
                 ]);
             }
-
+    
             DB::beginTransaction();
             
             if ($request->hasFile('image')) {
@@ -184,13 +196,14 @@ class ProductController extends Controller
             } else {
                 $imagePath = null;
             }
-
-            // Generate barcode jika tidak diisi
+    
+            // Generate SKU dan barcode jika tidak diisi
+            $sku = $request->sku ?? $this->generateUniqueSku();
             $barcode = $request->barcode ?? $this->generateUniqueBarcode();
-
+    
             $product = Product::create([
                 'name' => $request->name,
-                'sku' => $request->sku,
+                'sku' => $sku,
                 'barcode' => $barcode,
                 'description' => $request->description,
                 'price' => $request->price,
@@ -198,7 +211,7 @@ class ProductController extends Controller
                 'image' => $imagePath,
                 'is_active' => $request->is_active,
             ]);
-
+    
             foreach ($request->outlet_ids as $outletId) {
                 Inventory::create([
                     'product_id' => $product->id,
@@ -218,9 +231,9 @@ class ProductController extends Controller
                     'user_id' => $request->user()->id,
                 ]);
             }
-
+    
             DB::commit();
-
+    
             return $this->successResponse($product, 'Product created successfully');
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -259,8 +272,18 @@ class ProductController extends Controller
         try {
             $request->validate([
                 'name' => 'required|string|max:255',
-                'sku' => 'required|string|max:255',
-                'barcode' => 'nullable|string|max:255|unique:products,barcode,' . $product->id,
+                'sku' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('products', 'sku')->ignore($product->id)->whereNull('deleted_at')
+                ],
+                'barcode' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                    Rule::unique('products', 'barcode')->ignore($product->id)->whereNull('deleted_at')
+                ],
                 'description' => 'nullable|string|max:255',
                 'price' => 'required|numeric',
                 'category_id' => 'required|exists:categories,id',
@@ -271,7 +294,20 @@ class ProductController extends Controller
                 'quantity' => 'required|numeric',
                 'min_stock' => 'required|numeric',
             ]);
-
+    
+            // Validasi manual untuk SKU dan barcode
+            if ($request->sku && Product::where('sku', $request->sku)->where('id', '!=', $product->id)->exists()) {
+                throw ValidationException::withMessages([
+                    'sku' => 'SKU sudah digunakan oleh produk aktif'
+                ]);
+            }
+    
+            if ($request->barcode && Product::where('barcode', $request->barcode)->where('id', '!=', $product->id)->exists()) {
+                throw ValidationException::withMessages([
+                    'barcode' => 'Barcode sudah digunakan oleh produk aktif'
+                ]);
+            }
+    
             DB::beginTransaction();
             
             if ($request->hasFile('image')) {
@@ -279,7 +315,7 @@ class ProductController extends Controller
             } else {
                 $imagePath = $product->image;
             }
-
+    
             $product->update([
                 'name' => $request->name,
                 'sku' => $request->sku,
@@ -290,7 +326,7 @@ class ProductController extends Controller
                 'image' => $imagePath,
                 'is_active' => $request->is_active,
             ]);
-
+    
             foreach ($request->outlet_ids as $outletId) {
                 Inventory::updateOrCreate(
                     [
@@ -303,17 +339,20 @@ class ProductController extends Controller
                     ]
                 );
             }
-
+    
             Inventory::where('product_id', $product->id)
                 ->whereNotIn('outlet_id', $request->outlet_ids)
                 ->delete();
-
+    
             DB::commit();
-
+    
             return $this->successResponse($product, 'Product updated successfully');
         } catch (\Throwable $th) {
             DB::rollBack();
-            return $this->errorResponse($th->validator->errors());
+            if ($th instanceof \Illuminate\Validation\ValidationException) {
+                return $this->errorResponse($th->errors(), 'Validation failed', 422);
+            }
+            return $this->errorResponse($th->getMessage());
         }
     }
 
