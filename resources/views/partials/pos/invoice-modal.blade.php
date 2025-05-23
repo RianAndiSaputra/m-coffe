@@ -1,3 +1,4 @@
+
 <!-- Payment Process Modal -->
 <div id="paymentModal" class="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-50 hidden">
     <div class="bg-white rounded-lg shadow-lg max-w-md w-full p-6 text-center relative">
@@ -45,14 +46,19 @@
 
         <!-- Text Success -->
         <h3 class="text-lg font-semibold text-green-600 mb-1">Pembayaran Berhasil!</h3>
-        <p class="text-gray-600 text-sm mb-6">Transaksi telah berhasil diselesaikan</p>
+        <p class="text-gray-600 text-sm mb-4">Transaksi telah berhasil diselesaikan</p>
+        
+        <!-- Countdown Timer -->
+        <div id="countdownTimer" class="text-sm text-gray-500 mb-4 hidden">
+            Halaman akan refresh dalam <span id="countdownSeconds" class="font-bold text-red-500">5</span> detik
+        </div>
 
         <!-- Buttons -->
         <div class="flex justify-center gap-3">
             <button onclick="cetakInvoice()" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded">
                 Cetak Struk
             </button>
-            <button onclick="closeModal('successPaymentModal')" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-100">
+            <button onclick="closeModalWithRefresh('successPaymentModal')" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-100">
                 Tutup
             </button>
         </div>
@@ -67,6 +73,10 @@
         payment_method: null, // Selected payment method
         total: 0              // Order total
     };
+    
+    // Variable untuk tracking countdown timer
+    let countdownInterval = null;
+    let refreshTimeout = null;
     
     // Base URL for API calls - modify this to match your environment
     const BASE_URL = window.location.origin;
@@ -176,6 +186,9 @@
             const successModal = document.getElementById('successPaymentModal');
             successModal.classList.remove('hidden');
             
+            // Start auto refresh timer setelah modal sukses muncul
+            startAutoRefreshTimer();
+            
         } catch (error) {
             console.error('Payment processing error:', error);
             alert(`Gagal memproses pembayaran: ${error.message}`);
@@ -186,6 +199,83 @@
     function closeModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) modal.classList.add('hidden');
+    }
+    
+    // Function to close modal with immediate refresh
+    function closeModalWithRefresh(modalId) {
+        // Stop any existing timers
+        clearCountdownTimer();
+        
+        // Close modal
+        closeModal(modalId);
+        
+        // Show loading message (optional)
+        const loadingDiv = document.createElement('div');
+        loadingDiv.innerHTML = `
+            <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                <div class="bg-white rounded-lg p-6 text-center">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-3"></div>
+                    <p class="text-gray-600">Memuat ulang halaman...</p>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(loadingDiv);
+        
+        // Refresh setelah delay singkat
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
+    }
+    
+    // Function untuk memulai countdown timer auto refresh
+    function startAutoRefreshTimer() {
+        let seconds = 5;
+        
+        // Show countdown timer
+        const timerDiv = document.getElementById('countdownTimer');
+        const secondsSpan = document.getElementById('countdownSeconds');
+        
+        if (timerDiv && secondsSpan) {
+            timerDiv.classList.remove('hidden');
+            secondsSpan.textContent = seconds;
+            
+            // Update countdown setiap detik
+            countdownInterval = setInterval(() => {
+                seconds--;
+                secondsSpan.textContent = seconds;
+                
+                if (seconds <= 0) {
+                    clearInterval(countdownInterval);
+                }
+            }, 1000);
+        }
+        
+        // Set timeout untuk refresh halaman
+        refreshTimeout = setTimeout(() => {
+            // Clear any existing intervals
+            clearCountdownTimer();
+            
+            // Refresh halaman
+            window.location.reload();
+        }, 5000); // 5 detik
+    }
+    
+    // Function untuk membersihkan timer
+    function clearCountdownTimer() {
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+        }
+        if (refreshTimeout) {
+            clearTimeout(refreshTimeout);
+            refreshTimeout = null;
+        }
+        
+        // Hide countdown timer
+        const timerDiv = document.getElementById('countdownTimer');
+        if (timerDiv) {
+            timerDiv.classList.add('hidden');
+        }
     }
 
     // Fungsi untuk mengambil template struk dari database
@@ -245,9 +335,12 @@
         }
     }
 
-    // Function to print receipt
+    // Function to print receipt dengan auto refresh setelah cetak
     async function cetakInvoice() {
         try {
+            // Stop countdown timer sementara saat mencetak
+            clearCountdownTimer();
+            
             // Periksa apakah currentOrder ada
             if (!currentOrder || !currentOrder.data) {
                 throw new Error('Data transaksi tidak tersedia');
@@ -255,11 +348,9 @@
 
             // Ambil data dari currentOrder yang sudah disimpan
             const order = currentOrder.data;
-            // console.log('Order data for receipt:', order);
             
             // Fetch receipt template from database
             const templateData = await fetchReceiptTemplate();
-            // console.log('Template data for receipt:', templateData);
 
             // Buat window cetak
             const printWindow = window.open('', '_blank', 'width=400,height=600');
@@ -283,6 +374,9 @@
                     if (!mql.matches) {
                         // Print dialog was closed
                         printWindow.close();
+                        
+                        // Mulai proses refresh setelah print selesai
+                        startPrintRefreshProcess();
                     }
                 }, { once: true });
                 
@@ -291,9 +385,11 @@
                     try {
                         if (!printWindow.closed) {
                             printWindow.close();
+                            startPrintRefreshProcess();
                         }
                     } catch (e) {
                         console.log('Window may already be closed');
+                        startPrintRefreshProcess();
                     }
                 }, 4000);
             };
@@ -301,7 +397,65 @@
         } catch (error) {
             console.error('Error printing receipt:', error);
             alert(`Gagal mencetak struk: ${error.message}`);
+            
+            // Restart countdown timer jika error
+            startAutoRefreshTimer();
         }
+    }
+    
+    // Function untuk memulai proses refresh setelah cetak
+    function startPrintRefreshProcess() {
+        // Close success modal
+        closeModal('successPaymentModal');
+        
+        // Show loading with countdown
+        const loadingDiv = document.createElement('div');
+        loadingDiv.id = 'printRefreshLoading';
+        loadingDiv.innerHTML = `
+            <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                <div class="bg-white rounded-lg p-6 text-center max-w-sm w-full mx-4">
+                    <div class="bg-green-100 rounded-full p-3 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                        <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-green-600 mb-2">Struk Berhasil Dicetak!</h3>
+                    <p class="text-gray-600 text-sm mb-4">Halaman akan refresh dalam <span id="printCountdownSeconds" class="font-bold text-red-500">5</span> detik</p>
+                    <div class="flex justify-center">
+                        <button onclick="refreshNow()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm">
+                            Refresh Sekarang
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(loadingDiv);
+        
+        // Start countdown
+        let seconds = 5;
+        const secondsSpan = document.getElementById('printCountdownSeconds');
+        
+        const printCountdownInterval = setInterval(() => {
+            seconds--;
+            if (secondsSpan) {
+                secondsSpan.textContent = seconds;
+            }
+            
+            if (seconds <= 0) {
+                clearInterval(printCountdownInterval);
+            }
+        }, 1000);
+        
+        // Auto refresh after 5 seconds
+        setTimeout(() => {
+            clearInterval(printCountdownInterval);
+            window.location.reload();
+        }, 5000);
+    }
+    
+    // Function untuk refresh immediate
+    function refreshNow() {
+        window.location.reload();
     }
 
     // Function to generate receipt HTML with template
@@ -394,7 +548,7 @@
         };
 
         // Use logo from template or default
-        const logoPath = templateData.logo_url || '/images/logo.png';
+        const logoPath = templateData.logo_url || 'public/images/logo.png';
         
         // Data order yang aman
         const safeOrder = {
@@ -721,4 +875,29 @@
     function startCheckout(cartItems, total) {
         showPaymentModal(cartItems, total);
     }
+    
+    // Event listener untuk membersihkan timer jika user menutup halaman
+    window.addEventListener('beforeunload', function() {
+        clearCountdownTimer();
+    });
+    
+    // Event listener untuk keyboard shortcuts (optional)
+    document.addEventListener('keydown', function(event) {
+        // ESC key untuk close modal
+        if (event.key === 'Escape') {
+            const paymentModal = document.getElementById('paymentModal');
+            const successModal = document.getElementById('successPaymentModal');
+            
+            if (!paymentModal.classList.contains('hidden')) {
+                closeModal('paymentModal');
+            } else if (!successModal.classList.contains('hidden')) {
+                closeModalWithRefresh('successPaymentModal');
+            }
+        }
+        
+        // Enter key untuk refresh now (jika loading refresh sedang aktif)
+        if (event.key === 'Enter' && document.getElementById('printRefreshLoading')) {
+            refreshNow();
+        }
+    });
 </script>
