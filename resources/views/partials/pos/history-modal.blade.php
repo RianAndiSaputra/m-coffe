@@ -108,6 +108,7 @@
         mode: "range",
         dateFormat: "d M Y",
         locale: "id",
+        defaultDate: [new Date(), new Date()], // Set default tanggal hari ini
         onChange: function(tanggalTerpilih) {
             if (tanggalTerpilih.length === 2) {
                 ambilDataTransaksi(tanggalTerpilih[0], tanggalTerpilih[1]);
@@ -116,6 +117,14 @@
             }
         }
     });
+
+    function getHariIni() {
+        const hariIni = new Date();
+        return {
+            start: new Date(hariIni.getFullYear(), hariIni.getMonth(), hariIni.getDate()),
+            end: new Date(hariIni.getFullYear(), hariIni.getMonth(), hariIni.getDate(), 23, 59, 59)
+        };
+    }
 
     // Fungsi untuk mengambil data transaksi dari backend
     async function ambilDataTransaksi(tanggalMulai = null, tanggalSampai = null) {
@@ -130,10 +139,14 @@
             // Membuat URL endpoint dengan parameter
             let url = '/api/orders/history';
             const params = new URLSearchParams();
+            const { start, end } = getHariIni();
+            params.append('date_from', formatTanggalUntukBackend(start));
+            params.append('date_to', formatTanggalUntukBackend(end));
             
-            if (tanggalMulai && tanggalSampai) {
-                params.append('date_from', formatTanggalUntukBackend(tanggalMulai));
-                params.append('date_to', formatTanggalUntukBackend(tanggalSampai));
+            if (!tanggalMulai && !tanggalSampai) {
+                const hariIni = new Date();
+                tanggalMulai = hariIni;
+                tanggalSampai = hariIni;
             }
 
             const outletId = localStorage.getItem('outlet_id');
@@ -351,218 +364,6 @@
             alert(`Gagal mencetak struk: ${error.message}`);
         }
     }
-
-    // Fungsi untuk generate konten struk (dengan perbaikan)
-    // function generateReceiptContent(transaction, templateData) {
-    //     // Format tanggal lebih baik
-    //     const formatDate = (dateString) => {
-    //         if (!dateString) return '';
-    //         const options = { 
-    //             day: '2-digit', 
-    //             month: 'long', 
-    //             year: 'numeric',
-    //             hour: '2-digit',
-    //             minute: '2-digit'
-    //         };
-    //         return new Date(dateString).toLocaleDateString('id-ID', options);
-    //     };
-
-    //     // Helper function untuk menangani nilai yang mungkin undefined
-    //     const safeNumber = (value) => {
-    //         // Memastikan nilai adalah angka yang valid
-    //         return typeof value === 'number' && !isNaN(value) ? value : 0;
-    //     };
-
-    //     // Helper function untuk format uang dengan penanganan nilai undefined
-    //     const formatCurrency = (value) => {
-    //         return safeNumber(value).toLocaleString('id-ID');
-    //     };
-
-    //     // Pastikan properti-properti yang dibutuhkan ada, atau beri nilai default
-    //     const subtotal = safeNumber(transaction.subtotal);
-    //     const discount = safeNumber(transaction.discount);
-    //     const tax = safeNumber(transaction.tax);
-    //     const total = safeNumber(transaction.total);
-    //     const total_paid = safeNumber(transaction.total_paid);
-    //     const change = safeNumber(transaction.change);
-
-    //     console.log("DEBUG nilai-nilai transaksi:", {
-    //         subtotal, discount, tax, total, total_paid, change,
-    //         items: transaction.items
-    //     });
-
-    //     return `
-    //         <!DOCTYPE html>
-    //         <html>
-    //         <head>
-    //             <title>Struk Transaksi #${transaction.invoice}</title>
-    //             <style>
-    //                 body {
-    //                     font-family: 'Courier New', monospace;
-    //                     margin: 0;
-    //                     padding: 20px;
-    //                     max-width: 300px;
-    //                 }
-    //                 .header {
-    //                     display: flex;
-    //                     align-items: center;
-    //                     gap: 15px;
-    //                     margin-bottom: 20px;
-    //                 }
-    //                 .header-text {
-    //                     flex: 1;
-    //                     text-align: right;
-    //                 }
-    //                 .logo-container {
-    //                     display: flex;
-    //                     align-items: center;
-    //                 }
-    //                 .logo {
-    //                     max-width: 50px;
-    //                     height: auto;
-    //                 }
-    //                 .title {
-    //                     font-size: 16px;
-    //                     font-weight: bold;
-    //                     margin-bottom: 4px;
-    //                 }
-    //                 .info {
-    //                     font-size: 12px;
-    //                     margin: 5px 0;
-    //                 }
-    //                 .divider {
-    //                     border-top: 1px dashed #000;
-    //                     margin: 10px 0;
-    //                 }
-    //                 .item {
-    //                     display: flex;
-    //                     justify-content: space-between;
-    //                     font-size: 12px;
-    //                     margin: 5px 0;
-    //                 }
-    //                 .total {
-    //                     font-weight: bold;
-    //                     margin-top: 10px;
-    //                     text-align: right;
-    //                 }
-    //                 .footer {
-    //                     text-align: center;
-    //                     margin-top: 20px;
-    //                     font-size: 12px;
-    //                 }
-    //                 .text-center {
-    //                     text-align: center;
-    //                 }
-    //             </style>
-    //         </head>
-    //         <body>
-    //             <div class="header">
-    //                 ${templateData.logo_url ? `
-    //                 <div class="logo-container">
-    //                     <img src="${templateData.logo_url || 'logo'}" 
-    //                         alt="Logo Outlet" 
-    //                         class="logo"
-    //                         onerror="this.style.display='none'"/>
-    //                 </div>
-    //                 ` : ''}
-    //                 <div class="header-text">
-    //                     <div class="title">${templateData.company_name || 'Toko Saya'}</div>
-    //                     ${templateData.company_slogan ? `<div class="info">${templateData.company_slogan}</div>` : ''}
-    //                     ${templateData.outlet ? `
-    //                         <div class="info">${templateData.outlet.name || ''}</div>
-    //                         <div class="info">Alamat: ${templateData.outlet.address || ''}</div>
-    //                         <div class="info">Telp: ${templateData.outlet.phone || ''}</div>
-    //                     ` : ''}
-    //                 </div>
-    //             </div>
-
-    //             <div class="divider"></div>
-    //             <div class="text-center">
-    //                 <div class="info">STRUK PEMBAYARAN</div>
-    //             </div>
-    //             <div class="divider"></div>
-                
-    //             <div class="info">No. Invoice: ${transaction.invoice}</div>
-    //             <div class="info">Tanggal: ${formatDate(transaction.waktu)}</div>
-    //             <div class="info">Kasir: ${transaction.kasir}</div>
-    //             <div class="divider"></div>
-                
-    //             <div>
-    //                 ${transaction.items && transaction.items.length > 0 ? transaction.items.map(item => {
-    //                     // Pastikan setiap properti item ada dan valid
-    //                     const quantity = safeNumber(item.quantity);
-    //                     const price = safeNumber(item.price);
-    //                     const itemDiscount = safeNumber(item.discount);
-                        
-    //                     return `
-    //                         <div class="item">
-    //                             <div>${quantity}x ${item.product || 'Produk'}</div>
-    //                             <div>
-    //                                 Rp ${formatCurrency(price * quantity)}
-    //                                 ${itemDiscount > 0 ? ` (-${formatCurrency(itemDiscount)})` : ''}
-    //                             </div>
-    //                         </div>
-    //                     `;
-    //                 }).join('') : '<div class="item">Tidak ada item</div>'}
-                    
-    //                 <div class="divider"></div>
-    //                 <div class="item">
-    //                     <div>Subtotal:</div>
-    //                     <div>Rp ${formatCurrency(subtotal)}</div>
-    //                 </div>
-                    
-    //                 ${discount > 0 ? `
-    //                 <div class="item">
-    //                     <div>Diskon:</div>
-    //                     <div>Rp -${formatCurrency(discount)}</div>
-    //                 </div>
-    //                 ` : ''}
-                    
-    //                 ${tax > 0 ? `
-    //                 <div class="item">
-    //                     <div>Pajak:</div>
-    //                     <div>Rp ${formatCurrency(tax)}</div>
-    //                 </div>
-    //                 ` : ''}
-                    
-    //                 <div class="item">
-    //                     <div>Total:</div>
-    //                     <div>Rp ${formatCurrency(total)}</div>
-    //                 </div>
-                    
-    //                 <div class="item">
-    //                     <div>Metode Pembayaran:</div>
-    //                     <div>${transaction.pembayaran === "cash" ? "TUNAI" : 
-    //                         transaction.pembayaran === "qris" ? "QRIS" : 
-    //                         (transaction.pembayaran || 'TIDAK DIKETAHUI').toUpperCase()}</div>
-    //                 </div>
-                    
-    //                 ${transaction.pembayaran === 'cash' ? `
-    //                 <div class="item">
-    //                     <div>Bayar:</div>
-    //                     <div>Rp ${formatCurrency(total_paid)}</div>
-    //                 </div>
-    //                 <div class="item">
-    //                     <div>Kembalian:</div>
-    //                     <div>Rp ${formatCurrency(change)}</div>
-    //                 </div>
-    //                 ` : ''}
-    //             </div>
-                
-    //             <div class="divider"></div>
-    //             ${transaction.member ? `
-    //                 <div class="info">
-    //                     Member: ${transaction.member.name || ''} (${transaction.member.member_code || ''})
-    //                 </div>
-    //             ` : ''}
-                
-    //             <div class="footer">
-    //                 ${templateData.footer_message || 'Terima kasih atas kunjungan Anda'}
-    //             </div>
-    //         </body>
-    //         </html>
-    //     `;
-    // }
 
     function generateReceiptContent(transaction, templateData) {
         // Format tanggal dengan lebih baik
@@ -1143,6 +944,11 @@
             default: return 'bg-gray-100 text-gray-800';
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const hariIni = new Date();
+        ambilDataTransaksi(hariIni, hariIni);
+    });
 
     // Event listener untuk modal
     document.addEventListener('DOMContentLoaded', function() {
