@@ -516,49 +516,68 @@ class ProductController extends Controller
     public function posFindByBarcode(Request $request, $outletId, $barcode)
     {
         try {
-            // Validasi barcode
-            if (empty($barcode) || strlen($barcode) < 8) {
+            // Validasi barcode (opsional - bisa diaktifkan jika diperlukan)
+            if (empty($barcode) || strlen($barcode) < 3) {
                 return $this->errorResponse('Invalid barcode format', 400);
             }
 
-            // Method 1: Jika menggunakan many-to-many dengan pivot table
+            // Method 1: Menggunakan many-to-many dengan pivot table
             $product = Outlet::findOrFail($outletId)
                 ->products()
-                ->where('barcode', $barcode)
-                ->where('is_active', true)
-                ->wherePivot('quantity', '>', 0) // Gunakan wherePivot untuk pivot table
+                ->where('products.barcode', $barcode)
+                ->where('products.is_active', true)
+                ->wherePivot('quantity', '>', 0)
+                ->withPivot('quantity')
                 ->with(['category'])
                 ->first();
 
-            // Method 2: Alternative jika struktur berbeda
-            
-            // $product = Product::where('barcode', $barcode)
-            //     ->where('is_active', true)
-            //     ->whereHas('outlets', function($query) use ($outletId) {
-            //         $query->where('outlet_id', $outletId)
-            //             ->where('quantity', '>', 0);
-            //     })
-            //     ->with(['category'])
-            //     ->first();
-            
+            // Jika Method 1 tidak berhasil, coba Method 2
+            // if (!$product) {
+            //     $product = Product::where('barcode', $barcode)
+            //         ->where('is_active', true)
+            //         ->whereHas('outlets', function($query) use ($outletId) {
+            //             $query->where('outlets.id', $outletId)
+            //                 ->where('outlet_product.quantity', '>', 0);
+            //         })
+            //         ->with(['category', 'outlets' => function($query) use ($outletId) {
+            //             $query->where('outlets.id', $outletId);
+            //         }])
+            //         ->first();
+            // }
 
             if (!$product) {
                 // Log untuk debugging
-                Log::warning('Product not found', [
+                Log::warning('Product not found or out of stock', [
                     'barcode' => $barcode,
-                    'outlet' => $outletId,
-                    'user' => auth()->id()
+                    'outlet_id' => $outletId,
+                    'user_id' => auth()->id()
                 ]);
                 
                 return $this->errorResponse('Product not found or out of stock', 404);
+            }
+
+            // Ambil quantity dari pivot table
+            $stock = 0;
+            if ($product->pivot) {
+                // Dari Method 1
+                $stock = $product->pivot->quantity;
+            } elseif ($product->outlets && $product->outlets->count() > 0) {
+                // Dari Method 2
+                $stock = $product->outlets->first()->pivot->quantity;
+            }
+
+            // Validasi stock
+            if ($stock <= 0) {
+                return $this->errorResponse('Product is out of stock', 404);
             }
 
             // Log sukses
             Log::info('Barcode scanned successfully', [
                 'barcode' => $barcode,
                 'product_id' => $product->id,
-                'outlet' => $outletId,
-                'user' => auth()->id()
+                'outlet_id' => $outletId,
+                'stock' => $stock,
+                'user_id' => auth()->id()
             ]);
 
             return $this->successResponse([
@@ -566,10 +585,14 @@ class ProductController extends Controller
                 'name' => $product->name,
                 'price' => $product->price,
                 'barcode' => $product->barcode,
-                'stock' => $product->pivot->quantity,
+                'stock' => $stock,
                 'min_stock' => $product->min_stock,
-                'category' => $product->category->name ?? 'Uncategorized',
-                'image_url' => $product->image_url ? asset('storage/'.$product->image_url) : null
+                'is_active' => $product->is_active,
+                'category' => $product->category ? $product->category->name : 'Uncategorized',
+                'image_url' => $product->image_url ? asset('storage/'.$product->image_url) : null,
+                'inventory' => [
+                    'quantity' => $stock
+                ]
             ], 'Product found');
 
         } catch (ModelNotFoundException $e) {
@@ -578,14 +601,15 @@ class ProductController extends Controller
                 'error' => $e->getMessage()
             ]);
             return $this->errorResponse('Outlet not found', 404);
-        } catch (\Throwable $th) {
+        } catch (\Exception $e) {
             Log::error('Server error in posFindByBarcode', [
                 'barcode' => $barcode,
-                'outlet' => $outletId,
-                'error' => $th->getMessage(),
-                'trace' => $th->getTraceAsString()
+                'outlet_id' => $outletId,
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
             ]);
-            return $this->errorResponse('Server error: '.$th->getMessage(), 500);
+            return $this->errorResponse('Server error occurred', 500);
         }
     }
 

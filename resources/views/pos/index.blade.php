@@ -452,7 +452,7 @@
             try {
                 searchInput.value = ''; // Kosongkan input
                 
-                const response = await fetch(`/api/products/barcode/${barcode}`, {
+                const response = await fetch(`/api/outlets/${outletInfo.id}/products/barcode/${barcode}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
