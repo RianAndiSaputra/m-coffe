@@ -517,6 +517,12 @@
                 }
                 
                 filteredData.forEach(history => {
+                    // Skip records without product data or with invalid data
+                    if (!history.product || !history.product.name) {
+                        console.warn('Skipping record with missing product data:', history);
+                        return;
+                    }
+                    
                     const row = document.createElement('tr');
                     row.className = 'border-b hover:bg-gray-50';
                     
