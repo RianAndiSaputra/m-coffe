@@ -59,10 +59,10 @@
             <!-- Card: Manajemen Stok -->
             <div class="p-4 border rounded shadow">
                 <div class="space-y-4">
-                    <div>
+                    {{-- <div>
                         <label class="block font-medium mb-1">Stok</label>
                         <input type="number" id="editStok" class="w-full border rounded px-3 py-2 text-sm">
-                    </div>
+                    </div> --}}
                     <div>
                         <label class="block font-medium mb-1">Stok Minimum</label>
                         <input type="number" id="editStokMinimum" class="w-full border rounded px-3 py-2 text-sm">

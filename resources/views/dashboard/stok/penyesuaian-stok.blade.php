@@ -55,9 +55,9 @@
                     <th class="py-3 font-bold">Sku</th>
                     <th class="py-3 font-bold">Produk</th>
                     {{-- <th class="py-3 font-bold">Jumlah Sebelum</th> --}}
-                    <th class="py-3 font-bold">Status</th>
+                    <th class="py-3 font-bold">Stok</th>
                     {{-- <th class="py-3 font-bold">Perubahan</th> --}}
-                    <th class="py-3 font-bold">Tipe</th>
+                    {{-- <th class="py-3 font-bold">Tipe</th> --}}
                     <th class="py-3 font-bold">Tanggal</th>
                     <th class="py-3 font-bold text-right">Aksi</th>
                 </tr>
@@ -268,12 +268,14 @@
             
             // Jika ada riwayat inventaris
             if (product.inventory_history && product.inventory_history.length > 0) {
+                // console.log(`Processing inventory history for product ID: ${product.id}, Outlet ID: ${outletId}`);
                 product.inventory_history.forEach(history => {
                     inventoryRecords.push({
                         product: {
                             id: product.id,
                             name: product.name,
-                            sku: product.sku
+                            sku: product.sku,
+                            qty: product.quantity
                         },
                         outlet: {
                             id: outlet.id,
@@ -286,13 +288,15 @@
                         created_at: new Date().toISOString() // Karena API tidak memberikan tanggal, kita gunakan tanggal saat ini
                     });
                 });
+
             } else {
                 // Jika tidak ada riwayat, tambahkan stok terkini
                 inventoryRecords.push({
                     product: {
                         id: product.id,
                         name: product.name,
-                        sku: product.sku
+                        sku: product.sku,
+                        qty: product.quantity
                     },
                     outlet: {
                         id: outlet.id,
@@ -304,6 +308,8 @@
                     type: "current",
                     created_at: new Date().toISOString()
                 });
+
+
             }
         });
         
@@ -350,29 +356,29 @@
             qtyAfterCell.className = 'py-4';
             qtyAfterCell.innerHTML = `
                 <span class="px-3 py-1.5 text-sm font-bold bg-orange-100 text-orange-700 rounded-full">
-                    ${item.quantity_after}
+                    ${item.product.qty}
                 </span>
             `;
             row.appendChild(qtyAfterCell);
             
             // Create cell for Type
-            const typeCell = document.createElement('td');
-            typeCell.className = 'py-4 font-medium';
+            // const typeCell = document.createElement('td');
+            // typeCell.className = 'py-4 font-medium';
             
-            // Map the type to more readable Indonesian text
-            const typeMapping = {
-                'shipment': 'Pengiriman',
-                'adjustment': 'Penyesuaian',
-                'sale': 'Penjualan',
-                'purchase': 'Pembelian',
-                'transfer_in': 'Transfer Masuk',
-                'transfer_out': 'Transfer Keluar',
-                'other': 'Lainnya',
-                'current': 'Stok Terkini'
-            };
+            // // Map the type to more readable Indonesian text
+            // const typeMapping = {
+            //     'shipment': 'Pengiriman',
+            //     'adjustment': 'Penyesuaian',
+            //     'sale': 'Penjualan',
+            //     'purchase': 'Pembelian',
+            //     'transfer_in': 'Transfer Masuk',
+            //     'transfer_out': 'Transfer Keluar',
+            //     'other': 'Lainnya',
+            //     'current': 'Stok Terkini'
+            // };
             
-            typeCell.textContent = typeMapping[item.type] || item.type;
-            row.appendChild(typeCell);
+            // typeCell.textContent = typeMapping[item.type] || item.type;
+            // row.appendChild(typeCell);
             
             // Create cell for Date
             const dateCell = document.createElement('td');
@@ -406,7 +412,7 @@
             const actionCell = document.createElement('td');
             actionCell.className = 'py-4 text-right';
             actionCell.innerHTML = `
-                <button onclick="openModalAdjust(${item.product.id}, '${item.product.sku}', '${item.product.name}', '${item.outlet.name}', ${item.quantity_after})" 
+                <button onclick="openModalAdjust(${item.product.id}, '${item.product.sku}', '${item.product.name}', '${item.outlet.name}', ${item.product.qty})" 
                     class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-bold text-white bg-orange-500 rounded-md hover:bg-orange-600">
                     <i data-lucide="clipboard-list" class="w-4 h-4"></i> Sesuaikan
                 </button>

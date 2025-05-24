@@ -58,6 +58,7 @@
                 <option value="">Pilih Tipe Penyesuaian</option>
                 <option value="purchase">Pembelian</option>
                 <option value="sale">Penjualan</option>
+                <option value="adjustment">Penyesuaian</option>
                 <option value="shipment">Kiriman Pabrik</option>
                 <option value="other">Lainnya</option>
             </select>

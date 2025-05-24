@@ -833,7 +833,7 @@ const ProductManager = (() => {
                 product.description || "";
             document.getElementById("editHarga").value = product.price;
 
-            document.getElementById("editStok").value = product.quantity ?? 0;
+            // document.getElementById("editStok").value = product.quantity ?? 0;
             document.getElementById("editStokMinimum").value =
                 product.min_stock ?? 0;
 
