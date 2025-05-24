@@ -283,10 +283,14 @@
 
     // Initialize date range picker
     function initializeDateRangePicker() {
+        // Set default date to today
+        const today = new Date();
+        const todayFormatted = formatDateForAPI(today);
+        
         flatpickr("#dateRange", {
             mode: "range",
             dateFormat: "d M Y",
-            defaultDate: ["today", "today"],
+            defaultDate: [today, today], // Set default to today only
             locale: "id",
             onChange: function(selectedDates, dateStr) {
                 if (selectedDates.length === 2) {
@@ -299,14 +303,29 @@
                     
                     // Fetch data with new date range
                     fetchInventoryData(startDate, endDate);
+                } else if (selectedDates.length === 1) {
+                    // Handle single date selection (same day)
+                    const date = formatDateForAPI(selectedDates[0]);
+                    document.getElementById('dateRangeDisplay').textContent = formatDateForDisplay(date);
+                    fetchInventoryData(date, date);
                 }
             }
         });
+        
+        // Set initial display to today
+        document.getElementById('dateRangeDisplay').textContent = formatDateForDisplay(todayFormatted);
     }
 
     // Fetch inventory data from API
-    async function fetchInventoryData(startDate = '2025-05-14', endDate = '2025-05-14') {
+    async function fetchInventoryData(startDate = null, endDate = null) {
         try {
+            // Default to today if no dates provided
+            const today = new Date();
+            const todayFormatted = formatDateForAPI(today);
+            
+            if (!startDate) startDate = todayFormatted;
+            if (!endDate) endDate = todayFormatted;
+            
             // Get loading indicator element safely
             const loadingIndicator = document.getElementById('loadingIndicator');
             if (loadingIndicator) loadingIndicator.style.display = 'block';
@@ -340,7 +359,7 @@
             if (loadingIndicator) loadingIndicator.style.display = 'none';
         }
     }
-
+    
     // Update UI with data
     function updateUI() {
         // Update outlet information
