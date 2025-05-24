@@ -251,6 +251,10 @@
                         <div class="summary-item text-base text-gray-700">Diskon</div>
                         <div id="totalDiscount" class="summary-item text-base text-gray-700">Rp 0</div>
                     </div>
+                    <div class="flex justify-between mb-1">
+                        <div class="summary-item text-base text-gray-700">Subtotal Qty</div>
+                        <div id="totalQty" class="summary-item text-base text-gray-700">0</div>
+                    </div>
                     <div class="flex justify-between mb-3">
                         <div class="summary-item text-base text-gray-500">Pajak (0%)</div>
                         <div id="taxAmount" class="summary-item text-base text-gray-500">Rp 0</div>
@@ -1001,6 +1005,11 @@
                 });
             });
         }
+
+        // Fungsi untuk menghitung total quantity di cart
+function calculateTotalQty() {
+    return cart.reduce((total, item) => total + (item.quantity || 0), 0);
+}
         
         // Update cart display
         function updateCart() {
@@ -1011,6 +1020,7 @@
             let orderSubtotal = 0;
             let tax = 0;
             let grandTotal = 0;
+            let totalQty = calculateTotalQty();
             
             if (cart.length === 0) {
                 emptyCartElement.classList.remove('hidden');
@@ -1019,6 +1029,7 @@
                 totalDiscountElement.textContent = 'Rp 0';
                 taxAmountElement.textContent = 'Rp 0';
                 totalElement.textContent = 'Rp 0';
+                document.getElementById('totalQty').textContent = '0'; 
                 return;
             } else {
                 emptyCartElement.classList.add('hidden');
@@ -1081,6 +1092,9 @@
                     cartItemsContainer.appendChild(cartItemElement);
                 });
                 
+                 // Update total qty display
+                document.getElementById('totalQty').textContent = totalQty.toString();
+
                 // Calculate tax and grand total
                 tax = orderSubtotal * (outletInfo.tax / 100);
                 grandTotal = orderSubtotal + tax;
