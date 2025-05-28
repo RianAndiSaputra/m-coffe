@@ -599,42 +599,55 @@
                 // Clear existing list
                 outletListContainer.innerHTML = '';
 
+                // Cek apakah ada outlet yang aktif
+                const hasActiveOutlet = result.data.some(outlet => outlet.is_active);
+
+                if (!hasActiveOutlet) {
+                    outletListContainer.innerHTML = `
+                        <li class="no-outlet-message">
+                            Tidak ada outlet aktif. Silakan aktifkan outlet terlebih dahulu.
+                        </li>
+                    `;
+                    if (outletNameDisplay) {
+                        outletNameDisplay.textContent = 'Tidak Ada Outlet Aktif';
+                    }
+                    return;
+                }
+
                 result.data.forEach(outlet => {
-                    const li = document.createElement('li');
-                    li.className = 'px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm flex items-center gap-2';
-                    li.innerHTML = `<i data-lucide="store" class="w-4 h-4 text-orange-500"></i> <span>${outlet.name}</span>`;
-                    
-                    li.addEventListener('click', () => {
-                        outletNameDisplay.textContent = outlet.name;
-                        outletDropdown.classList.add('hidden');
-                        outletDropdownArrow.classList.remove('rotate-180');
+                    // Hanya tampilkan outlet yang aktif
+                    if (outlet.is_active) {
+                        const li = document.createElement('li');
+                        li.className = 'px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm flex items-center gap-2';
+                        li.innerHTML = `<i data-lucide="store" class="w-4 h-4 text-orange-500"></i> <span>${outlet.name}</span>`;
+                        
+                        li.addEventListener('click', () => {
+                            outletNameDisplay.textContent = outlet.name;
+                            outletDropdown.classList.add('hidden');
+                            outletDropdownArrow.classList.remove('rotate-180');
+                            localStorage.setItem('selectedOutletId', outlet.id);
+                        });
 
-                        // Save selected outlet to localStorage
-                        localStorage.setItem('selectedOutletId', outlet.id);
-
-                        // Reload data for selected outlet if needed
-                        if (typeof loadProductData === 'function') {
-                            loadProductData(outlet.id);
-                        }
-                    });
-
-                    outletListContainer.appendChild(li);
+                        outletListContainer.appendChild(li);
+                    }
                 });
 
-                // Re-initialize Lucide icons for dynamically added content
+                // Re-initialize Lucide icons
                 lucide.createIcons();
                 
-                // Set first outlet as default if available
-                if (result.data.length > 0) {
-                    const savedOutletId = localStorage.getItem('selectedOutletId');
-                    const defaultOutlet = result.data.find(o => o.id.toString() === savedOutletId) || result.data[0];
-                    outletNameDisplay.textContent = defaultOutlet.name;
+                // Set outlet aktif sebagai default
+                const savedOutletId = localStorage.getItem('selectedOutletId');
+                const activeOutlets = result.data.filter(o => o.is_active);
+                if (activeOutlets.length > 0) {
+                    const defaultOutlet = activeOutlets.find(o => o.id.toString() === savedOutletId) || activeOutlets[0];
+                    if (outletNameDisplay) {
+                        outletNameDisplay.textContent = defaultOutlet.name;
+                    }
                 }
                 
             } catch (err) {
                 console.error('Failed to load outlets:', err);
                 outletListContainer.innerHTML = '<li class="px-4 py-2 text-sm text-red-500">Gagal memuat outlet</li>';
-                const outletNameDisplay = document.querySelector('#outletDropdownButton span');
                 if (outletNameDisplay) {
                     outletNameDisplay.textContent = 'Pilih Outlet';
                 }
@@ -645,4 +658,44 @@
         setActiveMenu();
         loadOutletsFromAPI();
     });
+
+    function updateSidebarVisibility() {
+        const hasActiveOutlet = localStorage.getItem('hasActiveOutlet') === 'true';
+        const sidebarDropdowns = [
+            'productDropdown',
+            'outletManagementDropdown',
+            'stockDropdown',
+            'userDropdown',
+            'closingDropdown',
+            'reportDropdown',
+            'settingsDropdown'
+        ];
+
+        sidebarDropdowns.forEach(dropdownId => {
+            const dropdown = document.getElementById(dropdownId);
+            if (dropdown) {
+                if (!hasActiveOutlet) {
+                    dropdown.classList.add('hidden');
+                    const arrow = document.getElementById(`${dropdownId}Arrow`);
+                    if (arrow) arrow.classList.remove('rotate-180');
+                }
+            }
+        });
+
+        // Sembunyikan/munculkan menu utama berdasarkan status outlet
+        const menuItems = document.querySelectorAll('.menu-item[data-dropdown]');
+        menuItems.forEach(item => {
+            if (!hasActiveOutlet) {
+                item.style.display = 'none';
+            } else {
+                item.style.display = 'block';
+            }
+        });
+
+        // Sembunyikan/munculkan dashboard
+        const dashboardItem = document.querySelector('.menu-item:not([data-dropdown])');
+        if (dashboardItem) {
+            dashboardItem.style.display = 'block'; // Dashboard selalu ditampilkan
+        }
+    }
 </script>

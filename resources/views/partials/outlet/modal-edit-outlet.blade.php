@@ -98,15 +98,41 @@
       <!-- Status Aktif -->
       <div class="p-5 border rounded-lg shadow-sm bg-gray-50">
         <h3 class="font-semibold mb-4 text-gray-700">Status Outlet</h3>
-        <div class="flex items-center space-x-4">
-          <label class="flex items-center cursor-pointer">
-            <input type="checkbox" class="sr-only peer" id="editStatusAktif">
-            <div class="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-orange-500 relative transition-all duration-300">
-              <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-md transform transition-all duration-300 peer-checked:translate-x-5"></div>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <label class="flex items-center cursor-pointer group">
+              <input type="checkbox" class="sr-only peer" id="editStatusAktif" checked>
+              <div class="relative w-14 h-7 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full peer peer-checked:bg-gradient-to-r peer-checked:from-orange-400 peer-checked:to-orange-600 peer-checked:shadow-orange-200 transition-all duration-500 ease-in-out shadow-inner">
+                <div class="absolute left-7 top-1 w-5 h-5 bg-white rounded-full shadow-lg transform transition-all duration-500 ease-in-out peer-checked:translate-x-0 peer-checked:shadow-xl"></div>
+                <!-- Indikator ON/OFF -->
+                <span class="absolute left-2 top-1.5 text-xs font-bold text-white opacity-100 peer-checked:opacity-100 transition-opacity duration-300"></span>
+                <span class="absolute right-2 top-1.5 text-xs font-bold text-gray-600 opacity-0 peer-checked:opacity-0 transition-opacity duration-300"></span>
+              </div>
+              <div class="ml-4 transition-all duration-300">
+                <span class="text-sm font-semibold transition-colors duration-300" id="statusText">Aktif</span>
+                <p class="text-xs transition-colors duration-300" id="statusDescription">Outlet aktif dan dapat digunakan</p>
+              </div>
+            </label>
+            
+            <!-- Status Badge -->
+            <div class="flex items-center">
+              <div class="px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 bg-orange-100 text-orange-800 border border-orange-200" id="statusBadge">
+                <i class="w-3 h-3 inline-block mr-1 rounded-full transition-all duration-300 bg-orange-500" id="statusIndicator"></i>
+                <span id="badgeText">Aktif</span>
+              </div>
             </div>
-            <span class="ml-3 text-sm font-medium text-gray-700 peer-checked:text-orange-600">Aktif</span>
-          </label>
-          <span class="text-sm text-gray-500">Outlet hanya muncul jika status aktif.</span>
+          </div>
+          
+          <!-- Informasi tambahan -->
+          <div class="bg-orange-50 p-3 rounded-lg border border-orange-200 transition-all duration-300" id="statusInfo">
+            <div class="flex items-start space-x-2">
+              <i class="w-4 h-4 mt-0.5 text-orange-600 transition-colors duration-300" id="infoIcon"></i>
+              <div>
+                <p class="text-xs font-medium text-orange-700 transition-colors duration-300" id="infoTitle">Status Aktif</p>
+                <p class="text-xs text-orange-600 mt-1 transition-colors duration-300" id="infoDesc">Outlet aktif dan dapat digunakan untuk transaksi. Data outlet akan ditampilkan dalam sistem.</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -148,6 +174,72 @@ function previewEditFoto(input) {
     reader.readAsDataURL(input.files[0]);
   }
 }
+
+// Fungsi untuk update status text dengan animasi
+function updateStatusText() {
+  const checkbox = document.getElementById('editStatusAktif');
+  const statusText = document.getElementById('statusText');
+  const statusDescription = document.getElementById('statusDescription');
+  const statusBadge = document.getElementById('statusBadge');
+  const statusIndicator = document.getElementById('statusIndicator');
+  const badgeText = document.getElementById('badgeText');
+  const statusInfo = document.getElementById('statusInfo');
+  const infoIcon = document.getElementById('infoIcon');
+  const infoTitle = document.getElementById('infoTitle');
+  const infoDesc = document.getElementById('infoDesc');
+  const toggleDiv = checkbox.nextElementSibling;
+  const toggleButton = toggleDiv.querySelector('div');
+  
+  if (checkbox.checked) {
+    // Status Aktif (Default)
+    statusText.textContent = 'Aktif';
+    statusText.className = 'text-sm font-semibold text-orange-600 transition-colors duration-300';
+    
+    statusDescription.textContent = 'Outlet aktif dan dapat digunakan';
+    statusDescription.className = 'text-xs text-orange-500 transition-colors duration-300';
+    
+    statusBadge.className = 'px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 bg-orange-100 text-orange-800 border border-orange-200';
+    statusIndicator.className = 'w-3 h-3 inline-block mr-1 rounded-full transition-all duration-300 bg-orange-500';
+    badgeText.textContent = 'Aktif';
+    
+    statusInfo.className = 'bg-orange-50 p-3 rounded-lg border border-orange-200 transition-all duration-300';
+    infoIcon.textContent = '';
+    infoTitle.textContent = 'Status Aktif';
+    infoTitle.className = 'text-xs font-medium text-orange-700 transition-colors duration-300';
+    infoDesc.textContent = 'Outlet aktif dan dapat digunakan untuk transaksi. Data outlet akan ditampilkan dalam sistem.';
+    infoDesc.className = 'text-xs text-orange-600 mt-1 transition-colors duration-300';
+    
+    // Update toggle appearance
+    toggleDiv.className = 'relative w-14 h-7 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full peer peer-checked:bg-gradient-to-r peer-checked:from-orange-400 peer-checked:to-orange-600 peer-checked:shadow-orange-200 transition-all duration-500 ease-in-out shadow-inner';
+    toggleButton.className = 'absolute right-1 top-1 w-5 h-5 bg-white rounded-full shadow-lg transform transition-all duration-500 ease-in-out peer-checked:shadow-xl';
+    
+  } else {
+    // Status Tidak Aktif
+    statusText.textContent = 'Tidak Aktif';
+    statusText.className = 'text-sm font-semibold text-red-600 transition-colors duration-300';
+    
+    statusDescription.textContent = 'Outlet tidak akan ditampilkan di sistem';
+    statusDescription.className = 'text-xs text-red-500 transition-colors duration-300';
+    
+    statusBadge.className = 'px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 bg-red-100 text-red-800 border border-red-200';
+    statusIndicator.className = 'w-3 h-3 inline-block mr-1 rounded-full transition-all duration-300 bg-red-500';
+    badgeText.textContent = 'Tidak Aktif';
+    
+    statusInfo.className = 'bg-red-50 p-3 rounded-lg border border-red-200 transition-all duration-300';
+    infoIcon.textContent = '';
+    infoTitle.textContent = 'Status Tidak Aktif';
+    infoTitle.className = 'text-xs font-medium text-red-700 transition-colors duration-300';
+    infoDesc.textContent = 'Outlet tidak akan muncul dalam daftar dan tidak dapat digunakan untuk transaksi.';
+    infoDesc.className = 'text-xs text-red-600 mt-1 transition-colors duration-300';
+    
+    // Update toggle appearance
+    toggleDiv.className = 'relative w-14 h-7 bg-gray-300 rounded-full peer peer-checked:bg-gradient-to-r peer-checked:from-orange-400 peer-checked:to-orange-600 peer-checked:shadow-orange-200 transition-all duration-500 ease-in-out shadow-inner';
+    toggleButton.className = 'absolute left-1 top-1 w-5 h-5 bg-white rounded-full shadow-lg transform transition-all duration-500 ease-in-out peer-checked:shadow-xl';
+  }
+}
+
+// Event listener untuk checkbox status
+document.getElementById('editStatusAktif').addEventListener('change', updateStatusText);
 
 // Fungsi untuk validasi form edit
 function validateEditForm() {
@@ -247,6 +339,11 @@ function submitEditForm() {
     // Tampilkan alert sukses
     showAlert('success', 'Perubahan outlet berhasil disimpan!');
     
+    // Auto refresh halaman setelah 1 detik
+    setTimeout(() => {
+      location.reload();
+    }, 1000);
+    
     // Kembalikan tombol ke state semula
     btnSimpan.innerHTML = originalText;
     btnSimpan.disabled = false;
@@ -269,5 +366,10 @@ document.querySelectorAll('#modalEditOutlet input').forEach(input => {
       submitEditForm();
     }
   });
+});
+
+// Inisialisasi status text saat modal dibuka
+document.addEventListener('DOMContentLoaded', function() {
+  updateStatusText();
 });
 </script>

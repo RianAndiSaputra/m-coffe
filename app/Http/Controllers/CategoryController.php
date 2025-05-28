@@ -100,6 +100,11 @@ class CategoryController extends Controller
     public function destroy(Category $category)
     {
         try {
+            // Cek apakah kategori masih memiliki produk
+            if ($category->products()->count() > 0) {
+                return $this->errorResponse('Category cannot be deleted because it still has associated products. Please delete or move the products first.', 422);
+            }
+    
             DB::beginTransaction();
             
             // Soft delete semua produk terkait

@@ -185,6 +185,10 @@
                 </tr>
             `;
 
+            // Simpan status aktif outlet ke localStorage
+            const activeOutlet = outlets.find(outlet => outlet.is_active);
+            localStorage.setItem('hasActiveOutlet', activeOutlet ? 'true' : 'false');
+
             if (outlets.length === 0) {
                 tableBody.innerHTML += `
                     <tr>
@@ -236,6 +240,9 @@
                 `;
                 tableBody.appendChild(row);
             });
+
+            // Perbarui tampilan sidebar berdasarkan status outlet
+            updateSidebarVisibility();
 
             // Inisialisasi ikon Lucide
             if (window.lucide) {
@@ -481,82 +488,95 @@
         }
 
         async function updateOutlet() {
-            // Validasi form (tetap gunakan kode validasi yang ada)
-            if (!validateEditForm()) {
+        // Validasi form (tetap gunakan kode validasi yang ada)
+        if (!validateEditForm()) {
+            return;
+        }
+
+        const outletId = document.getElementById('outletIdToEdit').value;
+        if (!outletId) return;
+
+        // Siapkan data form
+        const formData = new FormData();
+        formData.append('name', document.getElementById('editNamaOutlet').value);
+        formData.append('phone', document.getElementById('editNomorTelepon').value);
+        formData.append('address', document.getElementById('editAlamatLengkap').value);
+        formData.append('email', document.getElementById('editEmail').value);
+        formData.append('tax', document.getElementById('editPersentasePajak').value || '0.00');
+        formData.append('nomor_transaksi_bank', document.getElementById('editNoTransaksi').value);
+        formData.append('nama_bank', document.getElementById('editNamaBank').value);
+        formData.append('atas_nama_bank', document.getElementById('editAtasNama').value);
+        formData.append('is_active', document.getElementById('editStatusAktif').checked ? '1' : '0');
+        
+        // Tambahkan file jika ada
+        const fileInput = document.getElementById('editFotoOutlet');
+        if (fileInput.files[0]) {
+            formData.append('qris', fileInput.files[0]);
+        }
+
+        // Dapatkan token CSRF
+        const csrfToken = getCSRFToken();
+        if (csrfToken) {
+            formData.append('_token', csrfToken);
+        }
+
+        // Tampilkan loading
+        const btnSimpan = document.getElementById('btnSimpanPerubahan');
+        const originalText = btnSimpan.innerHTML;
+        btnSimpan.innerHTML = `
+            <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+            Menyimpan...
+        `;
+        btnSimpan.disabled = true;
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`/api/outlets/${outletId}`, {
+                method: 'POST', // Tetap gunakan POST karena Laravel menerima _method
+                body: formData,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (response.redirected) {
+                window.location.href = response.url;
                 return;
             }
 
-            const outletId = document.getElementById('outletIdToEdit').value;
-            if (!outletId) return;
+            const data = await response.json();
 
-            // Siapkan data form
-            const formData = new FormData();
-            formData.append('name', document.getElementById('editNamaOutlet').value);
-            formData.append('phone', document.getElementById('editNomorTelepon').value);
-            formData.append('address', document.getElementById('editAlamatLengkap').value);
-            formData.append('email', document.getElementById('editEmail').value);
-            formData.append('tax', document.getElementById('editPersentasePajak').value || '0.00');
-            formData.append('nomor_transaksi_bank', document.getElementById('editNoTransaksi').value);
-            formData.append('nama_bank', document.getElementById('editNamaBank').value);
-            formData.append('atas_nama_bank', document.getElementById('editAtasNama').value);
-            formData.append('is_active', document.getElementById('editStatusAktif').checked ? '1' : '0');
-            
-            // Tambahkan file jika ada
-            const fileInput = document.getElementById('editFotoOutlet');
-            if (fileInput.files[0]) {
-                formData.append('qris', fileInput.files[0]);
-            }
-
-            // Dapatkan token CSRF
-            const csrfToken = getCSRFToken();
-            if (csrfToken) {
-                formData.append('_token', csrfToken);
-            }
-
-            // Tampilkan loading
-            const btnSimpan = document.getElementById('btnSimpanPerubahan');
-            const originalText = btnSimpan.innerHTML;
-            btnSimpan.innerHTML = `
-                <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
-                Menyimpan...
-            `;
-            btnSimpan.disabled = true;
-
-            try {
-                const token = localStorage.getItem('token');
-                const response = await fetch(`/api/outlets/${outletId}`, {
-                    method: 'POST', // Tetap gunakan POST karena Laravel menerima _method
-                    body: formData,
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
+            if (data.success) {
+                showAlert('success', 'Outlet berhasil diperbarui!');
+                
+                // Auto refresh setelah 1 detik
+                setTimeout(() => {
+                    // Refresh data outlet
+                    loadOutlets();
+                    
+                    // Jika outlet yang diedit adalah outlet aktif saat ini, refresh seluruh halaman
+                    const selectedOutletId = localStorage.getItem('selectedOutletId');
+                    if (selectedOutletId && selectedOutletId.toString() === outletId.toString()) {
+                        window.location.reload();
                     }
-                });
-
-                if (response.redirected) {
-                    window.location.href = response.url;
-                    return;
-                }
-
-                const data = await response.json();
-
-                if (data.success) {
-                    showAlert('success', 'Outlet berhasil diperbarui!');
-                    closeModalEdit();
-                    loadOutlets(); // Muat ulang data
-                } else {
-                    showAlert('error', data.message || 'Gagal memperbarui outlet');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showAlert('error', 'Terjadi kesalahan saat memperbarui outlet');
-            } finally {
-                // Kembalikan tombol ke state semula
-                btnSimpan.innerHTML = originalText;
-                btnSimpan.disabled = false;
+                }, 1000);
+                
+                // Tutup modal edit
+                closeModalEdit();
+            } else {
+                showAlert('error', data.message || 'Gagal memperbarui outlet');
             }
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('error', 'Terjadi kesalahan saat memperbarui outlet');
+        } finally {
+            // Kembalikan tombol ke state semula
+            btnSimpan.innerHTML = originalText;
+            btnSimpan.disabled = false;
         }
+    }
 
         // Fungsi untuk mengisi form edit dengan data outlet
         function editOutlet(id) {
@@ -843,6 +863,7 @@
             // Inisialisasi event listener untuk modal
             document.getElementById('btnBatalModalTambah').addEventListener('click', closeModalTambah);
             document.getElementById('btnBatalModalEdit').addEventListener('click', closeModalEdit);
+            updateSidebarVisibility();
         });
 </script>
 

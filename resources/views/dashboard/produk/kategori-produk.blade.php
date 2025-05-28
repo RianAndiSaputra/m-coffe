@@ -401,7 +401,8 @@ function showLoading(show) {
                             <button onclick="openEditModal(${kategori.id})" class="flex items-center w-full px-3 py-2.5 hover:bg-gray-100 text-left rounded-t-lg">
                                 <i data-lucide="pencil" class="w-4 h-4 mr-2 text-gray-500"></i> Edit
                             </button>
-                            <button onclick="hapusKategori(${kategori.id})" class="flex items-center w-full px-3 py-2.5 hover:bg-gray-100 text-left text-red-600 rounded-b-lg">
+                            <button onclick="${kategori.total_inventory_quantity > 0 ? 'showAlert(\'error\', \'Kategori tidak dapat dihapus karena masih memiliki produk\')' : `hapusKategori(${kategori.id})`}" 
+                                class="flex items-center w-full px-3 py-2.5 hover:bg-gray-100 text-left ${kategori.total_inventory_quantity > 0 ? 'text-gray-400 cursor-not-allowed' : 'text-red-600'} rounded-b-lg">
                                 <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i> Hapus
                             </button>
                         </div>
@@ -588,6 +589,12 @@ function showLoading(show) {
 
             if (!response.ok) {
                 throw new Error(data.message || 'Gagal memuat data kategori');
+            }
+
+            // Cek jika kategori masih memiliki produk
+            if (data.data.total_inventory_quantity > 0) {
+                showAlert('error', 'Kategori tidak dapat dihapus karena masih memiliki produk. Harap hapus atau pindahkan produk terlebih dahulu.');
+                return;
             }
 
             kategoriHapusId = id;
