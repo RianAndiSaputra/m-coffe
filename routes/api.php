@@ -76,6 +76,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/products/barcode/{barcode}', 'findByBarcode')->middleware('role:kasir');
             Route::get('/products/generate-barcode', 'generateBarcode')->middleware('role:admin');
             Route::get('/outlets/{outletId}/products/barcode/{barcode}', 'posFindByBarcode')->middleware('role:kasir');
+            Route::get('products/{product}/detail', [ProductController::class, 'getProductDetail']);
         });
 
         Route::controller(InventoryController::class)->group(function () {

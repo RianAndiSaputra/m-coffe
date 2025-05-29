@@ -291,8 +291,8 @@ class ProductController extends Controller
                 'is_active' => 'required|boolean',
                 'outlet_ids' => 'required|array',
                 'outlet_ids.*' => 'exists:outlets,id',
-                'quantity' => 'required|numeric',
-                'min_stock' => 'required|numeric',
+                // 'quantity' => 'required|numeric',
+                // 'min_stock' => 'required|numeric',
             ]);
     
             // Validasi manual untuk SKU dan barcode
@@ -328,18 +328,19 @@ class ProductController extends Controller
             ]);
     
             foreach ($request->outlet_ids as $outletId) {
-                Inventory::updateOrCreate(
+                Inventory::firstOrCreate(
                     [
                         'product_id' => $product->id,
                         'outlet_id' => $outletId
                     ],
                     [
-                        'quantity' => $request->quantity,
-                        'min_stock' => $request->min_stock
+                        'quantity' => 0, // Default value jika baru dibuat
+                        'min_stock' => 0 // Default value jika baru dibuat
                     ]
                 );
             }
     
+            // Tetap hapus dari outlet yang tidak dipilih
             Inventory::where('product_id', $product->id)
                 ->whereNotIn('outlet_id', $request->outlet_ids)
                 ->delete();
@@ -369,6 +370,58 @@ class ProductController extends Controller
             return $this->successResponse(null, 'Product deleted successfully');
         } catch (\Throwable $th) {
             DB::rollBack();
+            return $this->errorResponse($th->getMessage());
+        }
+    }
+
+   /**
+     * Get product detail with all outlets for edit form
+     */
+    public function getProductDetail(Product $product)
+    {
+        try {
+            $productData = $product->load([
+                'category:id,name',
+                'outlets:id,name', // Ini hanya load outlet yang BENAR-BENAR dimiliki produk
+                'inventory' => function($query) {
+                    $query->select('id', 'product_id', 'outlet_id', 'quantity', 'min_stock');
+                }
+            ]);
+
+            // Ambil hanya outlet yang benar-benar memiliki produk ini
+            $selectedOutletIds = $productData->outlets->pluck('id')->toArray();
+
+            // Format response untuk frontend
+            $response = [
+                'id' => $productData->id,
+                'name' => $productData->name,
+                'sku' => $productData->sku,
+                'barcode' => $productData->barcode,
+                'description' => $productData->description,
+                'price' => $productData->price,
+                'image' => $productData->image,
+                'image_url' => $productData->image_url,
+                'is_active' => $productData->is_active,
+                'category' => $productData->category,
+                'outlets' => $productData->outlets, // Hanya outlet yang dipilih
+                'inventory' => $productData->inventory,
+                'outlet_ids' => $selectedOutletIds, // Hanya ID outlet yang dipilih
+                'quantity' => $productData->inventory->first()->quantity ?? 0,
+                'min_stock' => $productData->inventory->first()->min_stock ?? 0,
+            ];
+
+            Log::info('Product detail loaded', [
+                'product_id' => $product->id,
+                'selected_outlets' => $selectedOutletIds,
+                'total_outlets_for_product' => count($selectedOutletIds)
+            ]);
+
+            return $this->successResponse($response, 'Product detail retrieved successfully');
+        } catch (\Throwable $th) {
+            Log::error('Error loading product detail', [
+                'product_id' => $product->id,
+                'error' => $th->getMessage()
+            ]);
             return $this->errorResponse($th->getMessage());
         }
     }

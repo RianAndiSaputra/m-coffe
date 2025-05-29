@@ -292,6 +292,22 @@ const ProductManager = (() => {
 
     // Setup event listeners
     const setupEventListeners = () => {
+
+        document.addEventListener('click', (e) => {
+            // Jika yang diklik bukan bagian dari dropdown
+            if (!e.target.closest('.dropdown-menu') && !e.target.closest('[onclick*="toggleDropdown"]')) {
+                document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                    menu.classList.add('hidden');
+                });
+            }
+        });
+
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            menu.addEventListener('click', (e) => {
+                e.stopPropagation(); // Mencegah event click menyebar ke document
+            });
+        });
+
         // fungsi untuk print dan export produk
         document
             .querySelector('[aria-label="Cetak laporan"]')
@@ -468,22 +484,24 @@ const ProductManager = (() => {
     // Toggle dropdown menu
     const toggleDropdown = (button) => {
         const menu = button.nextElementSibling;
-
+    
+        // Tutup semua dropdown lainnya
         document.querySelectorAll(".dropdown-menu").forEach((m) => {
             if (m !== menu) {
                 m.classList.add("hidden");
                 m.classList.remove("dropdown-up", "dropdown-down");
             }
         });
-
+    
+        // Buka/tutup dropdown yang diklik
         menu.classList.toggle("hidden");
         menu.classList.remove("dropdown-up", "dropdown-down");
-
+    
         const menuRect = menu.getBoundingClientRect();
         const buttonRect = button.getBoundingClientRect();
         const spaceBelow = window.innerHeight - buttonRect.bottom;
         const spaceAbove = buttonRect.top;
-
+    
         if (spaceBelow < menuRect.height && spaceAbove > menuRect.height) {
             menu.classList.add("dropdown-up");
             menu.style.bottom = "100%";
@@ -789,70 +807,62 @@ const ProductManager = (() => {
             `[onclick="ProductManager.openEditModal(${productId})"]`
         );
         const originalText = btnEdit?.innerHTML;
-
+    
         try {
             if (btnEdit) {
                 btnEdit.disabled = true;
-                btnEdit.innerHTML =
-                    '<i data-lucide="loader-circle" class="animate-spin w-4 h-4"></i>';
+                btnEdit.innerHTML = '<i data-lucide="loader-circle" class="animate-spin w-4 h-4"></i>';
                 if (window.lucide) window.lucide.createIcons();
             }
-
+    
             const token = localStorage.getItem("token");
             if (!token) throw new Error("Token tidak ditemukan");
-
-            const response = await fetch(
-                `/api/products/outlet/${currentOutletId}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        Accept: "application/json",
-                    },
-                }
-            );
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(
-                    errorData.message || `Error: ${response.status}`
-                );
+    
+            // console.log("=== DEBUG: Opening edit modal for product ID:", productId);
+    
+            // Gunakan endpoint detail
+            const productDetailResponse = await fetch(`/api/products/${productId}/detail`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    Accept: "application/json",
+                },
+            });
+            
+            if (!productDetailResponse.ok) {
+                throw new Error(`Failed to fetch product detail: ${productDetailResponse.status}`);
             }
-
-            const responseData = await response.json();
-            const allProducts = responseData.data;
-            const product = allProducts.find((p) => p.id === productId);
-
-            if (!product)
-                throw new Error("Produk tidak ditemukan di outlet ini");
-
+    
+            const productDetailData = await productDetailResponse.json();
+            const product = productDetailData.data;
+    
+            // console.log("=== DEBUG: Raw product data from API:", product);
+            // console.log("=== DEBUG: Product outlets:", product.outlets);
+            // console.log("=== DEBUG: Product outlet_ids:", product.outlet_ids);
+    
+            if (!product) throw new Error("Produk tidak ditemukan");
+    
+            // Populate form fields
             document.getElementById("editProdukId").textContent = product.id;
             document.getElementById("editNamaProduk").value = product.name;
             document.getElementById('editBarcode').value = product.barcode || '';
             document.getElementById("editSkuProduk").value = product.sku || "";
-            document.getElementById("editDeskripsi").value =
-                product.description || "";
+            document.getElementById("editDeskripsi").value = product.description || "";
             document.getElementById("editHarga").value = product.price;
-
             document.getElementById("editStok").value = product.quantity ?? 0;
-            document.getElementById("editStokMinimum").value =
-                product.min_stock ?? 0;
-
-            document.getElementById("editGambarCurrent").value =
-                product.image || "";
-
+            document.getElementById("editStokMinimum").value = product.min_stock ?? 0;
+            document.getElementById("editGambarCurrent").value = product.image || "";
+    
             await loadKategoriOptions();
-
+    
             if (product.category && product.category.id) {
                 const categorySelect = document.getElementById("editKategori");
                 if (categorySelect && categorySelect.options.length > 0) {
                     categorySelect.value = product.category.id;
                 }
             }
-
-            document.getElementById("editStatus").value = product.is_active
-                ? "active"
-                : "inactive";
-
+    
+            document.getElementById("editStatus").value = product.is_active ? "active" : "inactive";
+    
             const preview = document.getElementById("editGambarPreview");
             if (preview) {
                 if (product.image_url) {
@@ -862,47 +872,23 @@ const ProductManager = (() => {
                     preview.classList.add("hidden");
                 }
             }
-
-            console.log("Product data:", product);
-
+    
+            // Ambil outlet IDs yang dipilih
             let selectedOutletIds = [];
-            if (product.outlets && Array.isArray(product.outlets)) {
-                selectedOutletIds = product.outlets.map((outlet) =>
-                    outlet.id.toString()
-                );
-            } else if (
-                product.outlet_ids &&
-                Array.isArray(product.outlet_ids)
-            ) {
-                selectedOutletIds = product.outlet_ids.map((id) =>
-                    id.toString()
-                );
-            } else if (
-                product.inventories &&
-                Array.isArray(product.inventories)
-            ) {
-                selectedOutletIds = product.inventories.map((inv) =>
-                    inv.outlet_id.toString()
-                );
-            } else if (product.inventory && product.inventory.outlet_id) {
-                selectedOutletIds = [product.inventory.outlet_id.toString()];
+            if (product.outlet_ids && Array.isArray(product.outlet_ids)) {
+                selectedOutletIds = product.outlet_ids.map(id => id.toString());
             }
-
-            console.log("Selected outlet IDs:", selectedOutletIds);
-
-            // Pastikan tidak ada duplikat
-            selectedOutletIds = [...new Set(selectedOutletIds)];
-
+    
+            // console.log("=== DEBUG: Selected outlet IDs untuk checkbox:", selectedOutletIds);
+    
             await loadOutletCheckboxesForEdit(selectedOutletIds);
-
             openModal("modalEditProduk");
+            
         } catch (error) {
+            // console.error("=== ERROR: Failed to open edit modal:", error);
             showAlert("error", `Gagal memuat produk: ${error.message}`);
-
-            if (
-                error.message.includes("token") ||
-                error.message.includes("401")
-            ) {
+    
+            if (error.message.includes("token") || error.message.includes("401")) {
                 window.location.href = "/login";
             }
         } finally {
@@ -913,30 +899,51 @@ const ProductManager = (() => {
             }
         }
     };
+    
 
     // Load outlet checkboxes for edit modal
     const loadOutletCheckboxesForEdit = async (selectedOutletIds = []) => {
         try {
-            const response = await fetch("/api/outlets");
-            const { data: outlets } = await response.json();
+            // console.log("=== DEBUG loadOutletCheckboxesForEdit: Input selectedOutletIds:", selectedOutletIds);
+            
+            const token = localStorage.getItem("token");
+            const response = await fetch("/api/outlets", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    Accept: "application/json",
+                },
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const responseData = await response.json();
+            const outlets = responseData.data || responseData;
             const container = document.getElementById("editOutletList");
-
+    
+            // console.log("=== DEBUG: All outlets from API:", outlets);
+    
             if (!container) return;
-
+    
             container.innerHTML = "";
-
-            // Pastikan selectedOutletIds adalah array dari string
+    
+            // Pastikan selectedOutletIds adalah array of strings
             const selectedIds = Array.isArray(selectedOutletIds)
                 ? selectedOutletIds.map((id) => id.toString())
                 : [];
-
+    
+            // console.log("=== DEBUG: Processed selectedIds:", selectedIds);
+    
             outlets.forEach((outlet) => {
                 const outletIdStr = outlet.id.toString();
                 const isChecked = selectedIds.includes(outletIdStr);
-
+    
+                // console.log(`=== DEBUG: Outlet ${outlet.name} (ID: ${outletIdStr}) - Should be checked: ${isChecked}`);
+    
                 const div = document.createElement("div");
                 div.className = "flex items-center gap-2 py-1";
-
+    
                 const checkbox = document.createElement("input");
                 checkbox.type = "checkbox";
                 checkbox.name = "outlet_ids[]";
@@ -945,18 +952,26 @@ const ProductManager = (() => {
                 checkbox.className =
                     "w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500";
                 checkbox.checked = isChecked;
-
+    
                 const label = document.createElement("label");
                 label.htmlFor = `edit-outlet-${outletIdStr}`;
                 label.className = "text-sm text-gray-700";
                 label.textContent = outlet.name;
-
+    
                 div.appendChild(checkbox);
                 div.appendChild(label);
                 container.appendChild(div);
             });
+    
+            // console.log(`=== DEBUG: Loaded ${outlets.length} outlets, ${selectedIds.length} should be selected`);
+            
+            // Verifikasi hasil
+            // const checkedBoxes = container.querySelectorAll('input[type="checkbox"]:checked');
+            // console.log("=== DEBUG: Actually checked checkboxes:", checkedBoxes.length);
+            // checkedBoxes.forEach(cb => console.log("=== DEBUG: Checked outlet ID:", cb.value));
+            
         } catch (error) {
-            console.error("Error loading outlets:", error);
+            // console.error("=== ERROR: Error loading outlets:", error);
             const container = document.getElementById("editOutletList");
             if (container) {
                 container.innerHTML = `
@@ -1005,8 +1020,8 @@ const ProductManager = (() => {
             formData.append("category_id", kategori);
             formData.append("is_active",document.getElementById("editStatus").value === "active" ? 1 : 0);
 
-            formData.append("quantity", quantity);
-            formData.append("min_stock", minStock);
+            // formData.append("quantity", quantity);
+            // formData.append("min_stock", minStock);
             formData.append("outlet_id", currentOutletId.toString());
 
             const selectedOutlets = [];
