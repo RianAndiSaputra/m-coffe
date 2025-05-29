@@ -46,30 +46,33 @@ class OutletController extends Controller
                 'nama_bank' => 'nullable|string|max:255',
                 'nomor_transaksi_bank' => 'nullable|integer',
             ]);
-
+    
             DB::beginTransaction();
-
-            if ($request->hasFile('qris')) {
-                $path = $request->file('qris')->store('qris', 'uploads');
-                $qrisPath = $path;
-            }
-
-            $outlet = Outlet::create([
+    
+            $outletData = [
                 'name' => $request->name,
                 'address' => $request->address,
                 'phone' => $request->phone,
                 'email' => $request->email,
                 'tax' => $request->tax,
-                'qris' => $qrisPath,
                 'atas_nama_bank' => $request->atas_nama_bank,
                 'nama_bank' => $request->nama_bank,
                 'nomor_transaksi_bank' => $request->nomor_transaksi_bank,
-            ]);
+            ];
+    
+            // Hanya tambahkan qris jika ada file
+            if ($request->hasFile('qris')) {
+                $outletData['qris'] = $request->file('qris')->store('qris', 'uploads');
+            }
+    
+            $outlet = Outlet::create($outletData);
+            
             CashRegister::create([
                 'outlet_id' => $outlet->id,
                 'balance' => 0,
                 'is_active' => true,
             ]);
+            
             DB::commit();
             return $this->successResponse($outlet, 'Outlet created successfully');
         } catch (ValidationException $th) {
@@ -109,7 +112,6 @@ class OutletController extends Controller
     public function update(Request $request, Outlet $outlet)
     {
         try {
-
             $request->validate([
                 'name' => 'required|string|max:255',
                 'address' => 'nullable|string|max:255',
@@ -122,26 +124,30 @@ class OutletController extends Controller
                 'nama_bank' => 'nullable|string|max:255',
                 'nomor_transaksi_bank' => 'nullable|integer',
             ]);
-
-            $qrisPath = $outlet->qris;
-
-            if ($request->hasFile('qris')) {
-                $path = $request->file('qris')->store('qris', 'uploads');
-                $qrisPath = $path;
-            }
-
-            $outlet->update([
+    
+            $updateData = [
                 'name' => $request->name,
                 'address' => $request->address,
                 'phone' => $request->phone,
                 'email' => $request->email,
                 'tax' => $request->tax,
-                'qris' => $qrisPath,
                 'is_active' => $request->is_active,
                 'atas_nama_bank' => $request->atas_nama_bank,
                 'nama_bank' => $request->nama_bank,
                 'nomor_transaksi_bank' => $request->nomor_transaksi_bank,
-            ]);
+            ];
+    
+            // Hanya update qris jika ada file baru
+            if ($request->hasFile('qris')) {
+                // Hapus file lama jika ada
+                if ($outlet->qris) {
+                    Storage::disk('uploads')->delete($outlet->qris);
+                }
+                $updateData['qris'] = $request->file('qris')->store('qris', 'uploads');
+            }
+    
+            $outlet->update($updateData);
+            
             return $this->successResponse($outlet, 'Outlet updated successfully');
         } catch (ValidationException $th) {
             return $this->errorResponse('Validation error', $th->errors());

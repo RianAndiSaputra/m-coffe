@@ -841,6 +841,51 @@ const ProductManager = (() => {
     
             if (!product) throw new Error("Produk tidak ditemukan");
     
+            // Handle inventory data - prioritize outlet pivot data for current outlet
+            let quantity = 0;
+            let min_stock = 0;
+    
+            // Case 1: Get data from outlets array based on current outlet
+            if (Array.isArray(product.outlets) && product.outlets.length > 0) {
+                const currentOutletData = product.outlets.find(
+                    outlet => outlet.id == currentOutletId
+                );
+                
+                if (currentOutletData && currentOutletData.pivot) {
+                    quantity = currentOutletData.pivot.quantity || 0;
+                    min_stock = currentOutletData.pivot.min_stock || 0;
+                } else {
+                    // Fallback to first outlet if current outlet not found
+                    const firstOutlet = product.outlets[0];
+                    if (firstOutlet && firstOutlet.pivot) {
+                        quantity = firstOutlet.pivot.quantity || 0;
+                        min_stock = firstOutlet.pivot.min_stock || 0;
+                    }
+                }
+            }
+            // Case 2: Fallback to inventory data if outlets not available
+            else if (product.inventory) {
+                quantity = product.inventory.quantity || 0;
+                min_stock = product.inventory.min_stock || 0;
+            }
+            // Case 3: Fallback to direct properties
+            else if (product.quantity !== undefined) {
+                quantity = product.quantity;
+                min_stock = product.min_stock || 0;
+            }
+            // Case 4: Fallback to inventories array
+            else if (
+                Array.isArray(product.inventories) &&
+                product.inventories.length > 0
+            ) {
+                const mainInventory =
+                    product.inventories.find(
+                        (inv) => inv.outlet_id == currentOutletId
+                    ) || product.inventories[0];
+                quantity = mainInventory.quantity || 0;
+                min_stock = mainInventory.min_stock || 0;
+            }
+    
             // Populate form fields
             document.getElementById("editProdukId").textContent = product.id;
             document.getElementById("editNamaProduk").value = product.name;
@@ -848,8 +893,8 @@ const ProductManager = (() => {
             document.getElementById("editSkuProduk").value = product.sku || "";
             document.getElementById("editDeskripsi").value = product.description || "";
             document.getElementById("editHarga").value = product.price;
-            document.getElementById("editStok").value = product.quantity ?? 0;
-            document.getElementById("editStokMinimum").value = product.min_stock ?? 0;
+            document.getElementById("editStok").value = quantity; // Use calculated quantity from outlet pivot
+            document.getElementById("editStokMinimum").value = min_stock; // Use calculated min_stock from outlet pivot
             document.getElementById("editGambarCurrent").value = product.image || "";
     
             await loadKategoriOptions();
@@ -900,7 +945,6 @@ const ProductManager = (() => {
         }
     };
     
-
     // Load outlet checkboxes for edit modal
     const loadOutletCheckboxesForEdit = async (selectedOutletIds = []) => {
         try {
@@ -1021,7 +1065,7 @@ const ProductManager = (() => {
             formData.append("is_active",document.getElementById("editStatus").value === "active" ? 1 : 0);
 
             // formData.append("quantity", quantity);
-            // formData.append("min_stock", minStock);
+            formData.append("min_stock", minStock);
             formData.append("outlet_id", currentOutletId.toString());
 
             const selectedOutlets = [];

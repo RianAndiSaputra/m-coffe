@@ -292,7 +292,7 @@ class ProductController extends Controller
                 'outlet_ids' => 'required|array',
                 'outlet_ids.*' => 'exists:outlets,id',
                 // 'quantity' => 'required|numeric',
-                // 'min_stock' => 'required|numeric',
+                'min_stock' => 'required|numeric',
             ]);
     
             // Validasi manual untuk SKU dan barcode
@@ -328,19 +328,18 @@ class ProductController extends Controller
             ]);
     
             foreach ($request->outlet_ids as $outletId) {
-                Inventory::firstOrCreate(
+                Inventory::updateOrCreate(
                     [
                         'product_id' => $product->id,
                         'outlet_id' => $outletId
                     ],
                     [
-                        'quantity' => 0, // Default value jika baru dibuat
-                        'min_stock' => 0 // Default value jika baru dibuat
+                        // 'quantity' => $request->quantity,
+                        'min_stock' => $request->min_stock
                     ]
                 );
             }
     
-            // Tetap hapus dari outlet yang tidak dipilih
             Inventory::where('product_id', $product->id)
                 ->whereNotIn('outlet_id', $request->outlet_ids)
                 ->delete();
