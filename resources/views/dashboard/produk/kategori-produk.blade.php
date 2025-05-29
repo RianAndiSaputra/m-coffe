@@ -71,7 +71,19 @@
                 </tr>
             </thead>
             <tbody class="text-gray-700" id="kategoriTableBody">
-                <!-- Data will be loaded dynamically -->
+                <!-- Loading indicator -->
+                <tr class="border-b">
+                    <td colspan="5" class="py-8 text-center">
+                        <div class="flex flex-col items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                class="animate-spin text-orange-500">
+                                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                            </svg>
+                            <span class="text-gray-500">Memuat data kategori...</span>
+                        </div>
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>
@@ -314,55 +326,64 @@
 
     // Load categories from API
     async function loadKategories() {
-    try {
-        showLoading(true); // Tambahkan indikator loading
-        
-        const token = localStorage.getItem('token');
-        if (!token) {
-            window.location.href = '/login';
-            return;
-        }
-
-        const response = await fetch('/api/categories', {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
+        try {
+            // Show loading state
+            const tbody = document.getElementById('kategoriTableBody');
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr class="border-b">
+                        <td colspan="5" class="py-8 text-center">
+                            <div class="flex flex-col items-center justify-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                     class="animate-spin text-orange-500">
+                                    <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                                </svg>
+                                <span class="text-gray-500">Memuat data kategori...</span>
+                            </div>
+                        </td>
+                    </tr>
+                `;
             }
-        });
 
-        // Handle response error
-        if (!response.ok) {
-            const error = await response.json().catch(() => null);
-            throw new Error(error?.message || `HTTP error! status: ${response.status}`);
-        }
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
 
-        const result = await response.json();
-        
-        if (!result.success) {
-            throw new Error(result.message || 'Invalid response format');
-        }
+            const response = await fetch('/api/categories', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
 
-        renderKategories(result);
-        
-    } catch (error) {
-        console.error('Load Categories Error:', error);
-        showAlert('error', `Gagal memuat kategori: ${error.message}`);
-        
-        // Jika error 401/403, redirect ke login
-        if (error.message.includes('401') || error.message.includes('403')) {
-            window.location.href = '/login';
+            // Handle response error
+            if (!response.ok) {
+                const error = await response.json().catch(() => null);
+                throw new Error(error?.message || `HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.message || 'Invalid response format');
+            }
+
+            renderKategories(result);
+            
+        } catch (error) {
+            console.error('Load Categories Error:', error);
+            showAlert('error', `Gagal memuat kategori: ${error.message}`);
+            
+            // Jika error 401/403, redirect ke login
+            if (error.message.includes('401') || error.message.includes('403')) {
+                window.location.href = '/login';
+            }
         }
-    } finally {
-        showLoading(false); // Sembunyikan indikator loading
     }
-}
-
-// Fungsi bantu untuk loading indicator
-function showLoading(show) {
-    const loader = document.getElementById('loadingIndicator');
-    if (loader) loader.style.display = show ? 'block' : 'none';
-}
 
     // Render categories to table
     function renderKategories(responseData) {
@@ -373,16 +394,16 @@ function showLoading(show) {
 
         const kategories = responseData?.data || [];
     
-    if (kategories.length === 0) {
-        tbody.innerHTML = `
-            <tr class="border-b">
-                <td colspan="5" class="py-4 text-center text-gray-500">
-                    Tidak ada data kategori
-                </td>
-            </tr>
-        `;
-        return;
-    }
+        if (kategories.length === 0) {
+            tbody.innerHTML = `
+                <tr class="border-b">
+                    <td colspan="5" class="py-4 text-center text-gray-500">
+                        Tidak ada data kategori
+                    </td>
+                </tr>
+            `;
+            return;
+        }
 
         kategories.forEach((kategori, index) => {
             const row = document.createElement('tr');
@@ -420,6 +441,25 @@ function showLoading(show) {
     // Filter categories by search term
     async function filterKategories(searchTerm) {
         try {
+            // Show loading state during search
+            const tbody = document.getElementById('kategoriTableBody');
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr class="border-b">
+                        <td colspan="5" class="py-8 text-center">
+                            <div class="flex flex-col items-center justify-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                     class="animate-spin text-orange-500">
+                                    <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                                </svg>
+                                <span class="text-gray-500">Mencari kategori...</span>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+
             const response = await fetch('/api/categories');
             if (!response.ok) throw new Error('Gagal memuat data kategori');
             
@@ -610,49 +650,49 @@ function showLoading(show) {
         }
     }
 
-// Confirm category deletion
-async function konfirmasiHapusKategori() {
-    try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            throw new Error('Token tidak ditemukan');
-        }
-
-        const response = await fetch(`/api/categories/${kategoriHapusId}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+    // Confirm category deletion
+    async function konfirmasiHapusKategori() {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Token tidak ditemukan');
             }
-        });
 
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            const textResponse = await response.text();
-            throw new Error(`Response bukan JSON: ${textResponse.substring(0, 100)}`);
-        }
+            const response = await fetch(`/api/categories/${kategoriHapusId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            });
 
-        const data = await response.json();
-
-        if (!response.ok) {
-            // Tambahkan penanganan khusus untuk error constraint
-            if (data.message.includes('foreign key constraint')) {
-                throw new Error('Kategori tidak dapat dihapus karena masih memiliki produk terkait. Harap hapus atau pindahkan produk terlebih dahulu.');
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const textResponse = await response.text();
+                throw new Error(`Response bukan JSON: ${textResponse.substring(0, 100)}`);
             }
-            throw new Error(data.message || 'Gagal menghapus kategori');
-        }
 
-        showAlert('success', 'Kategori dan semua produk terkait berhasil dihapus');
-        closeModal('modalKonfirmasiHapus');
-        loadKategories();
-        kategoriHapusId = null;
-    } catch (error) {
-        console.error('Error:', error);
-        showAlert('error', error.message);
+            const data = await response.json();
+
+            if (!response.ok) {
+                // Tambahkan penanganan khusus untuk error constraint
+                if (data.message.includes('foreign key constraint')) {
+                    throw new Error('Kategori tidak dapat dihapus karena masih memiliki produk terkait. Harap hapus atau pindahkan produk terlebih dahulu.');
+                }
+                throw new Error(data.message || 'Gagal menghapus kategori');
+            }
+
+            showAlert('success', 'Kategori dan semua produk terkait berhasil dihapus');
+            closeModal('modalKonfirmasiHapus');
+            loadKategories();
+            kategoriHapusId = null;
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('error', error.message);
+        }
     }
-}
 </script>
 
 <style>

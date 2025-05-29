@@ -199,6 +199,11 @@
             }
 
             outlets.forEach((outlet, index) => {
+                // Potong alamat jika lebih dari 25 karakter dan tambahkan ...
+                const addressDisplay = outlet.address.length > 25 
+                    ? `${outlet.address.substring(0, 25)}...` 
+                    : outlet.address;
+                
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td class="py-4">${index + 1}</td>
@@ -213,7 +218,7 @@
                             </div>
                         </div>
                     </td>
-                    <td class="py-4">${outlet.address}</td>
+                    <td class="py-4" title="${outlet.address}">${addressDisplay}</td>
                     <td class="py-4">${outlet.phone}</td>
                     <td class="py-4">${outlet.tax}%</td>
                     <td class="py-4">

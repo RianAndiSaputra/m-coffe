@@ -70,11 +70,17 @@
             <tbody id="inventoryTableBody" class="text-gray-700 divide-y">
                 <!-- Data akan dirender di sini oleh JavaScript -->
                 <tr>
-                    <td colspan="4" class="py-4 text-center text-gray-500">
+                    <td colspan="4" class="py-4 text-center">
                         <!-- Loading indicator -->
-                        <div id="loadingIndicator" class="hidden text-center py-4">
-                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-orange-500 border-t-transparent"></div>
-                            <p class="mt-2 text-orange-600 font-medium">Mengambil data...</p>
+                        <div id="loadingIndicator" class="hidden">
+                            <div class="flex flex-col items-center justify-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                     class="animate-spin text-orange-500">
+                                    <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                                </svg>
+                                <span class="text-gray-500">Mengambil data...</span>
+                            </div>
                         </div>
                     </td>
                 </tr>

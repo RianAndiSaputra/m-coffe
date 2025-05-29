@@ -91,12 +91,14 @@
                 
             </tbody>
             <!-- Loading State -->
-                <div id="loadingState" class="py-8 flex justify-center items-center">
-                    <div class="flex flex-col items-center">
-                        <i data-lucide="loader-2" class="w-10 h-10 text-orange-500 animate-spin mb-3"></i>
-                        <p class="text-gray-600">Memuat data permintaan perubahan stok...</p>
-                    </div>
-                </div>
+            <div id="loadingState" class="py-8 flex flex-col items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+                     class="animate-spin text-orange-500">
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                </svg>
+                <span class="text-gray-500">Memuat data permintaan perubahan stok...</span>
+            </div>
         </table>
 
         <!-- Tambahkan ini di bagian atas content -->

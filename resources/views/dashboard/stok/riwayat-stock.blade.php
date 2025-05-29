@@ -70,8 +70,15 @@
             <tbody id="historyTableBody" class="text-gray-700 divide-y">
                 <!-- Data akan diisi via JavaScript -->
                 <tr id="loadingRow">
-                    <td colspan="7" class="py-4 text-center text-gray-500">
-                        Memuat data...
+                    <td colspan="7" class="py-4 text-center">
+                        <div class="flex flex-col items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                 class="animate-spin text-orange-500">
+                                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                            </svg>
+                            <span class="text-gray-500">Memuat data...</span>
+                        </div>
                     </td>
                 </tr>
             </tbody>
@@ -174,7 +181,16 @@
     // Update tampilan
     async function updateHistoryTable(date) {
         const tbody = document.getElementById('historyTableBody');
-        tbody.innerHTML = `<tr id="loadingRow"><td colspan="7" class="py-4 text-center text-gray-500">Memuat data...</td></tr>`;
+        tbody.innerHTML = `<td colspan="7" class="py-4 text-center">
+    <div class="flex flex-col items-center justify-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+             class="animate-spin text-orange-500">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+        </svg>
+        <span class="text-gray-500">Memuat data...</span>
+    </div>
+</td>`;
         
         const data = await fetchInventoryHistory(date);
         

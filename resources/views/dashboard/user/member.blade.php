@@ -94,8 +94,13 @@
         </table>
         
         <!-- Loading Indicator -->
-        <div id="loadingIndicator" class="flex justify-center items-center py-8">
-            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+        <div id="loadingIndicator" class="flex flex-col items-center justify-center gap-2 py-8">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+                 class="animate-spin text-orange-500">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+            </svg>
+            <span class="text-gray-500">Memuat data...</span>
         </div>
     </div>
 </div>
