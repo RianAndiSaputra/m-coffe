@@ -1031,16 +1031,16 @@ const ProductManager = (() => {
     const simpanPerubahanProduk = async () => {
         const btnSimpan = document.getElementById("btnSimpanEdit");
         const originalText = btnSimpan.innerHTML;
-
+    
         try {
             btnSimpan.disabled = true;
             btnSimpan.innerHTML =
                 '<i data-lucide="loader-circle" class="animate-spin mr-2"></i> Menyimpan...';
             if (window.lucide) window.lucide.createIcons();
-
+    
             const id = document.getElementById("editProdukId").textContent;
             const formData = new FormData();
-
+    
             const namaProduk = document.getElementById("editNamaProduk").value.trim();
             const barcodeValue = document.getElementById('editBarcode').value.trim();
             if (!barcodeValue) {
@@ -1052,27 +1052,25 @@ const ProductManager = (() => {
             const kategori = document.getElementById("editKategori").value.trim();
             const quantity = document.getElementById("editStok").value || 0;
             const minStock = document.getElementById("editStokMinimum").value || 0;
-
+    
             if (!namaProduk) throw new Error("Nama produk harus diisi");
             if (!harga) throw new Error("Harga harus diisi");
             if (!kategori) throw new Error("Kategori harus dipilih");
-
+    
             formData.append("name", namaProduk);
-            formData.append("sku",document.getElementById("editSkuProduk").value.trim() ||`SKU-${Date.now()}`);
-            formData.append("description",document.getElementById("editDeskripsi").value);
+            formData.append("sku", document.getElementById("editSkuProduk").value.trim() || `SKU-${Date.now()}`);
+            formData.append("description", document.getElementById("editDeskripsi").value);
             formData.append("price", harga);
             formData.append("category_id", kategori);
-            formData.append("is_active",document.getElementById("editStatus").value === "active" ? 1 : 0);
-
-            // formData.append("quantity", quantity);
+            formData.append("is_active", document.getElementById("editStatus").value === "active" ? 1 : 0);
             formData.append("min_stock", minStock);
             formData.append("outlet_id", currentOutletId.toString());
-
+    
             const selectedOutlets = [];
             const outletCheckboxes = document.querySelectorAll(
                 '#editOutletList input[type="checkbox"]:checked'
             );
-
+    
             if (outletCheckboxes && outletCheckboxes.length > 0) {
                 outletCheckboxes.forEach((checkbox) => {
                     selectedOutlets.push(checkbox.value);
@@ -1087,7 +1085,7 @@ const ProductManager = (() => {
                     }
                 });
             }
-
+    
             if (selectedOutlets.length === 0) {
                 const outletElements = document.querySelectorAll(
                     "#editOutletList [data-outlet-id]"
@@ -1095,21 +1093,21 @@ const ProductManager = (() => {
                 outletElements.forEach((el) => {
                     selectedOutlets.push(el.dataset.outletId);
                 });
-
+    
                 if (selectedOutlets.length === 0) {
                     selectedOutlets.push("1");
                 }
             }
-
+    
             selectedOutlets.forEach((outletId) => {
                 formData.append("outlet_ids[]", outletId);
             });
-
+    
             const imageInput = document.getElementById("editGambar");
             if (imageInput.files[0]) {
                 formData.append("image", imageInput.files[0]);
             }
-
+    
             const response = await fetch(`/api/products/${id}`, {
                 method: "POST",
                 body: formData,
@@ -1120,10 +1118,10 @@ const ProductManager = (() => {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
             });
-
+    
             const contentType = response.headers.get("content-type");
             let responseData;
-
+    
             if (contentType && contentType.includes("application/json")) {
                 responseData = await response.json();
             } else {
@@ -1135,19 +1133,45 @@ const ProductManager = (() => {
                     )}`
                 );
             }
-
+    
             if (!response.ok) {
-                if (response.status === 422 && responseData.errors) {
-                    const errorMessages = Object.values(responseData.errors)
-                        .flat()
-                        .join(", ");
-                    throw new Error(`Validasi gagal: ${errorMessages}`);
+                if (response.status === 422) {
+                    let errorMessage = " ";
+                    
+                    // Handle different error response formats
+                    if (responseData.message && typeof responseData.message === 'object') {
+                        // Format: {"message": {"field": ["error"]}}
+                        for (const [field, errors] of Object.entries(responseData.message)) {
+                            if (field === 'sku') {
+                                errorMessage += "\nSKU: sudah digunakan.";
+                            } else if (field === 'barcode') {
+                                errorMessage += "\nBarcode: sudah digunakan.";
+                            } else if (Array.isArray(errors)) {
+                                errorMessage += `\n${errors.join(", ")}`;
+                            }
+                        }
+                    } else if (responseData.errors) {
+                        // Format: {"errors": {"field": ["error"]}}
+                        for (const [field, errors] of Object.entries(responseData.errors)) {
+                            if (field === 'sku') {
+                                errorMessage += "\nSKU: sudah digunakan.";
+                            } else if (field === 'barcode') {
+                                errorMessage += "\nBarcode: sudah digunakan.";
+                            } else if (Array.isArray(errors)) {
+                                errorMessage += `\n${errors.join(", ")}`;
+                            }
+                        }
+                    } else {
+                        errorMessage = responseData.message || "Validasi gagal";
+                    }
+                    
+                    throw new Error(errorMessage);
                 }
                 throw new Error(
                     responseData.message || "Gagal memperbarui produk"
                 );
             }
-
+    
             showAlert("success", "Produk berhasil diperbarui");
             closeModal("modalEditProduk");
             loadProducts();
