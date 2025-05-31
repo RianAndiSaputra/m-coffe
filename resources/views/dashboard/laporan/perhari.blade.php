@@ -32,8 +32,8 @@
     <div class="mb-3 md:mb-0 flex items-start gap-2">
         <i data-lucide="package" class="w-5 h-5 text-gray-600 mt-1"></i>
         <div>
-            <h2 class="text-lg font-semibold text-gray-800">Daftar Stok Produk</h2>
-            <p class="text-sm text-gray-600">Kelola stok produk di semua outlet Kifa Bakery.</p>
+            <h2 class="text-lg font-semibold text-gray-800">Menampilkan Laporan untuk: <span class="outlet-name">Loading...</span></h2>
+            <p class="text-sm text-gray-600">Data yang ditampilkan adalah khusus untuk outlet <span class="outlet-name">...</span></p>
         </div>
     </div>
 </div>
@@ -283,7 +283,7 @@
                 // Update outlet name in header or wherever it appears
                 const outletElements = document.querySelectorAll('.outlet-name');
                 outletElements.forEach(el => {
-                    el.textContent = `Outlet Aktif: ${data.name}`;
+                    el.textContent = `${data.name}`;
                 });
                 
                 // Update outlet address if needed
