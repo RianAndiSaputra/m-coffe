@@ -635,7 +635,7 @@ class ReportController extends Controller
                     'total_saldo_awal' => collect($results)->sum('saldo_awal'),
                     'total_stock_masuk' => collect($results)->sum('stock_masuk'),
                     'total_stock_keluar' => collect($results)->sum('stock_keluar'),
-                    'total_stock_akhir' => collect($results)->sum('saldo_akhir'),
+                    'total_stock_akhir' => collect($results)->sum('stock_akhir'),
                     'total_selisih' => collect($results)->sum('selisih'),
                     'produk_stok_negatif' => collect($results)->where('saldo_akhir', '<', 0)->count(),
                     'produk_tidak_sesuai' => collect($results)->where('selisih', '!=', 0)->count()
