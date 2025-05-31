@@ -543,77 +543,82 @@ class ReportController extends Controller
         $results = [];
 
         foreach ($products as $product) {
-            // 1. Hitung SALDO AWAL (stok akhir hari sebelumnya)
+            // 1. SALDO AWAL - Saldo akhir tanggal sebelumnya
             $previousInventory = InventoryHistory::where('outlet_id', $outlet->id)
                 ->where('product_id', $product->id)
                 ->whereDate('created_at', '<=', $previousDay)
                 ->latest('created_at')
                 ->first();
 
-            // Dapatkan stok aktual terakhir sebagai fallback
             $currentInventory = Inventory::where('outlet_id', $outlet->id)
                 ->where('product_id', $product->id)
                 ->first();
 
-            // Sebelum perhitungan saldo awal, cek apakah produk baru
+            // Cek apakah produk baru (tidak ada history sebelum start_date)
             $isNewProduct = !InventoryHistory::where('product_id', $product->id)
                 ->where('outlet_id', $outlet->id)
                 ->whereDate('created_at', '<', $startDate)
                 ->exists();
 
-            $openingStock = $isNewProduct ? 0 : ($previousInventory ? $previousInventory->quantity_after : ($currentInventory ? $currentInventory->quantity : 0));
+            $saldoAwal = $isNewProduct ? 0 : ($previousInventory ? $previousInventory->quantity_after : ($currentInventory ? $currentInventory->quantity : 0));
 
-            // 2. Hitung STOCK MASUK (pembelian + adjustment plus + transfer masuk)
-            $incomingStock = InventoryHistory::where('outlet_id', $outlet->id)
+            // 2. STOCK MASUK - Kiriman pabrik, pembelian, dan adjustment plus
+            $stockMasuk = InventoryHistory::where('outlet_id', $outlet->id)
                 ->where('product_id', $product->id)
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->where(function ($query) {
-                    $query->where('type', 'purchase')
-                        ->orWhere('type', 'transfer_in')
-                        ->orWhere('type', 'shipment')
-                        ->orWhere('type', 'other')
+                    $query->where('type', 'purchase')           // Pembelian
+                        ->orWhere('type', 'transfer_in')        // Transfer masuk
+                        ->orWhere('type', 'shipment')           // Kiriman pabrik
+                        ->orWhere('type', 'other')              // Lainnya (jika positif)
                         ->orWhere(function ($q) {
                             $q->where('type', 'adjustment')
-                                ->where('quantity_change', '>', 0);
+                                ->where('quantity_change', '>', 0); // Adjustment plus
                         });
                 })
                 ->sum('quantity_change');
 
-            // 3. Hitung STOCK KELUAR (penjualan + adjustment minus + transfer keluar)
-            $outgoingStock = InventoryHistory::where('outlet_id', $outlet->id)
+            // 3. STOCK KELUAR - Penjualan dan adjustment minus
+            $stockKeluarPositive = InventoryHistory::where('outlet_id', $outlet->id)
                 ->where('product_id', $product->id)
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->where(function ($query) {
-                    $query->where('type', 'sale')
-                        ->orWhere('type', 'transfer_out')
-                        ->orWhere(function ($q) {
-                            $q->where('type', 'adjustment')
-                                ->where('quantity_change', '<', 0);
-                        });
+                    $query->where('type', 'sale')              // Penjualan
+                        ->orWhere('type', 'transfer_out');      // Transfer keluar
                 })
                 ->sum('quantity_change');
 
-            $outgoingStock = abs($outgoingStock); // Pastikan positif
+            $stockKeluarNegative = InventoryHistory::where('outlet_id', $outlet->id)
+                ->where('product_id', $product->id)
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->where('type', 'adjustment')
+                ->where('quantity_change', '<', 0)             // Adjustment minus
+                ->sum('quantity_change');
 
-            // 4. Hitung SALDO AKHIR
-            $closingStock = $openingStock + $incomingStock - $outgoingStock;
+            // Total stock keluar (konversi ke positif)
+            $stockKeluar = abs($stockKeluarPositive) + abs($stockKeluarNegative);
 
-            // 5. Hitung selisih dengan stok aktual
-            $actualStock = $currentInventory ? $currentInventory->quantity : 0;
-            $difference = $actualStock - $closingStock;
+            // 4. SALDO AKHIR = SALDO AWAL + STOCK MASUK - STOCK KELUAR
+            $saldoAkhir = $saldoAwal + $stockMasuk - $stockKeluar;
+
+            // 5. Stock aktual saat ini
+            $stockAktual = $currentInventory ? $currentInventory->quantity : 0;
+            
+            // 6. Selisih antara stock aktual dengan saldo akhir
+            $selisih = $stockAktual - $saldoAkhir;
 
             $results[] = [
                 'product_id' => $product->id,
                 'product_name' => $product->name,
                 'product_code' => $product->sku,
                 'unit' => $product->unit,
-                'saldo_awal' => $openingStock,
-                'stock_masuk' => $incomingStock,
-                'stock_keluar' => $outgoingStock,
-                'stock_akhir' => $closingStock,
-                'stock_aktual' => $actualStock,
-                'selisih' => $difference,
-                'status_stok' => $closingStock < 0 ? 'Negatif' : ($difference != 0 ? 'Tidak Sesuai' : 'Normal')
+                'saldo_awal' => $saldoAwal,
+                'stock_masuk' => $stockMasuk,
+                'stock_keluar' => $stockKeluar,
+                'stock_akhir' => $saldoAkhir,
+                'stock_aktual' => $stockAktual,
+                'selisih' => $selisih,
+                'status_stok' => $saldoAkhir < 0 ? 'Negatif' : ($selisih != 0 ? 'Tidak Sesuai' : 'Normal')
             ];
         }
 
@@ -632,7 +637,7 @@ class ReportController extends Controller
                     'total_stock_keluar' => collect($results)->sum('stock_keluar'),
                     'total_stock_akhir' => collect($results)->sum('stock_akhir'),
                     'total_selisih' => collect($results)->sum('selisih'),
-                    'produk_stok_negatif' => collect($results)->where('stock_akhir', '<', 0)->count(),
+                    'produk_stok_negatif' => collect($results)->where('saldo_akhir', '<', 0)->count(),
                     'produk_tidak_sesuai' => collect($results)->where('selisih', '!=', 0)->count()
                 ]
             ]

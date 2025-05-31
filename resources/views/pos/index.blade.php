@@ -896,10 +896,10 @@
                 const availableStock = (product.quantity || 0) - reservedInCart;
 
                 // Debug: Console log untuk pengecekan status produk
-                console.log(`Product: ${product.name}`, {
-                    is_active: product.is_active,
-                    type: typeof product.is_active
-                });
+                // console.log(`Product: ${product.name}`, {
+                //     is_active: product.is_active,
+                //     type: typeof product.is_active
+                // });
                 
                 // Tampilkan berbeda untuk produk tidak aktif
                 if (product.is_active === false) {
@@ -1007,9 +1007,9 @@
         }
 
         // Fungsi untuk menghitung total quantity di cart
-function calculateTotalQty() {
-    return cart.reduce((total, item) => total + (item.quantity || 0), 0);
-}
+        function calculateTotalQty() {
+            return cart.reduce((total, item) => total + (item.quantity || 0), 0);
+        }
         
         // Update cart display
         function updateCart() {
@@ -1450,6 +1450,24 @@ function calculateTotalQty() {
                 lucide.createIcons();
             }
 
+            function setPaymentButtonState(isProcessing) {
+                const button = document.getElementById('btnProcessPayment');
+                
+                if (isProcessing) {
+                    // Disable button dan ubah tampilan
+                    button.disabled = true;
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
+                    button.classList.remove('hover:bg-orange-600', 'bg-orange-500');
+                    button.classList.add('bg-gray-400', 'cursor-not-allowed');
+                } else {
+                    // Enable button dan kembalikan tampilan normal
+                    button.disabled = false;
+                    button.innerHTML = 'Proses Pembayaran';
+                    button.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                    button.classList.add('bg-orange-500', 'hover:bg-orange-600');
+                }
+            }
+
             function setupPaymentButton() {
                 // Remove old event listener if it exists
                 const btn = document.getElementById('btnProcessPayment');
@@ -1504,9 +1522,27 @@ function calculateTotalQty() {
                 const newButton = oldButton.cloneNode(true);
                 oldButton.parentNode.replaceChild(newButton, oldButton);
                 
-                // Add the event listener to the fresh button
-                document.getElementById('btnProcessPayment').addEventListener('click', function() {
-                    processPayment(grandTotal);
+                // Pastikan button dalam state normal saat modal dibuka
+                setPaymentButtonState(false);
+                
+                // Add the event listener to the fresh button dengan disable functionality
+                document.getElementById('btnProcessPayment').addEventListener('click', async function() {
+                    // Disable button saat mulai proses
+                    setPaymentButtonState(true);
+                    
+                    try {
+                        // Panggil function processPayment
+                        await processPayment(grandTotal);
+                        
+                    } catch (error) {
+                        // Jika terjadi error, tampilkan notifikasi
+                        console.error('Payment error:', error);
+                        showNotification('Terjadi kesalahan saat memproses pembayaran', 'error');
+                        
+                    } finally {
+                        // Enable kembali button setelah selesai (baik sukses atau error)
+                        setPaymentButtonState(false);
+                    }
                 });
                 
                 openModal('paymentModal');
