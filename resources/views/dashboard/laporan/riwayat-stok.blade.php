@@ -879,55 +879,118 @@
     }
 
     // Export report function with outlet name
-    function exportReport() {
+    async function exportReport() {
         showAlert('info', 'Mempersiapkan laporan untuk diekspor...');
         
-        setTimeout(() => {
-            try {
-                let csvContent = "data:text/csv;charset=utf-8,";
-                
-                // Add header with outlet info
-                const outletName = document.getElementById('outletName')?.textContent || 'Outlet';
-                const formattedStartDate = new Date(currentStartDate).toLocaleDateString('id-ID');
-                const formattedEndDate = new Date(currentEndDate).toLocaleDateString('id-ID');
-                
-                csvContent += "Tipe,Produk,SKU,Stok Akhir,Total Perubahan,Total Entri\n";
-                
-                // Add data from all categories
-                const categories = ['adjustment', 'shipment', 'purchase', 'sale', 'transfer_in', 'transfer_out', 'other'];
-                const typeLabels = {
-                    'adjustment': 'Penyesuaian',
-                    'shipment': 'Kiriman Pabrik',
-                    'purchase': 'Pembelian',
-                    'sale': 'Penjualan',
-                    'transfer_in': 'Transfer Masuk',
-                    'transfer_out': 'Transfer Keluar',
-                    'other': 'Lainnya'
-                };
-                
-                categories.forEach(type => {
-                    if (stockData?.data?.summary_by_type[type]?.products) {
-                        stockData.data.summary_by_type[type].products.forEach(product => {
-                            csvContent += `${typeLabels[type]},"${product.product_name}",${product.sku},${product.stock_as_of_end_date},${product.total_quantity_changed},${product.total_entries}\n`;
+        try {
+            // 1. Dapatkan outlet ID dan nama outlet secara dinamis
+            const outletId = stockData?.meta?.outlet_id;
+            const outletName = await getOutletName(outletId);
+
+            // 2. Format tanggal untuk nama file
+            const formattedStartDate = new Date(currentStartDate).toLocaleDateString('id-ID', { 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric' 
+            }).replace(/ /g, ' ');
+            
+            const formattedEndDate = new Date(currentEndDate).toLocaleDateString('id-ID', { 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric' 
+            }).replace(/ /g, ' ');
+            
+            // 3. Buat header CSV hanya dengan kolom tabel
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Jenis Transaksi,Nama Produk,SKU,Stok Akhir Periode,Satuan,Total Perubahan Stok,Jumlah Transaksi,Tanggal Transaksi,Stok Sebelum,Perubahan Stok,Stok Sesudah,Catatan,Outlet\n";
+
+            // 4. Mapping jenis transaksi
+            const typeMapping = {
+                'adjustment': 'Penyesuaian',
+                'shipment': 'Pengiriman',
+                'sale': 'Penjualan',
+                'purchase': 'Pembelian',
+                'transfer_in': 'Transfer Masuk',
+                'transfer_out': 'Transfer Keluar',
+                'other': 'Lainnya'
+            };
+
+            // 5. Proses data transaksi
+            if (stockData?.data?.summary_by_type) {
+                Object.keys(stockData.data.summary_by_type).forEach(type => {
+                    const typeData = stockData.data.summary_by_type[type];
+                    const typeLabel = typeMapping[type] || type;
+                    
+                    typeData.products.forEach(product => {
+                        product.entries.forEach(entry => {
+                            const transactionDate = new Date(entry.created_at);
+                            const formattedDate = transactionDate.toLocaleDateString('id-ID', {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric'
+                            }) + ' ' + transactionDate.toLocaleTimeString('id-ID', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+                            
+                            csvContent += [
+                                typeLabel,
+                                `"${product.product_name || 'Unknown Product'}"`,
+                                product.sku || '',
+                                product.stock_as_of_end_date,
+                                `"${product.unit || 'pcs'}"`,
+                                product.total_quantity_changed,
+                                product.total_entries,
+                                `"${formattedDate}"`,
+                                entry.quantity_before,
+                                entry.quantity_change,
+                                entry.quantity_after,
+                                `"${entry.notes || ''}"`,
+                                `"${outletName}"`
+                            ].join(',') + '\n';
                         });
-                    }
+                    });
                 });
-                
-                // Create download link
-                const encodedUri = encodeURI(csvContent);
-                const link = document.createElement("a");
-                link.setAttribute("href", encodedUri);
-                link.setAttribute("download", `riwayat-stok-${outletName}-${formattedStartDate}-${formattedEndDate}.csv`);
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                showAlert('success', 'Laporan berhasil diekspor');
-            } catch (error) {
-                console.error('Error exporting data:', error);
-                showAlert('error', 'Gagal mengekspor data');
             }
-        }, 1000);
+
+            // 6. Proses download
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute(
+                "download", 
+                `Laporan_Histori_Stok_${outletName.replace(/\s+/g, '_')}_${formattedStartDate}_${formattedEndDate}.csv`
+            );
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showAlert('success', 'Laporan berhasil diekspor');
+        } catch (error) {
+            console.error('Error exporting data:', error);
+            showAlert('error', 'Gagal mengekspor data: ' + error.message);
+        }
+    }
+
+    // Fungsi getOutletName tetap sama dengan versi pertama
+    async function getOutletName(outletId) {
+        try {
+            if (!outletId) return "Outlet";
+            
+            if (window.outletsData && Array.isArray(window.outletsData.data)) {
+                const outlet = window.outletsData.data.find(o => o.id.toString() === outletId.toString());
+                if (outlet) return outlet.name;
+            }
+            
+            const response = await fetch(`/api/outlets/${outletId}`);
+            if (!response.ok) throw new Error(`Error: ${response.status}`);
+            
+            const data = await response.json();
+            return data.name || `Outlet ${outletId}`;
+        } catch (error) {
+            console.error('Error getting outlet name:', error);
+            return `Outlet ${outletId}`;
+        }
     }
 
     // Show alert function

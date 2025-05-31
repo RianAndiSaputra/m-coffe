@@ -334,7 +334,9 @@ class ProductController extends Controller
                         'outlet_id' => $outletId
                     ],
                     [
-                        // 'quantity' => $request->quantity,
+                        'quantity' => Inventory::where('product_id', $product->id)
+                        ->where('outlet_id', $outletId)
+                        ->value('quantity') ?? 0,
                         'min_stock' => $request->min_stock
                     ]
                 );

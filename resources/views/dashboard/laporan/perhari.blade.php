@@ -678,69 +678,67 @@
 
         function formatCurrency(value) {
             return new Intl.NumberFormat('id-ID', {
-                style: 'currency',
-                currency: 'IDR',
-                minimumFractionDigits: 0,
                 maximumFractionDigits: 0
             }).format(value);
         }
 
+        function formatDate(dateStr) {
+            // Misalnya: "31/05/2025 10:03"
+            const parts = dateStr.split(' ');
+            return parts[0]; // Ambil tanggal saja → "31/05/2025"
+        }
+
+        function formatTime(dateStr) {
+            // Misalnya: "31/05/2025 10:03"
+            const parts = dateStr.split(' ');
+            return parts[1] || ''; // Ambil waktu saja → "10:03"
+        }
 
         setTimeout(() => {
             let csvContent = [];
 
-            // Header
-            csvContent.push(['LAPORAN PENJUALAN - Kifa Bakery']);
-            csvContent.push([`Outlet:`, currentData.outlet || 'Outlet 1']);
-            csvContent.push([`Tanggal:`, `${currentData.date_from} - ${currentData.date_to}`]);
-            csvContent.push([`Dicetak pada:`, new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })]);
-            csvContent.push([]); // Empty line
+            // Header kolom
+            csvContent.push([
+                'Order ID', 'Tanggal', 'Waktu', 'Kasir', 'Metode Pembayaran',
+                'Produk', 'SKU', 'Harga', 'Kuantitas', 'Subtotal', 'Total Order'
+            ]);
 
-            // Summary Section
-            csvContent.push(['Ringkasan']);
-            csvContent.push(['Keterangan', 'Nilai']);
+            // Data transaksi
+            currentData.orders.forEach(order => {
+                order.items.forEach((item, index) => {
+                    const kuantitas = item.quantity;
+                    const harga = item.price;
+                    const subtotal = harga * kuantitas;
+
+                    csvContent.push([
+                        order.order_number,
+                        formatDate(order.created_at),
+                        formatTime(order.created_at),
+                        order.user,
+                        getPaymentMethodText(order.payment_method),
+                        item.product,
+                        item.sku,
+                        formatCurrency(harga),
+                        kuantitas,
+                        formatCurrency(subtotal),
+                        '' // kosongkan kolom Total Order
+                    ]);
+                });
+            });
+
+            // Baris kosong pemisah
+            csvContent.push([]);
+            csvContent.push(['RINGKASAN PENJUALAN']);
             csvContent.push(['Total Penjualan', formatCurrency(currentData.total_revenue)]);
             csvContent.push(['Total Order', currentData.total_orders]);
             csvContent.push(['Total Item', currentData.total_items_sold]);
             csvContent.push(['Rata-rata Order', formatCurrency(currentData.average_order_value)]);
-            csvContent.push([]); // Empty line
 
-            // Detail Orders
-            csvContent.push(['Detail Transaksi']);
-
-            currentData.orders.forEach(order => {
-                csvContent.push(['No Transaksi', `#${order.order_number}`]);
-                csvContent.push(['Tanggal', order.created_at]);
-                csvContent.push(['Kasir', order.user]);
-                csvContent.push(['Metode Pembayaran', getPaymentMethodText(order.payment_method)]);
-                csvContent.push(['Nama Item', 'Kode Item', 'Harga', 'Jumlah', 'Satuan', 'Total']);
-
-                order.items.forEach(item => {
-                    csvContent.push([
-                        item.product,
-                        item.sku,
-                        formatCurrency(item.price),
-                        item.quantity,
-                        item.unit || 'pcs',
-                        formatCurrency(item.total)
-                    ]);
-                });
-
-                csvContent.push(['', '', '', '', 'Tax', formatCurrency(order.tax)]);
-                csvContent.push(['', '', '', '', 'Total', formatCurrency(order.total)]);
-                csvContent.push([]); // Empty line after each order
-            });
-
-            csvContent.push(['Laporan ini dibuat otomatis oleh sistem']);
-            csvContent.push([`© ${new Date().getFullYear()} Kifa Bakery`]);
-
-            // Convert to CSV string
+            // Buat dan unduh CSV
             const csvString = csvContent.map(row => row.join(',')).join('\n');
-
-            // Trigger download
             const a = document.createElement('a');
             a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvString);
-            a.download = `laporan-penjualan-perhari-${new Date().toISOString().slice(0,10)}.csv`;
+            a.download = `Laporan_Penjualan_Harian_Outlet_${currentData.outlet || '1'}_${new Date().toISOString().slice(0,10)}.csv`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -748,6 +746,10 @@
             showAlert('success', 'Laporan berhasil diekspor');
         }, 1000);
     }
+
+
+
+
 
     // Show transaction detail modal
     function showTransactionDetail(orderId) {
