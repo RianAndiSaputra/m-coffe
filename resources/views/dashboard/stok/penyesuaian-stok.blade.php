@@ -317,6 +317,10 @@
         return inventoryRecords;
     }
 
+    function escapeQuotes(str) {
+        return str.replace(/'/g, "\\'").replace(/"/g, '\\"');
+    }
+
     // Function to populate inventory table with data
     function populateInventoryTable(inventoryData) {
         const tableBody = document.getElementById('inventoryTableBody');
@@ -413,9 +417,9 @@
             const actionCell = document.createElement('td');
             actionCell.className = 'py-4 text-right';
             actionCell.innerHTML = `
-                <button onclick="openModalAdjust(${item.product.id}, '${item.product.sku}', '${item.product.name}', '${item.outlet.name}', ${item.product.qty})" 
-                    class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-bold text-white bg-orange-500 rounded-md hover:bg-orange-600">
-                    <i data-lucide="clipboard-list" class="w-4 h-4"></i> Sesuaikan
+                <button onclick="openModalAdjust(${item.product.id}, '${item.product.sku}', '${escapeQuotes(item.product.name)}', '${escapeQuotes(item.outlet.name)}', ${item.product.qty})" 
+                        class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-bold text-white bg-orange-500 rounded-md hover:bg-orange-600">
+                        <i data-lucide="clipboard-list" class="w-4 h-4"></i> Sesuaikan
                 </button>
             `;
             row.appendChild(actionCell);
