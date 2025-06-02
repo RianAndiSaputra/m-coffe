@@ -579,80 +579,107 @@
             }
         }
 
-        // Load outlets function
-        async function loadOutletsFromAPI() {
-            const outletListContainer = document.getElementById('outletListContainer');
-            const outletNameDisplay = document.querySelector('#outletDropdownButton span');
+// Load outlets function
+async function loadOutletsFromAPI() {
+    const outletListContainer = document.getElementById('outletListContainer');
+    const outletNameDisplay = document.querySelector('#outletDropdownButton span');
+    const outletDropdownButton = document.getElementById('outletDropdownButton');
+    const outletDropdown = document.getElementById('outletDropdown');
+    const outletDropdownArrow = document.getElementById('outletDropdownArrow');
 
-            try {
-                const response = await fetch('/api/outlets', {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                        'Accept': 'application/json'
-                    }
-                });
+    try {
+        const response = await fetch('/api/outlets', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Accept': 'application/json'
+            }
+        });
 
-                const result = await response.json();
+        const result = await response.json();
 
-                if (!result.success) throw new Error('Gagal memuat outlet');
+        if (!result.success) throw new Error('Gagal memuat outlet');
 
-                // Clear existing list
-                outletListContainer.innerHTML = '';
+        // Clear existing list
+        outletListContainer.innerHTML = '';
 
-                // Cek apakah ada outlet yang aktif
-                const hasActiveOutlet = result.data.some(outlet => outlet.is_active);
+        // Cek apakah ada outlet yang aktif
+        const hasActiveOutlet = result.data.some(outlet => outlet.is_active);
+        const userRole = "{{ auth()->user()->role }}"; // Ambil role user dari Laravel
 
-                if (!hasActiveOutlet) {
-                    outletListContainer.innerHTML = `
-                        <li class="no-outlet-message">
-                            Tidak ada outlet aktif. Silakan aktifkan outlet terlebih dahulu.
-                        </li>
-                    `;
-                    if (outletNameDisplay) {
-                        outletNameDisplay.textContent = 'Tidak Ada Outlet Aktif';
-                    }
-                    return;
-                }
+        if (!hasActiveOutlet) {
+            outletListContainer.innerHTML = `
+                <li class="no-outlet-message">
+                    Tidak ada outlet aktif. Silakan aktifkan outlet terlebih dahulu.
+                </li>
+            `;
+            if (outletNameDisplay) {
+                outletNameDisplay.textContent = 'Tidak Ada Outlet Aktif';
+            }
+            return;
+        }
 
-                result.data.forEach(outlet => {
-                    // Hanya tampilkan outlet yang aktif
-                    if (outlet.is_active) {
-                        const li = document.createElement('li');
-                        li.className = 'px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm flex items-center gap-2';
-                        li.innerHTML = `<i data-lucide="store" class="w-4 h-4 text-orange-500"></i> <span>${outlet.name}</span>`;
-                        
-                        li.addEventListener('click', () => {
-                            outletNameDisplay.textContent = outlet.name;
-                            outletDropdown.classList.add('hidden');
-                            outletDropdownArrow.classList.remove('rotate-180');
-                            localStorage.setItem('selectedOutletId', outlet.id);
-                        });
-
-                        outletListContainer.appendChild(li);
-                    }
-                });
-
-                // Re-initialize Lucide icons
-                lucide.createIcons();
-                
-                // Set outlet aktif sebagai default
-                const savedOutletId = localStorage.getItem('selectedOutletId');
-                const activeOutlets = result.data.filter(o => o.is_active);
-                if (activeOutlets.length > 0) {
-                    const defaultOutlet = activeOutlets.find(o => o.id.toString() === savedOutletId) || activeOutlets[0];
-                    if (outletNameDisplay) {
-                        outletNameDisplay.textContent = defaultOutlet.name;
-                    }
-                }
-                
-            } catch (err) {
-                console.error('Failed to load outlets:', err);
-                outletListContainer.innerHTML = '<li class="px-4 py-2 text-sm text-red-500">Gagal memuat outlet</li>';
+        // Jika role supervisor, langsung pilih outlet pertama yang aktif
+        if (userRole === 'supervisor') {
+            const activeOutlets = result.data.filter(o => o.is_active);
+            if (activeOutlets.length > 0) {
+                const defaultOutlet = activeOutlets[0];
                 if (outletNameDisplay) {
-                    outletNameDisplay.textContent = 'Pilih Outlet';
+                    outletNameDisplay.textContent = defaultOutlet.name;
+                }
+                localStorage.setItem('selectedOutletId', defaultOutlet.id);
+                
+                // Nonaktifkan dropdown untuk supervisor
+                if (outletDropdownButton) {
+                    outletDropdownButton.style.pointerEvents = 'none';
+                    outletDropdownButton.style.cursor = 'default';
+                }
+                if (outletDropdownArrow) {
+                    outletDropdownArrow.style.display = 'none';
                 }
             }
+            return; // Keluar dari fungsi setelah memilih outlet untuk supervisor
         }
+
+        // Untuk role selain supervisor, tampilkan dropdown seperti biasa
+        result.data.forEach(outlet => {
+            // Hanya tampilkan outlet yang aktif
+            if (outlet.is_active) {
+                const li = document.createElement('li');
+                li.className = 'px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm flex items-center gap-2';
+                li.innerHTML = `<i data-lucide="store" class="w-4 h-4 text-orange-500"></i> <span>${outlet.name}</span>`;
+                
+                li.addEventListener('click', () => {
+                    outletNameDisplay.textContent = outlet.name;
+                    outletDropdown.classList.add('hidden');
+                    outletDropdownArrow.classList.remove('rotate-180');
+                    localStorage.setItem('selectedOutletId', outlet.id);
+                });
+
+                outletListContainer.appendChild(li);
+            }
+        });
+
+        // Re-initialize Lucide icons
+        lucide.createIcons();
+        
+        // Set outlet aktif sebagai default
+        const savedOutletId = localStorage.getItem('selectedOutletId');
+        const activeOutlets = result.data.filter(o => o.is_active);
+        if (activeOutlets.length > 0) {
+            const defaultOutlet = activeOutlets.find(o => o.id.toString() === savedOutletId) || activeOutlets[0];
+            if (outletNameDisplay) {
+                outletNameDisplay.textContent = defaultOutlet.name;
+            }
+        }
+        
+    } catch (err) {
+        console.error('Failed to load outlets:', err);
+        outletListContainer.innerHTML = '<li class="px-4 py-2 text-sm text-red-500">Gagal memuat outlet</li>';
+        if (outletNameDisplay) {
+            outletNameDisplay.textContent = 'Pilih Outlet';
+        }
+    }
+}
 
         // Initialize active menu and load outlets
         setActiveMenu();
