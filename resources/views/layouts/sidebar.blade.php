@@ -2,8 +2,8 @@
     <!-- Logo -->
     <div class="p-4 flex items-center justify-between border-b">
         <div class="flex items-center">
-            <img src="/images/logo.png" alt="Kifa Bakery Logo" class="w-10 h-10 object-contain" />
-            <span class="ml-2 font-bold text-xl whitespace-nowrap sidebar-logo-text">Kifa Bakery</span>
+            <img src="/images/m-coffe.png" alt="Kifa Bakery Logo" class="w-10 h-10 object-contain" />
+            <span class="ml-2 font-bold text-xl whitespace-nowrap sidebar-logo-text">M-Coffee</span>
         </div>
         <button id="toggleSidebarBtn" class="text-gray-500 hover:text-black hidden md:block transition-all">
             <i data-lucide="chevrons-left" class="w-5 h-5 text-black" id="toggleIcon"></i>
@@ -27,7 +27,7 @@
                 <div class="p-2 border-b">
                     <div class="relative">
                         <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i>
-                        <input type="text" placeholder="Cari outlet..." class="w-full pl-9 pr-3 py-2 text-sm border rounded-lg focus:ring-1 focus:ring-orange-700 focus:border-orange-700">
+                        <input type="text" placeholder="Cari outlet..." class="w-full pl-9 pr-3 py-2 text-sm border rounded-lg focus:ring-1 focus:ring-green-700 focus:border-green-700">
                     </div>
                 </div>
                 
@@ -42,7 +42,7 @@
     <!-- Menu -->
     <nav class="flex-1 overflow-y-auto py-4">
         <div class="px-4 py-2 group rounded-lg transition-all menu-item">
-           <a href="/dashboard" class="flex items-center py-2 hover:text-orange-700 transition-all menu-subitem">
+           <a href="/dashboard" class="flex items-center py-2 hover:text-green-700 transition-all menu-subitem">
                 <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 text-black sidebar-icon"></i>
                 <span class="sidebar-text">Dashboard</span>
             </a>
@@ -240,7 +240,7 @@
 <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
 
 <!-- Mobile toggle button (hamburger) -->
-<button id="mobileSidebarToggle" class="fixed bottom-4 right-4 md:hidden bg-orange-700 text-white p-3 rounded-full shadow-lg z-30">
+<button id="mobileSidebarToggle" class="fixed bottom-4 right-4 md:hidden bg-green-700 text-white p-3 rounded-full shadow-lg z-30">
     <i data-lucide="menu" class="w-6 h-6"></i>
 </button>
 
@@ -327,7 +327,7 @@
 
     /* Active menu parent */
     .menu-item.active-parent > .flex.items-center.justify-between {
-        background-color: #ffedd5;
+        background-color: #dcfce7; /* Changed from orange to green */
         border-radius: 0.5rem;
         padding: 0.5rem 1rem;
         margin-left: -0.5rem;
@@ -336,7 +336,7 @@
 
     /* Active menu subitem */
     .menu-subitem.active {
-        background-color: #ffedd5;
+        background-color: #dcfce7; /* Changed from orange to green */
         border-radius: 0.5rem;
         padding: 0.5rem 1rem;
         margin-left: -0.5rem;
@@ -348,7 +348,7 @@
     .menu-subitem.active span,
     .menu-item.active-parent > .flex.items-center.justify-between i,
     .menu-item.active-parent > .flex.items-center.justify-between span {
-        color: #ea580c;
+        color: #3b6b0d; /* Changed from orange to green */
         font-weight: 500;
     }
 
@@ -579,107 +579,107 @@
             }
         }
 
-// Load outlets function
-async function loadOutletsFromAPI() {
-    const outletListContainer = document.getElementById('outletListContainer');
-    const outletNameDisplay = document.querySelector('#outletDropdownButton span');
-    const outletDropdownButton = document.getElementById('outletDropdownButton');
-    const outletDropdown = document.getElementById('outletDropdown');
-    const outletDropdownArrow = document.getElementById('outletDropdownArrow');
+    // Load outlets function
+    async function loadOutletsFromAPI() {
+        const outletListContainer = document.getElementById('outletListContainer');
+        const outletNameDisplay = document.querySelector('#outletDropdownButton span');
+        const outletDropdownButton = document.getElementById('outletDropdownButton');
+        const outletDropdown = document.getElementById('outletDropdown');
+        const outletDropdownArrow = document.getElementById('outletDropdownArrow');
 
-    try {
-        const response = await fetch('/api/outlets', {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                'Accept': 'application/json'
+        try {
+            const response = await fetch('/api/outlets', {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+
+            if (!result.success) throw new Error('Gagal memuat outlet');
+
+            // Clear existing list
+            outletListContainer.innerHTML = '';
+
+            // Cek apakah ada outlet yang aktif
+            const hasActiveOutlet = result.data.some(outlet => outlet.is_active);
+            const userRole = "{{ auth()->user()->role }}"; // Ambil role user dari Laravel
+
+            if (!hasActiveOutlet) {
+                outletListContainer.innerHTML = `
+                    <li class="no-outlet-message">
+                        Tidak ada outlet aktif. Silakan aktifkan outlet terlebih dahulu.
+                    </li>
+                `;
+                if (outletNameDisplay) {
+                    outletNameDisplay.textContent = 'Tidak Ada Outlet Aktif';
+                }
+                return;
             }
-        });
 
-        const result = await response.json();
-
-        if (!result.success) throw new Error('Gagal memuat outlet');
-
-        // Clear existing list
-        outletListContainer.innerHTML = '';
-
-        // Cek apakah ada outlet yang aktif
-        const hasActiveOutlet = result.data.some(outlet => outlet.is_active);
-        const userRole = "{{ auth()->user()->role }}"; // Ambil role user dari Laravel
-
-        if (!hasActiveOutlet) {
-            outletListContainer.innerHTML = `
-                <li class="no-outlet-message">
-                    Tidak ada outlet aktif. Silakan aktifkan outlet terlebih dahulu.
-                </li>
-            `;
-            if (outletNameDisplay) {
-                outletNameDisplay.textContent = 'Tidak Ada Outlet Aktif';
+            // Jika role supervisor, langsung pilih outlet pertama yang aktif
+            if (userRole === 'supervisor') {
+                const activeOutlets = result.data.filter(o => o.is_active);
+                if (activeOutlets.length > 0) {
+                    const defaultOutlet = activeOutlets[0];
+                    if (outletNameDisplay) {
+                        outletNameDisplay.textContent = defaultOutlet.name;
+                    }
+                    localStorage.setItem('selectedOutletId', defaultOutlet.id);
+                    
+                    // Nonaktifkan dropdown untuk supervisor
+                    if (outletDropdownButton) {
+                        outletDropdownButton.style.pointerEvents = 'none';
+                        outletDropdownButton.style.cursor = 'default';
+                    }
+                    if (outletDropdownArrow) {
+                        outletDropdownArrow.style.display = 'none';
+                    }
+                }
+                return; // Keluar dari fungsi setelah memilih outlet untuk supervisor
             }
-            return;
-        }
 
-        // Jika role supervisor, langsung pilih outlet pertama yang aktif
-        if (userRole === 'supervisor') {
+            // Untuk role selain supervisor, tampilkan dropdown seperti biasa
+            result.data.forEach(outlet => {
+                // Hanya tampilkan outlet yang aktif
+                if (outlet.is_active) {
+                    const li = document.createElement('li');
+                    li.className = 'px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm flex items-center gap-2';
+                    li.innerHTML = `<i data-lucide="store" class="w-4 h-4 text-orange-500"></i> <span>${outlet.name}</span>`;
+                    
+                    li.addEventListener('click', () => {
+                        outletNameDisplay.textContent = outlet.name;
+                        outletDropdown.classList.add('hidden');
+                        outletDropdownArrow.classList.remove('rotate-180');
+                        localStorage.setItem('selectedOutletId', outlet.id);
+                    });
+
+                    outletListContainer.appendChild(li);
+                }
+            });
+
+            // Re-initialize Lucide icons
+            lucide.createIcons();
+            
+            // Set outlet aktif sebagai default
+            const savedOutletId = localStorage.getItem('selectedOutletId');
             const activeOutlets = result.data.filter(o => o.is_active);
             if (activeOutlets.length > 0) {
-                const defaultOutlet = activeOutlets[0];
+                const defaultOutlet = activeOutlets.find(o => o.id.toString() === savedOutletId) || activeOutlets[0];
                 if (outletNameDisplay) {
                     outletNameDisplay.textContent = defaultOutlet.name;
                 }
-                localStorage.setItem('selectedOutletId', defaultOutlet.id);
-                
-                // Nonaktifkan dropdown untuk supervisor
-                if (outletDropdownButton) {
-                    outletDropdownButton.style.pointerEvents = 'none';
-                    outletDropdownButton.style.cursor = 'default';
-                }
-                if (outletDropdownArrow) {
-                    outletDropdownArrow.style.display = 'none';
-                }
             }
-            return; // Keluar dari fungsi setelah memilih outlet untuk supervisor
-        }
-
-        // Untuk role selain supervisor, tampilkan dropdown seperti biasa
-        result.data.forEach(outlet => {
-            // Hanya tampilkan outlet yang aktif
-            if (outlet.is_active) {
-                const li = document.createElement('li');
-                li.className = 'px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm flex items-center gap-2';
-                li.innerHTML = `<i data-lucide="store" class="w-4 h-4 text-orange-500"></i> <span>${outlet.name}</span>`;
-                
-                li.addEventListener('click', () => {
-                    outletNameDisplay.textContent = outlet.name;
-                    outletDropdown.classList.add('hidden');
-                    outletDropdownArrow.classList.remove('rotate-180');
-                    localStorage.setItem('selectedOutletId', outlet.id);
-                });
-
-                outletListContainer.appendChild(li);
-            }
-        });
-
-        // Re-initialize Lucide icons
-        lucide.createIcons();
-        
-        // Set outlet aktif sebagai default
-        const savedOutletId = localStorage.getItem('selectedOutletId');
-        const activeOutlets = result.data.filter(o => o.is_active);
-        if (activeOutlets.length > 0) {
-            const defaultOutlet = activeOutlets.find(o => o.id.toString() === savedOutletId) || activeOutlets[0];
+            
+        } catch (err) {
+            console.error('Failed to load outlets:', err);
+            outletListContainer.innerHTML = '<li class="px-4 py-2 text-sm text-red-500">Gagal memuat outlet</li>';
             if (outletNameDisplay) {
-                outletNameDisplay.textContent = defaultOutlet.name;
+                outletNameDisplay.textContent = 'Pilih Outlet';
             }
-        }
-        
-    } catch (err) {
-        console.error('Failed to load outlets:', err);
-        outletListContainer.innerHTML = '<li class="px-4 py-2 text-sm text-red-500">Gagal memuat outlet</li>';
-        if (outletNameDisplay) {
-            outletNameDisplay.textContent = 'Pilih Outlet';
         }
     }
-}
 
         // Initialize active menu and load outlets
         setActiveMenu();

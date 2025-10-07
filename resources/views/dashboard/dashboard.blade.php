@@ -9,7 +9,7 @@
         <!-- Left side - Outlet info with icon -->
         <div class="flex items-center space-x-4">
             <!-- Store icon -->
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-store">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-store text-green-600">
                 <path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/>
                 <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
                 <path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/>
@@ -19,14 +19,14 @@
             
             <div>
                 <h2 class="text-lg font-semibold text-gray-800" id="outletName">Loading...</h2>
-                <p class="text-sm text-gray-600 mt-1">Data yang ditampilkan adalah untuk outlet <span id="outletNameText">loading</span>.</p>
+                <p class="text-sm text-gray-600 mt-1">Data yang ditampilkan adalah untuk outlet <span id="outletNameText" class="font-medium text-green-700">loading</span>.</p>
             </div>
         </div>
         
         <!-- Right side - Date range picker -->
         <div class="relative">
-            <button id="dateRangeButton" class="flex items-center space-x-2 bg-gray-50 hover:bg-gray-100 px-3 py-2 rounded-lg transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days">
+            <button id="dateRangeButton" class="flex items-center space-x-2 bg-green-50 hover:bg-green-100 px-3 py-2 rounded-lg transition-colors border border-green-200">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days text-green-600">
                     <path d="M8 2v4"/>
                     <path d="M16 2v4"/>
                     <rect width="18" height="18" x="3" y="4" rx="2"/>
@@ -38,29 +38,29 @@
                     <path d="M12 18h.01"/>
                     <path d="M16 18h.01"/>
                 </svg>
-                <span id="dateRangeDisplay" class="text-sm font-medium text-gray-800">Loading...</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down">
+                <span id="dateRangeDisplay" class="text-sm font-medium text-green-800">Loading...</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down text-green-600">
                     <path d="m6 9 6 6 6-6"/>
                 </svg>
             </button>
             
             <!-- Date picker dropdown -->
-            <div id="datePickerDropdown" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-10 p-4">
+            <div id="datePickerDropdown" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-green-200 z-10 p-4">
                 <div class="flex justify-between items-center mb-4">
-                    <button id="prevMonth" class="p-1 rounded-full hover:bg-gray-100">
+                    <button id="prevMonth" class="p-1 rounded-full hover:bg-green-50 text-green-600">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left">
                             <path d="m15 18-6-6 6-6"/>
                         </svg>
                     </button>
-                    <h3 id="currentMonthYear" class="font-medium">Mei 2025</h3>
-                    <button id="nextMonth" class="p-1 rounded-full hover:bg-gray-100">
+                    <h3 id="currentMonthYear" class="font-medium text-green-800">Mei 2025</h3>
+                    <button id="nextMonth" class="p-1 rounded-full hover:bg-green-50 text-green-600">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right">
                             <path d="m9 18 6-6-6-6"/>
                         </svg>
                     </button>
                 </div>
                 
-                <div class="grid grid-cols-7 gap-1 text-center text-xs font-medium text-gray-500 mb-2">
+                <div class="grid grid-cols-7 gap-1 text-center text-xs font-medium text-green-600 mb-2">
                     <div>M</div>
                     <div>S</div>
                     <div>S</div>
@@ -74,25 +74,33 @@
                     <!-- Calendar days will be generated by JavaScript -->
                 </div>
                 
-                <div class="flex justify-between mt-4 pt-4 border-t border-gray-200">
-                    <button id="cancelDateRange" class="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded">Batal</button>
-                    <button id="applyDateRange" class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">Terapkan</button>
+                <div class="flex justify-between mt-4 pt-4 border-t border-green-200">
+                    <button id="cancelDateRange" class="px-3 py-1 text-sm text-gray-600 hover:bg-green-50 rounded">Batal</button>
+                    <button id="applyDateRange" class="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors">Terapkan</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 <!-- Stats Cards -->
 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
     <!-- Total Penjualan -->
-    <div class="bg-white rounded-lg p-4 card-shadow">
+    <div class="bg-white rounded-lg p-4 card-shadow border-l-4 border-emerald-500">
         <div class="flex justify-between items-start">
             <div>
                 <p class="text-sm text-gray-500">Total Penjualan</p>
-                <p class="text-xl font-bold" id="totalSales">Loading...</p>
+                <p class="text-xl font-bold text-emerald-700" id="totalSales">Loading...</p>
+                <p class="text-xs text-emerald-600 mt-1 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-up mr-1">
+                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                        <polyline points="17 6 23 6 23 12"/>
+                    </svg>
+                    <span id="salesGrowth">+12% dari bulan lalu</span>
+                </p>
             </div>
-            <div class="bg-orange-100 p-2 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-orange-500">
+            <div class="bg-emerald-100 p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500">
                     <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
                     <line x1="3" y1="6" x2="21" y2="6"></line>
                     <path d="M16 10a4 4 0 0 1-8 0"></path>
@@ -102,14 +110,21 @@
     </div>
     
     <!-- Transaksi -->
-    <div class="bg-white rounded-lg p-4 card-shadow">
+    <div class="bg-white rounded-lg p-4 card-shadow border-l-4 border-green-500">
         <div class="flex justify-between items-start">
             <div>
                 <p class="text-sm text-gray-500">Transaksi</p>
-                <p class="text-xl font-bold" id="totalOrders">Loading...</p>
+                <p class="text-xl font-bold text-green-700" id="totalOrders">Loading...</p>
+                <p class="text-xs text-green-600 mt-1 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-up mr-1">
+                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                        <polyline points="17 6 23 6 23 12"/>
+                    </svg>
+                    <span id="ordersGrowth">+8% dari bulan lalu</span>
+                </p>
             </div>
-            <div class="bg-blue-100 p-2 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500">
+            <div class="bg-green-100 p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-500">
                     <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
                     <line x1="1" y1="10" x2="23" y2="10"></line>
                 </svg>
@@ -118,14 +133,21 @@
     </div>
     
     <!-- Total Item Terjual -->
-    <div class="bg-white rounded-lg p-4 card-shadow">
+    <div class="bg-white rounded-lg p-4 card-shadow border-l-4 border-lime-500">
         <div class="flex justify-between items-start">
             <div>
                 <p class="text-sm text-gray-500">Total Item Terjual</p>
-                <p class="text-xl font-bold" id="totalItems">Loading...</p>
+                <p class="text-xl font-bold text-lime-700" id="totalItems">Loading...</p>
+                <p class="text-xs text-lime-600 mt-1 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-up mr-1">
+                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                        <polyline points="17 6 23 6 23 12"/>
+                    </svg>
+                    <span id="itemsGrowth">+15% dari bulan lalu</span>
+                </p>
             </div>
-            <div class="bg-green-100 p-2 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-500">
+            <div class="bg-lime-100 p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-lime-500">
                     <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
                     <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
                     <line x1="12" y1="22.08" x2="12" y2="12"></line>
@@ -135,14 +157,21 @@
     </div>
     
     <!-- Average Order Value -->
-    <div class="bg-white rounded-lg p-4 card-shadow">
+    <div class="bg-white rounded-lg p-4 card-shadow border-l-4 border-teal-500">
         <div class="flex justify-between items-start">
             <div>
                 <p class="text-sm text-gray-500">Rata-rata Nilai Order</p>
-                <p class="text-xl font-bold" id="averageOrder">Loading...</p>
+                <p class="text-xl font-bold text-teal-700" id="averageOrder">Loading...</p>
+                <p class="text-xs text-teal-600 mt-1 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-up mr-1">
+                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                        <polyline points="17 6 23 6 23 12"/>
+                    </svg>
+                    <span id="avgOrderGrowth">+5% dari bulan lalu</span>
+                </p>
             </div>
-            <div class="bg-purple-100 p-2 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-500">
+            <div class="bg-teal-100 p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-teal-500">
                     <line x1="12" y1="1" x2="12" y2="23"></line>
                     <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                 </svg>
@@ -155,39 +184,103 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- Left Column -->
     <div class="lg:col-span-2">
-    <!-- Overview with Bar Chart -->
-    <div class="bg-white rounded-lg p-4 card-shadow mb-6">
-        <h3 class="font-semibold text-gray-800 mb-4">Overview</h3>
-        <p class="text-sm text-gray-600 mb-2">Data penjualan untuk <span class="outlet-name">loading</span></p>
-        <p class="text-xl font-bold text-orange-500 mb-4" id="totalSalesOverview">Loading...</p>
-        
-        <!-- Bar Chart Container -->
-        <div class="relative h-64">
-            <canvas id="salesChart"></canvas>
+        <!-- Overview with Bar Chart -->
+        <div class="bg-white rounded-lg p-4 card-shadow mb-6 border border-green-50">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-semibold text-gray-800">Overview Penjualan</h3>
+                <div class="flex space-x-2">
+                    <button class="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-full font-medium">Harian</button>
+                    <button class="px-3 py-1 text-xs bg-white text-gray-600 border border-gray-200 rounded-full font-medium hover:bg-gray-50">Mingguan</button>
+                    <button class="px-3 py-1 text-xs bg-white text-gray-600 border border-gray-200 rounded-full font-medium hover:bg-gray-50">Bulanan</button>
+                </div>
+            </div>
+            <p class="text-sm text-gray-600 mb-2">Data penjualan untuk <span class="outlet-name font-medium text-green-700">loading</span></p>
+            <p class="text-xl font-bold text-emerald-600 mb-4" id="totalSalesOverview">Loading...</p>
+            
+            <!-- Bar Chart Container -->
+            <div class="relative h-64">
+                <canvas id="salesChart"></canvas>
+            </div>
         </div>
     </div>
-</div>
     
     <!-- Right Column -->
     <div class="lg:col-span-1">
         <!-- Penjualan Terlaris -->
-        <div class="bg-white rounded-lg p-4 card-shadow">
-            <h3 class="font-semibold text-gray-800 mb-4">Penjualan Terlaris</h3>
-            <p class="text-sm text-gray-600 mb-2">Produk terlaris</p>
+        <div class="bg-white rounded-lg p-4 card-shadow border border-green-50">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-semibold text-gray-800">Produk Terlaris</h3>
+                <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">7 hari terakhir</span>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Top 5 produk berdasarkan penjualan</p>
             
-            <div class="space-y-3" id="topProductsList">
+            <div class="space-y-4" id="topProductsList">
                 <!-- Top products will be inserted here -->
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="font-medium">Loading...</p>
-                        <p class="text-sm text-gray-500">Qty: -</p>
+                <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center mr-3">
+                            <span class="text-white text-xs font-bold">1</span>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-800">Loading...</p>
+                            <p class="text-xs text-gray-500">Qty: -</p>
+                        </div>
                     </div>
-                    <p class="font-bold text-orange-500">Rp -</p>
+                    <p class="font-bold text-emerald-600">Rp -</p>
                 </div>
+                
+                <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-3">
+                            <span class="text-white text-xs font-bold">2</span>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-800">Loading...</p>
+                            <p class="text-xs text-gray-500">Qty: -</p>
+                        </div>
+                    </div>
+                    <p class="font-bold text-green-600">Rp -</p>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-lime-500 rounded-full flex items-center justify-center mr-3">
+                            <span class="text-white text-xs font-bold">3</span>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-800">Loading...</p>
+                            <p class="text-xs text-gray-500">Qty: -</p>
+                        </div>
+                    </div>
+                    <p class="font-bold text-lime-600">Rp -</p>
+                </div>
+            </div>
+            
+            <div class="mt-4 pt-4 border-t border-gray-100">
+                <button class="w-full py-2 text-sm text-green-600 hover:bg-green-50 rounded-lg transition-colors flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bar-chart-3 mr-2">
+                        <path d="M3 3v18h18"/>
+                        <path d="M18 17V9"/>
+                        <path d="M13 17V5"/>
+                        <path d="M8 17v-3"/>
+                    </svg>
+                    Lihat Laporan Lengkap
+                </button>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+.card-shadow {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.card-shadow:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+</style>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
@@ -449,8 +542,8 @@
                 datasets: [{
                     label: 'Penjualan (Rp)',
                     data: salesData,
-                    backgroundColor: 'rgba(249, 115, 22, 0.7)', // Orange color with transparency
-                    borderColor: 'rgba(249, 115, 22, 1)', // Solid orange for border
+                    backgroundColor: 'rgba(59, 107, 13, 0.7)', // Hijau utama dengan transparency
+                    borderColor: 'rgba(59, 107, 13, 1)', // Solid hijau untuk border
                     borderWidth: 1
                 }]
             },
