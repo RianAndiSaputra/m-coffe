@@ -20,12 +20,12 @@
                     <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
                 </span>
                 <input type="text" id="searchInput" placeholder="Pencarian...."
-                    class="w-full pl-10 pr-4 py-3 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" />
+                    class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" />
             </div>
 
             <!-- Tombol Tambah Staff -->
             <a href="#" onclick="openModalTambahStaff()"
-                class="px-5 py-3 text-base font-medium text-white bg-orange-500 rounded-lg hover:bg-orange-600 shadow">
+                class="px-5 py-3 text-base font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 shadow transition-colors">
                 + Tambah Staff
             </a>
         </div>
@@ -77,10 +77,10 @@
                     <p class="text-sm text-gray-600">Anda yakin ingin menghapus staff ini? Data yang dihapus tidak dapat dikembalikan.</p>
                 </div>
                 <div class="mt-4 flex justify-end gap-3">
-                    <button id="btnBatalHapusStaff" type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none">
+                    <button id="btnBatalHapusStaff" type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none transition-colors">
                         Batal
                     </button>
-                    <button id="btnKonfirmasiHapusStaff" type="button" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md shadow-sm hover:bg-red-700 focus:outline-none">
+                    <button id="btnKonfirmasiHapusStaff" type="button" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md shadow-sm hover:bg-red-700 focus:outline-none transition-colors">
                         Hapus
                     </button>
                 </div>
@@ -361,7 +361,7 @@
                     <div class="flex flex-col items-center justify-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
-                            class="animate-spin text-orange-500">
+                            class="animate-spin text-green-600">
                             <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
                         </svg>
                         <span class="text-gray-500">Memuat data staff...</span>
