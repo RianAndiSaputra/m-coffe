@@ -3,19 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kifa Bakery - Login</title>
+    <title>M-Coffe - Login</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        .btn-orange {
-            background-color: #3b6b0d;
+        :root {
+            --primary-color: #3b6b0d;
+            --primary-dark: #335e0c;
+            --accent-color: #d4a574;
+            --text-light: #6b7280;
+            --text-dark: #1f2937;
         }
-        .btn-orange:hover {
-            background-color: #335e0c;
-        }
+        
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Inter', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            overflow: hidden;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 107, 13, 0.3);
+        }
+        
+        .btn-secondary {
+            background-color: white;
+            border: 1px solid #e5e7eb;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #f9fafb;
+            border-color: #d1d5db;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .input-field {
+            transition: all 0.3s ease;
+            border: 1px solid #d1d5db;
+        }
+        
+        .input-field:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 107, 13, 0.1);
+        }
+        
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .logo {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 380px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent-color) 100%);
+        }
+        
+        .title {
+            color: var(--text-dark);
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        
+        .subtitle {
+            margin: 0;
+            padding: 0;
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 1rem 0;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background-color: #e5e7eb;
+        }
+        
+        .divider-text {
+            padding: 0 1rem;
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+        
+        .footer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 14px;
+            color: #555;
+            margin-top: 1rem;
+        }
+        
+        .footer-logo {
+            height: 80px;
+            width: auto;
+            vertical-align: middle;
         }
         
         /* Notification styles */
@@ -41,12 +173,12 @@
         }
         
         .notification.success {
-            background-color:#3b6b0d; /* Orange with transparency */
+            background-color: var(--primary-color);
             color: white;
         }
         
         .notification.error {
-            background-color: rgba(239, 68, 68, 0.9); /* Red with transparency */
+            background-color: rgba(239, 68, 68, 0.9);
             color: white;
         }
         
@@ -92,19 +224,19 @@
         .faceid-content {
             background-color: white;
             border-radius: 0.75rem;
-            padding: 2rem;
+            padding: 1.5rem;
             width: 90%;
-            max-width: 500px;
+            max-width: 450px;
             text-align: center;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
         .faceid-camera-container {
             width: 100%;
-            height: 300px;
+            height: 250px;
             background-color: #f3f4f6;
             border-radius: 0.5rem;
-            margin: 1.5rem 0;
+            margin: 1rem 0;
             overflow: hidden;
             position: relative;
         }
@@ -140,12 +272,12 @@
         }
 
         .faceid-status {
-            margin-top: 1rem;
+            margin-top: 0.75rem;
             font-weight: 500;
         }
 
         .faceid-success {
-            color: #3b6b0d;
+            color: var(--primary-color);
         }
 
         .faceid-error {
@@ -158,16 +290,32 @@
             height: 20px;
             border: 3px solid rgba(59, 107, 13, 0.3);
             border-radius: 50%;
-            border-top-color: #3b6b0d;
+            border-top-color: var(--primary-color);
             animation: spin 1s ease-in-out infinite;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 1.25rem;
+            }
+            
+            .logo {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .footer-logo {
+                height: 60px;
+            }
+        }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
+<body>
     <!-- Notification container -->
     <div id="notification-container"></div>
 
@@ -188,7 +336,7 @@
                 <span class="ml-2">Menginisialisasi kamera...</span>
             </div>
             
-            <div class="mt-6 flex justify-center space-x-3">
+            <div class="mt-4 flex justify-center space-x-3">
                 <button 
                     type="button" 
                     class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
@@ -198,7 +346,7 @@
                 </button>
                 <button 
                     type="button" 
-                    class="px-4 py-2 btn-orange text-white rounded-lg hover:shadow-md transition"
+                    class="px-4 py-2 btn-primary text-white rounded-lg hover:shadow-md transition"
                     id="faceidRetry"
                     style="display: none;"
                 >
@@ -208,47 +356,45 @@
         </div>
     </div>
 
-    <!-- Logo and Title above the card -->
-    <div class="text-center mb-8">
-        <div class="flex justify-center">
-            <img src="/images/m-coffe.png" alt="M-Coffee Logo" class="w-60 h-60 object-contain sidebar-icon m-0 p-0" />
-        </div>
-        <p class="text-gray-600 mt-0 leading-tight">Sistem Manajemen Bisnis Terintegrasi</p>
+    <!-- Logo and Title -->
+    <div class="logo-container">
+        <img src="/images/m-coffe.png" alt="M-Coffee Logo" class="logo" />
+        <p class="subtitle">Sistem Manajemen Bisnis Terintegrasi</p>
     </div>
 
     <!-- Login Card -->
-    <div class="bg-white p-4 pt-4 pb-2 rounded-lg shadow-lg w-full max-w-md">
-        <div class="mb-6">
-            <h2 class="text-2xl font-semibold text-gray-700 text-center">Login</h2>
-            <p class="text-gray-500 text-center mt-2">Masukkan kredensial Anda untuk mengakses sistem</p>
+    <div class="login-card">
+        <div class="mb-4">
+            <h2 class="title text-xl text-center">Masuk ke Akun Anda</h2>
+            <p class="subtitle text-center">Gunakan kredensial Anda untuk mengakses sistem</p>
         </div>
 
         <form id="loginForm">
             @csrf
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="email">Email</label>
+            <div class="mb-3">
+                <label class="block text-gray-700 text-sm font-medium mb-2" for="email">Email</label>
                 <div class="relative">
                     <input 
                         type="email" 
                         id="email" 
                         name="email" 
                         placeholder="Masukkan email"
-                        class="w-full px-4 py-3 pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                        class="w-full px-4 py-3 pl-10 input-field rounded-lg focus:outline-none transition"
                         required
                     >
                     <i data-lucide="user" class="absolute left-3 top-3 text-gray-400 w-5 h-5"></i>
                 </div>
             </div>
 
-            <div class="mb-6">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="password">Password</label>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-2" for="password">Password</label>
                 <div class="relative">
                     <input 
                         type="password" 
                         id="password" 
                         name="password" 
                         placeholder="Masukkan password"
-                        class="w-full px-4 py-3 pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                        class="w-full px-4 py-3 pl-10 input-field rounded-lg focus:outline-none transition"
                         required
                     >
                     <i data-lucide="lock" class="absolute left-3 top-3 text-gray-400 w-5 h-5"></i>
@@ -256,28 +402,32 @@
                 </div>
             </div>
 
-            <div class="mb-6 flex items-center">
+            <div class="mb-4 flex items-center">
                 <input 
                     type="checkbox" 
                     id="remember" 
                     name="remember"
-                    class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+                    class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
                 >
                 <label for="remember" class="ml-2 block text-sm text-gray-700">Ingat saya</label>
             </div>
 
             <button 
                 type="submit" 
-                class="w-full btn-orange text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-300 hover:shadow-md mb-4"
+                class="w-full btn-primary font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition mb-3"
             >
-                Login
+                Masuk
             </button>
+
+            <div class="divider">
+                <span class="divider-text">Atau</span>
+            </div>
 
             <!-- Face ID Login Button -->
             <button 
                 type="button" 
                 id="faceidLoginBtn"
-                class="w-full bg-white border border-gray-300 text-gray-700 font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-300 hover:bg-gray-50 hover:shadow-md flex items-center justify-center"
+                class="w-full btn-secondary font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition flex items-center justify-center"
             >
                 <i data-lucide="scan-face" class="w-5 h-5 mr-2"></i>
                 Login dengan Face ID
@@ -285,8 +435,11 @@
         </form>
     </div>
 
-    <div class="mt-8 text-center text-sm text-gray-500">
-        © Copyright <span class="font-medium"><img src="/images/doa-ibuk.png" alt="IT Solution Logo" class="inline w-24 h-6 object-contain" /></span>
+    <div class="footer">
+        © Copyright 
+        <span class="font-medium">
+            <img src="/images/doa-ibuk.png" alt="IT Solution Logo" class="footer-logo" />
+        </span>
     </div>
 
     <script>
