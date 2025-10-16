@@ -9,16 +9,17 @@
 </div>
 
 <!-- Include Modals -->
-@include('partials.stok.bahan-baku.modal-konfirmasi-hapus')
-@include('partials.stok.bahan-baku.modal-tambah-bahan-baku')
-@include('partials.stok.bahan-baku.modal-edit-bahan-baku')
+@include('partials.stok.modal-konfirmasi-hapus')
+@include('partials.stok.modal-tambah-bahan-baku')
+@include('partials.stok.modal-tambah-stok')
+@include('partials.stok.modal-riwayat-stok')
 
 <div class="p-6">
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
         <div>
             <h1 class="text-2xl font-bold text-gray-800">Manajemen Bahan Baku</h1>
-            <p class="text-gray-600 mt-1">Kelola semua bahan baku untuk produksi minuman</p>
+            <p class="text-gray-600 mt-1">Kelola semua bahan baku dengan sistem average cost</p>
         </div>
         <button id="btnTambahBahanBaku" class="mt-4 md:mt-0 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -26,6 +27,17 @@
             </svg>
             Tambah Bahan Baku
         </button>
+    </div>
+
+    <!-- Card: Outlet Info -->
+    <div class="bg-white rounded-md p-4 shadow-md mb-4 flex flex-col md:flex-row md:items-center md:justify-between">
+        <div class="mb-3 md:mb-0 flex items-start gap-2">
+            <i data-lucide="store" class="w-5 h-5 text-gray-600"></i>
+            <div>
+                <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2 outlet-name">Outlet Aktif: Loading...</h2>
+                <p class="text-sm text-gray-600 outlet-address">Memuat data outlet...</p>
+            </div>
+        </div>
     </div>
 
     <!-- Stats Cards -->
@@ -77,8 +89,8 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="text-sm text-gray-600">Bahan Aktif</p>
-                    <p class="text-2xl font-bold text-gray-800" id="bahanAktif">0</p>
+                    <p class="text-sm text-gray-600">Harga Rata-rata</p>
+                    <p class="text-2xl font-bold text-gray-800" id="hargaRataRata">Rp 0</p>
                 </div>
             </div>
         </div>
@@ -109,14 +121,6 @@
                     <option value="inactive">Nonaktif</option>
                 </select>
             </div>
-            <div class="flex items-center gap-2">
-                <button id="btnExport" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    Export
-                </button>
-            </div>
         </div>
     </div>
 
@@ -129,83 +133,71 @@
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nama Bahan</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Kategori</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Stok</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Satuan</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Harga Beli</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Harga Rata-rata</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Total Nilai</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="bahanBakuTableBody" class="bg-white divide-y divide-gray-200">
                     <!-- Data will be populated by JavaScript -->
-                    <tr>
-                        <td colspan="7" class="px-6 py-8 text-center">
-                            <div class="flex flex-col items-center justify-center text-gray-500">
-                                <svg class="w-16 h-16 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                                </svg>
-                                <p class="text-lg font-medium mb-2">Belum ada bahan baku</p>
-                                <p class="text-sm mb-4">Mulai dengan menambahkan bahan baku pertama Anda</p>
-                                <button id="btnTambahPertama" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200">
-                                    + Tambah Bahan Baku Pertama
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
                 </tbody>
             </table>
-        </div>
-    </div>
-
-    <!-- Pagination -->
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between mt-6 gap-4">
-        <div class="text-sm text-gray-600">
-            Menampilkan <span id="showingFrom">0</span> - <span id="showingTo">0</span> dari <span id="totalItems">0</span> bahan baku
-        </div>
-        <div class="flex gap-2" id="paginationContainer">
-            <!-- Pagination buttons will be added here -->
         </div>
     </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Sample data - replace with actual data from your backend
+    // Sample data dengan sistem average cost
     let bahanBakuData = [
         {
             id: 1,
             name: 'Biji Kopi Arabica',
             category: 'kopi',
-            stock: 5.5,
+            stock: 8.5,
             unit: 'kg',
-            buy_price: 120000,
-            min_stock: 1,
+            min_stock: 2,
             is_active: true,
             supplier: 'Supplier A',
-            sku: 'BBK001'
+            code: 'BBK001',
+            batches: [
+                { id: 1, jumlah: 5, harga_beli: 120000, tanggal_masuk: '2024-01-10', sisa_stok: 3.5 },
+                { id: 2, jumlah: 3, harga_beli: 125000, tanggal_masuk: '2024-01-15', sisa_stok: 3 },
+                { id: 3, jumlah: 2, harga_beli: 130000, tanggal_masuk: '2024-01-20', sisa_stok: 2 }
+            ]
         },
         {
             id: 2,
             name: 'Susu Segar',
             category: 'susu',
-            stock: 12,
+            stock: 15,
             unit: 'l',
-            buy_price: 25000,
             min_stock: 5,
             is_active: true,
             supplier: 'Supplier B',
-            sku: 'BBS002'
+            code: 'BBS002',
+            batches: [
+                { id: 1, jumlah: 10, harga_beli: 25000, tanggal_masuk: '2024-01-12', sisa_stok: 5 },
+                { id: 2, jumlah: 8, harga_beli: 26000, tanggal_masuk: '2024-01-18', sisa_stok: 8 },
+                { id: 3, jumlah: 2, harga_beli: 25500, tanggal_masuk: '2024-01-22', sisa_stok: 2 }
+            ]
         },
         {
             id: 3,
             name: 'Gula Pasir',
             category: 'gula',
-            stock: 8.2,
+            stock: 12.2,
             unit: 'kg',
-            buy_price: 15000,
             min_stock: 3,
             is_active: true,
             supplier: 'Supplier C',
-            sku: 'BBG003'
+            code: 'BBG003',
+            batches: [
+                { id: 1, jumlah: 8, harga_beli: 15000, tanggal_masuk: '2024-01-08', sisa_stok: 4.2 },
+                { id: 2, jumlah: 5, harga_beli: 15500, tanggal_masuk: '2024-01-16', sisa_stok: 5 },
+                { id: 3, jumlah: 3, harga_beli: 15200, tanggal_masuk: '2024-01-25', sisa_stok: 3 }
+            ]
         }
     ];
 
@@ -213,21 +205,166 @@ document.addEventListener('DOMContentLoaded', function() {
     initializePage();
 
     function initializePage() {
+        updateOutletInfo();
         updateStats();
         renderTable();
         setupEventListeners();
     }
 
+    // ============================
+    // OUTLET MANAGEMENT FUNCTIONS
+    // ============================
+
+    // Function to get currently selected outlet ID
+    function getSelectedOutletId() {
+        // First check URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const outletIdFromUrl = urlParams.get('outlet_id');
+        
+        if (outletIdFromUrl) {
+            return outletIdFromUrl;
+        }
+        
+        // Then check localStorage
+        const savedOutletId = localStorage.getItem('selectedOutletId');
+        
+        if (savedOutletId) {
+            return savedOutletId;
+        }
+        
+        // Default to outlet ID 1 if nothing is found
+        return 1;
+    }
+
+    // Update outlet information
+    async function updateOutletInfo() {
+        try {
+            const outletId = getSelectedOutletId();
+            
+            // Fetch outlet details from API
+            const response = await fetch(`/api/outlets/${outletId}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Accept': 'application/json'
+                }
+            });
+            
+            const { data, success } = await response.json();
+            
+            if (success && data) {
+                const outletElements = document.querySelectorAll('.outlet-name');
+                outletElements.forEach(el => {
+                    el.textContent = `Outlet Aktif: ${data.name}`;
+                });
+                
+                const addressElements = document.querySelectorAll('.outlet-address');
+                addressElements.forEach(el => {
+                    el.textContent = data.address || 'Alamat tidak tersedia';
+                });
+            } else {
+                throw new Error('Data outlet tidak ditemukan');
+            }
+        } catch (error) {
+            console.error('Failed to fetch outlet details:', error);
+            
+            // Fallback: show basic outlet info
+            const outletElements = document.querySelectorAll('.outlet-name');
+            outletElements.forEach(el => {
+                el.textContent = `Outlet Aktif: Outlet ${getSelectedOutletId()}`;
+            });
+            
+            const addressElements = document.querySelectorAll('.outlet-address');
+            addressElements.forEach(el => {
+                el.textContent = 'Gagal memuat data outlet';
+            });
+        }
+    }
+
+    // Connect to outlet selection dropdown for real-time updates
+    function connectOutletSelection() {
+        // Listen for outlet changes in localStorage
+        window.addEventListener('storage', function(event) {
+            if (event.key === 'selectedOutletId') {
+                // Update outlet info when outlet changes
+                updateOutletInfo();
+                
+                // Show notification about outlet change
+                showNotification(`Outlet berhasil diubah`, 'success');
+                
+                // You can also reload the data if needed
+                // updateStats();
+                // renderTable();
+            }
+        });
+        
+        // Also watch for clicks on outlet items in dropdown (if exists)
+        const outletListContainer = document.getElementById('outletListContainer');
+        if (outletListContainer) {
+            outletListContainer.addEventListener('click', function(event) {
+                // Find the clicked li element
+                let targetElement = event.target;
+                while (targetElement && targetElement !== outletListContainer && targetElement.tagName !== 'LI') {
+                    targetElement = targetElement.parentElement;
+                }
+                
+                // If we clicked on an outlet list item
+                if (targetElement && targetElement.tagName === 'LI') {
+                    // Update outlet info after a short delay
+                    setTimeout(() => {
+                        updateOutletInfo();
+                        showNotification(`Outlet berhasil diubah`, 'success');
+                    }, 100);
+                }
+            });
+        }
+        
+        // Listen for custom outlet change event (if your app uses it)
+        window.addEventListener('outletChanged', function(event) {
+            updateOutletInfo();
+            showNotification(`Outlet berhasil diubah ke ${event.detail.outletName}`, 'success');
+        });
+    }
+
+    // ============================
+    // INVENTORY MANAGEMENT FUNCTIONS
+    // ============================
+
+    // Fungsi untuk menghitung harga rata-rata
+    function hitungHargaRataRata(bahan) {
+        if (!bahan.batches || bahan.batches.length === 0) {
+            return 0;
+        }
+        
+        let totalNilai = 0;
+        let totalStok = 0;
+        
+        bahan.batches.forEach(batch => {
+            totalNilai += batch.sisa_stok * batch.harga_beli;
+            totalStok += batch.sisa_stok;
+        });
+        
+        return totalStok > 0 ? totalNilai / totalStok : 0;
+    }
+
+    // Fungsi untuk menghitung total nilai stok
+    function hitungTotalNilai(bahan) {
+        const hargaRata = hitungHargaRataRata(bahan);
+        return bahan.stock * hargaRata;
+    }
+
     function updateStats() {
         const totalBahanBaku = bahanBakuData.length;
-        const totalInvestasi = bahanBakuData.reduce((sum, item) => sum + (item.buy_price * item.stock), 0);
+        const totalInvestasi = bahanBakuData.reduce((sum, item) => sum + hitungTotalNilai(item), 0);
         const stokMenipis = bahanBakuData.filter(item => item.stock <= item.min_stock).length;
-        const bahanAktif = bahanBakuData.filter(item => item.is_active).length;
+        
+        // Hitung harga rata-rata semua bahan
+        const totalHargaRata = bahanBakuData.reduce((sum, item) => sum + hitungHargaRataRata(item), 0);
+        const avgHargaRata = totalBahanBaku > 0 ? totalHargaRata / totalBahanBaku : 0;
 
         document.getElementById('totalBahanBaku').textContent = totalBahanBaku;
         document.getElementById('totalInvestasi').textContent = formatRupiah(totalInvestasi);
         document.getElementById('stokMenipis').textContent = stokMenipis;
-        document.getElementById('bahanAktif').textContent = bahanAktif;
+        document.getElementById('hargaRataRata').textContent = formatRupiah(avgHargaRata);
     }
 
     function renderTable(data = bahanBakuData) {
@@ -252,9 +389,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let html = '';
         data.forEach(item => {
+            const hargaRata = hitungHargaRataRata(item);
+            const totalNilai = hitungTotalNilai(item);
             const statusClass = item.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
             const statusText = item.is_active ? 'Aktif' : 'Nonaktif';
             const stokWarning = item.stock <= item.min_stock ? 'text-red-600 font-semibold' : 'text-gray-600';
+            const batchCount = item.batches ? item.batches.length : 0;
             
             html += `
                 <tr class="hover:bg-gray-50 transition-colors duration-150">
@@ -267,7 +407,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                             <div>
                                 <div class="text-sm font-medium text-gray-900">${item.name}</div>
-                                <div class="text-sm text-gray-500">${item.sku}</div>
+                                <div class="text-sm text-gray-500">${item.code}</div>
+                                <div class="text-xs text-blue-600 cursor-pointer hover:underline" onclick="showRiwayatStok(${item.id})">
+                                    ${batchCount} batch stok
+                                </div>
                             </div>
                         </div>
                     </td>
@@ -279,9 +422,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="text-sm ${stokWarning}">${item.stock} ${item.unit}</div>
                         ${item.stock <= item.min_stock ? '<div class="text-xs text-red-500">Stok menipis!</div>' : ''}
+                        <button onclick="showTambahStokModal(${item.id}, '${item.name}')" class="text-xs text-green-600 hover:text-green-700 mt-1">
+                            + Tambah Stok
+                        </button>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${item.unit}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">${formatRupiah(item.buy_price)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">${formatRupiah(hargaRata)}</div>
+                        <div class="text-xs text-gray-500">/ ${item.unit}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        ${formatRupiah(totalNilai)}
+                    </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">
                             ${statusText}
@@ -289,11 +440,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div class="flex items-center space-x-2">
-                            <button class="text-blue-600 hover:text-blue-900 edit-btn" data-id="${item.id}">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                </svg>
-                            </button>
                             <button class="text-red-600 hover:text-red-900 delete-btn" data-id="${item.id}">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -332,26 +478,17 @@ document.addEventListener('DOMContentLoaded', function() {
     function setupEventListeners() {
         // Tambah bahan baku buttons
         document.getElementById('btnTambahBahanBaku').addEventListener('click', showTambahModal);
-        document.getElementById('btnTambahPertama').addEventListener('click', showTambahModal);
 
         // Search and filter
         document.getElementById('searchBahanBaku').addEventListener('input', handleSearch);
         document.getElementById('filterKategori').addEventListener('change', handleFilter);
         document.getElementById('filterStatus').addEventListener('change', handleFilter);
 
-        // Export button
-        document.getElementById('btnExport').addEventListener('click', handleExport);
+        // Connect outlet selection
+        connectOutletSelection();
     }
 
     function attachTableEventListeners() {
-        // Edit buttons
-        document.querySelectorAll('.edit-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = this.getAttribute('data-id');
-                showEditModal(id);
-            });
-        });
-
         // Delete buttons
         document.querySelectorAll('.delete-btn').forEach(btn => {
             btn.addEventListener('click', function() {
@@ -362,30 +499,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function showTambahModal() {
-        // This will be handled by the modal partial
         const modal = document.getElementById('modalTambahBahanBaku');
         modal.classList.remove('hidden');
-    }
-
-    function showEditModal(id) {
-        const item = bahanBakuData.find(b => b.id == id);
-        if (item) {
-            // This will be handled by the modal partial
-            const modal = document.getElementById('modalEditBahanBaku');
-            // Populate form with item data
-            document.getElementById('editBahanBakuId').value = item.id;
-            document.getElementById('editNama').value = item.name;
-            document.getElementById('editSku').value = item.sku;
-            document.getElementById('editKategori').value = item.category;
-            document.getElementById('editStok').value = item.stock;
-            document.getElementById('editSatuan').value = item.unit;
-            document.getElementById('editHargaBeli').value = item.buy_price;
-            document.getElementById('editStokMinimum').value = item.min_stock;
-            document.getElementById('editSupplier').value = item.supplier;
-            document.getElementById('editStatus').value = item.is_active ? '1' : '0';
-            
-            modal.classList.remove('hidden');
-        }
+        document.getElementById('tambahBahanBakuForm').reset();
     }
 
     function showDeleteModal(id) {
@@ -398,11 +514,155 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Global functions untuk modal
+    window.closeModal = function(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.classList.add('hidden');
+    };
+
+    window.closeTambahStokModal = function() {
+        closeModal('modalTambahStok');
+        document.getElementById('tambahStokForm').reset();
+    };
+
+    window.showTambahStokModal = function(id, nama) {
+        const item = bahanBakuData.find(b => b.id == id);
+        if (item) {
+            document.getElementById('tambahStokBahanId').value = id;
+            document.getElementById('modalBahanNama').textContent = nama;
+            document.getElementById('currentStock').textContent = `${item.stock} ${item.unit}`;
+            document.getElementById('currentAvgPrice').textContent = formatRupiah(hitungHargaRataRata(item));
+            
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.querySelector('#tambahStokForm input[name="tanggal_masuk"]').value = today;
+            
+            const modal = document.getElementById('modalTambahStok');
+            modal.classList.remove('hidden');
+        }
+    };
+
+    window.showRiwayatStok = function(id) {
+        const item = bahanBakuData.find(b => b.id == id);
+        if (item) {
+            document.getElementById('riwayatBahanNama').textContent = item.name;
+            
+            const tbody = document.getElementById('riwayatStokTableBody');
+            let html = '';
+            
+            if (item.batches && item.batches.length > 0) {
+                item.batches.forEach((batch, index) => {
+                    html += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3 text-sm text-gray-900">Batch #${batch.id}</td>
+                            <td class="px-4 py-3 text-sm text-gray-900">${batch.tanggal_masuk}</td>
+                            <td class="px-4 py-3 text-sm text-gray-900">${batch.jumlah} ${item.unit}</td>
+                            <td class="px-4 py-3 text-sm text-gray-900">${formatRupiah(batch.harga_beli)}</td>
+                            <td class="px-4 py-3 text-sm text-gray-900">${batch.sisa_stok} ${item.unit}</td>
+                            <td class="px-4 py-3 text-sm font-medium text-gray-900">${formatRupiah(batch.sisa_stok * batch.harga_beli)}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                html = `<tr><td colspan="6" class="px-4 py-3 text-sm text-gray-500 text-center">Tidak ada riwayat stok</td></tr>`;
+            }
+            
+            tbody.innerHTML = html;
+            
+            // Update summary
+            const totalNilai = hitungTotalNilai(item);
+            const hargaRata = hitungHargaRataRata(item);
+            document.getElementById('totalNilaiStok').textContent = formatRupiah(totalNilai);
+            document.getElementById('hargaRataSummary').textContent = formatRupiah(hargaRata);
+            
+            const modal = document.getElementById('modalRiwayatStok');
+            modal.classList.remove('hidden');
+        }
+    };
+
+    window.simpanTambahStok = function() {
+        const form = document.getElementById('tambahStokForm');
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        
+        if (!data.jumlah || !data.harga_beli || !data.tanggal_masuk) {
+            showNotification('Harap lengkapi semua field!', 'error');
+            return;
+        }
+        
+        const bahanId = parseInt(data.bahan_baku_id);
+        const bahanIndex = bahanBakuData.findIndex(item => item.id === bahanId);
+        
+        if (bahanIndex !== -1) {
+            const newBatch = {
+                id: Date.now(), // Simple ID generation
+                jumlah: parseFloat(data.jumlah),
+                harga_beli: parseInt(data.harga_beli),
+                tanggal_masuk: data.tanggal_masuk,
+                sisa_stok: parseFloat(data.jumlah)
+            };
+            
+            // Add new batch
+            if (!bahanBakuData[bahanIndex].batches) {
+                bahanBakuData[bahanIndex].batches = [];
+            }
+            bahanBakuData[bahanIndex].batches.push(newBatch);
+            
+            // Update total stock
+            bahanBakuData[bahanIndex].stock += parseFloat(data.jumlah);
+            
+            updateStats();
+            renderTable();
+            showNotification('Stok berhasil ditambahkan!', 'success');
+            closeTambahStokModal();
+        }
+    };
+
+    window.hapusBahanBaku = function() {
+        const id = document.getElementById('hapusItemId').value;
+        bahanBakuData = bahanBakuData.filter(item => item.id != id);
+        updateStats();
+        renderTable();
+        showNotification('Bahan baku berhasil dihapus', 'success');
+        closeModal('modalKonfirmasiHapus');
+    };
+
+    window.simpanBahanBakuBaru = function() {
+        const form = document.getElementById('tambahBahanBakuForm');
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        
+        if (!data.name || !data.code || !data.category || !data.unit || !data.min_stock || !data.supplier) {
+            showNotification('Harap lengkapi semua field!', 'error');
+            return;
+        }
+        
+        const newId = bahanBakuData.length > 0 ? Math.max(...bahanBakuData.map(item => item.id)) + 1 : 1;
+        const newItem = {
+            id: newId,
+            name: data.name,
+            category: data.category,
+            stock: 0, // Start with 0 stock
+            unit: data.unit,
+            min_stock: parseFloat(data.min_stock),
+            is_active: data.is_active === '1',
+            supplier: data.supplier,
+            code: data.code,
+            batches: [] // Empty batches array
+        };
+        
+        bahanBakuData.push(newItem);
+        updateStats();
+        renderTable();
+        showNotification('Bahan baku berhasil ditambahkan', 'success');
+        closeModal('modalTambahBahanBaku');
+    };
+
     function handleSearch() {
         const searchTerm = document.getElementById('searchBahanBaku').value.toLowerCase();
         const filteredData = bahanBakuData.filter(item => 
             item.name.toLowerCase().includes(searchTerm) ||
-            item.sku.toLowerCase().includes(searchTerm)
+            item.code.toLowerCase().includes(searchTerm)
         );
         renderTable(filteredData);
     }
@@ -423,11 +683,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         renderTable(filteredData);
-    }
-
-    function handleExport() {
-        // Implement export functionality
-        showNotification('Fitur export akan segera tersedia', 'info');
     }
 
     function showNotification(message, type = 'info') {
@@ -466,60 +721,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }, 5000);
     }
-
-    // Global functions for modals to call
-    window.hapusBahanBaku = function() {
-        const id = document.getElementById('hapusItemId').value;
-        bahanBakuData = bahanBakuData.filter(item => item.id != id);
-        updateStats();
-        renderTable();
-        showNotification('Bahan baku berhasil dihapus', 'success');
-    };
-
-    window.simpanBahanBaku = function(formData) {
-        const newId = Math.max(...bahanBakuData.map(item => item.id)) + 1;
-        const newItem = {
-            id: newId,
-            name: formData.name,
-            category: formData.category,
-            stock: parseFloat(formData.stock),
-            unit: formData.unit,
-            buy_price: parseInt(formData.buy_price),
-            min_stock: parseFloat(formData.min_stock),
-            is_active: formData.is_active === '1',
-            supplier: formData.supplier,
-            sku: formData.sku
-        };
-        
-        bahanBakuData.push(newItem);
-        updateStats();
-        renderTable();
-        showNotification('Bahan baku berhasil ditambahkan', 'success');
-    };
-
-    window.updateBahanBaku = function(formData) {
-        const id = parseInt(formData.id);
-        const index = bahanBakuData.findIndex(item => item.id === id);
-        
-        if (index !== -1) {
-            bahanBakuData[index] = {
-                ...bahanBakuData[index],
-                name: formData.name,
-                category: formData.category,
-                stock: parseFloat(formData.stock),
-                unit: formData.unit,
-                buy_price: parseInt(formData.buy_price),
-                min_stock: parseFloat(formData.min_stock),
-                is_active: formData.is_active === '1',
-                supplier: formData.supplier,
-                sku: formData.sku
-            };
-            
-            updateStats();
-            renderTable();
-            showNotification('Bahan baku berhasil diperbarui', 'success');
-        }
-    };
 });
 </script>
 @endsection
