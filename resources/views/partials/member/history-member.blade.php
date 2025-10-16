@@ -4,7 +4,7 @@
         <!-- Modal Header -->
         <div class="flex items-center justify-between p-4 border-b">
             <div class="flex items-center gap-3">
-                <i data-lucide="history" class="w-6 h-6 text-orange-500"></i>
+                <i data-lucide="history" class="w-6 h-6 text-[#3b6b0d]"></i>
                 <h3 class="text-lg font-semibold text-gray-900">Riwayat Transaksi Member</h3>
             </div>
             <button onclick="closeModalHistory()" class="p-1 rounded-full hover:bg-gray-100">
@@ -26,7 +26,7 @@
                     </div>
                 </div>
                 <div class="flex items-end">
-                    <button onclick="loadMemberHistory()" class="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 flex items-center gap-2">
+                    <button onclick="loadMemberHistory()" class="px-4 py-2 bg-[#3b6b0d] text-white rounded-md hover:bg-[#335e0c]flex items-center gap-2">
                         <i data-lucide="filter" class="w-4 h-4"></i> Filter
                     </button>
                 </div>
@@ -97,7 +97,7 @@
         <!-- Modal Header -->
         <div class="flex items-center justify-between p-4 border-b">
             <div class="flex items-center gap-3">
-                <i data-lucide="receipt" class="w-6 h-6 text-orange-500"></i>
+                <i data-lucide="receipt" class="w-6 h-6 text-[#3b6b0d]"></i>
                 <h3 class="text-lg font-semibold text-gray-900">Detail Transaksi</h3>
             </div>
             <button onclick="closeModalDetailOrder()" class="p-1 rounded-full hover:bg-gray-100">
@@ -160,7 +160,7 @@
                 </div>
                 <div class="flex justify-between border-t pt-2">
                     <span class="text-gray-800 font-semibold">Total</span>
-                    <span id="detailTotal" class="text-orange-600 font-bold">Rp 0</span>
+                    <span id="detailTotal" class="text-[#3b6b0d] font-bold">Rp 0</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-600">Total Dibayar</span>
@@ -383,7 +383,7 @@
                 </td>
                 <td class="px-4 py-3 whitespace-nowrap text-right font-medium">${formatCurrency(order.total)}</td>
                 <td class="px-4 py-3 whitespace-nowrap text-right">
-                    <button onclick="showOrderDetail(${order.id})" class="text-orange-600 hover:text-orange-800 flex items-center gap-1">
+                    <button onclick="showOrderDetail(${order.id})" class="text-[#3b6b0d] hover:text-[#335e0c] flex items-center gap-1">
                         <i data-lucide="eye" class="w-4 h-4"></i> Detail
                     </button>
                 </td>
