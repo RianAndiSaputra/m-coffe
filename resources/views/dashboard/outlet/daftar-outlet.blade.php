@@ -45,12 +45,15 @@
                     <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
                 </span>
                 <input type="text" id="searchInput" placeholder="Pencarian...."
-                    class="w-full pl-10 pr-4 py-3 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" />
+                    class="w-full pl-10 pr-4 py-3 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#335e0c] focus:border-transparent" />
             </div>
 
             <!-- Tombol Tambah Outlet -->
             <a href="#" onclick="openModalTambah()"
-                class="px-5 py-3 text-base font-medium text-white bg-orange-500 rounded-lg hover:bg-orange-600 shadow">
+                class="px-5 py-3 text-base font-medium text-white rounded-lg shadow transition duration-200"
+                style="background-color: #335e0c;"
+                onmouseover="this.style.backgroundColor='#3b6b0d'"
+                onmouseout="this.style.backgroundColor='#335e0c'">
                 + Tambah Outlet
             </a>
         </div>
@@ -89,7 +92,7 @@
                 <tr id="loadingRow">
                     <td colspan="7" class="py-8 text-center">
                         <div class="flex justify-center items-center">
-                            <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-orange-500"></div>
+                            <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#335e0c]"></div>
                         </div>
                     </td>
                 </tr>
@@ -179,7 +182,7 @@
                 <tr id="loadingRow" class="hidden">
                     <td colspan="7" class="py-8 text-center">
                         <div class="flex justify-center items-center">
-                            <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-orange-500"></div>
+                            <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#335e0c]"></div>
                         </div>
                     </td>
                 </tr>
@@ -209,8 +212,8 @@
                     <td class="py-4">${index + 1}</td>
                     <td class="py-4">
                         <div class="flex items-center gap-4">
-                            <div class="bg-orange-100 p-2 rounded-full">
-                                <i data-lucide="map-pin" class="w-6 h-6 text-orange-500"></i>
+                            <div class="bg-[#dbead1] p-2 rounded-full">
+                                <i data-lucide="map-pin" class="w-6 h-6 text-[#335e0c]"></i>
                             </div>
                             <div>
                                 <div class="font-semibold text-base text-gray-900">${outlet.name}</div>
@@ -268,11 +271,11 @@
             
             const alertConfig = {
                 success: {
-                    bgColor: 'bg-orange-50',
-                    borderColor: 'border-orange-200',
-                    textColor: 'text-orange-800',
+                    bgColor: 'bg-[#e6f3da]',
+                    borderColor: 'border-[#c8e1b0]',
+                    textColor: 'text-[#335e0c]', 
                     icon: 'check-circle',
-                    iconColor: 'text-orange-500'
+                    iconColor: 'text-[#3b6b0d]'   
                 },
                 error: {
                     bgColor: 'bg-red-50',

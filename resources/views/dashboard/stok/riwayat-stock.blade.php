@@ -18,8 +18,11 @@
             <input 
                 type="text" 
                 placeholder="Cari Produk..." 
-                class="w-full pl-10 pr-4 py-3 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                class="w-full pl-10 pr-4 py-3 border rounded-lg text-base focus:outline-none"
                 id="searchProduct"
+                style="border-color: !important;"
+                onfocus="this.style.boxShadow='0 0 0 2px #3b6b0d'; this.style.borderColor='transparent'"
+                onblur="this.style.boxShadow=''; this.style.borderColor='#gray-300'"
             />
         </div>
     </div>
@@ -44,7 +47,7 @@
         <label for="reportDateInput" class="block text-sm font-medium text-gray-700 mb-1">Pilih Tanggal</label>
             <div class="relative">
                 <input id="reportDateInput" type="text"
-                    class="w-full sm:w-56 pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    class="w-full sm:w-56 pl-10 pr-3 py-2 border border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3b6b0d] focus:border-transparent"
                     placeholder="Tanggal" />
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <i data-lucide="calendar" class="w-4 h-4 text-gray-500"></i>
@@ -73,8 +76,8 @@
                     <td colspan="7" class="py-4 text-center">
                         <div class="flex flex-col items-center justify-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                 class="animate-spin text-orange-500">
+                                stroke="#3b6b0d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                class="animate-spin">
                                 <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
                             </svg>
                             <span class="text-gray-500">Memuat data...</span>
@@ -182,16 +185,16 @@
     async function updateHistoryTable(date) {
         const tbody = document.getElementById('historyTableBody');
         tbody.innerHTML = `<td colspan="7" class="py-4 text-center">
-    <div class="flex flex-col items-center justify-center gap-2">
+        <div class="flex flex-col items-center justify-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="animate-spin text-orange-500">
+                stroke="#3b6b0d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="animate-spin">
                 <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
             </svg>
             <span class="text-gray-500">Memuat data...</span>
         </div>
-    </td>`;
-            
+</td>`;
+        
         const data = await fetchInventoryHistory(date);
         
         // Update info outlet

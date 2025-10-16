@@ -3,7 +3,7 @@
         <!-- Header -->
         <div class="flex items-start justify-between mb-4">
             <h3 class="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                <i data-lucide="truck" class="w-6 h-6 text-orange-500"></i>
+                <i data-lucide="truck" class="w-6 h-6 text-[#3b6b0d]"></i>
                 Transfer Stok
             </h3>
             <button onclick="closeModalTransfer()" class="p-1 rounded-full hover:bg-gray-100">
@@ -30,7 +30,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-500">Stok Saat Ini</p>
-                        <p id="stokTersedia" class="font-medium text-gray-800">-</p>
+                        <p id="stokTersedia" class="font-medium text-[#3b6b0d]">-</p>
                     </div>
                 </div>
             </div>
@@ -55,7 +55,7 @@
                         <!-- Outlet Tujuan (Dropdown) -->
                         <div>
                             <label for="tujuanTransfer" class="block text-sm font-medium text-gray-700 mb-1">Outlet Tujuan</label>
-                            <select id="tujuanTransfer" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                            <select id="tujuanTransfer" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#3b6b0d] focus:border-transparent">
                                 <option value="">Pilih Outlet Tujuan</option>
                                 <!-- Options akan diisi secara dinamis -->
                             </select>
@@ -73,7 +73,7 @@
                             type="number" 
                             id="jumlahTransfer" 
                             min="1" 
-                            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" 
+                            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#3b6b0d] focus:border-transparent" 
                             placeholder="Masukkan jumlah"
                             oninput="validateTransferAmount(this)"
                         >
@@ -86,7 +86,7 @@
                         <textarea 
                             id="catatanTransfer" 
                             rows="2" 
-                            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" 
+                            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#3b6b0d] focus:border-transparent" 
                             placeholder="Contoh: Stok untuk promo akhir bulan"
                         ></textarea>
                         <p class="text-xs text-gray-500 mt-1">Masukkan alasan transfer stok ini</p>
@@ -100,7 +100,7 @@
             <button id="btnBatalTransfer" type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none">
                 Batal
             </button>
-            <button id="btnSubmitTransfer" type="button" class="px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-md shadow-sm hover:bg-orange-700 focus:outline-none flex items-center gap-2">
+            <button id="btnSubmitTransfer" type="button" class="px-4 py-2 text-sm font-medium text-white bg-[#3b6b0d] rounded-md shadow-sm hover:bg-[#335e0c] focus:outline-none flex items-center gap-2">
                 <i data-lucide="truck" class="w-4 h-4"></i> Proses Transfer
             </button>
         </div>

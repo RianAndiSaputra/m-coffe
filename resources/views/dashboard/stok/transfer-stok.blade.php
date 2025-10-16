@@ -21,7 +21,7 @@
             <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
         </span>
         <input type="text" id="searchInput" placeholder="Pencarian..."
-            class="w-full pl-10 pr-4 py-3 border rounded-lg text-base font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" />
+            class="w-full pl-10 pr-4 py-3 border rounded-lg text-base font-medium focus:outline-none focus:ring-2 focus:ring[##3b6b0d] focus:border-transparent" />
     </div>
     </div>
 </div>
@@ -59,7 +59,7 @@
                         <div class="flex flex-col items-center justify-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                 class="animate-spin text-orange-500">
+                                 class="animate-spin text-[#3b6b0d]">
                                 <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
                             </svg>
                             <span class="text-gray-500">Memuat data...</span>
@@ -89,11 +89,11 @@
         // Warna dan ikon berdasarkan jenis alert
         const alertConfig = {
             success: {
-                bgColor: 'bg-orange-50',
-                borderColor: 'border-orange-200',
-                textColor: 'text-orange-800',
+                bgColor: 'bg-green-50',
+                borderColor: 'border-green-200',
+                textColor: 'text-green-800',
                 icon: 'check-circle',
-                iconColor: 'text-orange-500'
+                iconColor: 'text-green-500'
             },
             error: {
                 bgColor: 'bg-red-50',
@@ -349,7 +349,7 @@
                         <div class="flex flex-col items-center justify-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                class="animate-spin text-orange-500">
+                                class="animate-spin text-[#3b6b0d]">
                                 <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
                             </svg>
                             <span class="text-gray-500">Memuat data...</span>
@@ -473,8 +473,8 @@
                     <td class="py-4 font-medium">${product.sku}</td>
                     <td class="py-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-md bg-orange-100 flex items-center justify-center">
-                                <i data-lucide="${categoryIcon}" class="w-5 h-5 text-orange-500"></i>
+                            <div class="w-10 h-10 rounded-md bg-green-100 flex items-center justify-center">
+                                <i data-lucide="${categoryIcon}" class="w-5 h-5 text-[#3b6b0d]"></i>
                             </div>
                             <span>${product.name}</span>
                         </div>

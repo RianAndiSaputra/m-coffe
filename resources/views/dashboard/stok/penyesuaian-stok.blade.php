@@ -21,7 +21,7 @@
             <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
         </span>
         <input type="text" id="searchInput" placeholder="Pencarian..."
-            class="w-full pl-10 pr-4 py-3 border rounded-lg text-base font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" />
+             class="w-full pl-10 pr-4 py-3 border rounded-lg text-base font-medium focus:outline-none focus:ring-2 focus:ring-[#3b6b0d] focus:border-transparent" />
     </div>
     </div>
 </div>
@@ -41,7 +41,7 @@
         <!-- Date Selection -->
         <div class="flex items-center gap-2">
             <span class="text-sm font-medium text-gray-700">Tanggal:</span>
-            <input type="date" id="dateSelector" class="border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" />
+            <input type="date" id="dateSelector" class="border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#3b6b0d]" />
         </div>
     </div>
 </div>
@@ -67,12 +67,12 @@
                 <tr>
                     <td colspan="8" class="py-4 text-center text-gray-500">
                         <div class="inline-flex items-center gap-2">
-                            <svg class="animate-spin h-5 w-5 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span>Memuat data stok...</span>
-                        </div>
+                    {{-- <svg class="animate-spin h-5 w-5 text-[#3b6b0d]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Memuat data stok...</span>
+                </div> --}}
                     </td>
                 </tr>
             </tbody>
@@ -81,8 +81,8 @@
     <div id="loading" class="py-4 text-center hidden">
         <div class="flex flex-col items-center justify-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                 class="animate-spin text-orange-500">
+                stroke="#3b6b0d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="animate-spin">
                 <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
             </svg>
             <span class="text-gray-500">Memuat data...</span>
@@ -348,8 +348,8 @@
             const productContent = document.createElement('div');
             productContent.className = 'flex items-center gap-3';
             productContent.innerHTML = `
-                <div class="w-10 h-10 rounded-md bg-orange-100 flex items-center justify-center">
-                    <i data-lucide="package" class="w-5 h-5 text-orange-500"></i>
+                <div class="w-10 h-10 rounded-md bg-[#3b6b0d] bg-opacity-10 flex items-center justify-center">
+                    <i data-lucide="package" class="w-5 h-5 text-[#3b6b0d]"></i>
                 </div>
                 <span class="font-semibold">${item.product.name}</span>
             `;
@@ -360,7 +360,7 @@
             const qtyAfterCell = document.createElement('td');
             qtyAfterCell.className = 'py-4';
             qtyAfterCell.innerHTML = `
-                <span class="px-3 py-1.5 text-sm font-bold bg-orange-100 text-orange-700 rounded-full">
+                <span class="px-3 py-1.5 text-sm font-bold bg-[#3b6b0d] bg-opacity-10 text-[#3b6b0d] rounded-full">
                     ${item.product.qty}
                 </span>
             `;
@@ -418,7 +418,7 @@
             actionCell.className = 'py-4 text-right';
             actionCell.innerHTML = `
                 <button onclick="openModalAdjust(${item.product.id}, '${item.product.sku}', '${escapeQuotes(item.product.name)}', '${escapeQuotes(item.outlet.name)}', ${item.product.qty})" 
-                        class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-bold text-white bg-orange-500 rounded-md hover:bg-orange-600">
+                        class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-bold text-white bg-[#3b6b0d] rounded-md hover:bg-[#335e0c]">
                         <i data-lucide="clipboard-list" class="w-4 h-4"></i> Sesuaikan
                 </button>
             `;
@@ -515,11 +515,11 @@
         // Warna dan ikon berdasarkan jenis alert
         const alertConfig = {
             success: {
-                bgColor: 'bg-orange-50',
-                borderColor: 'border-orange-200',
-                textColor: 'text-orange-800',
+                bgColor: 'bg-[#3b6b0d] bg-opacity-10',
+                borderColor: 'border-[#3b6b0d] border-opacity-20',
+                textColor: 'text-[#3b6b0d]',
                 icon: 'check-circle',
-                iconColor: 'text-orange-500'
+                iconColor: 'text-[#3b6b0d]'
             },
             error: {
                 bgColor: 'bg-red-50',

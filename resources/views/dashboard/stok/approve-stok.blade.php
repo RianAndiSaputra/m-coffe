@@ -18,7 +18,7 @@
                 <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
             </span>
             <input type="text" id="searchInput" placeholder="Pencarian..."
-                class="w-full pl-10 pr-4 py-3 border rounded-lg text-base font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" />
+                class="w-full pl-10 pr-4 py-3 border rounded-lg text-base font-medium focus:outline-none focus:ring-2 focus:ring-[#3b6b0d] focus:border-transparent" />
         </div>
     </div>
 </div>
@@ -44,7 +44,7 @@
         <label for="reportDateInput" class="block text-sm font-medium text-gray-700 mb-1">Pilih Tanggal</label>
         <div class="relative">
             <input id="reportDateInput" type="text"
-                class="w-full sm:w-56 pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                class="w-full sm:w-56 pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3b6b0d]"
                 placeholder="Tanggal" />
             <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <i data-lucide="calendar" class="w-4 h-4 text-gray-500"></i>
@@ -94,7 +94,7 @@
             <div id="loadingState" class="py-8 flex flex-col items-center justify-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
-                     class="animate-spin text-orange-500">
+                     class="animate-spin text-[#3b6b0d]">
                     <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
                 </svg>
                 <span class="text-gray-500">Memuat data permintaan perubahan stok...</span>
@@ -113,7 +113,7 @@
                             <button id="modalCancel" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
                                 Batal
                             </button>
-                            <button id="modalConfirm" class="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600">
+                            <button id="modalConfirm" class="px-4 py-2 bg-[#3b6b0d] text-white rounded-md hover:bg-[#335e0c]">
                                 Konfirmasi
                             </button>
                         </div>
@@ -338,12 +338,12 @@ async function updateOutletNameDisplay(outletId) {
 
         document.getElementById('modalCancel').addEventListener('click', hideConfirmationModal);
     
-    document.getElementById('modalConfirm').addEventListener('click', function() {
-        hideConfirmationModal();
-        if (currentApprovalId !== null && currentApprovalAction !== null) {
-            processApproval(currentApprovalId, currentApprovalAction);
-        }
-    });
+    // document.getElementById('modalConfirm').addEventListener('click', function() {
+    //     hideConfirmationModal();
+    //     if (currentApprovalId !== null && currentApprovalAction !== null) {
+    //         processApproval(currentApprovalId, currentApprovalAction);
+    //     }
+    // });
         
         // Update UI dengan outlet yang dipilih
         document.getElementById('outletName').textContent = currentOutletName;
@@ -391,7 +391,7 @@ async function updateOutletNameDisplay(outletId) {
         if (isApproved) {
             title.textContent = 'Setujui Permintaan Stok';
             message.textContent = 'Anda yakin ingin menyetujui penyesuaian stok ini?';
-            document.getElementById('modalConfirm').className = 'px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600';
+            document.getElementById('modalConfirm').className = 'px-4 py-2 bg-[#3b6b0d] text-white rounded-md hover:bg-[#335e0c]';
         } else {
             title.textContent = 'Tolak Permintaan Stok';
             message.textContent = 'Anda yakin ingin menolak penyesuaian stok ini?';
