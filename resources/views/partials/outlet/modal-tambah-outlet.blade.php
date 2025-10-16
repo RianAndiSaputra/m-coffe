@@ -96,21 +96,31 @@
         <div class="flex items-center space-x-4">
           <label class="flex items-center cursor-pointer">
             <input type="checkbox" class="sr-only peer" id="statusAktif" checked>
-            <div class="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-orange-500 relative transition-all duration-300">
+            
+            <!-- Tombol switch -->
+            <div class="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-[#335e0c] relative transition-all duration-300">
               <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-md transform transition-all duration-300 peer-checked:translate-x-5"></div>
             </div>
-            <span class="ml-3 text-sm font-medium text-gray-700 peer-checked:text-orange-600">Aktif</span>
+
+            <!-- Label teks -->
+            <span class="ml-3 text-sm font-medium text-gray-700 peer-checked:text-[#3b6b0d]">Aktif</span>
           </label>
+
           <span class="text-sm text-gray-500">Outlet hanya muncul jika status aktif.</span>
         </div>
       </div>
+
 
     </div>
 
     <!-- Footer -->
     <div class="p-6 border-t flex justify-end gap-3">
       <button id="btnBatalModalTambah" class="px-4 py-2 border rounded hover:bg-gray-100">Batal</button>
-      <button id="btnTambahOutlet" class="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 flex items-center gap-2">
+      <button id="btnTambahOutlet"
+        class="px-4 py-2 text-white rounded flex items-center gap-2 transition duration-200 shadow"
+        style="background-color: #335e0c;"
+        onmouseover="this.style.backgroundColor='#3b6b0d'"
+        onmouseout="this.style.backgroundColor='#335e0c'">
         <i data-lucide="plus" class="w-4 h-4"></i>
         <span>Tambah Outlet</span>
       </button>

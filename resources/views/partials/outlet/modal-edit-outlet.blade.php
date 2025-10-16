@@ -101,21 +101,36 @@
         <div class="flex items-center space-x-4">
           <label class="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" id="editStatusAktif" class="sr-only peer">
-            <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
-            <span id="editStatusText" class="ml-3 text-sm font-medium text-gray-700">Aktif</span>
+            <div
+              class="w-11 h-6 bg-gray-300 rounded-full peer-focus:outline-none peer
+              peer-checked:after:translate-x-full peer-checked:after:border-white
+              after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+              after:bg-white after:border-gray-300 after:border after:rounded-full
+              after:h-5 after:w-5 after:transition-all
+              peer-checked:bg-[#335e0c]">
+            </div>
+            <span id="editStatusText" class="ml-3 text-sm font-medium text-gray-700 peer-checked:text-[#3b6b0d]">
+              Aktif
+            </span>
           </label>
           <span class="text-sm text-gray-500">Outlet hanya muncul jika status aktif.</span>
         </div>
       </div>
+
     </div>
 
     <!-- Footer -->
     <div class="p-6 border-t flex justify-end gap-3">
       <button id="btnBatalModalEdit" class="px-4 py-2 border rounded hover:bg-gray-100">Batal</button>
-      <button id="btnSimpanPerubahan" class="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 flex items-center gap-2">
+      <button id="btnSimpanPerubahan"
+        class="px-4 py-2 text-white rounded flex items-center gap-2 transition duration-200 shadow"
+        style="background-color: #335e0c;"
+        onmouseover="this.style.backgroundColor='#3b6b0d'"
+        onmouseout="this.style.backgroundColor='#335e0c'">
         <i data-lucide="save" class="w-4 h-4"></i>
         <span>Simpan Perubahan</span>
-      </button>
+    </button>
+
     </div>
   </div>
 </div>

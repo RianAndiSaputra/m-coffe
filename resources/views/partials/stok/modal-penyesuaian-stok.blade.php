@@ -30,7 +30,7 @@
                     </div>
                     <div>
                         <div class="text-gray-600 mb-1">Stok Saat Ini</div>
-                        <div class="font-medium bg-gray-50 p-2 rounded border border-gray-200 text-orange-600" id="stokSaatIni">-</div>
+                        <div class="font-medium bg-gray-50 p-2 rounded border border-gray-200 text-[#3b6b0d]" id="stokSaatIni">-</div>
                     </div>
                 </div>
             </div>
@@ -45,7 +45,7 @@
         <div>
             <label for="jumlahAdjust" class="block text-sm font-medium text-gray-700 mb-1">Jumlah Penyesuaian</label>
             <input type="number" id="jumlahAdjust" name="jumlahAdjust" 
-                class="w-full border rounded-lg px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                class="w-full border border rounded-lg px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-[#3b6b0d] focus:border-transparent"
                 placeholder="+/- nilai">
             <p class="text-xs text-gray-500 mt-1">Gunakan tanda minus (-) untuk mengurangi stok</p>
         </div>
@@ -54,7 +54,7 @@
         <div>
             <label for="tipeAdjust" class="block text-sm font-medium text-gray-700 mb-1">Tipe Penyesuaian</label>
             <select id="tipeAdjust" name="tipeAdjust" 
-                class="w-full border rounded-lg px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                class="w-full border border rounded-lg px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-[#3b6b0d] focus:border-transparent">
                 <option value="">Pilih Tipe Penyesuaian</option>
                 <option value="purchase">Pembelian</option>
                 <option value="sale">Penjualan</option>
@@ -69,7 +69,7 @@
     <div class="mt-4">
         <label for="keteranganAdjust" class="block text-sm font-medium text-gray-700 mb-1">Keterangan</label>
         <textarea id="keteranganAdjust" name="keteranganAdjust" rows="4"
-            class="w-full border rounded-lg px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+            class="w-full border rounded-lg px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-[#3b6b0d] focus:border-transparent"
             placeholder="Masukkan keterangan penyesuaian (opsional)"></textarea>
     </div>
 </div>
@@ -83,7 +83,7 @@
                 Batal
             </button>
             <button id="btnSubmitAdjust" type="button" 
-                class="px-4 py-2 text-sm font-medium text-white bg-orange-500 rounded-md hover:bg-orange-600">
+                class="px-4 py-2 text-sm font-medium text-white bg-[#335e0c] rounded-md hover:bg-[#3b6b0d]">
                 Simpan Penyesuaian
             </button>
         </div>
