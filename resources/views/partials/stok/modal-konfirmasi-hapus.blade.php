@@ -1,17 +1,24 @@
-<div id="modalKonfirmasiHapus" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
-    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl" onclick="event.stopPropagation()">
+<div id="modalKonfirmasiHapus" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl mx-auto" onclick="event.stopPropagation()">
         <!-- Header -->
         <div class="p-6 border-b">
-            <div class="flex items-center">
-                <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mr-4">
-                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mr-4">
+                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">Konfirmasi Hapus</h2>
+                        <p class="text-sm text-gray-600 mt-1">Tindakan ini tidak dapat dibatalkan</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeDeleteModal()" class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
-                </div>
-                <div>
-                    <h2 class="text-xl font-bold text-gray-800">Konfirmasi Hapus</h2>
-                    <p class="text-sm text-gray-600 mt-1">Tindakan ini tidak dapat dibatalkan</p>
-                </div>
+                </button>
             </div>
         </div>
 
@@ -40,7 +47,8 @@
 
 <script>
 function closeDeleteModal() {
-    document.getElementById('modalKonfirmasiHapus').classList.add('hidden');
+    const modal = document.getElementById('modalKonfirmasiHapus');
+    modal.classList.add('hidden');
 }
 
 function konfirmasiHapus() {
@@ -54,9 +62,16 @@ function konfirmasiHapus() {
     closeDeleteModal();
 }
 
-// Close modal when clicking outside
+// Close modal ketika klik outside
 document.getElementById('modalKonfirmasiHapus').addEventListener('click', function(e) {
     if (e.target === this) {
+        closeDeleteModal();
+    }
+});
+
+// Close modal dengan ESC key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
         closeDeleteModal();
     }
 });

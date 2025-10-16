@@ -1,5 +1,5 @@
-<div id="modalEditBahanBaku" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
-    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl max-h-[90vh] flex flex-col" onclick="event.stopPropagation()">
+<div id="modalEditBahanBaku" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl max-h-[90vh] flex flex-col mx-auto" onclick="event.stopPropagation()">
         <!-- Header -->
         <div class="p-6 border-b bg-gradient-to-r from-blue-50 to-cyan-50 rounded-t-2xl">
             <div class="flex items-center justify-between">
@@ -7,11 +7,11 @@
                     <h2 class="text-2xl font-bold text-gray-800">Edit Bahan Baku</h2>
                     <p class="text-sm text-gray-600 mt-1">Perbarui informasi bahan baku</p>
                 </div>
-                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                <button type="button" onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
-                </div>
+                </button>
             </div>
         </div>
 
@@ -37,6 +37,7 @@
                     <div>
                         <label class="block font-medium mb-2 text-gray-700" for="editKategori">Kategori <span class="text-red-500">*</span></label>
                         <select id="editKategori" name="category" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200" required>
+                            <option value="">Pilih Kategori</option>
                             <option value="kopi">Biji Kopi</option>
                             <option value="susu">Produk Susu</option>
                             <option value="gula">Pemanis</option>
@@ -56,6 +57,7 @@
                     <div>
                         <label class="block font-medium mb-2 text-gray-700" for="editSatuan">Satuan <span class="text-red-500">*</span></label>
                         <select id="editSatuan" name="unit" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200" required>
+                            <option value="">Pilih Satuan</option>
                             <option value="kg">Kilogram (kg)</option>
                             <option value="g">Gram (g)</option>
                             <option value="mg">Miligram (mg)</option>
@@ -115,7 +117,8 @@
 
 <script>
 function closeEditModal() {
-    document.getElementById('modalEditBahanBaku').classList.add('hidden');
+    const modal = document.getElementById('modalEditBahanBaku');
+    modal.classList.add('hidden');
     document.getElementById('editBahanBakuForm').reset();
 }
 
@@ -140,9 +143,16 @@ function updateBahanBakuData() {
     closeEditModal();
 }
 
-// Close modal when clicking outside
+// Close modal ketika klik outside
 document.getElementById('modalEditBahanBaku').addEventListener('click', function(e) {
     if (e.target === this) {
+        closeEditModal();
+    }
+});
+
+// Close modal dengan ESC key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
         closeEditModal();
     }
 });

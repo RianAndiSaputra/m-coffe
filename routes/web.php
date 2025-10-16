@@ -101,6 +101,10 @@ Route::get('/laporan-approve', function () {
     return view('dashboard.laporan.approve');
 })->name('approve');
 
+Route::get('/laporan-laba', function () {
+    return view('dashboard.laporan.laba');
+})->name('laba');
+
 Route::get('/template-print', function () {
     return view('dashboard.pengaturan.template-print');
 })->name('template-print');
