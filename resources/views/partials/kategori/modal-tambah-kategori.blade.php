@@ -20,7 +20,7 @@
                     <input 
                         type="text" 
                         id="namaKategori" 
-                        class="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm hover:border-2 hover:border-orange-600 focus:border-orange-600 focus:ring-orange-500" 
+                        class="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm hover:border-2 hover:border-green-600 focus:border-green-600 focus:ring-green-500" 
                         placeholder="Contoh: Kue, Roti, Minuman"
                     >
                 </div>
@@ -30,7 +30,7 @@
                     <label class="block font-medium mb-1">Deskripsi</label>
                     <textarea 
                         id="deskripsiKategori" 
-                        class="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm hover:border-2 hover:border-orange-600 focus:border-orange-600 focus:ring-orange-500" 
+                        class="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm hover:border-2 hover:border-green-600 focus:border-green-600 focus:ring-green-500" 
                         rows="3" 
                         placeholder="Deskripsi singkat tentang kategori ini"
                     ></textarea>
@@ -48,7 +48,7 @@
                 Batal
             </button>
             <button 
-                class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
                 onclick="tambahKategori()"
             >
                 + Tambah Kategori
