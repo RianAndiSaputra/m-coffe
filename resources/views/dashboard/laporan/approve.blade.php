@@ -54,7 +54,7 @@
                             <i data-lucide="calendar" class="w-5 h-5 text-gray-400"></i>
                         </span>
                         <input type="text" id="dateRange" placeholder="Pilih rentang tanggal"
-                            class="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                            class="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3b6b0d]" />
                     </div>
                 </div>
             </div>
@@ -66,13 +66,13 @@
                         <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
                     </span>
                     <input type="text" id="searchInput" placeholder="Cari produk..."
-                        class="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                        class="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3b6b0d]" />
                 </div>
             </div>
             <!-- Filter Status -->
             <div class="flex-1">
                 <h2 class="text-sm font-medium text-gray-800 mb-1">Status</h2>
-                <select id="statusFilter" class="w-full pl-3 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                <select id="statusFilter" class="w-full pl-3 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3b6b0d]">
                     <option value="all">Semua Status</option>
                     <option value="approved">Disetujui</option>
                     <option value="rejected">Ditolak</option>
@@ -590,7 +590,7 @@
         const alert = document.createElement('div');
         alert.className = `px-4 py-3 rounded-lg shadow-md ${
             type === 'error' ? 'bg-red-100 text-red-700' : 
-            type === 'success' ? 'bg-orange-100 text-orange-700' : 'bg-orange-100 text-orange-700'
+            type === 'success' ? 'bg-green-100 text-[#3b6b0d]' : 'bg-orange-100 text-orange-700'
         }`;
         alert.innerHTML = `
             <div class="flex items-center justify-between">

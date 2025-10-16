@@ -13,41 +13,41 @@
         <!-- Kode Member -->
         <div>
           <label class="block font-medium mb-1">Kode Member <span class="text-red-500">*</span></label>
-          <input type="text" id="kodeMember" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Kode member" required>
+          <input type="text" id="kodeMember" class="w-full border rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" placeholder="Kode member" required>
           <p id="errorKode" class="text-red-500 text-xs mt-1 hidden">Kode member wajib diisi</p>
         </div>
 
         <!-- Nama -->
         <div>
           <label class="block font-medium mb-1">Nama <span class="text-red-500">*</span></label>
-          <input type="text" id="namaMember" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Nama member" required>
+          <input type="text" id="namaMember" class="w-full border rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" placeholder="Nama member" required>
           <p id="errorNama" class="text-red-500 text-xs mt-1 hidden">Nama member wajib diisi</p>
         </div>
 
         <!-- Telepon -->
         <div>
           <label class="block font-medium mb-1">Telp <span class="text-red-500">*</span></label>
-          <input type="text" id="teleponMember" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="No. telp member" required>
+          <input type="text" id="teleponMember" class="w-full border rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" placeholder="No. telp member" required>
           <p id="errorTelepon" class="text-red-500 text-xs mt-1 hidden">Nomor telepon wajib diisi</p>
         </div>
 
         <!-- Email -->
         <div>
           <label class="block font-medium mb-1">Email</label>
-          <input type="email" id="emailMember" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Email member (opsional)">
+          <input type="email" id="emailMember" class="w-full border rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" placeholder="Email member (opsional)">
           <p id="errorEmail" class="text-red-500 text-xs mt-1 hidden">Format email tidak valid</p>
         </div>
 
         <!-- Alamat -->
         <div>
           <label class="block font-medium mb-1">Alamat</label>
-          <textarea id="alamatMember" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Alamat member (opsional)"></textarea>
+          <textarea id="alamatMember" class="w-full border rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" placeholder="Alamat member (opsional)"></textarea>
         </div>
 
         <!-- Jenis Kelamin -->
         <div>
           <label class="block font-medium mb-1">Jenis Kelamin <span class="text-red-500">*</span></label>
-          <select id="jenisKelamin" class="w-full border rounded-lg px-4 py-2 text-sm" required>
+          <select id="jenisKelamin" class="w-full border rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" required>
             <option value="">Pilih gender</option>
             <option value="male">Laki-laki</option>
             <option value="female">Perempuan</option>
@@ -59,8 +59,8 @@
 
     <!-- Footer -->
     <div class="p-6 border-t flex justify-end gap-3">
-      <button id="btnBatalModalTambah" class="px-4 py-2 border rounded hover:bg-gray-100">Batal</button>
-      <button id="btnTambahMember" class="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 flex items-center gap-2">
+      <button id="btnBatalModalTambah" type="button" class="px-4 py-2 border rounded hover:bg-gray-100 transition duration-200">Batal</button>
+      <button id="btnTambahMember" type="button" class="px-4 py-2 bg-[#3b6b0d] text-white rounded hover:bg-[#335e0c] flex items-center gap-2 transition duration-200">
         <i data-lucide="plus" class="w-4 h-4"></i>
         <span>Simpan</span>
       </button>
@@ -69,6 +69,10 @@
 </div>
 
 <script>
+    // Flag untuk mencegah multiple submission
+    let isSubmitting = false;
+    let eventListenersInitialized = false;
+
     // Fungsi untuk validasi form
     function validateForm() {
       let isValid = true;
@@ -148,26 +152,41 @@
       // Reset error messages dan styling
       document.querySelectorAll('[id^="error"]').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('.border-red-500').forEach(el => el.classList.remove('border-red-500'));
+      
+      // Reset submit flag
+      isSubmitting = false;
     }
 
     // Fungsi untuk submit form
     async function submitForm() {
-      if (!validateForm()) return;
+      // Cegah multiple submission dengan flag yang lebih ketat
+      if (isSubmitting) {
+        console.log('⏹️ Submit dicegah - sedang dalam proses');
+        return;
+      }
+      
+      console.log('🟡 Submit dimulai');
+      
+      if (!validateForm()) {
+        console.log('❌ Validasi gagal');
+        return;
+      }
 
+      isSubmitting = true;
       const btnTambah = document.getElementById('btnTambahMember');
       const originalText = btnTambah.innerHTML;
 
-      // Tampilkan loading state
-      btnTambah.innerHTML = `
-        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        Menyimpan...
-      `;
-      btnTambah.disabled = true;
-
       try {
+        // Tampilkan loading state
+        btnTambah.innerHTML = `
+          <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Menyimpan...
+        `;
+        btnTambah.disabled = true;
+
         const formData = {
           member_code: document.getElementById('kodeMember').value,
           nama: document.getElementById('namaMember').value,
@@ -176,6 +195,8 @@
           alamat: document.getElementById('alamatMember').value || null,
           jenis_kelamin: document.getElementById('jenisKelamin').value
         };
+
+        console.log('📤 Mengirim data:', formData);
 
         // Kirim data ke API
         const token = localStorage.getItem('token');
@@ -189,12 +210,14 @@
         });
 
         const data = await response.json();
+        console.log('📥 Response:', data);
 
         if (!response.ok) {
           throw new Error(data.message || 'Gagal menambahkan member');
         }
 
         // Jika sukses
+        console.log('✅ Berhasil menambahkan member');
         showAlert('success', 'Member berhasil ditambahkan');
         resetForm();
         closeModalTambah();
@@ -205,33 +228,106 @@
         }
 
       } catch (error) {
-        console.error('Error:', error);
+        console.error('❌ Error:', error);
         showAlert('error', error.message);
       } finally {
         // Kembalikan tombol ke state awal
+        console.log('🔄 Reset tombol');
+        isSubmitting = false;
         btnTambah.innerHTML = originalText;
         btnTambah.disabled = false;
       }
     }
 
-    // Event listener untuk tombol tambah
-    document.getElementById('btnTambahMember').addEventListener('click', submitForm);
+    // Handler untuk submit dengan prevention
+    function handleSubmit(event) {
+      console.log('🖱️ Tombol Simpan diklik');
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      
+      submitForm();
+      return false;
+    }
 
-    // Submit form saat tekan enter
-    document.querySelectorAll('#modalTambahMember input').forEach(input => {
-      input.addEventListener('keypress', e => {
-        if (e.key === 'Enter') {
-          submitForm();
-        }
+    // Handler untuk enter key
+    function handleEnterKey(event) {
+      if (event.key === 'Enter') {
+        console.log('⌨️ Enter key ditekan');
+        event.preventDefault();
+        event.stopPropagation();
+        submitForm();
+      }
+    }
+
+    // Setup event listeners dengan cleanup yang lebih thorough
+    function setupEventListeners() {
+      // Jika sudah diinisialisasi, jangan setup ulang
+      if (eventListenersInitialized) {
+        console.log('ℹ️ Event listeners sudah diinisialisasi');
+        return;
+      }
+
+      console.log('🔄 Setup event listeners');
+      
+      const btnTambah = document.getElementById('btnTambahMember');
+      const btnBatal = document.getElementById('btnBatalModalTambah');
+      
+      // Clone dan replace tombol untuk menghilangkan event listeners lama
+      const newBtnTambah = btnTambah.cloneNode(true);
+      const newBtnBatal = btnBatal.cloneNode(true);
+      
+      btnTambah.parentNode.replaceChild(newBtnTambah, btnTambah);
+      btnBatal.parentNode.replaceChild(newBtnBatal, btnBatal);
+      
+      // Tambah event listeners baru
+      newBtnTambah.addEventListener('click', handleSubmit, { once: false });
+      newBtnBatal.addEventListener('click', closeModalTambah, { once: false });
+
+      // Event listeners untuk input
+      document.querySelectorAll('#modalTambahMember input').forEach(input => {
+        input.addEventListener('keypress', handleEnterKey);
       });
-    });
+
+      eventListenersInitialized = true;
+    }
+
+    // Cleanup event listeners
+    function cleanupEventListeners() {
+      console.log('🧹 Cleanup event listeners');
+      
+      const btnTambah = document.getElementById('btnTambahMember');
+      const btnBatal = document.getElementById('btnBatalModalTambah');
+      
+      // Remove event listeners dengan function reference yang sama
+      btnTambah.removeEventListener('click', handleSubmit);
+      btnBatal.removeEventListener('click', closeModalTambah);
+      
+      document.querySelectorAll('#modalTambahMember input').forEach(input => {
+        input.removeEventListener('keypress', handleEnterKey);
+      });
+      
+      eventListenersInitialized = false;
+    }
 
     // Fungsi untuk menutup modal
     function closeModalTambah() {
+      console.log('🚪 Menutup modal');
       document.getElementById('modalTambahMember').classList.add('hidden');
+      cleanupEventListeners();
       resetForm();
     }
 
-    // Event listener untuk tombol batal
-    document.getElementById('btnBatalModalTambah').addEventListener('click', closeModalTambah);
+    // Fungsi untuk membuka modal
+    function openModalTambah() {
+      console.log('🚀 Membuka modal');
+      document.getElementById('modalTambahMember').classList.remove('hidden');
+      setupEventListeners();
+    }
+
+    // Inisialisasi sekali saja
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('📄 DOM loaded');
+      // Jangan setup event listeners di sini, nanti saat modal dibuka
+    });
 </script>

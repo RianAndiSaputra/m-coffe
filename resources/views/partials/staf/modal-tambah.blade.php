@@ -15,28 +15,28 @@
         <!-- Nama Staff -->
         <div>
           <label class="block font-medium mb-1 text-gray-700">Nama <span class="text-red-500">*</span></label>
-          <input type="text" id="namaStaff" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" placeholder="Nama staff" required>
+          <input type="text" id="namaStaff" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" placeholder="Nama staff" required>
           <p id="errorNamaStaff" class="text-red-500 text-xs mt-1 hidden">Nama staff wajib diisi</p>
         </div>
 
         <!-- Email Staff -->
         <div>
           <label class="block font-medium mb-1 text-gray-700">Email <span class="text-red-500">*</span></label>
-          <input type="email" id="emailStaff" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" placeholder="Email staff" required>
+          <input type="email" id="emailStaff" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" placeholder="Email staff" required>
           <p id="errorEmailStaff" class="text-red-500 text-xs mt-1 hidden">Email wajib diisi dan valid</p>
         </div>
 
         <!-- Password -->
         <div>
           <label class="block font-medium mb-1 text-gray-700">Password <span class="text-red-500">*</span></label>
-          <input type="password" id="passwordStaff" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" placeholder="Password" required>
+          <input type="password" id="passwordStaff" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" placeholder="Password" required>
           <p id="errorPasswordStaff" class="text-red-500 text-xs mt-1 hidden">Password wajib diisi (min. 8 karakter)</p>
         </div>
 
         <!-- Peran -->
         <div>
           <label class="block font-medium mb-1 text-gray-700">Peran <span class="text-red-500">*</span></label>
-          <select id="peranStaff" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" required>
+          <select id="peranStaff" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" required>
             <option value="" disabled selected>Pilih peran</option>
             <option value="kasir">Kasir</option>
             <option value="supervisor">Supervisor</option>
@@ -50,12 +50,12 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block font-medium mb-1 text-gray-700">Waktu Mulai <span class="text-red-500">*</span></label>
-            <input type="time" id="waktuMulai" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" required>
+            <input type="time" id="waktuMulai" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" required>
             <p id="errorWaktuMulai" class="text-red-500 text-xs mt-1 hidden">Waktu mulai wajib diisi</p>
           </div>
           <div>
             <label class="block font-medium mb-1 text-gray-700">Waktu Selesai <span class="text-red-500">*</span></label>
-            <input type="time" id="waktuSelesai" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" required>
+            <input type="time" id="waktuSelesai" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" required>
             <p id="errorWaktuSelesai" class="text-red-500 text-xs mt-1 hidden">Waktu selesai wajib diisi</p>
           </div>
         </div>
@@ -63,7 +63,7 @@
         <!-- Outlet -->
         <div>
           <label class="block font-medium mb-1 text-gray-700">Outlet <span class="text-red-500">*</span></label>
-          <select id="outletStaff" data-url="{{ url('/api/outlets') }}" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" required>
+          <select id="outletStaff" data-url="{{ url('/api/outlets') }}" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" required>
             <option value="" disabled selected>Memuat outlet...</option>
           </select>
           <p id="errorOutletStaff" class="text-red-500 text-xs mt-1 hidden">Outlet wajib dipilih</p>
@@ -94,7 +94,7 @@
 
                 <!-- Capture Controls -->
                 <div class="flex justify-center space-x-3">
-                  <button type="button" id="btnStartCamera" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
+                  <button type="button" id="btnStartCamera" class="px-4 py-2 bg-[#3b6b0d] text-white rounded-lg hover:bg-[#335e0c] transition-colors flex items-center gap-2">
                     <i data-lucide="camera" class="w-4 h-4"></i>
                     <span>Mulai Kamera</span>
                   </button>
@@ -141,7 +141,7 @@
     <!-- Footer -->
     <div class="p-6 border-t flex justify-end gap-3">
       <button id="btnBatalModalTambahStaff" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-gray-700">Batal</button>
-      <button id="btnTambahStaff" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
+      <button id="btnTambahStaff" class="px-4 py-2 bg-[#3b6b0d] text-white rounded-lg hover:bg-[#335e0c] transition-colors flex items-center gap-2">
         <i data-lucide="user-plus" class="w-4 h-4"></i>
         <span>Simpan Staff</span>
       </button>

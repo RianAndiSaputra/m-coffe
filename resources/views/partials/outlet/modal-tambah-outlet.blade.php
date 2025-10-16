@@ -16,17 +16,17 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block font-medium mb-1">Nama Outlet <span class="text-red-500">*</span></label>
-            <input type="text" id="namaOutlet" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Masukkan nama outlet" required>
+            <input type="text" id="namaOutlet" class="w-full border rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" placeholder="Masukkan nama outlet" required>
             <p id="errorNama" class="text-red-500 text-xs mt-1 hidden">Nama outlet wajib diisi</p>
           </div>
           <div>
             <label class="block font-medium mb-1">Nomor Telepon <span class="text-red-500">*</span></label>
-            <input type="text" id="teleponOutlet" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Masukkan nomor telepon" required>
+            <input type="text" id="teleponOutlet" class="w-full border rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" placeholder="Masukkan nomor telepon" required>
             <p id="errorTelepon" class="text-red-500 text-xs mt-1 hidden">Nomor telepon wajib diisi</p>
           </div>
           <div class="md:col-span-2">
             <label class="block font-medium mb-1">Alamat Lengkap <span class="text-red-500">*</span></label>
-            <textarea id="alamatOutlet" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Masukkan alamat lengkap" required></textarea>
+            <textarea id="alamatOutlet" class="w-full border rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" placeholder="Masukkan alamat lengkap" required></textarea>
             <p id="errorAlamat" class="text-red-500 text-xs mt-1 hidden">Alamat wajib diisi</p>
           </div>
         </div>
@@ -37,13 +37,13 @@
         <h3 class="font-semibold mb-4 text-gray-700">Informasi Tambahan</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block font-medium mb-1">Email <span class="text-red-500">*</span> </label>
-            <input type="email" id="emailOutlet" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Masukkan email (wajib diisi)">
+            <label class="block font-medium mb-1">Email <span class="text-red-500">*</span></label>
+            <input type="email" id="emailOutlet" class="w-full border rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" placeholder="Masukkan email (wajib diisi)" required>
             <p id="errorEmail" class="text-red-500 text-xs mt-1 hidden">Format email tidak valid</p>
           </div>
           <div>
             <label class="block font-medium mb-1">Persentase Pajak (%)</label>
-            <input type="number" id="pajakOutlet" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="0%">
+            <input type="number" id="pajakOutlet" class="w-full border rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" placeholder="0%">
           </div>
         </div>
       </div>
@@ -54,15 +54,15 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block font-medium mb-1">Nomor Transaksi Default</label>
-            <input type="text" id="nomorTransaksi" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Contoh: 001">
+            <input type="text" id="nomorTransaksi" class="w-full border rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" placeholder="Contoh: 001">
           </div>
           <div>
             <label class="block font-medium mb-1">Nama Bank</label>
-            <input type="text" id="namaBank" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Contoh: BCA">
+            <input type="text" id="namaBank" class="w-full border rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" placeholder="Contoh: BCA">
           </div>
           <div class="md:col-span-2">
             <label class="block font-medium mb-1">Atas Nama</label>
-            <input type="text" id="atasNama" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Nama pemilik rekening">
+            <input type="text" id="atasNama" class="w-full border rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" placeholder="Nama pemilik rekening">
           </div>
         </div>
       </div>
@@ -70,7 +70,7 @@
       <!-- Foto Outlet -->
       <div class="p-5 bg-gray-100 border rounded-lg shadow-sm">
         <h3 class="font-semibold mb-4 text-gray-700">Foto Qris <span class="text-red-500">*</span></h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start" required>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
           <!-- Preview Foto -->
           <div>
             <p class="text-sm text-gray-600 mb-1">Foto Qris:</p>
@@ -83,7 +83,7 @@
           <!-- Upload Foto Baru -->
           <div>
             <label class="block font-medium mb-1">Ganti Foto</label>
-            <input type="file" id="fotoOutlet" class="w-full text-sm" accept=".jpg,.jpeg,.png" onchange="previewFotoOutlet(this)">
+            <input type="file" id="fotoOutlet" class="w-full text-sm border rounded-lg px-4 py-2 focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#335e0c] file:text-white hover:file:bg-[#3b6b0d]" accept=".jpg,.jpeg,.png" onchange="previewFotoOutlet(this)">
             <p class="text-gray-500 text-xs mt-1">Format: JPG, PNG. Ukuran maksimal: 2MB</p>
             <p id="errorFoto" class="text-red-500 text-xs mt-1 hidden">Ukuran file terlalu besar (maks 2MB)</p>
           </div>
@@ -110,12 +110,11 @@
         </div>
       </div>
 
-
     </div>
 
     <!-- Footer -->
     <div class="p-6 border-t flex justify-end gap-3">
-      <button id="btnBatalModalTambah" class="px-4 py-2 border rounded hover:bg-gray-100">Batal</button>
+      <button id="btnBatalModalTambah" class="px-4 py-2 border rounded hover:bg-gray-100 transition duration-200">Batal</button>
       <button id="btnTambahOutlet"
         class="px-4 py-2 text-white rounded flex items-center gap-2 transition duration-200 shadow"
         style="background-color: #335e0c;"

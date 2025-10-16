@@ -58,7 +58,7 @@
                             <i data-lucide="calendar" class="w-5 h-5 text-gray-400"></i>
                         </span>
                         <input type="text" id="dateRange" placeholder="Pilih rentang tanggal"
-                            class="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                            class="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3b6b0d]" />
                     </div>
                 </div>
             </div>
@@ -70,7 +70,7 @@
                         <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
                     </span>
                     <input type="text" id="searchInput" placeholder="Cari member..."
-                        class="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                        class="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3b6b0d]" />
                 </div>
             </div>
         </div>
@@ -124,7 +124,7 @@
         <div id="loadingIndicator" style="display: none;" class="grid place-items-center py-8 gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" 
                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
-                 class="animate-spin text-orange-500">
+                 class="animate-spin text-[#3b6b0d]">
                 <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
             </svg>
             <span class="text-gray-500">Memuat data laporan...</span>
@@ -729,7 +729,7 @@ function filterData() {
         const alertContainer = document.getElementById('alertContainer');
         const alert = document.createElement('div');
         alert.className = `px-4 py-3 rounded-lg shadow-md ${type === 'error' ? 'bg-red-100 text-red-700' : 
-                         type === 'success' ? 'bg-orange-100 text-orange-700' : 'bg-orange-100 text-orange-700'}`;
+                         type === 'success' ? 'bg-green-100 text-[#3b6b0d]' : 'bg-orange-100 text-orange-700'}`;
         alert.innerHTML = `
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
@@ -757,45 +757,45 @@ function filterData() {
 </script>
 
 <style>
-    /* Tanggal terpilih: awal & akhir range */
+        /* Tanggal terpilih: awal & akhir range */
     .flatpickr-day.selected,
     .flatpickr-day.startRange,
     .flatpickr-day.endRange {
-        background-color: #f97316; /* Tailwind orange-500 */
+        background-color: #3b6b0d; /* Warna hijau konsisten */
         color: white;
-        border-color: #f97316;
+        border-color: #3b6b0d;
     }
 
     .flatpickr-day.selected:hover,
     .flatpickr-day.startRange:hover,
     .flatpickr-day.endRange:hover {
-        background-color: #fb923c; /* Tailwind orange-400 */
+        background-color: #335e0c; /* Warna hijau lebih gelap untuk hover */
         color: white;
-        border-color: #fb923c;
+        border-color: #335e0c;
     }
 
     /* Tanggal di antara range */
     .flatpickr-day.inRange {
-        background-color: #fed7aa; /* Tailwind orange-200 */
-        color: #78350f; /* Tailwind orange-800 */
+        background-color: #dcfce7; /* Tailwind green-100 */
+        color: #166534; /* Tailwind green-800 */
     }
 
     /* Hover efek pada hari */
     .flatpickr-day:hover {
-        background-color: #fdba74; /* Tailwind orange-300 */
+        background-color: #bbf7d0; /* Tailwind green-200 */
         color: black;
     }
 
     /* Hilangkan outline biru saat klik/tap */
     .flatpickr-day:focus {
         outline: none;
-        box-shadow: 0 0 0 2px #fdba74; /* Tailwind orange-300 glow */
+        box-shadow: 0 0 0 2px #86efac; /* Tailwind green-300 glow */
     }
 
     /* Hari ini */
     .flatpickr-day.today:not(.selected):not(.inRange) {
-        border: 1px solid #fb923c; /* Tailwind orange-400 */
-        background-color: #fff7ed; /* Tailwind orange-50 */
+        border: 1px solid #3b6b0d; /* Warna hijau konsisten */
+        background-color: #f0fdf4; /* Tailwind green-50 */
     }
 </style>
 

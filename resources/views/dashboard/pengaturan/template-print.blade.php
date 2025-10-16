@@ -49,14 +49,14 @@
                 <div class="mb-4">
                     <label for="companyName" class="block text-sm font-medium text-gray-700 mb-2">Nama Perusahaan</label>
                     <input type="text" id="companyName" value="KIFA BAKERY"
-                        class="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        class="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3b6b0d]">
                 </div>
                 
                 <!-- Slogan Perusahaan -->
                 <div>
                     <label for="companySlogan" class="block text-sm font-medium text-gray-700 mb-2">Slogan Perusahaan</label>
                     <input type="text" id="companySlogan" value="Rajanya Roti Hajatan"
-                        class="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        class="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3b6b0d]">
                 </div>
             </div>
 
@@ -71,7 +71,7 @@
                     <p class="text-xs text-gray-500 mt-2 mb-4">Format: PNG/JPG (Maks. 10MB)</p>
                     
                     <div class="flex gap-3">
-                        <label for="logoUpload" class="px-4 py-2 bg-white text-orange-500 border border-orange-500 rounded-lg hover:bg-orange-50 flex items-center gap-2 cursor-pointer">
+                        <label for="logoUpload" class="px-4 py-2 bg-white text-green-500 border border-green-500 rounded-lg hover:bg-green-50 flex items-center gap-2 cursor-pointer">
                             <i data-lucide="upload" class="w-5 h-5"></i>
                             Unggah
                             <input type="file" id="logoUpload" accept="image/png,image/jpeg" class="hidden">
@@ -89,7 +89,7 @@
         <div class="mb-8">
             <label for="footerMessage" class="block text-sm font-medium text-gray-700 mb-2">Pesan Footer</label>
             <textarea id="footerMessage" rows="3"
-                class="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">Terima kasih sudah berbelanja</textarea>
+                class="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3b6b0d]">Terima kasih sudah berbelanja</textarea>
         </div>
         
         <!-- Preview Section -->
@@ -172,7 +172,7 @@
                 <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
                 Reset
             </button>
-            <button type="button" onclick="saveTemplate()" class="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 flex items-center gap-2">
+            <button type="button" onclick="saveTemplate()" class="px-6 py-2 bg-[#3b6b0d] text-white rounded-lg hover:bg-[#335e0c] flex items-center gap-2">
                 <i data-lucide="save" class="w-5 h-5"></i>
                 Simpan
             </button>

@@ -652,8 +652,8 @@ async function updateOutletNameDisplay(outletId) {
             row.innerHTML = `
                 <td class="py-4">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-md bg-orange-100 flex items-center justify-center">
-                            <i data-lucide="${getProductIcon(product)}" class="w-5 h-5 text-orange-500"></i>
+                        <div class="w-10 h-10 rounded-md bg-green-100 flex items-center justify-center">
+                            <i data-lucide="${getProductIcon(product)}" class="w-5 h-5 text-[#3b6b0d]"></i>
                         </div>
                         <div>
                             <span class="font-semibold block">${product.name || 'N/A'}</span>
@@ -753,7 +753,7 @@ async function updateOutletNameDisplay(outletId) {
         const alertContainer = document.getElementById('alertContainer');
         const alert = document.createElement('div');
         alert.className = `p-4 rounded-md shadow-md ${
-            type === 'success' ? 'bg-orange-100 text-orange-700' : 'bg-red-100 text-red-700'
+            type === 'success' ? 'bg-green-100 text-[#3b6b0d]' : 'bg-red-100 text-red-700'
         } animate-fadeIn`;
         alert.innerHTML = `
             <div class="flex items-center gap-2">

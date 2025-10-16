@@ -56,7 +56,7 @@
                                 <i data-lucide="calendar" class="w-5 h-5 text-gray-400"></i>
                             </span>
                             <input type="text" id="dateRange" placeholder="Pilih rentang tanggal"
-                                class="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                                class="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3b6b0d]" />
                         </div>
                     </div>
                 </div>
@@ -68,7 +68,7 @@
                             <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
                         </span>
                         <input type="text" id="searchInput" placeholder="Cari kategori..."
-                            class="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                            class="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3b6b0d]" />
                         </div>
                     </div>
                 </div>
@@ -109,7 +109,7 @@
         <div id="categories-container">
             <!-- Categories will be added here dynamically -->
             <div class="flex items-center justify-center py-8">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3b6b0d]"></div>
             </div>
         </div>
     </div>
@@ -298,8 +298,8 @@
                 datasets: [{
                     label: 'Total Pendapatan (Rp)',
                     data: dataValues,
-                    backgroundColor: 'rgba(255, 159, 64, 0.7)',
-                    borderColor: 'rgba(255, 159, 64, 1)',
+                    backgroundColor: 'rgba(59, 107, 13, 0.7)', // #3b6b0d dengan opacity 0.7
+                    borderColor: 'rgba(59, 107, 13, 1)', // #3b6b0d tanpa opacity
                     borderWidth: 1
                 }]
             },
@@ -626,7 +626,7 @@
         const alertContainer = document.getElementById('alertContainer');
         const alert = document.createElement('div');
         alert.className = `px-4 py-3 rounded-lg shadow-md ${type === 'error' ? 'bg-red-100 text-red-700' : 
-                         type === 'success' ? 'bg-orange-100 text-orange-700' : 'bg-orange-100 text-orange-700'}`;
+                         type === 'success' ? 'bg-green-100 text-[#3b6b0d]' : 'bg-orange-100 text-orange-700'}`;
         alert.innerHTML = `
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
@@ -660,45 +660,45 @@
 
 <style>
     /* Tanggal terpilih: awal & akhir range */
-    .flatpickr-day.selected,
-    .flatpickr-day.startRange,
-    .flatpickr-day.endRange {
-        background-color: #f97316; /* Tailwind orange-500 */
-        color: white;
-        border-color: #f97316;
-    }
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange {
+    background-color: #3b6b0d; /* Warna hijau konsisten */
+    color: white;
+    border-color: #3b6b0d;
+}
 
-    .flatpickr-day.selected:hover,
-    .flatpickr-day.startRange:hover,
-    .flatpickr-day.endRange:hover {
-        background-color: #fb923c; /* Tailwind orange-400 */
-        color: white;
-        border-color: #fb923c;
-    }
+.flatpickr-day.selected:hover,
+.flatpickr-day.startRange:hover,
+.flatpickr-day.endRange:hover {
+    background-color: #335e0c; /* Warna hijau lebih gelap untuk hover */
+    color: white;
+    border-color: #335e0c;
+}
 
-    /* Tanggal di antara range */
-    .flatpickr-day.inRange {
-        background-color: #fed7aa; /* Tailwind orange-200 */
-        color: #78350f; /* Tailwind orange-800 */
-    }
+/* Tanggal di antara range */
+.flatpickr-day.inRange {
+    background-color: #dcfce7; /* Tailwind green-100 */
+    color: #166534; /* Tailwind green-800 */
+}
 
-    /* Hover efek pada hari */
-    .flatpickr-day:hover {
-        background-color: #fdba74; /* Tailwind orange-300 */
-        color: black;
-    }
+/* Hover efek pada hari */
+.flatpickr-day:hover {
+    background-color: #bbf7d0; /* Tailwind green-200 */
+    color: black;
+}
 
-    /* Hilangkan outline biru saat klik/tap */
-    .flatpickr-day:focus {
-        outline: none;
-        box-shadow: 0 0 0 2px #fdba74; /* Tailwind orange-300 glow */
-    }
+/* Hilangkan outline biru saat klik/tap */
+.flatpickr-day:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #86efac; /* Tailwind green-300 glow */
+}
 
-    /* Hari ini */
-    .flatpickr-day.today:not(.selected):not(.inRange) {
-        border: 1px solid #fb923c; /* Tailwind orange-400 */
-        background-color: #fff7ed; /* Tailwind orange-50 */
-    }
+/* Hari ini */
+.flatpickr-day.today:not(.selected):not(.inRange) {
+    border: 1px solid #3b6b0d; /* Warna hijau konsisten */
+    background-color: #f0fdf4; /* Tailwind green-50 */
+}
 </style>
 
 @endsection

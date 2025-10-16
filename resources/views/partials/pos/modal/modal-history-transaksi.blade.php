@@ -71,7 +71,7 @@
       {{-- Bayar & Kembalian --}}
       <div class="flex justify-between text-sm">
         <div class="font-medium">Total Bayar</div>
-        <div id="modalTotalPaid" class="font-medium text-orange-600">-</div>
+        <div id="modalTotalPaid" class="font-medium text-[#3b6b0d]">-</div>
       </div>
       <div class="flex justify-between text-sm">
         <div class="font-medium">Kembalian</div>

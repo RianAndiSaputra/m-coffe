@@ -15,40 +15,40 @@
         <!-- Kode Member -->
         <div>
           <label class="block font-medium mb-1">Kode Member <span class="text-red-500">*</span></label>
-          <input type="text" id="editKodeMember" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Kode member" required>
+          <input type="text" id="editKodeMember" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" placeholder="Kode member" required>
           <p id="errorEditKode" class="text-red-500 text-xs mt-1 hidden">Kode member wajib diisi</p>
         </div>
 
         <!-- Nama -->
         <div>
           <label class="block font-medium mb-1">Nama <span class="text-red-500">*</span></label>
-          <input type="text" id="editNamaMember" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Nama member" required>
+          <input type="text" id="editNamaMember" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" placeholder="Nama member" required>
           <p id="errorEditNama" class="text-red-500 text-xs mt-1 hidden">Nama member wajib diisi</p>
         </div>
 
         <!-- Telepon -->
         <div>
           <label class="block font-medium mb-1">Telp</label>
-          <input type="text" id="editTeleponMember" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="No. telp member">
+          <input type="text" id="editTeleponMember" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" placeholder="No. telp member">
         </div>
 
         <!-- Email -->
         <div>
           <label class="block font-medium mb-1">Email</label>
-          <input type="email" id="editEmailMember" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Email member">
+          <input type="email" id="editEmailMember" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" placeholder="Email member">
           <p id="errorEditEmail" class="text-red-500 text-xs mt-1 hidden">Format email tidak valid</p>
         </div>
 
         <!-- Alamat -->
         <div>
           <label class="block font-medium mb-1">Alamat</label>
-          <textarea id="editAlamatMember" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Alamat member"></textarea>
+          <textarea id="editAlamatMember" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" placeholder="Alamat member"></textarea>
         </div>
 
         <!-- Jenis Kelamin -->
         <div>
           <label class="block font-medium mb-1">Jenis Kelamin</label>
-          <select id="editJenisKelamin" class="w-full border rounded-lg px-4 py-2 text-sm">
+          <select id="editJenisKelamin" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200">
             <option value="">Pilih gender</option>
             <option value="male">Laki-laki</option>
             <option value="female">Perempuan</option>
@@ -59,8 +59,8 @@
 
     <!-- Footer -->
     <div class="p-6 border-t flex justify-end gap-3">
-      <button id="btnBatalModalEdit" class="px-4 py-2 border rounded hover:bg-gray-100">Batal</button>
-      <button id="btnEditMember" class="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 flex items-center gap-2">
+      <button id="btnBatalModalEdit" class="px-4 py-2 border rounded hover:bg-gray-100 transition duration-200">Batal</button>
+      <button id="btnEditMember" class="px-4 py-2 bg-[#3b6b0d] text-white rounded hover:bg-[#335e0c] flex items-center gap-2 transition duration-200">
         <i data-lucide="save" class="w-4 h-4"></i>
         <span>Simpan Perubahan</span>
       </button>

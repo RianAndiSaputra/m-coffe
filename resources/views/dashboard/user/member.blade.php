@@ -45,13 +45,13 @@
                   <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
               </span>
               <input id="searchInput" type="text" placeholder="Search..."
-                  class="w-full pl-10 pr-4 py-3 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" />
+                  class="w-full pl-10 pr-4 py-3 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#3b6b0d] focus:border-transparent" />
           </div>
 
             @if(auth()->check() && auth()->user()->role !== 'supervisor')
             <!-- Add Member Button -->
             <button onclick="openModalTambah()"
-                class="px-5 py-3 text-base font-medium text-white bg-orange-500 rounded-lg hover:bg-orange-600 shadow">
+                class="px-5 py-3 text-base font-medium text-white bg-[#3b6b0d] rounded-lg hover:bg-[#335e0c] shadow">
                 + Tambah Member
             </button>
             @endif
@@ -97,7 +97,7 @@
         <div id="loadingIndicator" class="flex flex-col items-center justify-center gap-2 py-8">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
-                 class="animate-spin text-orange-500">
+                 class="animate-spin text-[#3b6b0d]">
                 <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
             </svg>
             <span class="text-gray-500">Memuat data...</span>
@@ -194,11 +194,11 @@
 
         const alertConfig = {
             success: {
-                bgColor: 'bg-orange-50',
-                borderColor: 'border-orange-200',
-                textColor: 'text-orange-800',
+                bgColor: 'bg-green-50',
+                borderColor: 'border-green-200',
+                textColor: 'text-green-800',
                 icon: 'check-circle',
-                iconColor: 'text-orange-500'
+                iconColor: 'text-green-500'
             },
             error: {
                 bgColor: 'bg-red-50',
@@ -321,8 +321,8 @@
                 <td class="py-4">${index + 1}</td>
                 <td class="py-4">
                     <div class="flex items-center gap-4">
-                        <div class="bg-orange-100 p-2 rounded-full">
-                            <i data-lucide="user" class="w-6 h-6 text-orange-500"></i>
+                        <div class="bg-green-100 p-2 rounded-full">
+                            <i data-lucide="user" class="w-6 h-6 text-[#3b6b0d]"></i>
                         </div>
                         <div>
                             <div class="font-semibold text-base text-gray-900">${member.name}</div>
