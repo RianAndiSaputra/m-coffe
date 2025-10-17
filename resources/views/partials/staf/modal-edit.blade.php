@@ -14,28 +14,28 @@
           <!-- Nama Staff -->
           <div>
             <label class="block font-medium mb-1 text-gray-700">Nama <span class="text-red-500">*</span></label>
-            <input type="text" id="editNamaStaff" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" placeholder="Nama staff" required>
+            <input type="text" id="editNamaStaff" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" placeholder="Nama staff" required>
             <p id="errorEditNamaStaff" class="text-red-500 text-xs mt-1 hidden">Nama staff wajib diisi</p>
           </div>
   
           <!-- Email Staff -->
           <div>
             <label class="block font-medium mb-1 text-gray-700">Email <span class="text-red-500">*</span></label>
-            <input type="email" id="editEmailStaff" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" placeholder="Email staff" required>
+            <input type="email" id="editEmailStaff" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" placeholder="Email staff" required>
             <p id="errorEditEmailStaff" class="text-red-500 text-xs mt-1 hidden">Email wajib diisi dan valid</p>
           </div>
   
           <!-- Password -->
           <div>
             <label class="block font-medium mb-1 text-gray-700">Password</label>
-            <input type="password" id="editPasswordStaff" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" placeholder="Kosongkan jika tidak ingin mengubah">
+            <input type="password" id="editPasswordStaff" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" placeholder="Kosongkan jika tidak ingin mengubah">
             <p id="errorEditPasswordStaff" class="text-red-500 text-xs mt-1 hidden">Password minimal 8 karakter</p>
           </div>
   
           <!-- Peran -->
           <div>
             <label class="block font-medium mb-1 text-gray-700">Peran <span class="text-red-500">*</span></label>
-            <select id="editPeranStaff" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" required>
+            <select id="editPeranStaff" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" required>
               <option value="" disabled>Pilih peran</option>
               <option value="kasir">Kasir</option>
               <option value="supervisor">Supervisor</option>
@@ -49,18 +49,18 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block font-medium mb-1 text-gray-700">Waktu Mulai</label>
-              <input type="time" id="editWaktuMulai" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" placeholder="--.--">
+              <input type="time" id="editWaktuMulai" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" placeholder="--.--">
             </div>
             <div>
               <label class="block font-medium mb-1 text-gray-700">Waktu Selesai</label>
-              <input type="time" id="editWaktuSelesai" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" placeholder="--.--">
+              <input type="time" id="editWaktuSelesai" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" placeholder="--.--">
             </div>
           </div>
   
           <!-- Outlet -->
           <div>
             <label class="block font-medium mb-1 text-gray-700">Outlet</label>
-            <select id="editOutletStaff" data-url="{{ url('/api/outlets') }}" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors">
+            <select id="editOutletStaff" data-url="{{ url('/api/outlets') }}" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200">
               <option value="" disabled selected>Memuat outlet...</option>
             </select>
             <p id="errorEditOutletStaff" class="text-red-500 text-xs mt-1 hidden">Outlet wajib dipilih</p>
@@ -109,7 +109,7 @@
 
                   <!-- Capture Controls -->
                   <div class="flex justify-center space-x-3">
-                    <button type="button" id="editBtnStartCamera" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
+                    <button type="button" id="editBtnStartCamera" class="px-4 py-2 bg-[#3b6b0d] text-white rounded-lg hover:bg-[#335e0c] transition-colors flex items-center gap-2">
                       <i data-lucide="camera" class="w-4 h-4"></i>
                       <span>Mulai Kamera</span>
                     </button>
@@ -171,14 +171,13 @@
       <!-- Footer -->
       <div class="p-6 border-t flex justify-end gap-3">
         <button id="btnBatalModalEditStaff" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-gray-700">Batal</button>
-        <button id="btnSimpanEditStaff" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
+        <button id="btnSimpanEditStaff" class="px-4 py-2 bg-[#3b6b0d] text-white rounded-lg hover:bg-[#335e0c] transition-colors flex items-center gap-2">
           <i data-lucide="save" class="w-4 h-4"></i>
           <span>Simpan Perubahan</span>
         </button>
       </div>
     </div>
 </div>
-
 <script>
 // Edit Staff Face ID Functionality
 let editFaceStream = null;

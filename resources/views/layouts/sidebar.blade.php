@@ -98,6 +98,11 @@
                 <i data-lucide="chevron-down" class="w-4 h-4 transition-transform sidebar-arrow" id="stockDropdownArrow"></i>
             </div>
             <div id="stockDropdown" class="hidden pl-12 mt-2 sidebar-dropdown">
+                <a href="/bahan-baku" class="menu-subitem flex items-center py-2 transition-all w-full">
+                    <i data-lucide="beaker" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Bahan Baku</span>
+                </a>
+
                 <a href="/riwayat-stok" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="history" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Riwayat Stok</span>
@@ -204,6 +209,10 @@
                 <a href="/laporan-approve" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="check-circle" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Approve</span>
+                </a>
+                 <a href="/laporan-laba" class="menu-subitem flex items-center py-2 transition-all w-full">
+                    <i data-lucide="check-circle" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Laba</span>
                 </a>
             </div>
         </div>

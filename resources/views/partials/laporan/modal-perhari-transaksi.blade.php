@@ -91,7 +91,7 @@
                         </div>
                         <div class="flex justify-between border-t pt-2 mt-2">
                             <span class="text-gray-800 font-bold">Total</span>
-                            <span id="modalTotal" class="text-orange-600 font-bold">Rp 0</span>
+                            <span id="modalTotal" class="text-[#3b6b0d] font-bold">Rp 0</span>
                         </div>
                     </div>
                 </div>

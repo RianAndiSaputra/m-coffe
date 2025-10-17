@@ -62,7 +62,7 @@
         
         <!-- Modal footer -->
         <div class="modal-footer bg-gray-100 px-6 py-4 border-t flex justify-end">
-            <button onclick="closeModal()" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
+            <button onclick="closeModal()" class="px-4 py-2 bg-[#3b6b0d] text-white rounded-lg hover:bg-[#335e0c]">
                 Tutup
             </button>
         </div>

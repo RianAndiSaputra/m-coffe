@@ -35,7 +35,7 @@
             
             <div class="relative mt-2 sm:mt-0">
                 <input id="transDateInput" type="text"
-                    class="w-full sm:w-56 pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    class="w-full sm:w-56 pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3b6b0d]"
                     placeholder="Pilih Tanggal" />
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <i data-lucide="calendar" class="w-4 h-4 text-gray-500"></i>
@@ -46,7 +46,7 @@
         <!-- Search Bar -->
         <div class="w-full sm:w-72 relative">
             <input type="text" id="searchInvoice"
-                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3b6b0d]"
                 placeholder="Cari Invoice..." />
             <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
                 <i data-lucide="search" class="w-4 h-4"></i>
@@ -75,7 +75,7 @@
                         <div class="flex flex-col items-center justify-center gap-2 mx-auto">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
                                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
-                                 class="animate-spin text-orange-500">
+                                 class="animate-spin text-[#3b6b0d]">
                                 <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
                             </svg>
                             <span class="text-gray-500">Memuat data transaksi...</span>
@@ -145,7 +145,7 @@
                 </div>
                 <div class="flex justify-between border-t pt-2 font-bold text-lg">
                     <span>Total</span>
-                    <span id="detailTotal" class="text-orange-600"></span>
+                    <span id="detailTotal" class="text-[#3b6b0d]"></span>
                 </div>
             </div>
         </div>
@@ -453,7 +453,7 @@
                 </td>
                 <td class="py-4 font-semibold">${formatCurrency(transaction.total)}</td>
                 <td class="py-4 flex space-x-2">
-                    <a href="#" onclick="openDetailModal('${transaction.id}')" class="text-gray-600 hover:text-orange-600">
+                    <a href="#" onclick="openDetailModal('${transaction.id}')" class="text-gray-600 hover:text-[#3b6b0d]">
                         <i data-lucide="eye" class="w-5 h-5"></i>
                     </a>
                     ${transaction.status === 'completed' ? `

@@ -21,17 +21,17 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block font-medium mb-1">Nama Outlet <span class="text-red-500">*</span></label>
-            <input type="text" class="w-full border rounded-lg px-4 py-2 text-sm" id="editNamaOutlet" placeholder="Masukkan nama outlet" required>
+            <input type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" id="editNamaOutlet" placeholder="Masukkan nama outlet" required>
             <p id="errorEditNama" class="text-red-500 text-xs mt-1 hidden">Nama outlet wajib diisi</p>
           </div>
           <div>
             <label class="block font-medium mb-1">Nomor Telepon <span class="text-red-500">*</span></label>
-            <input type="text" class="w-full border rounded-lg px-4 py-2 text-sm" id="editNomorTelepon" placeholder="Masukkan nomor telepon" required>
+            <input type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" id="editNomorTelepon" placeholder="Masukkan nomor telepon" required>
             <p id="errorEditTelepon" class="text-red-500 text-xs mt-1 hidden">Nomor telepon wajib diisi</p>
           </div>
           <div class="md:col-span-2">
             <label class="block font-medium mb-1">Alamat Lengkap <span class="text-red-500">*</span></label>
-            <textarea class="w-full border rounded-lg px-4 py-2 text-sm" id="editAlamatLengkap" placeholder="Masukkan alamat lengkap" required></textarea>
+            <textarea class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" id="editAlamatLengkap" placeholder="Masukkan alamat lengkap" required></textarea>
             <p id="errorEditAlamat" class="text-red-500 text-xs mt-1 hidden">Alamat wajib diisi</p>
           </div>
         </div>
@@ -43,12 +43,12 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block font-medium mb-1">Email</label>
-            <input type="email" class="w-full border rounded-lg px-4 py-2 text-sm" id="editEmail" placeholder="Masukkan email">
+            <input type="email" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" id="editEmail" placeholder="Masukkan email">
             <p id="errorEditEmail" class="text-red-500 text-xs mt-1 hidden">Format email tidak valid</p>
           </div>
           <div>
             <label class="block font-medium mb-1">Persentase Pajak (%)</label>
-            <input type="number" class="w-full border rounded-lg px-4 py-2 text-sm" id="editPersentasePajak" placeholder="0%">
+            <input type="number" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" id="editPersentasePajak" placeholder="0%">
           </div>
         </div>
       </div>
@@ -59,15 +59,15 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block font-medium mb-1">Nomor Transaksi Default</label>
-            <input type="text" class="w-full border rounded-lg px-4 py-2 text-sm" id="editNoTransaksi" placeholder="Contoh: 001">
+            <input type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" id="editNoTransaksi" placeholder="Contoh: 001">
           </div>
           <div>
             <label class="block font-medium mb-1">Nama Bank</label>
-            <input type="text" class="w-full border rounded-lg px-4 py-2 text-sm" id="editNamaBank" placeholder="Contoh: BCA">
+            <input type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" id="editNamaBank" placeholder="Contoh: BCA">
           </div>
           <div class="md:col-span-2">
             <label class="block font-medium mb-1">Atas Nama</label>
-            <input type="text" class="w-full border rounded-lg px-4 py-2 text-sm" id="editAtasNama" placeholder="Nama pemilik rekening">
+            <input type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" id="editAtasNama" placeholder="Nama pemilik rekening">
           </div>
         </div>
       </div>
@@ -88,7 +88,7 @@
           <!-- Upload Foto Baru -->
           <div>
             <label class="block font-medium mb-1">Ganti Foto</label>
-            <input type="file" id="editFotoOutlet" class="w-full text-sm" accept=".jpg,.jpeg,.png" onchange="previewEditFoto(this)">
+            <input type="file" id="editFotoOutlet" class="w-full text-sm border border-gray-300 rounded-lg px-4 py-2 focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#335e0c] file:text-white hover:file:bg-[#3b6b0d]" accept=".jpg,.jpeg,.png" onchange="previewEditFoto(this)">
             <p class="text-gray-500 text-xs mt-1">Format: JPG, PNG. Ukuran maksimal: 2MB</p>
             <p id="errorEditFoto" class="text-red-500 text-xs mt-1 hidden">Ukuran file terlalu besar (maks 2MB)</p>
           </div>
@@ -121,7 +121,7 @@
 
     <!-- Footer -->
     <div class="p-6 border-t flex justify-end gap-3">
-      <button id="btnBatalModalEdit" class="px-4 py-2 border rounded hover:bg-gray-100">Batal</button>
+      <button id="btnBatalModalEdit" class="px-4 py-2 border rounded hover:bg-gray-100 transition duration-200">Batal</button>
       <button id="btnSimpanPerubahan"
         class="px-4 py-2 text-white rounded flex items-center gap-2 transition duration-200 shadow"
         style="background-color: #335e0c;"
@@ -129,8 +129,7 @@
         onmouseout="this.style.backgroundColor='#335e0c'">
         <i data-lucide="save" class="w-4 h-4"></i>
         <span>Simpan Perubahan</span>
-    </button>
-
+      </button>
     </div>
   </div>
 </div>
