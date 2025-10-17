@@ -11,9 +11,12 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\RawMaterialController;
 use App\Http\Controllers\CashRegisterController;
 use App\Http\Controllers\PrintTemplateController;
+use App\Http\Controllers\ProductRecipeController;
 use App\Http\Controllers\InventoryHistoryController;
+use App\Http\Controllers\RawMaterialPurchaseController;
 use App\Http\Controllers\CashRegisterTransactionController;
 
 Route::post('/login', [AuthController::class, 'login']);
@@ -121,6 +124,20 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/sales-by-category/{outlet}', 'salesByCategory');
             Route::get('/inventory-approvals/{outlet}',  'inventoryApprovals');
             Route::get('/sales-by-member/{outlet}', 'listProductByMember');
+        });
+
+        Route::controller(RawMaterialController::class)->group(function(){
+            Route::get('/raw-material', 'index');
+            Route::post('/raw-material', 'store');
+        });
+
+        Route::controller(ProductRecipeController::class)->group(function(){
+            Route::get('/product-recipe', 'index');
+        });
+
+        Route::controller(RawMaterialPurchaseController::class)->group(function(){
+            Route::get('/material-purchase', 'index');
+            Route::post('/material-purchase', 'store');
         });
 
         Route::post('/print-template', [PrintTemplateController::class, 'store']);
