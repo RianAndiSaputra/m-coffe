@@ -130,6 +130,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::controller(RawMaterialController::class)->group(function(){
             Route::get('/raw-material', 'index');
             Route::post('/raw-material', 'store');
+            Route::delete('/material-delete/{id}', 'destroy');
         });
 
         Route::controller(ProductRecipeController::class)->group(function(){

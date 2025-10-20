@@ -25,24 +25,10 @@
                         <input type="text" id="nama" name="name" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200" placeholder="Contoh: Biji Kopi Arabica" required>
                     </div>
 
-                    <!-- code -->
+                    <!-- Kode -->
                     <div>
                         <label class="block font-medium mb-2 text-gray-700" for="code">Kode <span class="text-red-500">*</span></label>
                         <input type="text" id="code" name="code" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200" placeholder="Kode unik bahan baku" required>
-                    </div>
-
-                    <!-- Kategori -->
-                    <div>
-                        <label class="block font-medium mb-2 text-gray-700" for="kategori">Kategori <span class="text-red-500">*</span></label>
-                        <select id="kategori" name="category" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200" required>
-                            <option value="">Pilih Kategori</option>
-                            <option value="kopi">Biji Kopi</option>
-                            <option value="susu">Produk Susu</option>
-                            <option value="gula">Pemanis</option>
-                            <option value="sirup">Sirup & Flavor</option>
-                            <option value="topping">Topping</option>
-                            <option value="lainnya">Lainnya</option>
-                        </select>
                     </div>
 
                     <!-- Satuan -->
@@ -50,27 +36,34 @@
                         <label class="block font-medium mb-2 text-gray-700" for="satuan">Satuan <span class="text-red-500">*</span></label>
                         <select id="satuan" name="unit" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200" required>
                             <option value="">Pilih Satuan</option>
-                            <option value="kg">Kilogram (kg)</option>
-                            <option value="g">Gram (g)</option>
-                            <option value="mg">Miligram (mg)</option>
-                            <option value="l">Liter (l)</option>
-                            <option value="ml">Mililiter (ml)</option>
-                            <option value="pcs">Pieces (pcs)</option>
-                            <option value="pack">Pack</option>
+                            <option value="gram">Gram (g)</option>
+                            <option value="milliliter">Mililiter (ml)</option>
+                            <option value="kilogram">Kilogram (kg)</option>
+                            <option value="liter">Liter (l)</option>
+                            <option value="piece">Piece (pcs)</option>
                             <option value="sachet">Sachet</option>
+                            <option value="pack">Pack</option>
+                            <option value="botol">Botol</option>
+                            <option value="kaleng">Kaleng</option>
                         </select>
                     </div>
 
+                    <!-- Harga per Unit -->
+                    {{-- <div>
+                        <label class="block font-medium mb-2 text-gray-700" for="cost_per_unit">Harga per Unit</label>
+                        <input type="number" id="cost_per_unit" name="cost_per_unit" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200" placeholder="0" step="0.01" min="0">
+                    </div> --}}
+
                     <!-- Stok Minimum -->
                     <div>
-                        <label class="block font-medium mb-2 text-gray-700" for="stokMinimum">Stok Minimum</label>
-                        <input type="number" id="stokMinimum" name="min_stock" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200" placeholder="0.00" step="0.01" value="0">
+                        <label class="block font-medium mb-2 text-gray-700" for="stokMinimum">Stok Minimum <span class="text-red-500">*</span></label>
+                        <input type="number" id="stokMinimum" name="min_stock" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200" placeholder="0.00" step="0.01" value="0" required>
                     </div>
 
-                    <!-- Supplier -->
+                    <!-- Deskripsi -->
                     <div class="md:col-span-2">
-                        <label class="block font-medium mb-2 text-gray-700" for="supplier">Supplier</label>
-                        <input type="text" id="supplier" name="supplier" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200" placeholder="Nama supplier bahan baku">
+                        <label class="block font-medium mb-2 text-gray-700" for="description">Deskripsi</label>
+                        <textarea id="description" name="description" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200" placeholder="Deskripsi bahan baku" rows="3"></textarea>
                     </div>
 
                     <!-- Status -->

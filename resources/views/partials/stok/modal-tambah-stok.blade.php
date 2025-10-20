@@ -21,7 +21,7 @@
                 </div>
             </div>
         </div>
-        <form id="tambahStokForm" onsubmit="event.preventDefault(); simpanTambahStok();">
+        <form id="tambahStokForm">
             <input type="hidden" name="bahan_baku_id" id="tambahStokBahanId">
             <div class="space-y-4">
                 <div>
@@ -41,7 +41,7 @@
                 <button type="button" onclick="closeModal('modalTambahStok')" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200">
                     Batal
                 </button>
-                <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200">
+                <button type="button" onclick="simpanTambahStok()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200">
                     Simpan Stok
                 </button>
             </div>
