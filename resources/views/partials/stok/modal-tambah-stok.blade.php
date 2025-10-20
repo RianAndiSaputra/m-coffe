@@ -1,8 +1,8 @@
 <div id="modalTambahStok" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md mx-4">
+    <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md mx-4" onclick="event.stopPropagation()">
         <div class="flex items-center justify-between mb-6">
             <h3 class="text-xl font-semibold text-gray-900">Tambah Stok</h3>
-            <button onclick="closeModal('modalTambahStok')" class="text-gray-400 hover:text-gray-600">
+            <button type="button" onclick="closeModal('modalTambahStok')" class="text-gray-400 hover:text-gray-600 transition-colors duration-200 p-1 rounded">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>

@@ -141,7 +141,8 @@
 <script>
     // Global variables
     let bahanBakuData = [];
-    
+    let modalCloseHandlersInitialized = false;
+
     // Initialize when DOM is loaded
     document.addEventListener('DOMContentLoaded', function() {
         createAuthInterceptor();
@@ -163,47 +164,45 @@
         const modal = document.getElementById(modalId);
         if (!modal) return;
 
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                closeModal(modalId);
-            }
-        });
-
-        const modalContent = modal.querySelector('.modal-content');
-        if (modalContent) {
-            modalContent.addEventListener('click', function(e) {
-                e.stopPropagation();
+        if (!modal.hasAttribute('data-modal-initialized')) {
+            modal.setAttribute('data-modal-initialized', 'true');
+            
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModal(modalId);
+                }
             });
+
+            const modalContent = modal.querySelector('.bg-white, [class*="rounded"]');
+            if (modalContent) {
+                modalContent.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            }
         }
     }
 
-    // Setup modal close buttons (X and Batal buttons)
+    // Setup modal close buttons
     function setupModalCloseButtons() {
-        // Close buttons dengan class 'close-modal'
-        document.querySelectorAll('.close-modal').forEach(button => {
-            button.addEventListener('click', function() {
-                const modal = this.closest('[id^="modal"]');
-                if (modal) {
-                    closeModal(modal.id);
-                }
-            });
-        });
+        if (modalCloseHandlersInitialized) {
+            return;
+        }
+        
+        modalCloseHandlersInitialized = true;
 
-        // Batal buttons
-        document.querySelectorAll('button[onclick*="closeModal"]').forEach(button => {
-            button.addEventListener('click', function() {
-                const onclick = this.getAttribute('onclick');
-                const modalIdMatch = onclick.match(/closeModal\('([^']+)'\)/);
-                if (modalIdMatch) {
-                    closeModal(modalIdMatch[1]);
-                }
-            });
-        });
+        console.log('Setting up modal close buttons...');
 
-        // Close buttons dengan SVG icon
+        // 1. Handle close buttons dengan SVG (X button)
         document.querySelectorAll('[id^="modal"] button:has(svg)').forEach(button => {
-            if (!button.onclick && button.closest('.flex.items-center.justify-between')) {
-                button.addEventListener('click', function() {
+            if (button.hasAttribute('onclick')) {
+                return;
+            }
+            
+            const header = button.closest('.flex.items-center.justify-between');
+            if (header) {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
                     const modal = this.closest('[id^="modal"]');
                     if (modal) {
                         closeModal(modal.id);
@@ -211,6 +210,38 @@
                 });
             }
         });
+
+        // 2. Handle "Batal" buttons yang menggunakan onclick
+        document.querySelectorAll('button[onclick*="closeModal"]').forEach(button => {
+            const originalOnclick = button.getAttribute('onclick');
+            
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                if (originalOnclick) {
+                    try {
+                        if (originalOnclick.includes("closeModal('modalTambahStok')")) {
+                            closeModal('modalTambahStok');
+                        } else if (originalOnclick.includes("closeModal('modalTambahBahanBaku')")) {
+                            closeModal('modalTambahBahanBaku');
+                        } else if (originalOnclick.includes("closeModal('modalKonfirmasiHapus')")) {
+                            closeModal('modalKonfirmasiHapus');
+                        } else {
+                            eval(originalOnclick);
+                        }
+                    } catch (error) {
+                        console.warn('Error executing onclick:', error);
+                        const modal = this.closest('[id^="modal"]');
+                        if (modal) {
+                            closeModal(modal.id);
+                        }
+                    }
+                }
+            });
+        });
+
+        console.log('Modal close buttons setup completed');
     }
 
     // Create fetch interceptor for authentication
@@ -307,33 +338,62 @@
 
     // Modal functions
     function openModal(modalId) {
-        document.querySelectorAll('[id^="modal"]').forEach(modal => {
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        });
-        
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            document.body.style.overflow = 'hidden';
+        try {
+            console.log('Opening modal:', modalId);
+            
+            document.querySelectorAll('[id^="modal"]').forEach(modal => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            });
+            
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                document.body.style.overflow = 'hidden';
+                
+                modal.dispatchEvent(new Event('modal-opened'));
+            } else {
+                console.error(`Modal dengan ID ${modalId} tidak ditemukan`);
+            }
+        } catch (error) {
+            console.error('Error opening modal:', error);
         }
     }
 
     function closeModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            document.body.style.overflow = '';
+        try {
+            console.log('Closing modal:', modalId);
             
-            // Reset form jika ada
-            const form = modal.querySelector('form');
-            if (form) {
-                form.reset();
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                document.body.style.overflow = '';
+                
+                const form = modal.querySelector('form');
+                if (form) {
+                    form.reset();
+                }
+                
+                modal.dispatchEvent(new Event('modal-closed'));
             }
+        } catch (error) {
+            console.error('Error closing modal:', error);
         }
     }
+
+    // Fungsi khusus untuk modal tambah stok
+    window.closeTambahStokModal = function() {
+        closeModal('modalTambahStok');
+        const form = document.getElementById('tambahStokForm');
+        if (form) {
+            form.reset();
+        }
+    };
+
+    // Fungsi global untuk close modal
+    window.closeModal = closeModal;
 
     async function initializePage() {
         await updateOutletInfo();
@@ -410,7 +470,6 @@
                 el.textContent = 'Gagal memuat data outlet';
             });
 
-            // Jika error 401/403, redirect ke login
             if (error.message.includes('401') || error.message.includes('403')) {
                 window.location.href = '/login';
             }
@@ -460,7 +519,6 @@
                 return;
             }
 
-            // Show loading state
             const tbody = document.getElementById('bahanBakuTableBody');
             if (tbody) {
                 tbody.innerHTML = `
@@ -505,7 +563,6 @@
             console.error('Load Bahan Baku Error:', error);
             showAlert('error', `Gagal memuat bahan baku: ${error.message}`);
             
-            // Jika error 401/403, redirect ke login
             if (error.message.includes('401') || error.message.includes('403')) {
                 window.location.href = '/login';
             }
@@ -604,12 +661,11 @@
                 throw new Error('Token tidak ditemukan');
             }
 
-            // Format data sesuai dengan controller RawMaterialPurchaseController
             const purchaseData = {
                 outlet_id: parseInt(getSelectedOutletId()),
                 purchase_date: formData.tanggal_masuk,
                 notes: `Tambah stok untuk ${formData.bahan_baku_name}`,
-                created_by: 1, // Ganti dengan user ID yang sesuai
+                created_by: 1,
                 items: [
                     {
                         raw_material_id: parseInt(formData.bahan_baku_id),
@@ -660,14 +716,12 @@
     // ============================
 
     function hitungHargaRataRata(bahan) {
-        // Gunakan cost_per_unit dari API response
         return parseFloat(bahan.cost_per_unit) || 0;
     }
 
     function hitungTotalNilai(bahan) {
         const hargaRata = hitungHargaRataRata(bahan);
         
-        // Cari stok di outlet yang aktif
         let stok = 0;
         if (bahan.stocks && bahan.stocks.length > 0) {
             const outletId = getSelectedOutletId();
@@ -679,7 +733,6 @@
     }
 
     function getStokBahan(bahan) {
-        // Cari stok di outlet yang aktif
         if (bahan.stocks && bahan.stocks.length > 0) {
             const outletId = getSelectedOutletId();
             const stockData = bahan.stocks.find(stock => stock.outlet_id == outletId);
@@ -770,19 +823,16 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div class="flex items-center space-x-2">
-                            <!-- BUTTON TAMBAH STOK -->
                             <button class="text-green-600 hover:text-green-900 add-stock-btn" data-id="${item.id}" title="Tambah Stok">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                                 </svg>
                             </button>
-                            <!-- BUTTON RIWAYAT STOK -->
                             <button class="text-blue-600 hover:text-blue-900 history-btn" data-id="${item.id}" title="Riwayat Stok">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
                             </button>
-                            <!-- BUTTON HAPUS -->
                             <button class="text-red-600 hover:text-red-900 delete-btn" data-id="${item.id}" title="Hapus Bahan Baku">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -807,19 +857,13 @@
     }
 
     function setupEventListeners() {
-        // Tambah bahan baku buttons
         document.getElementById('btnTambahBahanBaku').addEventListener('click', showTambahModal);
-
-        // Search and filter
         document.getElementById('searchBahanBaku').addEventListener('input', handleSearch);
         document.getElementById('filterStatus').addEventListener('change', handleFilter);
-
-        // Connect outlet selection
         connectOutletSelection();
     }
 
     function attachTableEventListeners() {
-        // Add stock buttons
         document.querySelectorAll('.add-stock-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const id = this.getAttribute('data-id');
@@ -827,7 +871,6 @@
             });
         });
 
-        // History buttons
         document.querySelectorAll('.history-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const id = this.getAttribute('data-id');
@@ -835,7 +878,6 @@
             });
         });
 
-        // Delete buttons
         document.querySelectorAll('.delete-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const id = this.getAttribute('data-id');
@@ -852,13 +894,11 @@
     function showTambahStokModal(id) {
         const item = bahanBakuData.find(b => b.id == id);
         if (item) {
-            // Set data di modal
             document.getElementById('modalBahanNama').textContent = item.name;
             document.getElementById('currentStock').textContent = `${getStokBahan(item)} ${item.unit}`;
             document.getElementById('currentAvgPrice').textContent = formatRupiah(hitungHargaRataRata(item));
             document.getElementById('tambahStokBahanId').value = item.id;
             
-            // Set tanggal hari ini sebagai default
             const today = new Date().toISOString().split('T')[0];
             document.querySelector('input[name="tanggal_masuk"]').value = today;
             
@@ -878,15 +918,6 @@
     // ============================
     // GLOBAL FUNCTIONS UNTUK MODAL
     // ============================
-
-    window.closeModal = function(modalId) {
-        closeModal(modalId);
-    };
-
-    window.closeTambahStokModal = function() {
-        closeModal('modalTambahStok');
-        document.getElementById('tambahStokForm').reset();
-    };
 
     window.showRiwayatStok = function(id) {
         const item = bahanBakuData.find(b => b.id == id);
@@ -915,7 +946,6 @@
             
             tbody.innerHTML = html;
             
-            // Update summary
             const totalNilai = hitungTotalNilai(item);
             const hargaRata = hitungHargaRataRata(item);
             document.getElementById('totalNilaiStok').textContent = formatRupiah(totalNilai);
@@ -944,13 +974,11 @@
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
         
-        // Validasi form
         if (!data.name || !data.code || !data.unit || !data.min_stock) {
             showAlert('error', 'Harap lengkapi semua field yang wajib!');
             return;
         }
 
-        // Konversi tipe data
         const postData = {
             name: data.name,
             code: data.code,
@@ -968,7 +996,6 @@
             closeModal('modalTambahBahanBaku');
         } else {
             if (result.errors) {
-                // Tampilkan error validasi
                 const errorMessages = Object.values(result.errors).flat().join(', ');
                 showAlert('error', `Gagal menambah bahan baku: ${errorMessages}`);
             } else {
@@ -982,13 +1009,11 @@
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
         
-        // Validasi form
         if (!data.jumlah || !data.harga_beli || !data.tanggal_masuk) {
             showAlert('error', 'Harap lengkapi semua field!');
             return;
         }
 
-        // Tambahkan nama bahan baku ke formData
         const bahanBakuId = data.bahan_baku_id;
         const bahanBaku = bahanBakuData.find(b => b.id == bahanBakuId);
         data.bahan_baku_name = bahanBaku ? bahanBaku.name : '';
@@ -1000,7 +1025,6 @@
             closeModal('modalTambahStok');
         } else {
             if (result.errors) {
-                // Tampilkan error validasi
                 const errorMessages = Object.values(result.errors).flat().join(', ');
                 showAlert('error', `Gagal menambah stok: ${errorMessages}`);
             } else {
@@ -1077,9 +1101,19 @@
         transform: scale(1.05);
     }
 
-    /* Style untuk modal content */
-    .modal-content {
-        position: relative;
+    /* Smooth transitions untuk modal */
+    [id^="modal"] {
+        transition: opacity 0.3s ease;
+    }
+
+    /* Style untuk close button */
+    button:has(svg) {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    button:has(svg):hover {
+        background-color: #f3f4f6;
     }
 </style>
 
