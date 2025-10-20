@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CashRegister;
-use App\Models\Inventory;
-use App\Models\InventoryHistory;
-use App\Models\Order;
-use App\Traits\ApiResponse;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
+use App\Models\Order;
+use App\Models\Inventory;
+use App\Traits\ApiResponse;
 use Illuminate\Support\Str;
+use App\Models\CashRegister;
+use Illuminate\Http\Request;
+use App\Models\ProductRecipe;
+use App\Models\InventoryHistory;
+use App\Models\RawMaterialStock;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use App\Models\RawMaterialStockHistory;
+use Illuminate\Support\Facades\Validator;
 
 class OrderController extends Controller
 {
@@ -138,6 +142,25 @@ class OrderController extends Controller
         ]);
 
         try {
+
+            foreach ($request->items as $item) {
+                $product = Product::find($item['product_id']);
+                $recipes = $product->productRecipes;
+                
+                foreach ($recipes as $recipe) {
+                    $required = $recipe->quantity * $item['quantity'];
+                    $available = RawMaterialStock::where('outlet_id', $request->outlet_id)
+                        ->where('raw_material_id', $recipe->raw_material_id)
+                        ->value('current_stock') ?? 0;
+                        
+                    if ($available < $required) {
+                        return $this->errorResponse(
+                            "Stock {$recipe->rawMaterial->name} tidak cukup. Dibutuhkan: {$required}, Tersedia: {$available}"
+                        );
+                    }
+                }
+            }
+            
             DB::beginTransaction();
 
             // 1. Hitung subtotal awal (tanpa diskon)
@@ -189,7 +212,7 @@ class OrderController extends Controller
                 'member_id' => $request->member_id
             ]);
 
-            // Buat order items
+            // Buat order items & kurangi stok produk + raw material
             foreach ($request->items as $item) {
                 $itemTotal = $item['quantity'] * $item['price'];
                 $itemDiscount = min(floatval($item['discount'] ?? 0), $itemTotal);
@@ -200,11 +223,10 @@ class OrderController extends Controller
                     'quantity' => $item['quantity'],
                     'price' => $item['price'],
                     'discount' => $itemDiscount,
-                    'subtotal' => $subtotal, // Ini HARUS positif
+                    'subtotal' => $subtotal,
                 ]);
-
-
-                // Update inventory (tidak diubah)
+                
+                // Update inventory produk jadi
                 $inventory = Inventory::where('outlet_id', $request->outlet_id)
                     ->where('product_id', $item['product_id'])
                     ->first();
@@ -220,15 +242,24 @@ class OrderController extends Controller
                         'quantity_after' => $inventory->quantity,
                         'quantity_change' => -$item['quantity'],
                         'type' => 'sale',
-                        'notes' => 'Penjualan POS, Invoice #' . $order->order_number,
+                        'notes' => 'Penjualan, Invoice #' . $order->order_number,
                         'user_id' => $request->user()->id,
                     ]);
                 }
+
+                $this->deductRawMaterialStock(
+                    $item['product_id'], 
+                    $item['quantity'], 
+                    $request->outlet_id, 
+                    $order->id,
+                    $order->order_number,
+                    $request->user()->id
+                );
             }
 
-            // Tidak diubah
+            // Update cash register
             $cashRegister = CashRegister::where('outlet_id', $request->outlet_id)->first();
-            $cashRegister->addCash($total, $request->user()->id, $request->shift_id, 'Penjualan POS, Invoice #' . $order->order_number, 'pos');
+            $cashRegister->addCash($total, $request->user()->id, $request->shift_id, 'Penjualan, Invoice #' . $order->order_number, 'pos');
 
             $order->update(['status' => 'completed']);
 
@@ -241,13 +272,11 @@ class OrderController extends Controller
                 'user' => $order->user->name,
                 'total' => $order->total,
                 'status' => $order->status,
-
                 'subtotal' => $order->subtotal,
                 'tax' => $order->tax,
                 'discount' => $order->discount,
                 'total_paid' => $order->total_paid,
                 'change' => $order->change,
-
                 'payment_method' => $order->payment_method,
                 'created_at' => $order->created_at->format('d/m/Y H:i'),
                 'items' => $order->items->map(function ($item) {
@@ -265,11 +294,79 @@ class OrderController extends Controller
                 ] : null
             ];
 
-            return $this->successResponse($data, "Succesfully created order");
-            // return $this->successResponse($order->load(['items.product', 'user']), 'Order berhasil dibuat');
+            return $this->successResponse($data, "Successfully created order");
+            
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->errorResponse('Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * @param int $productId
+     * @param int $quantity Jumlah produk yang dijual
+     * @param int $outletId
+     * @param int $orderId
+     * @param string $orderNumber
+     * @param int $userId
+     */
+    private function deductRawMaterialStock($productId, $quantity, $outletId, $orderId, $orderNumber, $userId)
+    {
+        $recipes = ProductRecipe::where('product_id', $productId)
+            ->with('rawMaterial')
+            ->get();
+
+        if ($recipes->isEmpty()) {
+            return;
+        }
+
+        foreach ($recipes as $recipe) {
+            $requiredQuantity = $recipe->quantity * $quantity;
+            $rawMaterialStock = RawMaterialStock::where('outlet_id', $outletId)
+                ->where('raw_material_id', $recipe->raw_material_id)
+                ->first();
+
+            if (!$rawMaterialStock) {
+                $rawMaterialStock = RawMaterialStock::create([
+                    'outlet_id' => $outletId,
+                    'raw_material_id' => $recipe->raw_material_id,
+                    'current_stock' => 0,
+                    'total_value' => 0
+                ]);
+            }
+
+            $stockBefore = $rawMaterialStock->current_stock;
+            $valueBefore = $rawMaterialStock->total_value;
+
+            $newStock = $stockBefore - $requiredQuantity;
+
+            if ($stockBefore > 0) {
+                $valuePerUnit = $valueBefore / $stockBefore;
+                $valueReduced = $requiredQuantity * $valuePerUnit;
+            } else {
+                $valueReduced = $requiredQuantity * $recipe->rawMaterial->cost_per_unit;
+            }
+
+            $newValue = max(0, $valueBefore - $valueReduced);
+
+            // Update stock
+            $rawMaterialStock->update([
+                'current_stock' => $newStock,
+                'total_value' => $newValue
+            ]);
+
+            RawMaterialStockHistory::create([
+                'outlet_id' => $outletId,
+                'raw_material_id' => $recipe->raw_material_id,
+                'stock_before' => $stockBefore,
+                'stock_after' => $newStock,
+                'quantity_change' => -$requiredQuantity,
+                'type' => 'production',
+                'notes' => "Produksi {$quantity} pcs {$recipe->product->name} untuk order #{$orderNumber}",
+                'user_id' => $userId,
+                'product_id' => $productId,
+                'order_id' => $orderId
+            ]);
         }
     }
 

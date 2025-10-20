@@ -37,37 +37,57 @@ class ProductRecipeController extends Controller
         try {
             $validated = $request->validate([
                 'product_id' => 'required|exists:products,id',
-                'raw_material_id' => 'required|exists:raw_materials,id',
-                'quantity' => 'required|numeric|min:0',
-                'notes' => 'nullable|string'
+                'recipes' => 'required|array|min:1',
+                'recipes.*.raw_material_id' => 'required|exists:raw_materials,id|distinct',
+                'recipes.*.quantity' => 'required|numeric|min:0.01',
+                'recipes.*.notes' => 'nullable|string'
             ]);
 
-            // Check if the combination already exists
-            $exists = ProductRecipe::where('product_id', $validated['product_id'])
-                ->where('raw_material_id', $validated['raw_material_id'])
-                ->exists();
+            DB::beginTransaction();
 
-            if ($exists) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Recipe already exists',
-                    'error' => 'Recipe for this product and raw material combination already exists'
-                ], 422);
+            $product = Product::findOrFail($validated['product_id']);
+            $createdRecipes = [];
+
+            foreach ($validated['recipes'] as $recipe) {
+                // Check if already exists
+                $exists = ProductRecipe::where('product_id', $validated['product_id'])
+                    ->where('raw_material_id', $recipe['raw_material_id'])
+                    ->exists();
+
+                if ($exists) {
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Duplicate recipe found',
+                        'error' => "Recipe with raw material ID {$recipe['raw_material_id']} already exists for this product"
+                    ], 422);
+                }
+
+                $createdRecipe = ProductRecipe::create([
+                    'product_id' => $validated['product_id'],
+                    'raw_material_id' => $recipe['raw_material_id'],
+                    'quantity' => $recipe['quantity'],
+                    'notes' => $recipe['notes'] ?? null
+                ]);
+
+                $createdRecipes[] = $createdRecipe->load('rawMaterial');
             }
 
-            DB::beginTransaction();
-            
-            $productRecipe = ProductRecipe::create($validated);
-            $productRecipe->load(['product', 'rawMaterial']);
-            
+            // Update product cost setelah semua recipe ditambahkan
+            $this->updateProductCost($validated['product_id']);
+
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Product recipe created successfully',
-                'data' => $productRecipe
+                'message' => 'Product recipes created successfully',
+                'data' => [
+                    'product' => $product->fresh(),
+                    'recipes' => $createdRecipes,
+                    'total_recipes' => count($createdRecipes)
+                ]
             ], 201);
-            
+
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
@@ -79,7 +99,7 @@ class ProductRecipeController extends Controller
             
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to create product recipe',
+                'message' => 'Failed to create product recipes',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -119,7 +139,7 @@ class ProductRecipeController extends Controller
             $validated = $request->validate([
                 'product_id' => 'sometimes|required|exists:products,id',
                 'raw_material_id' => 'sometimes|required|exists:raw_materials,id',
-                'quantity' => 'sometimes|required|numeric|min:0',
+                'quantity' => 'sometimes|required|numeric|min:0.01',
                 'notes' => 'nullable|string'
             ]);
 
@@ -144,7 +164,17 @@ class ProductRecipeController extends Controller
 
             DB::beginTransaction();
             
+            $oldProductId = $productRecipe->product_id;
             $productRecipe->update($validated);
+            
+            // Update product cost untuk produk lama (jika product_id berubah)
+            if ($request->has('product_id') && $oldProductId != $validated['product_id']) {
+                $this->updateProductCost($oldProductId);
+            }
+            
+            // Update product cost untuk produk baru/current
+            $this->updateProductCost($productRecipe->product_id);
+            
             $productRecipe->load(['product', 'rawMaterial']);
             
             DB::commit();
@@ -152,7 +182,7 @@ class ProductRecipeController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Product recipe updated successfully',
-                'data' => $productRecipe->fresh(['product', 'rawMaterial'])
+                'data' => $productRecipe
             ], 200);
             
         } catch (ModelNotFoundException $e) {
@@ -182,10 +212,14 @@ class ProductRecipeController extends Controller
     {
         try {
             $productRecipe = ProductRecipe::findOrFail($id);
+            $productId = $productRecipe->product_id;
             
             DB::beginTransaction();
             
             $productRecipe->delete();
+            
+            // Update product cost setelah recipe dihapus
+            $this->updateProductCost($productId);
             
             DB::commit();
 
@@ -214,20 +248,53 @@ class ProductRecipeController extends Controller
     public function getByProduct($productId)
     {
         try {
-            // Verify product exists
             $product = Product::findOrFail($productId);
             
-            $recipes = ProductRecipe::with(['product', 'rawMaterial'])
+            $recipes = ProductRecipe::with(['rawMaterial'])
                 ->where('product_id', $productId)
                 ->get();
+            
+            // Calculate total recipe cost
+            $totalCost = 0;
+            $recipeDetails = $recipes->map(function ($recipe) use (&$totalCost) {
+                $itemCost = $recipe->quantity * $recipe->rawMaterial->cost_per_unit;
+                $totalCost += $itemCost;
+                
+                return [
+                    'id' => $recipe->id,
+                    'raw_material' => [
+                        'id' => $recipe->rawMaterial->id,
+                        'name' => $recipe->rawMaterial->name,
+                        'code' => $recipe->rawMaterial->code,
+                        'unit' => $recipe->rawMaterial->unit,
+                        'cost_per_unit' => $recipe->rawMaterial->cost_per_unit
+                    ],
+                    'quantity' => $recipe->quantity,
+                    'notes' => $recipe->notes,
+                    'item_cost' => round($itemCost, 2)
+                ];
+            });
             
             return response()->json([
                 'success' => true,
                 'message' => 'Product recipes retrieved successfully',
                 'data' => [
-                    'product' => $product,
-                    'recipes' => $recipes,
-                    'total_recipes' => $recipes->count()
+                    'product' => [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'code' => $product->code,
+                        'price' => $product->price
+                    ],
+                    'recipes' => $recipeDetails,
+                    'summary' => [
+                        'total_recipes' => $recipes->count(),
+                        'total_recipe_cost' => round($totalCost, 2),
+                        'selling_price' => $product->price,
+                        'gross_profit' => round($product->price - $totalCost, 2),
+                        'profit_margin_percentage' => $product->price > 0 
+                            ? round((($product->price - $totalCost) / $product->price) * 100, 2) 
+                            : 0
+                    ]
                 ]
             ], 200);
             
@@ -249,20 +316,45 @@ class ProductRecipeController extends Controller
     public function getByRawMaterial($rawMaterialId)
     {
         try {
-            // Verify raw material exists
             $rawMaterial = RawMaterial::findOrFail($rawMaterialId);
             
-            $recipes = ProductRecipe::with(['product', 'rawMaterial'])
+            $recipes = ProductRecipe::with(['product'])
                 ->where('raw_material_id', $rawMaterialId)
                 ->get();
             
+            $productDetails = $recipes->map(function ($recipe) use ($rawMaterial) {
+                $itemCost = $recipe->quantity * $rawMaterial->cost_per_unit;
+                
+                return [
+                    'recipe_id' => $recipe->id,
+                    'product' => [
+                        'id' => $recipe->product->id,
+                        'name' => $recipe->product->name,
+                        'code' => $recipe->product->code,
+                        'price' => $recipe->product->price
+                    ],
+                    'quantity_used' => $recipe->quantity,
+                    'cost_per_product' => round($itemCost, 2),
+                    'notes' => $recipe->notes
+                ];
+            });
+            
             return response()->json([
                 'success' => true,
-                'message' => 'Raw material recipes retrieved successfully',
+                'message' => 'Raw material usage retrieved successfully',
                 'data' => [
-                    'raw_material' => $rawMaterial,
-                    'recipes' => $recipes,
-                    'total_products_using' => $recipes->count()
+                    'raw_material' => [
+                        'id' => $rawMaterial->id,
+                        'name' => $rawMaterial->name,
+                        'code' => $rawMaterial->code,
+                        'unit' => $rawMaterial->unit,
+                        'cost_per_unit' => $rawMaterial->cost_per_unit
+                    ],
+                    'products_using' => $productDetails,
+                    'summary' => [
+                        'total_products_using' => $recipes->count(),
+                        'total_quantity_in_recipes' => $recipes->sum('quantity')
+                    ]
                 ]
             ], 200);
             
@@ -279,5 +371,26 @@ class ProductRecipeController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    private function updateProductCost($productId)
+    {
+        $product = Product::find($productId);
+        
+        if (!$product) {
+            return;
+        }
+
+        // Hitung total cost dari semua recipe
+        $totalCost = ProductRecipe::where('product_id', $productId)
+            ->with('rawMaterial')
+            ->get()
+            ->sum(function ($recipe) {
+                return $recipe->quantity * $recipe->rawMaterial->cost_per_unit;
+            });
+
+        // Update product cost (jika ada field cost di products table)
+        // Uncomment jika table products punya field 'cost'
+        // $product->update(['cost' => $totalCost]);
     }
 }

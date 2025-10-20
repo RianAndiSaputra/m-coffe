@@ -143,7 +143,7 @@
       <button id="btnBatalModalTambahStaff" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-gray-700">Batal</button>
       <button id="btnTambahStaff" class="px-4 py-2 bg-[#3b6b0d] text-white rounded-lg hover:bg-[#335e0c] transition-colors flex items-center gap-2">
         <i data-lucide="user-plus" class="w-4 h-4"></i>
-        <span>Simpan Staff</span>
+        <span id="btnTambahStaff">Simpan Staff</span>
       </button>
     </div>
 
@@ -247,105 +247,105 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Form Submission
-    document.getElementById('btnTambahStaff').addEventListener('click', async function() {
-        // Validate form
-        if (!validateForm()) {
-            return;
-        }
+    // document.getElementById('btnTambahStaff').addEventListener('click', async function() {
+    //     // Validate form
+    //     if (!validateForm()) {
+    //         return;
+    //     }
 
-        // Prepare form data
-        const formData = new FormData();
-        formData.append('name', document.getElementById('namaStaff').value);
-        formData.append('email', document.getElementById('emailStaff').value);
-        formData.append('password', document.getElementById('passwordStaff').value);
-        formData.append('role', document.getElementById('peranStaff').value);
-        formData.append('shift_start', document.getElementById('waktuMulai').value);
-        formData.append('shift_end', document.getElementById('waktuSelesai').value);
-        formData.append('outlet_id', document.getElementById('outletStaff').value);
+    //     // Prepare form data
+    //     const formData = new FormData();
+    //     formData.append('name', document.getElementById('namaStaff').value);
+    //     formData.append('email', document.getElementById('emailStaff').value);
+    //     formData.append('password', document.getElementById('passwordStaff').value);
+    //     formData.append('role', document.getElementById('peranStaff').value);
+    //     formData.append('shift_start', document.getElementById('waktuMulai').value);
+    //     formData.append('shift_end', document.getElementById('waktuSelesai').value);
+    //     formData.append('outlet_id', document.getElementById('outletStaff').value);
         
-        // Add face data if captured
-        if (capturedFaceData) {
-            formData.append('face_image', capturedFaceData, 'face.jpg');
-        }
+    //     // Add face data if captured
+    //     if (capturedFaceData) {
+    //         formData.append('face_image', capturedFaceData, 'face.jpg');
+    //     }
 
-        try {
-            // Show loading state
-            const btn = this;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Menyimpan...</span>';
-            btn.disabled = true;
+    //     try {
+    //         // Show loading state
+    //         const btn = this;
+    //         const originalText = btn.innerHTML;
+    //         btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Menyimpan...</span>';
+    //         btn.disabled = true;
 
-            // Send to backend
-            const response = await fetch('/api/staff', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: formData
-            });
+    //         // Send to backend
+    //         const response = await fetch('/api/staff', {
+    //             method: 'POST',
+    //             headers: {
+    //                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    //             },
+    //             body: formData
+    //         });
 
-            const data = await response.json();
+    //         const data = await response.json();
 
-            if (response.ok) {
-                // Success
-                showNotification('success', 'Staff berhasil ditambahkan!');
-                closeModalTambahStaff();
-                // Refresh staff list or redirect
-                window.location.reload();
-            } else {
-                // Error
-                showNotification('error', data.message || 'Gagal menambahkan staff');
-            }
+    //         if (response.ok) {
+    //             // Success
+    //             showNotification('success', 'Staff berhasil ditambahkan!');
+    //             closeModalTambahStaff();
+    //             // Refresh staff list or redirect
+    //             window.location.reload();
+    //         } else {
+    //             // Error
+    //             showNotification('error', data.message || 'Gagal menambahkan staff');
+    //         }
 
-        } catch (error) {
-            console.error('Error adding staff:', error);
-            showNotification('error', 'Terjadi kesalahan saat menambahkan staff');
-        } finally {
-            // Reset button state
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-            lucide.createIcons();
-        }
-    });
+    //     } catch (error) {
+    //         console.error('Error adding staff:', error);
+    //         showNotification('error', 'Terjadi kesalahan saat menambahkan staff');
+    //     } finally {
+    //         // Reset button state
+    //         btn.innerHTML = originalText;
+    //         btn.disabled = false;
+    //         lucide.createIcons();
+    //     }
+    // });
 
     // Form validation function
-    function validateForm() {
-        let isValid = true;
+    // function validateForm() {
+    //     let isValid = true;
         
-        // Add your form validation logic here
-        const requiredFields = [
-            'namaStaff', 'emailStaff', 'passwordStaff', 
-            'peranStaff', 'waktuMulai', 'waktuSelesai', 'outletStaff'
-        ];
+    //     // Add your form validation logic here
+    //     const requiredFields = [
+    //         'namaStaff', 'emailStaff', 'passwordStaff', 
+    //         'peranStaff', 'waktuMulai', 'waktuSelesai', 'outletStaff'
+    //     ];
         
-        requiredFields.forEach(fieldId => {
-            const field = document.getElementById(fieldId);
-            const errorElement = document.getElementById(`error${fieldId.charAt(0).toUpperCase() + fieldId.slice(1)}`);
+    //     requiredFields.forEach(fieldId => {
+    //         const field = document.getElementById(fieldId);
+    //         const errorElement = document.getElementById(`error${fieldId.charAt(0).toUpperCase() + fieldId.slice(1)}`);
             
-            if (!field.value) {
-                errorElement.classList.remove('hidden');
-                isValid = false;
-            } else {
-                errorElement.classList.add('hidden');
-            }
-        });
+    //         if (!field.value) {
+    //             errorElement.classList.remove('hidden');
+    //             isValid = false;
+    //         } else {
+    //             errorElement.classList.add('hidden');
+    //         }
+    //     });
         
-        return isValid;
-    }
+    //     return isValid;
+    // }
 });
 
 // Close modal function
-function closeModalTambahStaff() {
-    document.getElementById('modalTambahStaff').classList.add('hidden');
-    // Clean up camera
-    if (faceStream) {
-        faceStream.getTracks().forEach(track => track.stop());
-    }
-}
+// function closeModalTambahStaff() {
+//     document.getElementById('modalTambahStaff').classList.add('hidden');
+//     // Clean up camera
+//     if (faceStream) {
+//         faceStream.getTracks().forEach(track => track.stop());
+//     }
+// }
 
-// Notification function (you can reuse from your existing code)
-function showNotification(type, message) {
-    // Your existing notification implementation
-    console.log(`${type}: ${message}`);
-}
+// // Notification function (you can reuse from your existing code)
+// function showNotification(type, message) {
+//     // Your existing notification implementation
+//     console.log(`${type}: ${message}`);
+// }
 </script>

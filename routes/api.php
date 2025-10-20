@@ -16,6 +16,7 @@ use App\Http\Controllers\CashRegisterController;
 use App\Http\Controllers\PrintTemplateController;
 use App\Http\Controllers\ProductRecipeController;
 use App\Http\Controllers\InventoryHistoryController;
+use App\Http\Controllers\RawMaterialStockController;
 use App\Http\Controllers\RawMaterialPurchaseController;
 use App\Http\Controllers\CashRegisterTransactionController;
 
@@ -133,11 +134,18 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::controller(ProductRecipeController::class)->group(function(){
             Route::get('/product-recipe', 'index');
+            Route::post('/product-recipe', 'store');
         });
 
         Route::controller(RawMaterialPurchaseController::class)->group(function(){
             Route::get('/material-purchase', 'index');
             Route::post('/material-purchase', 'store');
+        });
+
+        Route::controller(RawMaterialStockController::class)->group(function(){
+            Route::get('/raw-stock', 'index');
+            Route::get('/get-low-stock', 'getLowStock');
+            Route::get('/get-stock-history', 'getStockHistory');
         });
 
         Route::post('/print-template', [PrintTemplateController::class, 'store']);

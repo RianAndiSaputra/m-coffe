@@ -21,7 +21,7 @@ class UserSeeder extends Seeder
             'email' => 'admin@admin.com',
             'password' => Hash::make('password'),
             'role' => 'admin',
-            'foto_profil' => '2180321',
+            // 'foto_profil' => '2180321',
         ]);
 
         $kasir = User::create([
@@ -29,7 +29,7 @@ class UserSeeder extends Seeder
             'email' => 'kasir@kasir.com',
             'password' => Hash::make('password'),
             'role' => 'kasir',
-            'foto_profil' => '2180321',
+            // 'foto_profil' => '2180321',
             'outlet_id' => 1
         ]);
 

@@ -51,26 +51,26 @@ class RawMaterial extends Model
     }
 
     // Scopes
-    // public function scopeActive($query)
-    // {
-    //     return $query->where('is_active', true);
-    // }
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
 
-    // public function scopeInactive($query)
-    // {
-    //     return $query->where('is_active', false);
-    // }
+    public function scopeInactive($query)
+    {
+        return $query->where('is_active', false);
+    }
 
-    // // Methods
-    // public function getCurrentStock($outletId)
-    // {
-    //     $stock = $this->stocks()->where('outlet_id', $outletId)->first();
-    //     return $stock ? $stock->current_stock : 0;
-    // }
+    // Methods
+    public function getCurrentStock($outletId)
+    {
+        $stock = $this->stocks()->where('outlet_id', $outletId)->first();
+        return $stock ? $stock->current_stock : 0;
+    }
 
-    // public function isBelowMinStock($outletId)
-    // {
-    //     $currentStock = $this->getCurrentStock($outletId);
-    //     return $currentStock < $this->min_stock;
-    // }
+    public function isBelowMinStock($outletId)
+    {
+        $currentStock = $this->getCurrentStock($outletId);
+        return $currentStock < $this->min_stock;
+    }
 }

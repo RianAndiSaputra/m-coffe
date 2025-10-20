@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('code')->unique();
             $table->enum('unit', ['gram', 'milliliter', 'kilogram', 'liter', 'piece', 'sachet', 'pack', 'botol', 'kaleng']);
-            $table->decimal('cost_per_unit', 15, 2);
+            $table->decimal('cost_per_unit', 15, 2)->nullable();
             $table->decimal('min_stock', 10, 2);
             $table->text('description')->nullable();
             $table->boolean('is_active')->default(true);

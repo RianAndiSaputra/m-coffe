@@ -37,7 +37,7 @@ class RawMaterialController extends Controller
                 'name' => 'required|string|max:255',
                 'code' => 'required|string|unique:raw_materials,code',
                 'unit' => 'required|in:gram,milliliter,kilogram,liter,piece,sachet,pack,botol,kaleng',
-                'cost_per_unit' => 'required|numeric|min:0',
+                'cost_per_unit' => 'nullable|numeric|min:0',
                 'min_stock' => 'required|numeric|min:0',
                 'description' => 'nullable|string',
                 'is_active' => 'boolean'

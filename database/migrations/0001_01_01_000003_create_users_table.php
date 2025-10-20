@@ -19,7 +19,7 @@ return new class extends Migration
             $table->enum('role', ['admin', 'manajer', 'kasir']);
             $table->foreignId('outlet_id')->nullable()->constrained('outlets');
             $table->string('password');
-            $table->string('foto_profil');
+            // $table->string('foto_profil');
             $table->boolean('is_active')->default(true);    
             $table->softDeletes();
             $table->rememberToken();

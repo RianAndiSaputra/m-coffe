@@ -74,4 +74,9 @@ class Order extends Model
     {
         return $this->hasMany(InventoryHistory::class);
     }
+
+    public function rawMaterialHistories()
+    {
+        return $this->hasMany(RawMaterialStockHistory::class);
+    }
 }
