@@ -2,11 +2,16 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use App\Models\Outlet;
 use App\Models\Product;
-use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\RawMaterial;
 use Illuminate\Database\Seeder;
+use Database\Seeders\UserSeeder;
+use Database\Seeders\OutletSeeder;
+use Database\Seeders\ProductSeeder;
+use Database\Seeders\CategorySeeder;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
@@ -23,7 +28,9 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             CategorySeeder::class,
             ProductSeeder::class,
-            RawMaterial::class,
+            RawMaterialSeeder::class,
+            RawMaterialPurchaseSeeder::class,
+            RawMaterialStockSeeder::class,
         ]);
 
     }

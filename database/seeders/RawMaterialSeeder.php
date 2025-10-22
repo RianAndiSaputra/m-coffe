@@ -3,13 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\RawMaterial;
-use App\Models\RawMaterialStock;
-use App\Models\RawMaterialPurchase;
-use App\Models\RawMaterialPurchaseItem;
-use App\Models\Outlet;
-use App\Models\User;
 use Illuminate\Database\Seeder;
-use Carbon\Carbon;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class RawMaterialSeeder extends Seeder
 {
@@ -18,7 +13,6 @@ class RawMaterialSeeder extends Seeder
      */
     public function run(): void
     {
-        // Data raw materials
         $rawMaterials = [
             [
                 'name' => 'Tepung Terigu',
@@ -112,71 +106,10 @@ class RawMaterialSeeder extends Seeder
             ],
         ];
 
-        // Insert raw materials
         foreach ($rawMaterials as $material) {
             RawMaterial::create($material);
         }
 
-        // Ambil outlet dan user pertama (sesuaikan dengan data Anda)
-        $outlet = Outlet::first();
-        $user = User::first();
-
-        if (!$outlet || !$user) {
-            $this->command->warn('Outlet atau User tidak ditemukan. Pastikan seeder Outlet dan User sudah dijalankan terlebih dahulu.');
-            return;
-        }
-
-        // Create stock untuk setiap raw material di outlet
-        $materials = RawMaterial::all();
-        foreach ($materials as $material) {
-            $currentStock = rand(50, 200);
-            $totalValue = $currentStock * $material->cost_per_unit;
-
-            RawMaterialStock::create([
-                'outlet_id' => $outlet->id,
-                'raw_material_id' => $material->id,
-                'current_stock' => $currentStock,
-                'total_value' => $totalValue,
-            ]);
-        }
-
-        // Create sample purchases
-        for ($i = 1; $i <= 3; $i++) {
-            $purchaseDate = Carbon::now()->subDays(rand(1, 30));
-            
-            $purchase = RawMaterialPurchase::create([
-                'purchase_number' => 'PUR-' . date('Ymd') . '-' . str_pad($i, 4, '0', STR_PAD_LEFT),
-                'outlet_id' => $outlet->id,
-                'purchase_date' => $purchaseDate,
-                'total_amount' => 0, // akan diupdate setelah item dibuat
-                'notes' => 'Pembelian bahan baku periode ' . $purchaseDate->format('F Y'),
-                'created_by' => $user->id,
-            ]);
-
-            // Create purchase items (3-5 items per purchase)
-            $itemCount = rand(3, 5);
-            $totalAmount = 0;
-            $selectedMaterials = $materials->random($itemCount);
-
-            foreach ($selectedMaterials as $material) {
-                $quantity = rand(10, 50);
-                $unitCost = $material->cost_per_unit;
-                $totalCost = $quantity * $unitCost;
-                $totalAmount += $totalCost;
-
-                RawMaterialPurchaseItem::create([
-                    'purchase_id' => $purchase->id,
-                    'raw_material_id' => $material->id,
-                    'quantity' => $quantity,
-                    'unit_cost' => $unitCost,
-                    'total_cost' => $totalCost,
-                ]);
-            }
-
-            // Update total amount
-            $purchase->update(['total_amount' => $totalAmount]);
-        }
-
-        $this->command->info('Raw material data berhasil di-seed!');
+        $this->command->info('Raw materials berhasil di-seed!');
     }
 }
