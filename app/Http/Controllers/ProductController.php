@@ -8,16 +8,17 @@ use Milon\Barcode\DNS1D;
 use App\Models\Inventory;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use App\Models\ProductRecipe;
+use Illuminate\Validation\Rule;
 use App\Models\InventoryHistory;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
 // use Illuminate\Container\Attributes\Log;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\Rule;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ProductController extends Controller
 {
@@ -148,7 +149,7 @@ class ProductController extends Controller
         if ($request->has('image') && $request->image === null) {
             $request->request->remove('image');
         }
-    
+
         try {
             $request->validate([
                 'name' => 'required|string|max:255',
@@ -173,21 +174,26 @@ class ProductController extends Controller
                 'outlet_ids.*' => 'exists:outlets,id',
                 'quantity' => 'required|numeric',
                 'min_stock' => 'required|numeric',
+                // Validasi untuk resep produk
+                'recipes' => 'nullable|array',
+                'recipes.*.raw_material_id' => 'required_with:recipes|exists:raw_materials,id|distinct',
+                'recipes.*.quantity' => 'required_with:recipes|numeric|min:0.01',
+                'recipes.*.notes' => 'nullable|string'
             ]);
-    
+
             // Validasi manual untuk SKU dan barcode
             if ($request->sku && Product::where('sku', $request->sku)->exists()) {
                 throw ValidationException::withMessages([
                     'sku' => 'SKU sudah digunakan oleh produk aktif'
                 ]);
             }
-    
+
             if ($request->barcode && Product::where('barcode', $request->barcode)->exists()) {
                 throw ValidationException::withMessages([
                     'barcode' => 'Barcode sudah digunakan oleh produk aktif'
                 ]);
             }
-    
+
             DB::beginTransaction();
             
             if ($request->hasFile('image')) {
@@ -196,11 +202,11 @@ class ProductController extends Controller
             } else {
                 $imagePath = null;
             }
-    
+
             // Generate SKU dan barcode jika tidak diisi
             $sku = $request->sku ?? $this->generateUniqueSku();
             $barcode = $request->barcode ?? $this->generateUniqueBarcode();
-    
+
             $product = Product::create([
                 'name' => $request->name,
                 'sku' => $sku,
@@ -211,7 +217,8 @@ class ProductController extends Controller
                 'image' => $imagePath,
                 'is_active' => $request->is_active,
             ]);
-    
+
+            // Create inventory untuk setiap outlet
             foreach ($request->outlet_ids as $outletId) {
                 Inventory::create([
                     'product_id' => $product->id,
@@ -231,10 +238,47 @@ class ProductController extends Controller
                     'user_id' => $request->user()->id,
                 ]);
             }
-    
+
+            // Create product recipes jika ada
+            if ($request->has('recipes') && is_array($request->recipes) && count($request->recipes) > 0) {
+                $createdRecipes = [];
+                
+                foreach ($request->recipes as $recipe) {
+                    // Check if already exists (untuk keamanan)
+                    $exists = ProductRecipe::where('product_id', $product->id)
+                        ->where('raw_material_id', $recipe['raw_material_id'])
+                        ->exists();
+
+                    if ($exists) {
+                        DB::rollBack();
+                        return $this->errorResponse(
+                            "Recipe with raw material ID {$recipe['raw_material_id']} already exists for this product",
+                            'Duplicate recipe found',
+                            422
+                        );
+                    }
+
+                    $createdRecipe = ProductRecipe::create([
+                        'product_id' => $product->id,
+                        'raw_material_id' => $recipe['raw_material_id'],
+                        'quantity' => $recipe['quantity'],
+                        'notes' => $recipe['notes'] ?? null
+                    ]);
+
+                    $createdRecipes[] = $createdRecipe->load('rawMaterial');
+                }
+
+                // Update product cost setelah semua recipe ditambahkan
+                $this->updateProductCost($product->id);
+                
+                // Refresh product untuk mendapatkan data terbaru
+                $product = $product->fresh(['recipes.rawMaterial']);
+            }
+
             DB::commit();
-    
+
             return $this->successResponse($product, 'Product created successfully');
+            
         } catch (\Throwable $th) {
             DB::rollBack();
             if ($th instanceof \Illuminate\Validation\ValidationException) {
@@ -712,5 +756,26 @@ class ProductController extends Controller
         } catch (\Throwable $th) {
             return $this->errorResponse($th->getMessage());
         }
+    }
+
+    private function updateProductCost($productId)
+    {
+        $product = Product::find($productId);
+        
+        if (!$product) {
+            return;
+        }
+
+        // Hitung total cost dari semua recipe
+        $totalCost = ProductRecipe::where('product_id', $productId)
+            ->with('rawMaterial')
+            ->get()
+            ->sum(function ($recipe) {
+                return $recipe->quantity * $recipe->rawMaterial->cost_per_unit;
+            });
+
+        // Update product cost (jika ada field cost di products table)
+        // Uncomment jika table products punya field 'cost'
+        // $product->update(['cost' => $totalCost]);
     }
 }
