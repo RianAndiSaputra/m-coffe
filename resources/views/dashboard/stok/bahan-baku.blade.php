@@ -106,15 +106,6 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
                 </div>
-                <select id="filterKategori" class="border border-gray-300 rounded-lg px-4 py-2 focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200">
-                    <option value="">Semua Kategori</option>
-                    <option value="kopi">Biji Kopi</option>
-                    <option value="susu">Produk Susu</option>
-                    <option value="gula">Pemanis</option>
-                    <option value="sirup">Sirup & Flavor</option>
-                    <option value="topping">Topping</option>
-                    <option value="lainnya">Lainnya</option>
-                </select>
                 <select id="filterStatus" class="border border-gray-300 rounded-lg px-4 py-2 focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200">
                     <option value="">Semua Status</option>
                     <option value="active">Aktif</option>
@@ -131,7 +122,7 @@
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nama Bahan</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Kategori</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Kode</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Stok</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Harga Rata-rata</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Total Nilai</th>
@@ -148,66 +139,265 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Sample data dengan sistem average cost
-    let bahanBakuData = [
-        {
-            id: 1,
-            name: 'Biji Kopi Arabica',
-            category: 'kopi',
-            stock: 8.5,
-            unit: 'kg',
-            min_stock: 2,
-            is_active: true,
-            supplier: 'Supplier A',
-            code: 'BBK001',
-            batches: [
-                { id: 1, jumlah: 5, harga_beli: 120000, tanggal_masuk: '2024-01-10', sisa_stok: 3.5 },
-                { id: 2, jumlah: 3, harga_beli: 125000, tanggal_masuk: '2024-01-15', sisa_stok: 3 },
-                { id: 3, jumlah: 2, harga_beli: 130000, tanggal_masuk: '2024-01-20', sisa_stok: 2 }
-            ]
-        },
-        {
-            id: 2,
-            name: 'Susu Segar',
-            category: 'susu',
-            stock: 15,
-            unit: 'l',
-            min_stock: 5,
-            is_active: true,
-            supplier: 'Supplier B',
-            code: 'BBS002',
-            batches: [
-                { id: 1, jumlah: 10, harga_beli: 25000, tanggal_masuk: '2024-01-12', sisa_stok: 5 },
-                { id: 2, jumlah: 8, harga_beli: 26000, tanggal_masuk: '2024-01-18', sisa_stok: 8 },
-                { id: 3, jumlah: 2, harga_beli: 25500, tanggal_masuk: '2024-01-22', sisa_stok: 2 }
-            ]
-        },
-        {
-            id: 3,
-            name: 'Gula Pasir',
-            category: 'gula',
-            stock: 12.2,
-            unit: 'kg',
-            min_stock: 3,
-            is_active: true,
-            supplier: 'Supplier C',
-            code: 'BBG003',
-            batches: [
-                { id: 1, jumlah: 8, harga_beli: 15000, tanggal_masuk: '2024-01-08', sisa_stok: 4.2 },
-                { id: 2, jumlah: 5, harga_beli: 15500, tanggal_masuk: '2024-01-16', sisa_stok: 5 },
-                { id: 3, jumlah: 3, harga_beli: 15200, tanggal_masuk: '2024-01-25', sisa_stok: 3 }
-            ]
+    // Global variables
+    let bahanBakuData = [];
+    let modalCloseHandlersInitialized = false;
+
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        createAuthInterceptor();
+        setupModals();
+        initializePage();
+        setupModalCloseButtons();
+    });
+
+    // Setup all modals
+    function setupModals() {
+        setupModal('modalTambahBahanBaku');
+        setupModal('modalKonfirmasiHapus');
+        setupModal('modalTambahStok');
+        setupModal('modalRiwayatStok');
+    }
+
+    // Setup individual modal
+    function setupModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+
+        if (!modal.hasAttribute('data-modal-initialized')) {
+            modal.setAttribute('data-modal-initialized', 'true');
+            
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModal(modalId);
+                }
+            });
+
+            const modalContent = modal.querySelector('.bg-white, [class*="rounded"]');
+            if (modalContent) {
+                modalContent.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            }
         }
-    ];
+    }
 
-    // Initialize the page
-    initializePage();
+    // Setup modal close buttons
+    function setupModalCloseButtons() {
+        if (modalCloseHandlersInitialized) {
+            return;
+        }
+        
+        modalCloseHandlersInitialized = true;
 
-    function initializePage() {
-        updateOutletInfo();
-        updateStats();
-        renderTable();
+        console.log('Setting up modal close buttons...');
+
+        // 1. Handle close buttons dengan SVG (X button)
+        document.querySelectorAll('[id^="modal"] button:has(svg)').forEach(button => {
+            if (button.hasAttribute('onclick')) {
+                return;
+            }
+            
+            const header = button.closest('.flex.items-center.justify-between');
+            if (header) {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const modal = this.closest('[id^="modal"]');
+                    if (modal) {
+                        closeModal(modal.id);
+                    }
+                });
+            }
+        });
+
+        // 2. Handle "Batal" buttons yang menggunakan onclick
+        document.querySelectorAll('button[onclick*="closeModal"]').forEach(button => {
+            const originalOnclick = button.getAttribute('onclick');
+            
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                if (originalOnclick) {
+                    try {
+                        if (originalOnclick.includes("closeModal('modalTambahStok')")) {
+                            closeModal('modalTambahStok');
+                        } else if (originalOnclick.includes("closeModal('modalTambahBahanBaku')")) {
+                            closeModal('modalTambahBahanBaku');
+                        } else if (originalOnclick.includes("closeModal('modalKonfirmasiHapus')")) {
+                            closeModal('modalKonfirmasiHapus');
+                        } else {
+                            eval(originalOnclick);
+                        }
+                    } catch (error) {
+                        console.warn('Error executing onclick:', error);
+                        const modal = this.closest('[id^="modal"]');
+                        if (modal) {
+                            closeModal(modal.id);
+                        }
+                    }
+                }
+            });
+        });
+
+        console.log('Modal close buttons setup completed');
+    }
+
+    // Create fetch interceptor for authentication
+    function createAuthInterceptor() {
+        const originalFetch = window.fetch;
+        
+        window.fetch = async function(resource, options = {}) {
+            const token = localStorage.getItem('token');
+            if (token) {
+                options.headers = options.headers || {};
+                options.headers.Authorization = `Bearer ${token}`;
+                options.headers.Accept = 'application/json';
+                options.headers['Content-Type'] = 'application/json';
+                options.headers['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').content;
+            }
+            
+            const response = await originalFetch(resource, options);
+            
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const textResponse = await response.text();
+                throw new Error(`Invalid response format: ${textResponse.substring(0, 100)}`);
+            }
+            
+            return response;
+        };
+    }
+
+    // Show alert notification
+    function showAlert(type, message) {
+        const alertContainer = document.getElementById('alertContainer');
+        const alertId = 'alert-' + Date.now();
+        
+        const alertConfig = {
+            success: {
+                bgColor: 'bg-green-50',
+                borderColor: 'border-green-200',
+                textColor: 'text-green-800',
+                icon: 'check-circle',
+                iconColor: 'text-green-500'
+            },
+            error: {
+                bgColor: 'bg-red-50',
+                borderColor: 'border-red-200',
+                textColor: 'text-red-800',
+                icon: 'alert-circle',
+                iconColor: 'text-red-500'
+            },
+            info: {
+                bgColor: 'bg-blue-50',
+                borderColor: 'border-blue-200',
+                textColor: 'text-blue-800',
+                icon: 'info',
+                iconColor: 'text-blue-500'
+            }
+        };
+        
+        const config = alertConfig[type] || alertConfig.info;
+        
+        const alertElement = document.createElement('div');
+        alertElement.id = alertId;
+        alertElement.className = `p-4 border rounded-lg shadow-sm ${config.bgColor} ${config.borderColor} ${config.textColor} flex items-start gap-3 animate-fade-in-up`;
+        alertElement.innerHTML = `
+            <i data-lucide="${config.icon}" class="w-5 h-5 mt-0.5 ${config.iconColor}"></i>
+            <div class="flex-1">
+                <p class="text-sm font-medium">${message}</p>
+            </div>
+            <button onclick="closeAlert('${alertId}')" class="p-1 rounded-full hover:bg-gray-100">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        `;
+        
+        alertContainer.prepend(alertElement);
+        
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+        
+        setTimeout(() => {
+            closeAlert(alertId);
+        }, 5000);
+    }
+
+    // Close alert
+    function closeAlert(id) {
+        const alert = document.getElementById(id);
+        if (alert) {
+            alert.classList.add('animate-fade-out');
+            setTimeout(() => {
+                alert.remove();
+            }, 300);
+        }
+    }
+
+    // Modal functions
+    function openModal(modalId) {
+        try {
+            console.log('Opening modal:', modalId);
+            
+            document.querySelectorAll('[id^="modal"]').forEach(modal => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            });
+            
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                document.body.style.overflow = 'hidden';
+                
+                modal.dispatchEvent(new Event('modal-opened'));
+            } else {
+                console.error(`Modal dengan ID ${modalId} tidak ditemukan`);
+            }
+        } catch (error) {
+            console.error('Error opening modal:', error);
+        }
+    }
+
+    function closeModal(modalId) {
+        try {
+            console.log('Closing modal:', modalId);
+            
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                document.body.style.overflow = '';
+                
+                const form = modal.querySelector('form');
+                if (form) {
+                    form.reset();
+                }
+                
+                modal.dispatchEvent(new Event('modal-closed'));
+            }
+        } catch (error) {
+            console.error('Error closing modal:', error);
+        }
+    }
+
+    // Fungsi khusus untuk modal tambah stok
+    window.closeTambahStokModal = function() {
+        closeModal('modalTambahStok');
+        const form = document.getElementById('tambahStokForm');
+        if (form) {
+            form.reset();
+        }
+    };
+
+    // Fungsi global untuk close modal
+    window.closeModal = closeModal;
+
+    async function initializePage() {
+        await updateOutletInfo();
+        await loadBahanBakuData();
         setupEventListeners();
     }
 
@@ -215,9 +405,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // OUTLET MANAGEMENT FUNCTIONS
     // ============================
 
-    // Function to get currently selected outlet ID
     function getSelectedOutletId() {
-        // First check URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         const outletIdFromUrl = urlParams.get('outlet_id');
         
@@ -225,41 +413,46 @@ document.addEventListener('DOMContentLoaded', function() {
             return outletIdFromUrl;
         }
         
-        // Then check localStorage
         const savedOutletId = localStorage.getItem('selectedOutletId');
         
         if (savedOutletId) {
             return savedOutletId;
         }
         
-        // Default to outlet ID 1 if nothing is found
         return 1;
     }
 
-    // Update outlet information
     async function updateOutletInfo() {
         try {
             const outletId = getSelectedOutletId();
+            const token = localStorage.getItem('token');
             
-            // Fetch outlet details from API
+            if (!token) {
+                throw new Error('Token tidak ditemukan');
+            }
+            
             const response = await fetch(`/api/outlets/${outletId}`, {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json'
                 }
             });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             
-            const { data, success } = await response.json();
+            const result = await response.json();
             
-            if (success && data) {
+            if (result.success && result.data) {
                 const outletElements = document.querySelectorAll('.outlet-name');
                 outletElements.forEach(el => {
-                    el.textContent = `Outlet Aktif: ${data.name}`;
+                    el.textContent = `Outlet Aktif: ${result.data.name}`;
                 });
                 
                 const addressElements = document.querySelectorAll('.outlet-address');
                 addressElements.forEach(el => {
-                    el.textContent = data.address || 'Alamat tidak tersedia';
+                    el.textContent = result.data.address || 'Alamat tidak tersedia';
                 });
             } else {
                 throw new Error('Data outlet tidak ditemukan');
@@ -267,7 +460,6 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Failed to fetch outlet details:', error);
             
-            // Fallback: show basic outlet info
             const outletElements = document.querySelectorAll('.outlet-name');
             outletElements.forEach(el => {
                 el.textContent = `Outlet Aktif: Outlet ${getSelectedOutletId()}`;
@@ -277,87 +469,283 @@ document.addEventListener('DOMContentLoaded', function() {
             addressElements.forEach(el => {
                 el.textContent = 'Gagal memuat data outlet';
             });
+
+            if (error.message.includes('401') || error.message.includes('403')) {
+                window.location.href = '/login';
+            }
         }
     }
 
-    // Connect to outlet selection dropdown for real-time updates
     function connectOutletSelection() {
-        // Listen for outlet changes in localStorage
         window.addEventListener('storage', function(event) {
             if (event.key === 'selectedOutletId') {
-                // Update outlet info when outlet changes
                 updateOutletInfo();
-                
-                // Show notification about outlet change
-                showNotification(`Outlet berhasil diubah`, 'success');
-                
-                // You can also reload the data if needed
-                // updateStats();
-                // renderTable();
+                showAlert('success', 'Outlet berhasil diubah');
             }
         });
         
-        // Also watch for clicks on outlet items in dropdown (if exists)
         const outletListContainer = document.getElementById('outletListContainer');
         if (outletListContainer) {
             outletListContainer.addEventListener('click', function(event) {
-                // Find the clicked li element
                 let targetElement = event.target;
                 while (targetElement && targetElement !== outletListContainer && targetElement.tagName !== 'LI') {
                     targetElement = targetElement.parentElement;
                 }
                 
-                // If we clicked on an outlet list item
                 if (targetElement && targetElement.tagName === 'LI') {
-                    // Update outlet info after a short delay
                     setTimeout(() => {
                         updateOutletInfo();
-                        showNotification(`Outlet berhasil diubah`, 'success');
+                        showAlert('success', 'Outlet berhasil diubah');
                     }, 100);
                 }
             });
         }
         
-        // Listen for custom outlet change event (if your app uses it)
         window.addEventListener('outletChanged', function(event) {
             updateOutletInfo();
-            showNotification(`Outlet berhasil diubah ke ${event.detail.outletName}`, 'success');
+            showAlert('success', `Outlet berhasil diubah ke ${event.detail.outletName}`);
         });
+    }
+
+    // ============================
+    // API FUNCTIONS
+    // ============================
+
+    async function loadBahanBakuData() {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+
+            const tbody = document.getElementById('bahanBakuTableBody');
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-6 py-8 text-center">
+                            <div class="flex flex-col items-center justify-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                     class="animate-spin text-green-500">
+                                    <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                                </svg>
+                                <span class="text-gray-500">Memuat data bahan baku...</span>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+
+            const response = await fetch('/api/raw-material', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json().catch(() => null);
+                throw new Error(error?.message || `HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.message || 'Invalid response format');
+            }
+
+            bahanBakuData = result.data;
+            updateStats();
+            renderTable();
+            
+        } catch (error) {
+            console.error('Load Bahan Baku Error:', error);
+            showAlert('error', `Gagal memuat bahan baku: ${error.message}`);
+            
+            if (error.message.includes('401') || error.message.includes('403')) {
+                window.location.href = '/login';
+            }
+            
+            renderTable([]);
+        }
+    }
+
+    async function createBahanBaku(formData) {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Token tidak ditemukan');
+            }
+
+            const response = await fetch('/api/raw-material', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Gagal menambahkan bahan baku');
+            }
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                await loadBahanBakuData();
+                return { success: true, data: result.data };
+            } else {
+                return { 
+                    success: false, 
+                    message: result.message,
+                    errors: result.errors 
+                };
+            }
+        } catch (error) {
+            console.error('Error creating bahan baku:', error);
+            return { 
+                success: false, 
+                message: error.message || 'Terjadi kesalahan saat menyimpan data' 
+            };
+        }
+    }
+
+    async function deleteBahanBaku(id) {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Token tidak ditemukan');
+            }
+
+            const response = await fetch(`/api/material-delete/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Gagal menghapus bahan baku');
+            }
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                await loadBahanBakuData();
+                return { success: true };
+            } else {
+                return { 
+                    success: false, 
+                    message: result.message || 'Gagal menghapus bahan baku' 
+                };
+            }
+        } catch (error) {
+            console.error('Error deleting bahan baku:', error);
+            return { 
+                success: false, 
+                message: error.message || 'Terjadi kesalahan saat menghapus data' 
+            };
+        }
+    }
+
+    async function tambahStok(formData) {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Token tidak ditemukan');
+            }
+
+            const purchaseData = {
+                outlet_id: parseInt(getSelectedOutletId()),
+                purchase_date: formData.tanggal_masuk,
+                notes: `Tambah stok untuk ${formData.bahan_baku_name}`,
+                created_by: 1,
+                items: [
+                    {
+                        raw_material_id: parseInt(formData.bahan_baku_id),
+                        quantity: parseFloat(formData.jumlah),
+                        unit_cost: parseFloat(formData.harga_beli)
+                    }
+                ]
+            };
+
+            const response = await fetch('/api/material-purchase', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(purchaseData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Gagal menambah stok');
+            }
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                await loadBahanBakuData();
+                return { success: true, data: result.data };
+            } else {
+                return { 
+                    success: false, 
+                    message: result.message,
+                    errors: result.errors 
+                };
+            }
+        } catch (error) {
+            console.error('Error adding stock:', error);
+            return { 
+                success: false, 
+                message: error.message || 'Terjadi kesalahan saat menambah stok' 
+            };
+        }
     }
 
     // ============================
     // INVENTORY MANAGEMENT FUNCTIONS
     // ============================
 
-    // Fungsi untuk menghitung harga rata-rata
     function hitungHargaRataRata(bahan) {
-        if (!bahan.batches || bahan.batches.length === 0) {
-            return 0;
-        }
-        
-        let totalNilai = 0;
-        let totalStok = 0;
-        
-        bahan.batches.forEach(batch => {
-            totalNilai += batch.sisa_stok * batch.harga_beli;
-            totalStok += batch.sisa_stok;
-        });
-        
-        return totalStok > 0 ? totalNilai / totalStok : 0;
+        return parseFloat(bahan.cost_per_unit) || 0;
     }
 
-    // Fungsi untuk menghitung total nilai stok
     function hitungTotalNilai(bahan) {
         const hargaRata = hitungHargaRataRata(bahan);
-        return bahan.stock * hargaRata;
+        
+        let stok = 0;
+        if (bahan.stocks && bahan.stocks.length > 0) {
+            const outletId = getSelectedOutletId();
+            const stockData = bahan.stocks.find(stock => stock.outlet_id == outletId);
+            stok = stockData ? parseFloat(stockData.current_stock) : 0;
+        }
+        
+        return stok * hargaRata;
+    }
+
+    function getStokBahan(bahan) {
+        if (bahan.stocks && bahan.stocks.length > 0) {
+            const outletId = getSelectedOutletId();
+            const stockData = bahan.stocks.find(stock => stock.outlet_id == outletId);
+            return stockData ? parseFloat(stockData.current_stock) : 0;
+        }
+        return 0;
     }
 
     function updateStats() {
         const totalBahanBaku = bahanBakuData.length;
         const totalInvestasi = bahanBakuData.reduce((sum, item) => sum + hitungTotalNilai(item), 0);
-        const stokMenipis = bahanBakuData.filter(item => item.stock <= item.min_stock).length;
+        const stokMenipis = bahanBakuData.filter(item => getStokBahan(item) <= parseFloat(item.min_stock)).length;
         
-        // Hitung harga rata-rata semua bahan
         const totalHargaRata = bahanBakuData.reduce((sum, item) => sum + hitungHargaRataRata(item), 0);
         const avgHargaRata = totalBahanBaku > 0 ? totalHargaRata / totalBahanBaku : 0;
 
@@ -391,10 +779,10 @@ document.addEventListener('DOMContentLoaded', function() {
         data.forEach(item => {
             const hargaRata = hitungHargaRataRata(item);
             const totalNilai = hitungTotalNilai(item);
+            const stok = getStokBahan(item);
             const statusClass = item.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
             const statusText = item.is_active ? 'Aktif' : 'Nonaktif';
-            const stokWarning = item.stock <= item.min_stock ? 'text-red-600 font-semibold' : 'text-gray-600';
-            const batchCount = item.batches ? item.batches.length : 0;
+            const stokWarning = stok <= parseFloat(item.min_stock) ? 'text-red-600 font-semibold' : 'text-gray-600';
             
             html += `
                 <tr class="hover:bg-gray-50 transition-colors duration-150">
@@ -407,24 +795,19 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                             <div>
                                 <div class="text-sm font-medium text-gray-900">${item.name}</div>
-                                <div class="text-sm text-gray-500">${item.code}</div>
-                                <div class="text-xs text-blue-600 cursor-pointer hover:underline" onclick="showRiwayatStok(${item.id})">
-                                    ${batchCount} batch stok
-                                </div>
+                                <div class="text-sm text-gray-500">${item.description || 'Tidak ada deskripsi'}</div>
                             </div>
                         </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            ${getCategoryName(item.category)}
+                            ${item.code}
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm ${stokWarning}">${item.stock} ${item.unit}</div>
-                        ${item.stock <= item.min_stock ? '<div class="text-xs text-red-500">Stok menipis!</div>' : ''}
-                        <button onclick="showTambahStokModal(${item.id}, '${item.name}')" class="text-xs text-green-600 hover:text-green-700 mt-1">
-                            + Tambah Stok
-                        </button>
+                        <div class="text-sm ${stokWarning}">${stok} ${item.unit}</div>
+                        <div class="text-xs text-gray-500">Min: ${item.min_stock} ${item.unit}</div>
+                        ${stok <= parseFloat(item.min_stock) ? '<div class="text-xs text-red-500">Stok menipis!</div>' : ''}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="text-sm font-medium text-gray-900">${formatRupiah(hargaRata)}</div>
@@ -440,7 +823,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div class="flex items-center space-x-2">
-                            <button class="text-red-600 hover:text-red-900 delete-btn" data-id="${item.id}">
+                            <button class="text-green-600 hover:text-green-900 add-stock-btn" data-id="${item.id}" title="Tambah Stok">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                            </button>
+                            <button class="text-blue-600 hover:text-blue-900 history-btn" data-id="${item.id}" title="Riwayat Stok">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </button>
+                            <button class="text-red-600 hover:text-red-900 delete-btn" data-id="${item.id}" title="Hapus Bahan Baku">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                 </svg>
@@ -455,18 +848,6 @@ document.addEventListener('DOMContentLoaded', function() {
         attachTableEventListeners();
     }
 
-    function getCategoryName(category) {
-        const categories = {
-            'kopi': 'Biji Kopi',
-            'susu': 'Produk Susu',
-            'gula': 'Pemanis',
-            'sirup': 'Sirup & Flavor',
-            'topping': 'Topping',
-            'lainnya': 'Lainnya'
-        };
-        return categories[category] || category;
-    }
-
     function formatRupiah(amount) {
         return new Intl.NumberFormat('id-ID', {
             style: 'currency',
@@ -476,20 +857,27 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function setupEventListeners() {
-        // Tambah bahan baku buttons
         document.getElementById('btnTambahBahanBaku').addEventListener('click', showTambahModal);
-
-        // Search and filter
         document.getElementById('searchBahanBaku').addEventListener('input', handleSearch);
-        document.getElementById('filterKategori').addEventListener('change', handleFilter);
         document.getElementById('filterStatus').addEventListener('change', handleFilter);
-
-        // Connect outlet selection
         connectOutletSelection();
     }
 
     function attachTableEventListeners() {
-        // Delete buttons
+        document.querySelectorAll('.add-stock-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                showTambahStokModal(id);
+            });
+        });
+
+        document.querySelectorAll('.history-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                showRiwayatStok(id);
+            });
+        });
+
         document.querySelectorAll('.delete-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const id = this.getAttribute('data-id');
@@ -499,48 +887,37 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function showTambahModal() {
-        const modal = document.getElementById('modalTambahBahanBaku');
-        modal.classList.remove('hidden');
+        openModal('modalTambahBahanBaku');
         document.getElementById('tambahBahanBakuForm').reset();
+    }
+
+    function showTambahStokModal(id) {
+        const item = bahanBakuData.find(b => b.id == id);
+        if (item) {
+            document.getElementById('modalBahanNama').textContent = item.name;
+            document.getElementById('currentStock').textContent = `${getStokBahan(item)} ${item.unit}`;
+            document.getElementById('currentAvgPrice').textContent = formatRupiah(hitungHargaRataRata(item));
+            document.getElementById('tambahStokBahanId').value = item.id;
+            
+            const today = new Date().toISOString().split('T')[0];
+            document.querySelector('input[name="tanggal_masuk"]').value = today;
+            
+            openModal('modalTambahStok');
+        }
     }
 
     function showDeleteModal(id) {
         const item = bahanBakuData.find(b => b.id == id);
         if (item) {
-            const modal = document.getElementById('modalKonfirmasiHapus');
             document.getElementById('hapusItemId').value = id;
             document.getElementById('hapusItemName').textContent = item.name;
-            modal.classList.remove('hidden');
+            openModal('modalKonfirmasiHapus');
         }
     }
 
-    // Global functions untuk modal
-    window.closeModal = function(modalId) {
-        const modal = document.getElementById(modalId);
-        modal.classList.add('hidden');
-    };
-
-    window.closeTambahStokModal = function() {
-        closeModal('modalTambahStok');
-        document.getElementById('tambahStokForm').reset();
-    };
-
-    window.showTambahStokModal = function(id, nama) {
-        const item = bahanBakuData.find(b => b.id == id);
-        if (item) {
-            document.getElementById('tambahStokBahanId').value = id;
-            document.getElementById('modalBahanNama').textContent = nama;
-            document.getElementById('currentStock').textContent = `${item.stock} ${item.unit}`;
-            document.getElementById('currentAvgPrice').textContent = formatRupiah(hitungHargaRataRata(item));
-            
-            // Set default date to today
-            const today = new Date().toISOString().split('T')[0];
-            document.querySelector('#tambahStokForm input[name="tanggal_masuk"]').value = today;
-            
-            const modal = document.getElementById('modalTambahStok');
-            modal.classList.remove('hidden');
-        }
-    };
+    // ============================
+    // GLOBAL FUNCTIONS UNTUK MODAL
+    // ============================
 
     window.showRiwayatStok = function(id) {
         const item = bahanBakuData.find(b => b.id == id);
@@ -550,16 +927,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const tbody = document.getElementById('riwayatStokTableBody');
             let html = '';
             
-            if (item.batches && item.batches.length > 0) {
-                item.batches.forEach((batch, index) => {
+            if (item.stocks && item.stocks.length > 0) {
+                item.stocks.forEach((stock, index) => {
                     html += `
                         <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-sm text-gray-900">Batch #${batch.id}</td>
-                            <td class="px-4 py-3 text-sm text-gray-900">${batch.tanggal_masuk}</td>
-                            <td class="px-4 py-3 text-sm text-gray-900">${batch.jumlah} ${item.unit}</td>
-                            <td class="px-4 py-3 text-sm text-gray-900">${formatRupiah(batch.harga_beli)}</td>
-                            <td class="px-4 py-3 text-sm text-gray-900">${batch.sisa_stok} ${item.unit}</td>
-                            <td class="px-4 py-3 text-sm font-medium text-gray-900">${formatRupiah(batch.sisa_stok * batch.harga_beli)}</td>
+                            <td class="px-4 py-3 text-sm text-gray-900">Batch #${stock.id}</td>
+                            <td class="px-4 py-3 text-sm text-gray-900">${new Date(stock.created_at).toLocaleDateString('id-ID')}</td>
+                            <td class="px-4 py-3 text-sm text-gray-900">${stock.current_stock} ${item.unit}</td>
+                            <td class="px-4 py-3 text-sm text-gray-900">${formatRupiah(stock.total_value / stock.current_stock)}</td>
+                            <td class="px-4 py-3 text-sm text-gray-900">${stock.current_stock} ${item.unit}</td>
+                            <td class="px-4 py-3 text-sm font-medium text-gray-900">${formatRupiah(stock.total_value)}</td>
                         </tr>
                     `;
                 });
@@ -569,113 +946,107 @@ document.addEventListener('DOMContentLoaded', function() {
             
             tbody.innerHTML = html;
             
-            // Update summary
             const totalNilai = hitungTotalNilai(item);
             const hargaRata = hitungHargaRataRata(item);
             document.getElementById('totalNilaiStok').textContent = formatRupiah(totalNilai);
             document.getElementById('hargaRataSummary').textContent = formatRupiah(hargaRata);
             
-            const modal = document.getElementById('modalRiwayatStok');
-            modal.classList.remove('hidden');
+            openModal('modalRiwayatStok');
         }
     };
 
-    window.simpanTambahStok = function() {
+    window.hapusBahanBaku = async function() {
+        const id = document.getElementById('hapusItemId').value;
+        
+        const result = await deleteBahanBaku(id);
+        
+        if (result.success) {
+            showAlert('success', 'Bahan baku berhasil dihapus');
+        } else {
+            showAlert('error', result.message);
+        }
+        
+        closeModal('modalKonfirmasiHapus');
+    };
+
+    window.simpanBahanBakuBaru = async function() {
+        const form = document.getElementById('tambahBahanBakuForm');
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        
+        if (!data.name || !data.code || !data.unit || !data.min_stock) {
+            showAlert('error', 'Harap lengkapi semua field yang wajib!');
+            return;
+        }
+
+        const postData = {
+            name: data.name,
+            code: data.code,
+            unit: data.unit,
+            cost_per_unit: data.cost_per_unit ? parseFloat(data.cost_per_unit) : 0,
+            min_stock: parseFloat(data.min_stock),
+            description: data.description || '',
+            is_active: data.is_active === '1'
+        };
+
+        const result = await createBahanBaku(postData);
+        
+        if (result.success) {
+            showAlert('success', 'Bahan baku berhasil ditambahkan');
+            closeModal('modalTambahBahanBaku');
+        } else {
+            if (result.errors) {
+                const errorMessages = Object.values(result.errors).flat().join(', ');
+                showAlert('error', `Gagal menambah bahan baku: ${errorMessages}`);
+            } else {
+                showAlert('error', result.message);
+            }
+        }
+    };
+
+    window.simpanTambahStok = async function() {
         const form = document.getElementById('tambahStokForm');
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
         
         if (!data.jumlah || !data.harga_beli || !data.tanggal_masuk) {
-            showNotification('Harap lengkapi semua field!', 'error');
+            showAlert('error', 'Harap lengkapi semua field!');
             return;
         }
+
+        const bahanBakuId = data.bahan_baku_id;
+        const bahanBaku = bahanBakuData.find(b => b.id == bahanBakuId);
+        data.bahan_baku_name = bahanBaku ? bahanBaku.name : '';
+
+        const result = await tambahStok(data);
         
-        const bahanId = parseInt(data.bahan_baku_id);
-        const bahanIndex = bahanBakuData.findIndex(item => item.id === bahanId);
-        
-        if (bahanIndex !== -1) {
-            const newBatch = {
-                id: Date.now(), // Simple ID generation
-                jumlah: parseFloat(data.jumlah),
-                harga_beli: parseInt(data.harga_beli),
-                tanggal_masuk: data.tanggal_masuk,
-                sisa_stok: parseFloat(data.jumlah)
-            };
-            
-            // Add new batch
-            if (!bahanBakuData[bahanIndex].batches) {
-                bahanBakuData[bahanIndex].batches = [];
+        if (result.success) {
+            showAlert('success', 'Stok berhasil ditambahkan');
+            closeModal('modalTambahStok');
+        } else {
+            if (result.errors) {
+                const errorMessages = Object.values(result.errors).flat().join(', ');
+                showAlert('error', `Gagal menambah stok: ${errorMessages}`);
+            } else {
+                showAlert('error', result.message);
             }
-            bahanBakuData[bahanIndex].batches.push(newBatch);
-            
-            // Update total stock
-            bahanBakuData[bahanIndex].stock += parseFloat(data.jumlah);
-            
-            updateStats();
-            renderTable();
-            showNotification('Stok berhasil ditambahkan!', 'success');
-            closeTambahStokModal();
         }
-    };
-
-    window.hapusBahanBaku = function() {
-        const id = document.getElementById('hapusItemId').value;
-        bahanBakuData = bahanBakuData.filter(item => item.id != id);
-        updateStats();
-        renderTable();
-        showNotification('Bahan baku berhasil dihapus', 'success');
-        closeModal('modalKonfirmasiHapus');
-    };
-
-    window.simpanBahanBakuBaru = function() {
-        const form = document.getElementById('tambahBahanBakuForm');
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
-        
-        if (!data.name || !data.code || !data.category || !data.unit || !data.min_stock || !data.supplier) {
-            showNotification('Harap lengkapi semua field!', 'error');
-            return;
-        }
-        
-        const newId = bahanBakuData.length > 0 ? Math.max(...bahanBakuData.map(item => item.id)) + 1 : 1;
-        const newItem = {
-            id: newId,
-            name: data.name,
-            category: data.category,
-            stock: 0, // Start with 0 stock
-            unit: data.unit,
-            min_stock: parseFloat(data.min_stock),
-            is_active: data.is_active === '1',
-            supplier: data.supplier,
-            code: data.code,
-            batches: [] // Empty batches array
-        };
-        
-        bahanBakuData.push(newItem);
-        updateStats();
-        renderTable();
-        showNotification('Bahan baku berhasil ditambahkan', 'success');
-        closeModal('modalTambahBahanBaku');
     };
 
     function handleSearch() {
         const searchTerm = document.getElementById('searchBahanBaku').value.toLowerCase();
         const filteredData = bahanBakuData.filter(item => 
             item.name.toLowerCase().includes(searchTerm) ||
-            item.code.toLowerCase().includes(searchTerm)
+            item.code.toLowerCase().includes(searchTerm) ||
+            (item.description && item.description.toLowerCase().includes(searchTerm))
         );
         renderTable(filteredData);
     }
 
     function handleFilter() {
-        const categoryFilter = document.getElementById('filterKategori').value;
         const statusFilter = document.getElementById('filterStatus').value;
         
         let filteredData = bahanBakuData;
-
-        if (categoryFilter) {
-            filteredData = filteredData.filter(item => item.category === categoryFilter);
-        }
 
         if (statusFilter) {
             const isActive = statusFilter === 'active';
@@ -684,43 +1055,66 @@ document.addEventListener('DOMContentLoaded', function() {
 
         renderTable(filteredData);
     }
-
-    function showNotification(message, type = 'info') {
-        const alertContainer = document.getElementById('alertContainer');
-        const alertId = 'alert-' + Date.now();
-        
-        const typeConfig = {
-            success: { bg: 'bg-green-500', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
-            error: { bg: 'bg-red-500', icon: 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
-            warning: { bg: 'bg-yellow-500', icon: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z' },
-            info: { bg: 'bg-blue-500', icon: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' }
-        };
-
-        const config = typeConfig[type] || typeConfig.info;
-
-        const alertHTML = `
-            <div id="${alertId}" class="${config.bg} text-white p-4 rounded-lg shadow-lg transform transition-all duration-300 ease-in-out">
-                <div class="flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${config.icon}"></path>
-                    </svg>
-                    <span>${message}</span>
-                </div>
-            </div>
-        `;
-
-        alertContainer.insertAdjacentHTML('beforeend', alertHTML);
-
-        // Remove alert after 5 seconds
-        setTimeout(() => {
-            const alert = document.getElementById(alertId);
-            if (alert) {
-                alert.style.opacity = '0';
-                alert.style.transform = 'translateX(100%)';
-                setTimeout(() => alert.remove(), 300);
-            }
-        }, 5000);
-    }
-});
 </script>
+
+<style>
+    /* Animations for alerts */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes fadeOut {
+        from {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+    }
+    
+    .animate-fade-in-up {
+        animation: fadeInUp 0.3s ease-out forwards;
+    }
+    
+    .animate-fade-out {
+        animation: fadeOut 0.3s ease-out forwards;
+    }
+
+    /* Style untuk button aksi yang lebih rapi */
+    .flex.items-center.space-x-2 button {
+        padding: 4px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .flex.items-center.space-x-2 button:hover {
+        background-color: #f3f4f6;
+        transform: scale(1.05);
+    }
+
+    /* Smooth transitions untuk modal */
+    [id^="modal"] {
+        transition: opacity 0.3s ease;
+    }
+
+    /* Style untuk close button */
+    button:has(svg) {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    button:has(svg):hover {
+        background-color: #f3f4f6;
+    }
+</style>
+
 @endsection

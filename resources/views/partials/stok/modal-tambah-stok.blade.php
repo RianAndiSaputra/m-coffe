@@ -1,8 +1,8 @@
 <div id="modalTambahStok" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md mx-4">
+    <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md mx-4" onclick="event.stopPropagation()">
         <div class="flex items-center justify-between mb-6">
             <h3 class="text-xl font-semibold text-gray-900">Tambah Stok</h3>
-            <button onclick="closeModal('modalTambahStok')" class="text-gray-400 hover:text-gray-600">
+            <button type="button" onclick="closeModal('modalTambahStok')" class="text-gray-400 hover:text-gray-600 transition-colors duration-200 p-1 rounded">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
@@ -21,7 +21,7 @@
                 </div>
             </div>
         </div>
-        <form id="tambahStokForm" onsubmit="event.preventDefault(); simpanTambahStok();">
+        <form id="tambahStokForm">
             <input type="hidden" name="bahan_baku_id" id="tambahStokBahanId">
             <div class="space-y-4">
                 <div>
@@ -41,7 +41,7 @@
                 <button type="button" onclick="closeModal('modalTambahStok')" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200">
                     Batal
                 </button>
-                <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200">
+                <button type="button" onclick="simpanTambahStok()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200">
                     Simpan Stok
                 </button>
             </div>
