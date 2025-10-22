@@ -335,31 +335,55 @@ class ProductController extends Controller
                 'is_active' => 'required|boolean',
                 'outlet_ids' => 'required|array',
                 'outlet_ids.*' => 'exists:outlets,id',
-                // 'quantity' => 'required|numeric',
                 'min_stock' => 'required|numeric',
+                // Validasi untuk resep produk
+                'recipes' => 'nullable|array',
+                'recipes.*.id' => 'nullable|exists:product_recipes,id',
+                'recipes.*.raw_material_id' => 'required_with:recipes|exists:raw_materials,id',
+                'recipes.*.quantity' => 'required_with:recipes|numeric|min:0.01',
+                'recipes.*.notes' => 'nullable|string',
+                'recipes.*.is_deleted' => 'nullable|boolean'
             ]);
-    
+
             // Validasi manual untuk SKU dan barcode
             if ($request->sku && Product::where('sku', $request->sku)->where('id', '!=', $product->id)->exists()) {
                 throw ValidationException::withMessages([
                     'sku' => 'SKU sudah digunakan oleh produk aktif'
                 ]);
             }
-    
+
             if ($request->barcode && Product::where('barcode', $request->barcode)->where('id', '!=', $product->id)->exists()) {
                 throw ValidationException::withMessages([
                     'barcode' => 'Barcode sudah digunakan oleh produk aktif'
                 ]);
             }
-    
+
+            // Validasi duplikat raw_material_id dalam request
+            if ($request->has('recipes') && is_array($request->recipes)) {
+                $rawMaterialIds = collect($request->recipes)
+                    ->where('is_deleted', '!=', true)
+                    ->pluck('raw_material_id')
+                    ->filter();
+                
+                if ($rawMaterialIds->count() !== $rawMaterialIds->unique()->count()) {
+                    throw ValidationException::withMessages([
+                        'recipes' => 'Terdapat bahan baku yang duplikat dalam resep'
+                    ]);
+                }
+            }
+
             DB::beginTransaction();
             
             if ($request->hasFile('image')) {
+                // Hapus gambar lama jika ada
+                if ($product->image && Storage::disk('uploads')->exists($product->image)) {
+                    Storage::disk('uploads')->delete($product->image);
+                }
                 $imagePath = $request->file('image')->store('products', 'uploads');
             } else {
                 $imagePath = $product->image;
             }
-    
+
             $product->update([
                 'name' => $request->name,
                 'sku' => $request->sku,
@@ -370,7 +394,8 @@ class ProductController extends Controller
                 'image' => $imagePath,
                 'is_active' => $request->is_active,
             ]);
-    
+
+            // Update inventory
             foreach ($request->outlet_ids as $outletId) {
                 Inventory::updateOrCreate(
                     [
@@ -379,20 +404,96 @@ class ProductController extends Controller
                     ],
                     [
                         'quantity' => Inventory::where('product_id', $product->id)
-                        ->where('outlet_id', $outletId)
-                        ->value('quantity') ?? 0,
+                            ->where('outlet_id', $outletId)
+                            ->value('quantity') ?? 0,
                         'min_stock' => $request->min_stock
                     ]
                 );
             }
-    
+
+            // Hapus inventory yang tidak ada di outlet_ids
             Inventory::where('product_id', $product->id)
                 ->whereNotIn('outlet_id', $request->outlet_ids)
                 ->delete();
-    
+
+            // Update product recipes jika ada
+            if ($request->has('recipes')) {
+                $recipeIds = [];
+                
+                foreach ($request->recipes as $recipeData) {
+                    // Skip jika ditandai untuk dihapus
+                    if (isset($recipeData['is_deleted']) && $recipeData['is_deleted']) {
+                        if (isset($recipeData['id'])) {
+                            ProductRecipe::where('id', $recipeData['id'])
+                                ->where('product_id', $product->id)
+                                ->delete();
+                        }
+                        continue;
+                    }
+
+                    // Check duplikat untuk recipe baru atau update
+                    $query = ProductRecipe::where('product_id', $product->id)
+                        ->where('raw_material_id', $recipeData['raw_material_id']);
+                    
+                    if (isset($recipeData['id'])) {
+                        $query->where('id', '!=', $recipeData['id']);
+                    }
+                    
+                    if ($query->exists()) {
+                        DB::rollBack();
+                        return $this->errorResponse(
+                            "Bahan baku dengan ID {$recipeData['raw_material_id']} sudah ada dalam resep produk ini",
+                            'Duplicate recipe found',
+                            422
+                        );
+                    }
+
+                    // Update existing recipe atau create new
+                    if (isset($recipeData['id'])) {
+                        $recipe = ProductRecipe::where('id', $recipeData['id'])
+                            ->where('product_id', $product->id)
+                            ->first();
+                        
+                        if ($recipe) {
+                            $recipe->update([
+                                'raw_material_id' => $recipeData['raw_material_id'],
+                                'quantity' => $recipeData['quantity'],
+                                'notes' => $recipeData['notes'] ?? null
+                            ]);
+                            $recipeIds[] = $recipe->id;
+                        }
+                    } else {
+                        $recipe = ProductRecipe::create([
+                            'product_id' => $product->id,
+                            'raw_material_id' => $recipeData['raw_material_id'],
+                            'quantity' => $recipeData['quantity'],
+                            'notes' => $recipeData['notes'] ?? null
+                        ]);
+                        $recipeIds[] = $recipe->id;
+                    }
+                }
+
+                // Hapus recipe yang tidak ada dalam request (jika user menghapus semua recipe lama)
+                if (!empty($recipeIds)) {
+                    ProductRecipe::where('product_id', $product->id)
+                        ->whereNotIn('id', $recipeIds)
+                        ->delete();
+                } else {
+                    // Jika tidak ada recipe yang dikirim, hapus semua recipe
+                    ProductRecipe::where('product_id', $product->id)->delete();
+                }
+
+                // Update product cost
+                $this->updateProductCost($product->id);
+            }
+
             DB::commit();
-    
+
+            // Load relations untuk response
+            $product->load(['recipes.rawMaterial', 'inventories.outlet']);
+
             return $this->successResponse($product, 'Product updated successfully');
+            
         } catch (\Throwable $th) {
             DB::rollBack();
             if ($th instanceof \Illuminate\Validation\ValidationException) {
