@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\ProductRecipe;
 use App\Models\RawMaterialStock;
 use App\Models\RawMaterialPurchaseItem;
 use App\Models\RawMaterialStockHistory;
