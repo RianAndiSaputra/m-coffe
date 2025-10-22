@@ -8,16 +8,16 @@
     <div class="modal-container bg-white w-11/12 md:max-w-sm mx-auto rounded-lg shadow-lg z-50 overflow-y-auto relative top-1/2 transform -translate-y-1/2">
         <div class="modal-content py-6 px-6 text-center">
             <p class="text-sm text-gray-500 font-semibold mb-1">Kas Kasir</p>
-            <div id="kasTotal" class="text-3xl font-bold text-orange-500 mb-4">Rp 0</div>
+            <div id="kasTotal" class="text-3xl font-bold text-[#3b6b0d] mb-4">Rp 0</div>
             <div id="cashRegisterName" class="text-sm text-gray-500 mb-4"></div>
-            <hr class="mb-4 border-orange-200">
+            <hr class="mb-4 border-green-200">
 
             <div class="flex justify-center gap-3">
-                <button onclick="openModal('tambahKasModal')" class="flex items-center gap-1 border border-orange-400 text-orange-500 px-4 py-2 rounded hover:bg-orange-50 transition">
+                <button onclick="openModal('tambahKasModal')" class="flex items-center gap-1 border border-[#335e0c] text-[#3b6b0d] px-4 py-2 rounded hover:bg-green-50 transition">
                     <span class="text-green-500 font-bold">+</span>
                     Tambah Kas
                 </button>
-                <button onclick="openModal('withdrawModal')" class="flex items-center gap-1 border border-orange-400 text-orange-500 px-4 py-2 rounded hover:bg-orange-50 transition">
+                <button onclick="openModal('withdrawModal')" class="flex items-center gap-1 border border-[#335e0c] text-[#3b6b0d] px-4 py-2 rounded hover:bg-green-50 transition">
                     <span class="text-red-500 font-bold">−</span>
                     Ambil Kas
                 </button>
@@ -42,15 +42,15 @@
             <form onsubmit="submitTambahKas(event)">
                 <div class="mb-4 text-left">
                     <label class="block text-sm mb-1 font-medium">Jumlah</label>
-                    <input type="number" id="inputJumlah" class="w-full border border-orange-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-orange-500" placeholder="Masukkan jumlah" required>
+                    <input type="number" id="inputJumlah" class="w-full border border-[#335e0c] rounded px-3 py-2 focus:outline-none focus:ring focus:border-[#3b6b0d] focus:ring-[#3b6b0d]" placeholder="Masukkan jumlah" required>
                 </div>
                 <div class="mb-4 text-left">
                     <label class="block text-sm mb-1 font-medium">Catatan</label>
-                    <input type="text" id="inputCatatan" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring" placeholder="Tambahkan catatan">
+                    <input type="text" id="inputCatatan" class="w-full border border-[#335e0c] rounded px-3 py-2 focus:outline-none focus:ring focus:border-[#3b6b0d] focus:ring-[#3b6b0d]" placeholder="Tambahkan catatan">
                 </div>
                 <div class="flex justify-end gap-2">
-                    <button type="button" onclick="closeModal('tambahKasModal')" class="px-4 py-2 border border-orange-400 text-orange-500 rounded hover:bg-orange-50">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">Tambah Kas</button>
+                    <button type="button" onclick="closeModal('tambahKasModal')" class="px-4 py-2 border border-[#335e0c] text-[#3b6b0d] rounded hover:bg-green-50">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-[#3b6b0d] text-white rounded hover:bg-[#335e0c]">Tambah Kas</button>
                 </div>
             </form>
         </div>
@@ -74,15 +74,15 @@
             <form id="withdrawForm" onsubmit="submitWithdrawKas(event)">
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="withdrawAmount">Jumlah</label>
-                    <input id="withdrawAmount" name="withdrawAmount" type="number" placeholder="Masukkan jumlah" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-orange-500" required>
+                    <input id="withdrawAmount" name="withdrawAmount" type="number" placeholder="Masukkan jumlah" class="w-full px-4 py-2 border border-[#335e0c] rounded-lg focus:outline-none focus:ring focus:border-[#3b6b0d] focus:ring-[#3b6b0d]" required>
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="withdrawNote">Catatan</label>
-                    <input id="withdrawNote" name="withdrawNote" type="text" placeholder="Tambahkan catatan" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-orange-500">
+                    <input id="withdrawNote" name="withdrawNote" type="text" placeholder="Tambahkan catatan" class="w-full px-4 py-2 border border-[#335e0c] rounded-lg focus:outline-none focus:ring focus:border-[#3b6b0d] focus:ring-[#3b6b0d]">
                 </div>
                 <div class="flex justify-end gap-2">
-                    <button type="button" onclick="closeModal('withdrawModal')" class="px-4 py-2 border border-orange-400 text-orange-500 rounded-lg hover:bg-orange-50">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">Ambil Kas</button>
+                    <button type="button" onclick="closeModal('withdrawModal')" class="px-4 py-2 border border-[#335e0c] text-[#3b6b0d] rounded-lg hover:bg-green-50">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-[#3b6b0d] text-white rounded-lg hover:bg-[#335e0c]">Ambil Kas</button>
                 </div>
             </form>
         </div>

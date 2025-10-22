@@ -88,20 +88,20 @@
         }
         /* Payment method selection */
         .payment-method {
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .payment-method:hover {
-            border-color: #F97316;
-        }
-        .payment-method.selected {
-            border-color: #F97316;
-            background-color: #FFF7ED;
-        }
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .payment-method:hover {
+        border-color: #3b6b0d;
+    }
+    .payment-method.selected {
+        border-color: #3b6b0d;
+        background-color: #f0f9f0; /* Ganti dengan warna hijau yang lebih soft */
+    }
         /* Print styles for invoice */
         @media print {
             body * {
@@ -143,8 +143,8 @@
             background-color: #f9fafb;
         }
         .member-item.active {
-            background-color: #F97316;
-            color: white;
+            background-color: #dcfce7; /* green-100 equivalent */
+            color: #166534; /* green-800 equivalent */
         }
     </style>
 </head>
@@ -153,30 +153,30 @@
         <!-- Enhanced Navbar -->
         <nav class="navbar bg-white shadow-sm border-b py-4 px-5">
             <div class="flex flex-col md:flex-row md:justify-between md:items-center w-full gap-3">
-                <a href="#" class="text-orange-500 font-bold text-xl md:text-2xl">
+                <a href="#" class="text-[##3b6b0d] font-bold text-xl md:text-2xl">
                     <span id="outletName">Loading ...</span>
                 </a>
                 <div class="flex flex-wrap gap-2 items-center">
-                   <button id="btnStockModal" class="px-3 py-1.5 text-sm text-black font-bold bg-orange-50 border border-orange-300 rounded-md hover:bg-orange-100 transition-colors">
-                        <i class="fas fa-box mr-1.5 text-orange-500 text-base"></i> Stok
+                   <button id="btnStockModal" class="px-3 py-1.5 text-sm text-white font-bold bg-[#3b6b0d] border border-green-300 rounded-md hover:bg-[#335e0c] transition-colors">
+                        <i class="fas fa-box mr-1.5 text-white"></i> Stok
                     </button>
 
-                    <button id="btnIncomeModal" class="px-3 py-1.5 text-sm text-black font-bold bg-orange-50 border border-orange-300 rounded-md hover:bg-orange-100 transition-colors">
-                        <i class="fas fa-money-bill mr-1.5 text-orange-500 text-base"></i> Rp 0
+                    <button id="btnIncomeModal" class="px-3 py-1.5 text-sm text-white font-bold bg-[#3b6b0d] border border-green-300 rounded-md hover:bg-[#335e0c] transition-colors">
+                        <i class="fas fa-money-bill mr-1.5 text-white text-base"></i> Rp 0
                     </button>
 
-                    <button id="btnCashierModal" class="px-3 py-1.5 text-sm text-black font-bold bg-orange-50 border border-orange-300 rounded-md hover:bg-orange-100 transition-colors">
-                        <i class="fas fa-cash-register mr-1.5 text-orange-500 text-base"></i> Kas kasir
+                    <button id="btnCashierModal" class="px-3 py-1.5 text-sm text-white font-bold bg-[#3b6b0d] border border-green-300 rounded-md hover:bg-[#335e0c] transition-colors">
+                        <i class="fas fa-cash-register mr-1.5 text-white text-base"></i> Kas kasir
                     </button>
                     
-                  <button class="px-5 py-2.5 text-base text-black font-bold rounded-md hover:bg-orange-50 transition-colors">
-                    <i class="fas fa-user mr-2 text-orange-500 text-base"></i>
-                    <span id="userLabel" class="font-medium">Loading...</span>
+                  <button class="px-5 py-2.5 text-base text-[#3b6b0d] font-bold rounded-md hover:bg-green-50 transition-colors">
+                        <i class="fas fa-user mr-2 text-[#3b6b0d] text-base"></i>
+                        <span id="userLabel" class="font-medium">Loading...</span>
                     </button>
 
-                    <button id="logoutButton" class="px-3 py-1.5 text-sm text-black font-bold border border-orange-300 rounded-md hover:bg-orange-100 transition-colors">
-                        <i class="fas fa-sign-out-alt mr-1.5 text-orange-500 text-lg"></i>
-                    </button>
+                    <button id="logoutButton" class="px-3 py-1.5 text-sm text-white font-bold bg-[#3b6b0d] border border-green-300 rounded-md hover:bg-[#335e0c] transition-colors">
+                            <i class="fas fa-sign-out-alt mr-1.5 text-white text-lg"></i>
+                        </button>
 
                 </div>
             </div>
@@ -184,18 +184,18 @@
 
         <div class="main-container flex h-[calc(100vh-68px)] overflow-hidden">
             <!-- Products Section -->
-            <div class="products-section w-2/3 bg-white flex flex-col border-r-2 border-orange-200">
+            <div class="products-section w-2/3 bg-white flex flex-col border-r-2 border-green-200">
                 <!-- Search and Categories Section -->
-                <div class="p-4">
-                    <div class="search-bar mb-3">
-                        <input
-                            id="searchInput"
-                            type="text"
-                            class="w-full px-3 py-2 text-sm rounded-md border border-orange-300 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 placeholder-gray-400 transition-all duration-200"
-                            placeholder="Cari produk atau scan barcode..."
-                            autofocus
-                        >
-                    </div>
+            <div class="p-4">
+                <div class="search-bar mb-3">
+                    <input
+                        id="searchInput"
+                        type="text"
+                        class="w-full px-3 py-2 text-sm rounded-md border border-[#335e0c] focus:outline-none focus:border-[#3b6b0d] focus:ring-1 focus:ring-[#3b6b0d] placeholder-gray-400 transition-all duration-200"
+                        placeholder="Cari produk atau scan barcode..."
+                        autofocus
+                    >
+                </div>
 
                     <div class="category-container overflow-x-auto whitespace-nowrap pb-1 mb-2">
                         <ul id="categoryTabs" class="nav flex-nowrap">
@@ -204,7 +204,7 @@
                     </div>
                 </div>
 
-                <hr class="border-t border-orange-500 opacity-30 my-0">
+                <hr class="border-t border-[#3b6b0d] opacity-30 my-0">
 
                 <!-- Products List -->
                 <div id="productsContainer" class="products-list-container p-4">
@@ -216,10 +216,10 @@
             </div>
 
             <!-- Cart Section -->
-            <div class="cart-section w-1/3 bg-white flex flex-col overflow-hidden border-l-2 border-orange-200">
-                  <div class="cart-header p-4 border-b-2 border-orange-200">
+            <div class="cart-section w-1/3 bg-white flex flex-col overflow-hidden border-l-2 border-[#335e0c]">
+                <div class="cart-header p-4 border-b-2 border-[#335e0c]">
                     <h4 class="text-lg m-0 flex items-center font-semibold">
-                        <i class="fas fa-shopping-cart text-orange-500 mr-3"></i> Keranjang
+                        <i class="fas fa-shopping-cart text-[#3b6b0d] mr-3"></i> Keranjang
                     </h4>
                 </div>
 
@@ -242,7 +242,7 @@
                 </div>
 
                 <!-- Payment Section - Now sticks to bottom -->
-                <div class="payment-section p-5 border-t border-orange-200">
+                <div class="payment-section p-5 border-t border-green-200">
                     <div class="flex justify-between mb-1">
                         <div class="summary-item text-base text-gray-700">Subtotal</div>
                         <div id="subtotal" class="summary-item text-base text-gray-700">Rp 0</div>
@@ -261,15 +261,15 @@
                     </div>
 
                     <!-- Divider -->
-                    <div class="border-t border-orange-200 my-3"></div>
+                    <div class="border-t border-green-200 my-3"></div>
 
                     <div class="flex justify-between mb-5">
                         <div class="summary-item text-lg text-gray-800 font-bold">Total</div>
-                        <div id="total" class="text-orange-500 font-extrabold text-2xl">Rp 0</div>
+                        <div id="total" class="text-[#3b6b0d] font-extrabold text-2xl">Rp 0</div>
                     </div>
-                    <div class="border-t border-orange-200 my-3 mb-3"></div>
+                    <div class="border-t border-green-200 my-3 mb-3"></div>
                     <!-- Tombol Pembayaran -->
-                    <button id="btnPaymentModal" class="bg-orange-500 text-white border border-orange-500 w-full py-2 font-semibold rounded-md text-sm mb-3 hover:bg-orange-600 transition-colors">
+                    <button id="btnPaymentModal" class="bg-[#3b6b0d] text-white border border-[#3b6b0d] w-full py-2 font-semibold rounded-md text-sm mb-3 hover:bg-[#335e0c] transition-colors">
                         <i class="fas fa-money-bill-wave mr-2"></i> Pembayaran
                     </button>
 
@@ -811,7 +811,7 @@
                 tabItem.className = 'inline-flex';
                 
                 tabItem.innerHTML = `
-                    <a href="#" data-category="${category}" class="nav-link ${isActive ? 'active' : ''} px-3 py-1.5 text-xs font-medium rounded-full mr-2 ${isActive ? 'bg-orange-500 text-white border-orange-400' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100'} border shadow-sm transition-all duration-200">
+                    <a href="#" data-category="${category}" class="nav-link ${isActive ? 'active' : ''} px-3 py-1.5 text-xs font-medium rounded-full mr-2 ${isActive ? 'bg-[#3b6b0d] text-white border-[#335e0c]' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100'} border shadow-sm transition-all duration-200">
                         ${categoryName}
                     </a>
                 `;
@@ -826,12 +826,12 @@
                     
                     // Update active tab
                     document.querySelectorAll('#categoryTabs .nav-link').forEach(t => {
-                        t.classList.remove('active', 'bg-orange-500', 'text-white', 'border-orange-400');
+                        t.classList.remove('active', 'bg-[#3b6b0d]', 'text-white', 'border-[#335e0c]');
                         t.classList.add('bg-white', 'text-gray-700', 'border-gray-200');
                     });
                     
                     this.classList.remove('bg-white', 'text-gray-700', 'border-gray-200');
-                    this.classList.add('active', 'bg-orange-500', 'text-white', 'border-orange-400');
+                    this.classList.add('active', 'bg-[#3b6b0d]', 'text-white', 'border-[#335e0c]');
                     
                     const category = this.getAttribute('data-category');
                     const searchTerm = searchInput.value;
@@ -926,7 +926,7 @@
             <div class="product-card flex justify-between items-center p-4 bg-white border border-gray-200 rounded-lg hover:shadow-sm transition-all">
                 <div>
                     <div class="product-name text-base font-medium">${product.name} (${availableStock})</div>
-                    <div class="product-price text-orange-500 font-semibold text-base">Rp ${parseFloat(product.price).toLocaleString('id-ID')}</div>
+                    <div class="product-price text-[#3b6b0d] font-semibold text-base">Rp ${parseFloat(product.price).toLocaleString('id-ID')}</div>
                     ${isLowStock ? '<span class="low-stock bg-yellow-100 px-2 py-1 rounded text-sm text-yellow-800 font-medium mt-1 inline-block">Produk menipis</span>' : ''}
                 </div>
                 <div class="flex items-center">
@@ -935,7 +935,7 @@
                     </span>
                     ${isOutOfStock ? 
                         '<button class="bg-gray-100 text-gray-500 border border-gray-300 rounded px-4 py-2 text-sm w-24">Habis</button>' : 
-                        `<button class="btn-add-to-cart bg-orange-500 text-white border-none rounded px-4 py-2 text-sm flex items-center justify-center w-24 hover:bg-orange-600 transition-colors">
+                        `<button class="btn-add-to-cart bg-[#3b6b0d] text-white border-none rounded px-4 py-2 text-sm flex items-center justify-center w-24 hover:bg-[#335e0c] transition-colors">
                             <i data-lucide="plus" class="w-4 h-4 mr-1"></i> Tambah
                         </button>`
                     }
@@ -1457,14 +1457,14 @@
                     // Disable button dan ubah tampilan
                     button.disabled = true;
                     button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
-                    button.classList.remove('hover:bg-orange-600', 'bg-orange-500');
+                    button.classList.remove('hover:bg-[#3b6b0d]', 'bg-[#3b6b0d]');
                     button.classList.add('bg-gray-400', 'cursor-not-allowed');
                 } else {
                     // Enable button dan kembalikan tampilan normal
                     button.disabled = false;
                     button.innerHTML = 'Proses Pembayaran';
                     button.classList.remove('bg-gray-400', 'cursor-not-allowed');
-                    button.classList.add('bg-orange-500', 'hover:bg-orange-600');
+                    button.classList.add('bg-[#3b6b0d]', 'hover:bg-[#335e0c]');
                 }
             }
 
