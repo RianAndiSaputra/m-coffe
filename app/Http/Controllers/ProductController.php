@@ -490,7 +490,7 @@ class ProductController extends Controller
             DB::commit();
 
             // Load relations untuk response
-            $product->load(['recipes.rawMaterial', 'inventories.outlet']);
+            $product->load(['recipes.rawMaterial', 'inventory.outlet']);
 
             return $this->successResponse($product, 'Product updated successfully');
             
