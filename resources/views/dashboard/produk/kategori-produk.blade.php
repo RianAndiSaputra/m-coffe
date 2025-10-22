@@ -25,13 +25,13 @@
                 <input 
                     type="text" 
                     placeholder="Cari kategori..." 
-                    class="w-full pl-10 pr-4 py-3 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    class="w-full pl-10 pr-4 py-3 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#3b6b0d] focus:border-transparent"
                     id="searchKategori"
                 />
             </div>
             <button 
                 onclick="openModal('modalTambahKategori')" 
-                class="px-5 py-3 text-base font-medium text-white bg-green-500 rounded-lg hover:bg-green-600 shadow"
+                class="px-5 py-3 text-base font-medium text-white bg-[#3b6b0d] rounded-lg hover:bg-[#335e0c] shadow"
             >
                 + Tambah Kategori
             </button>
@@ -77,7 +77,7 @@
                         <div class="flex flex-col items-center justify-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                class="animate-spin text-green-500">
+                                class="animate-spin text-[#3b6b0d]">
                                 <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
                             </svg>
                             <span class="text-gray-500">Memuat data kategori...</span>
@@ -336,7 +336,7 @@
                             <div class="flex flex-col items-center justify-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                     class="animate-spin text-green-500">
+                                     class="animate-spin text-[#3b6b0d]">
                                     <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
                                 </svg>
                                 <span class="text-gray-500">Memuat data kategori...</span>
@@ -450,7 +450,7 @@
                             <div class="flex flex-col items-center justify-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                     class="animate-spin text-green-500">
+                                     class="animate-spin text-[#3b6b0d]">
                                     <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
                                 </svg>
                                 <span class="text-gray-500">Mencari kategori...</span>

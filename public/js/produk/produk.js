@@ -7,6 +7,9 @@ const ProductManager = (() => {
     let produkHapusId = null;
     let currentOutletId = localStorage.getItem('selectedOutletId') || 1;
     let currentOutletName = localStorage.getItem('currentOutletName') || 'Kifa Bakery Pusat';
+    let bahanBakuList = []; // Untuk menyimpan daftar bahan baku
+    let selectedBahanBaku = []; // Untuk menyimpan bahan baku yang dipilih
+    let editSelectedBahanBaku = []; // Untuk edit modal
 
     // DOM Elements
     const elements = {
@@ -26,121 +29,36 @@ const ProductManager = (() => {
             cancelEdit: "btnBatalEdit",
             cancelDelete: "btnBatalHapus",
             confirmDelete: "btnKonfirmasiHapus",
+            tambahBahan: "tambahBahanBtn",
+            editTambahBahan: "editTambahBahanBtn",
+            generateBarcode: "generateBarcodeBtn",
+            generateBarcodeEdit: "generateBarcodeBtnEdit",
         },
         inputs: {
             search: "searchProduk",
             image: "gambar",
             editImage: "editGambar",
+            productType: "product_type",
+            editProductType: "edit_product_type",
+            bahanBaku: "bahanBaku",
+            editBahanBaku: "editBahanBaku",
+            jumlahBahan: "jumlahBahan",
+            editJumlahBahan: "editJumlahBahan",
+            satuanBahan: "satuanBahan",
+            editSatuanBahan: "editSatuanBahan",
         },
         containers: {
             alert: "alertContainer",
             tableBody: "produkTableBody",
             outletCheckboxes: "outletCheckboxes",
-            editOutletList: "editOutletList",
+            editOutletCheckboxes: "editOutletCheckboxes",
+            daftarBahanBaku: "daftarBahanBaku",
+            editDaftarBahanBaku: "editDaftarBahanBaku",
+            bahanBakuSection: "bahanBakuSection",
+            editBahanBakuSection: "editBahanBakuSection",
+            stokSection: "stokSection",
+            editStokSection: "editStokSection",
         },
-    };
-
-    async function loadProductData(outletId) {
-        try {
-            // Ensure outletId is valid
-            outletId = outletId || getSelectedOutletId();
-            if (!outletId || isNaN(outletId)) {
-                outletId = 1; // Fallback to default
-            }
-
-            // Hide outlet dropdown after selection
-            const outletDropdown = document.getElementById("outletDropdown");
-            if (outletDropdown) outletDropdown.classList.add("hidden");
-
-            // Get outlet name and update display
-            const outletName = await getOutletName(outletId);
-            updateOutletDisplay(outletId, outletName);
-
-            // Load products for this outlet
-            await loadProducts(outletId);
-
-            // Save the selected outlet
-            localStorage.setItem("selectedOutletId", outletId);
-            currentOutletId = outletId;
-        } catch (error) {
-            console.error("Error loading product data:", error);
-            showAlert("error", "Gagal memuat data produk");
-        }
-    }
-
-    // Fungsi untuk mengupdate tampilan nama outlet
-    function updateOutletDisplay() {
-        const outletTitle = document.getElementById('currentOutletName');
-        const outletDesc = document.getElementById('outletNamePlaceholder');
-        
-        if (outletTitle) outletTitle.textContent = currentOutletName;
-        if (outletDesc) outletDesc.textContent = currentOutletName;
-    }
-
-    // Fungsi untuk mendapatkan nama outlet (bisa dari API atau object mapping)
-    async function getOutletName(outletId) {
-        // Check cache first
-        if (window.outletCache && window.outletCache[outletId]) {
-            return window.outletCache[outletId];
-        }
-
-        try {
-            const response = await fetch(`/api/outlets/${outletId}`);
-            const data = await response.json();
-
-            // Cache the result
-            if (!window.outletCache) window.outletCache = {};
-            window.outletCache[outletId] = data.name || `Outlet ${outletId}`;
-
-            return window.outletCache[outletId];
-        } catch (error) {
-            console.error("Error fetching outlet:", error);
-            return `Outlet ${outletId}`;
-        }
-    }
-
-    window.addEventListener("storage", function (event) {
-        if (event.key === "selectedOutletId" && event.newValue) {
-            const outletId = event.newValue;
-            getOutletName(outletId).then((name) => {
-                updateOutletDisplay(outletId, name);
-                loadProductData(outletId);
-            });
-        }
-    });
-
-    const connectOutletSelectionToProducts = () => {
-        // Serupa dengan connectOutletSelectionToHistory() di script riwayat stok
-        const outletListContainer = document.getElementById(
-            "outletListContainer"
-        );
-        if (outletListContainer) {
-            outletListContainer.addEventListener("click", function (event) {
-                // Logika untuk mendeteksi perubahan outlet
-                setTimeout(() => {
-                    currentOutletId = getSelectedOutletId();
-                    loadProducts();
-                }, 100);
-            });
-        }
-    };
-
-    const getSelectedOutletId = () => {
-        // Ambil dari URL jika ada
-        const urlParams = new URLSearchParams(window.location.search);
-        const outletIdFromUrl = urlParams.get("outlet_id");
-
-        if (outletIdFromUrl && !isNaN(outletIdFromUrl)) {
-            return parseInt(outletIdFromUrl);
-        }
-
-        // Ambil dari localStorage
-        const savedOutletId = localStorage.getItem("selectedOutletId");
-        if (savedOutletId && !isNaN(savedOutletId)) {
-            return parseInt(savedOutletId);
-        }
-
-        return 1; // Default outlet
     };
 
     // Initialize the module
@@ -161,199 +79,39 @@ const ProductManager = (() => {
 
         connectOutletSelectionToProducts();
     };
-    // fungsi untuk generate barcode
-    const generateBarcode = () => {
-        // Generate random barcode (EAN-13 format)
-        const randomBarcode = Math.floor(1000000000000 + Math.random() * 9000000000000).toString();
-        return randomBarcode;
-    };
-
-    document.getElementById('generateBarcodeBtn')?.addEventListener('click', () => {
-        document.getElementById('barcode').value = generateBarcode();
-    });
-    
-    document.getElementById('generateBarcodeBtnEdit')?.addEventListener('click', () => {
-        document.getElementById('editBarcode').value = generateBarcode();
-    });
-
-    function setupOutletChangeListener() {
-        // Method 1: Polling localStorage setiap 500ms
-        let lastOutletId = currentOutletId;
-        
-        setInterval(() => {
-            const newOutletId = localStorage.getItem('selectedOutletId') || currentOutletId;
-            if (newOutletId !== lastOutletId) {
-                lastOutletId = newOutletId;
-                loadProducts(newOutletId);
-            }
-        }, 500);
-        
-        // Method 2: Event listener untuk klik di dokumen
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('#outletListContainer li')) {
-                // Beri sedikit delay untuk memastikan localStorage sudah terupdate
-                setTimeout(() => {
-                    const newOutletId = localStorage.getItem('selectedOutletId') || currentOutletId;
-                    loadProducts(newOutletId);
-                }, 100);
-            }
-        });
-    }
-
-    async function preloadOutlets() {
-        try {
-            const response = await fetch("/api/outlets");
-            const { data: outlets } = await response.json();
-
-            // Create cache
-            window.outletCache = {};
-            outlets.forEach((outlet) => {
-                window.outletCache[outlet.id] = outlet.name;
-            });
-        } catch (error) {
-            console.error("Failed to preload outlets:", error);
-        }
-    }
-
-    document
-        .getElementById("outletDropdown")
-        .addEventListener("change", function () {
-            const outletId = this.value;
-            const outletName = this.options[this.selectedIndex].text;
-            updateOutletDisplay(outletId, outletName);
-            loadProductData(outletId);
-        });
-
-    // Setup all modals
-    const setupModals = () => {
-        elements.modals.forEach((modalId) => {
-            const modal = document.getElementById(modalId);
-            if (!modal) return;
-
-            modal.addEventListener("click", (e) => {
-                if (e.target === modal) closeModal(modalId);
-            });
-
-            const modalContent = modal.querySelector("div[onclick]");
-            if (modalContent) {
-                modalContent.addEventListener("click", (e) =>
-                    e.stopPropagation()
-                );
-            }
-        });
-    };
-
-    // Create fetch interceptor for authentication
-    const createAuthInterceptor = () => {
-        const originalFetch = window.fetch;
-
-        window.fetch = async (resource, options = {}) => {
-            const token = localStorage.getItem("token");
-            if (token) {
-                options.headers = options.headers || {};
-                options.headers.Authorization = `Bearer ${token}`;
-                options.headers.Accept = "application/json";
-
-                if (
-                    !options.headers["Content-Type"] &&
-                    !(options.body instanceof FormData)
-                ) {
-                    options.headers["Content-Type"] = "application/json";
-                }
-
-                options.headers["X-CSRF-TOKEN"] = document.querySelector(
-                    'meta[name="csrf-token"]'
-                ).content;
-            }
-
-            const response = await originalFetch(resource, options);
-
-            if (options.headers?.Accept === "application/json") {
-                const contentType = response.headers.get("content-type");
-                if (contentType && contentType.includes("application/json")) {
-                    return response;
-                } else if (response.status !== 204) {
-                    return new Response(
-                        JSON.stringify({
-                            message:
-                                "Server did not return valid JSON response",
-                        }),
-                        {
-                            status: 500,
-                            headers: { "Content-Type": "application/json" },
-                        }
-                    );
-                }
-            }
-
-            return response;
-        };
-    };
 
     // Setup event listeners
     const setupEventListeners = () => {
-
-        document.addEventListener('click', (e) => {
-            // Jika yang diklik bukan bagian dari dropdown
-            if (!e.target.closest('.dropdown-menu') && !e.target.closest('[onclick*="toggleDropdown"]')) {
-                document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                    menu.classList.add('hidden');
-                });
-            }
+        // Product type change handler
+        document.querySelectorAll('input[name="product_type"]').forEach(radio => {
+            radio.addEventListener('change', handleProductTypeChange);
         });
 
-        document.querySelectorAll('.dropdown-menu').forEach(menu => {
-            menu.addEventListener('click', (e) => {
-                e.stopPropagation(); // Mencegah event click menyebar ke document
-            });
+        document.querySelectorAll('input[name="edit_product_type"]').forEach(radio => {
+            radio.addEventListener('change', handleEditProductTypeChange);
         });
 
-        // fungsi untuk print dan export produk
-        document
-            .querySelector('[aria-label="Cetak laporan"]')
-            ?.addEventListener("click", printProductReport);
-        document
-            .querySelector('[aria-label="Ekspor ke CSV"]')
-            ?.addEventListener("click", exportProductsToCSV);
-        // Form submission
-        document
-            .getElementById(elements.buttons.save)
-            ?.addEventListener("click", (e) => {
-                e.preventDefault();
-                tambahProduk();
-            });
+        // Barcode generation
+        document.getElementById(elements.buttons.generateBarcode)?.addEventListener('click', generateBarcodeHandler);
+        document.getElementById(elements.buttons.generateBarcodeEdit)?.addEventListener('click', generateBarcodeHandlerEdit);
 
-        document
-            .getElementById(elements.buttons.saveEdit)
-            ?.addEventListener("click", (e) => {
-                e.preventDefault();
-                simpanPerubahanProduk();
-            });
+        // Add ingredient buttons
+        document.getElementById(elements.buttons.tambahBahan)?.addEventListener('click', tambahBahanBaku);
+        document.getElementById(elements.buttons.editTambahBahan)?.addEventListener('click', editTambahBahanBaku);
 
-        // Cancel buttons
-        document
-            .getElementById(elements.buttons.cancel)
-            ?.addEventListener("click", () => closeModal("modalTambahProduk"));
-        document
-            .getElementById(elements.buttons.cancelEdit)
-            ?.addEventListener("click", () => closeModal("modalEditProduk"));
-        document
-            .getElementById(elements.buttons.cancelDelete)
-            ?.addEventListener("click", () => {
-                closeModal("modalKonfirmasiHapus");
-                produkHapusId = null;
-            });
+        // File upload area click handler
+        document.querySelector('#modalTambahProduk .border-dashed')?.addEventListener('click', () => {
+            document.getElementById('gambar').click();
+        });
 
-        // Confirm delete button
-        document
-            .getElementById(elements.buttons.confirmDelete)
-            ?.addEventListener("click", konfirmasiHapusProduk);
+        document.querySelector('#modalEditProduk .border-dashed')?.addEventListener('click', () => {
+            document.getElementById('editGambar').click();
+        });
 
         // Search input
         document.getElementById(elements.inputs.search)?.addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase();
             
-            // Jika search kosong, load ulang produk outlet saat ini
             if (searchTerm.trim() === '') {
                 loadProducts(currentOutletId);
             } else {
@@ -361,160 +119,315 @@ const ProductManager = (() => {
             }
         });
 
+        // Form submission
+        document.getElementById(elements.buttons.save)?.addEventListener('click', (e) => {
+            e.preventDefault();
+            tambahProduk();
+        });
+
+        document.getElementById(elements.buttons.saveEdit)?.addEventListener('click', (e) => {
+            e.preventDefault();
+            simpanPerubahanProduk();
+        });
+
+        // Cancel buttons
+        document.getElementById(elements.buttons.cancel)?.addEventListener('click', () => closeModal("modalTambahProduk"));
+        document.getElementById(elements.buttons.cancelEdit)?.addEventListener('click', () => closeModal("modalEditProduk"));
+        document.getElementById(elements.buttons.cancelDelete)?.addEventListener('click', () => {
+            closeModal("modalKonfirmasiHapus");
+            produkHapusId = null;
+        });
+
+        // Confirm delete button
+        document.getElementById(elements.buttons.confirmDelete)?.addEventListener('click', konfirmasiHapusProduk);
+
         // Image preview handlers
         setupImagePreview(elements.inputs.image, "gambarPreview");
         setupImagePreview(elements.inputs.editImage, "editGambarPreview");
     };
 
-    // Setup image preview for a given input
-    const setupImagePreview = (inputId, previewId) => {
-        document.getElementById(inputId)?.addEventListener("change", (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const preview = document.getElementById(previewId);
-                    if (preview) {
-                        preview.src = e.target.result;
-                        preview.classList.remove("hidden");
-                    }
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+    // Handle product type change for create modal
+    const handleProductTypeChange = (e) => {
+        const productType = e.target.value;
+        const bahanBakuSection = document.getElementById(elements.containers.bahanBakuSection);
+        const stokSection = document.getElementById(elements.containers.stokSection);
+
+        if (productType === 'minuman') {
+            bahanBakuSection.classList.remove('hidden');
+            stokSection.classList.add('hidden');
+        } else {
+            bahanBakuSection.classList.add('hidden');
+            stokSection.classList.remove('hidden');
+        }
+    };
+
+    // Handle product type change for edit modal
+    const handleEditProductTypeChange = (e) => {
+        const productType = e.target.value;
+        const bahanBakuSection = document.getElementById(elements.containers.editBahanBakuSection);
+        const stokSection = document.getElementById(elements.containers.editStokSection);
+
+        if (productType === 'minuman') {
+            bahanBakuSection.classList.remove('hidden');
+            stokSection.classList.add('hidden');
+        } else {
+            bahanBakuSection.classList.add('hidden');
+            stokSection.classList.remove('hidden');
+        }
+    };
+
+    // Generate barcode handlers
+    const generateBarcodeHandler = () => {
+        document.getElementById('barcode').value = generateBarcode();
+    };
+
+    const generateBarcodeHandlerEdit = () => {
+        document.getElementById('editBarcode').value = generateBarcode();
+    };
+
+    // Generate random barcode
+    const generateBarcode = () => {
+        return Math.floor(1000000000000 + Math.random() * 9000000000000).toString();
     };
 
     // Load initial data
     const loadInitialData = async () => {
         try {
-            currentOutletId = getSelectedOutletId(); // Update dengan outlet yang dipilih
+            currentOutletId = getSelectedOutletId();
             await Promise.all([
                 loadProducts(),
                 loadKategoriOptions(),
                 loadOutletCheckboxes(),
+                loadBahanBakuOptions(),
             ]);
         } catch (error) {
             showAlert("error", `Gagal memuat data awal: ${error.message}`);
         }
     };
 
-    // Initialize Lucide icons
-    const initLucideIcons = () => {
-        if (window.lucide) window.lucide.createIcons();
-    };
+    // Load bahan baku options from RawMaterial model
+    const loadBahanBakuOptions = async () => {
+        try {
+            const response = await fetch('/api/raw-material?active=true');
+            if (!response.ok) throw new Error('Gagal memuat bahan baku');
+            
+            const { data: rawMaterials } = await response.json();
+            bahanBakuList = rawMaterials;
 
-    // Show alert notification
-    const showAlert = (type, message) => {
-        const alertContainer = document.getElementById(
-            elements.containers.alert
-        );
-        const alertId = `alert-${Date.now()}`;
-
-        const alertConfig = {
-            success: {
-                bgColor: "bg-orange-50",
-                borderColor: "border-orange-200",
-                textColor: "text-orange-800",
-                icon: "check-circle",
-                iconColor: "text-orange-500",
-            },
-            error: {
-                bgColor: "bg-red-50",
-                borderColor: "border-red-200",
-                textColor: "text-red-800",
-                icon: "alert-circle",
-                iconColor: "text-red-500",
-            },
-        };
-
-        const config = alertConfig[type] || alertConfig.success;
-
-        const alertElement = document.createElement("div");
-        alertElement.id = alertId;
-        alertElement.className = `p-4 border rounded-lg shadow-sm ${config.bgColor} ${config.borderColor} ${config.textColor} flex items-start gap-3 animate-fade-in-up`;
-        alertElement.innerHTML = `
-            <i data-lucide="${config.icon}" class="w-5 h-5 mt-0.5 ${config.iconColor}"></i>
-            <div class="flex-1">
-                <p class="text-sm font-medium">${message}</p>
-            </div>
-            <button onclick="ProductManager.closeAlert('${alertId}')" class="p-1 rounded-full hover:bg-gray-100">
-                <i data-lucide="x" class="w-4 h-4"></i>
-            </button>
-        `;
-
-        alertContainer.prepend(alertElement);
-        initLucideIcons();
-
-        setTimeout(() => closeAlert(alertId), 5000);
-    };
-
-    // Close alert
-    const closeAlert = (id) => {
-        const alert = document.getElementById(id);
-        if (alert) {
-            alert.classList.add("animate-fade-out");
-            setTimeout(() => alert.remove(), 300);
-        }
-    };
-
-    // Modal functions
-    const openModal = (modalId) => {
-        document.querySelectorAll('[id^="modal"]').forEach((modal) => {
-            modal.classList.add("hidden");
-            modal.classList.remove("flex");
-        });
-
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.remove("hidden");
-            modal.classList.add("flex");
-            document.body.style.overflow = "hidden";
-        }
-    };
-
-    const closeModal = (modalId) => {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.add("hidden");
-            modal.classList.remove("flex");
-            document.body.style.overflow = "";
-        }
-    };
-
-    // Toggle dropdown menu
-    const toggleDropdown = (button) => {
-        const menu = button.nextElementSibling;
-    
-        // Tutup semua dropdown lainnya
-        document.querySelectorAll(".dropdown-menu").forEach((m) => {
-            if (m !== menu) {
-                m.classList.add("hidden");
-                m.classList.remove("dropdown-up", "dropdown-down");
+            // For create modal
+            const selectBahan = document.getElementById(elements.inputs.bahanBaku);
+            if (selectBahan) {
+                selectBahan.innerHTML = '<option value="">Pilih Bahan Baku</option>';
+                rawMaterials.forEach(material => {
+                    const option = document.createElement('option');
+                    option.value = material.id;
+                    option.textContent = material.name;
+                    option.setAttribute('data-unit', material.unit);
+                    selectBahan.appendChild(option);
+                });
             }
-        });
-    
-        // Buka/tutup dropdown yang diklik
-        menu.classList.toggle("hidden");
-        menu.classList.remove("dropdown-up", "dropdown-down");
-    
-        const menuRect = menu.getBoundingClientRect();
-        const buttonRect = button.getBoundingClientRect();
-        const spaceBelow = window.innerHeight - buttonRect.bottom;
-        const spaceAbove = buttonRect.top;
-    
-        if (spaceBelow < menuRect.height && spaceAbove > menuRect.height) {
-            menu.classList.add("dropdown-up");
-            menu.style.bottom = "100%";
-            menu.style.marginBottom = "0.25rem";
-            menu.style.top = "auto";
-            menu.style.marginTop = "0";
-        } else {
-            menu.classList.add("dropdown-down");
-            menu.style.top = "100%";
-            menu.style.marginTop = "0.25rem";
-            menu.style.bottom = "auto";
-            menu.style.marginBottom = "0";
+
+            // For edit modal
+            const selectEditBahan = document.getElementById(elements.inputs.editBahanBaku);
+            if (selectEditBahan) {
+                selectEditBahan.innerHTML = '<option value="">Pilih Bahan Baku</option>';
+                rawMaterials.forEach(material => {
+                    const option = document.createElement('option');
+                    option.value = material.id;
+                    option.textContent = material.name;
+                    option.setAttribute('data-unit', material.unit);
+                    selectEditBahan.appendChild(option);
+                });
+            }
+
+            // Setup unit selection based on selected ingredient for create modal
+            selectBahan?.addEventListener('change', (e) => {
+                const selectedId = e.target.value;
+                const selectedMaterial = rawMaterials.find(mat => mat.id == selectedId);
+                const satuanSelect = document.getElementById(elements.inputs.satuanBahan);
+                
+                if (satuanSelect && selectedMaterial) {
+                    satuanSelect.innerHTML = `<option value="${selectedMaterial.unit}">${selectedMaterial.unit}</option>`;
+                }
+            });
+
+            // Setup unit selection based on selected ingredient for edit modal
+            selectEditBahan?.addEventListener('change', (e) => {
+                const selectedId = e.target.value;
+                const selectedMaterial = rawMaterials.find(mat => mat.id == selectedId);
+                const satuanSelect = document.getElementById(elements.inputs.editSatuanBahan);
+                
+                if (satuanSelect && selectedMaterial) {
+                    satuanSelect.innerHTML = `<option value="${selectedMaterial.unit}">${selectedMaterial.unit}</option>`;
+                }
+            });
+
+        } catch (error) {
+            console.error('Error loading bahan baku:', error);
+            showAlert('error', 'Gagal memuat daftar bahan baku');
         }
+    };
+
+    // Add bahan baku to list for create modal
+    const tambahBahanBaku = () => {
+        const bahanSelect = document.getElementById(elements.inputs.bahanBaku);
+        const jumlahInput = document.getElementById(elements.inputs.jumlahBahan);
+        const satuanSelect = document.getElementById(elements.inputs.satuanBahan);
+
+        const bahanId = bahanSelect.value;
+        const jumlah = parseFloat(jumlahInput.value);
+        const satuan = satuanSelect.value;
+
+        if (!bahanId || !jumlah || jumlah <= 0) {
+            showAlert('error', 'Pilih bahan baku dan isi jumlah yang valid');
+            return;
+        }
+
+        const selectedBahan = bahanBakuList.find(b => b.id == bahanId);
+        if (!selectedBahan) {
+            showAlert('error', 'Bahan baku tidak ditemukan');
+            return;
+        }
+
+        // Check if already added
+        if (selectedBahanBaku.find(item => item.ingredient_id == bahanId)) {
+            showAlert('error', 'Bahan baku sudah ditambahkan');
+            return;
+        }
+
+        // Add to list
+        selectedBahanBaku.push({
+            ingredient_id: parseInt(bahanId),
+            ingredient_name: selectedBahan.name,
+            quantity: jumlah,
+            unit: satuan
+        });
+
+        renderDaftarBahanBaku();
+
+        // Reset form
+        bahanSelect.value = '';
+        jumlahInput.value = '';
+        satuanSelect.innerHTML = '<option value="">Pilih Satuan</option>';
+    };
+
+    // Add bahan baku to list for edit modal
+    const editTambahBahanBaku = () => {
+        const bahanSelect = document.getElementById(elements.inputs.editBahanBaku);
+        const jumlahInput = document.getElementById(elements.inputs.editJumlahBahan);
+        const satuanSelect = document.getElementById(elements.inputs.editSatuanBahan);
+
+        const bahanId = bahanSelect.value;
+        const jumlah = parseFloat(jumlahInput.value);
+        const satuan = satuanSelect.value;
+
+        if (!bahanId || !jumlah || jumlah <= 0) {
+            showAlert('error', 'Pilih bahan baku dan isi jumlah yang valid');
+            return;
+        }
+
+        const selectedBahan = bahanBakuList.find(b => b.id == bahanId);
+        if (!selectedBahan) {
+            showAlert('error', 'Bahan baku tidak ditemukan');
+            return;
+        }
+
+        // Check if already added
+        if (editSelectedBahanBaku.find(item => item.ingredient_id == bahanId)) {
+            showAlert('error', 'Bahan baku sudah ditambahkan');
+            return;
+        }
+
+        // Add to list
+        editSelectedBahanBaku.push({
+            ingredient_id: parseInt(bahanId),
+            ingredient_name: selectedBahan.name,
+            quantity: jumlah,
+            unit: satuan
+        });
+
+        renderEditDaftarBahanBaku();
+
+        // Reset form
+        bahanSelect.value = '';
+        jumlahInput.value = '';
+        satuanSelect.innerHTML = '<option value="">Pilih Satuan</option>';
+    };
+
+    // Render daftar bahan baku for create modal
+    const renderDaftarBahanBaku = () => {
+        const container = document.getElementById(elements.containers.daftarBahanBaku);
+        if (!container) return;
+
+        if (selectedBahanBaku.length === 0) {
+            container.innerHTML = '<p class="text-gray-500 text-sm italic text-center py-4">Belum ada bahan baku yang ditambahkan</p>';
+            return;
+        }
+
+        container.innerHTML = selectedBahanBaku.map((bahan, index) => `
+            <div class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg mb-2">
+                <div class="flex-1">
+                    <div class="font-medium text-gray-800">${bahan.ingredient_name}</div>
+                    <div class="text-sm text-gray-600">${bahan.quantity} ${bahan.unit}</div>
+                </div>
+                <button type="button" onclick="ProductManager.hapusBahanBaku(${index})" 
+                        class="p-1 text-red-600 hover:text-red-800">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+            </div>
+        `).join('');
+
+        initLucideIcons();
+    };
+
+    // Render daftar bahan baku for edit modal
+    const renderEditDaftarBahanBaku = () => {
+        const container = document.getElementById(elements.containers.editDaftarBahanBaku);
+        if (!container) return;
+
+        if (editSelectedBahanBaku.length === 0) {
+            container.innerHTML = '<p class="text-gray-500 text-sm italic text-center py-4">Belum ada bahan baku yang ditambahkan</p>';
+            return;
+        }
+
+        container.innerHTML = editSelectedBahanBaku.map((bahan, index) => `
+            <div class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg mb-2">
+                <div class="flex-1">
+                    <div class="font-medium text-gray-800">${bahan.ingredient_name}</div>
+                    <div class="text-sm text-gray-600">${bahan.quantity} ${bahan.unit}</div>
+                </div>
+                <button type="button" onclick="ProductManager.hapusEditBahanBaku(${index})" 
+                        class="p-1 text-red-600 hover:text-red-800">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+            </div>
+        `).join('');
+
+        initLucideIcons();
+    };
+
+    // Remove bahan baku from list for create modal
+    const hapusBahanBaku = (index) => {
+        selectedBahanBaku.splice(index, 1);
+        renderDaftarBahanBaku();
+    };
+
+    // Remove bahan baku from list for edit modal
+    const hapusEditBahanBaku = (index) => {
+        editSelectedBahanBaku.splice(index, 1);
+        renderEditDaftarBahanBaku();
+    };
+
+    // Clear bahan baku list for create modal
+    const clearBahanBaku = () => {
+        selectedBahanBaku = [];
+        renderDaftarBahanBaku();
+    };
+
+    // Clear bahan baku list for edit modal
+    const clearEditBahanBaku = () => {
+        editSelectedBahanBaku = [];
+        renderEditDaftarBahanBaku();
     };
 
     // Load products from API
@@ -529,7 +442,6 @@ const ProductManager = (() => {
             renderProducts(responseData);
             updateOutletDisplay();
             
-            // Simpan ke localStorage
             localStorage.setItem('selectedOutletId', outletId);
             localStorage.setItem('currentOutletName', currentOutletName);
             
@@ -551,7 +463,7 @@ const ProductManager = (() => {
         if (products.length === 0) {
             tbody.innerHTML = `
                 <tr class="border-b">
-                    <td colspan="8" class="py-4 text-center text-gray-500">
+                    <td colspan="9" class="py-4 text-center text-gray-500">
                         Tidak ada data produk
                     </td>
                 </tr>
@@ -560,29 +472,19 @@ const ProductManager = (() => {
         }
 
         products.forEach((product, index) => {
-            // Handle inventory data - several possible structures
             let quantity = 0;
             let min_stock = 0;
 
-            // Case 1: Inventory data in nested object
             if (product.inventory) {
                 quantity = product.inventory.quantity || 0;
                 min_stock = product.inventory.min_stock || 0;
-            }
-            // Case 2: Direct properties
-            else if (product.quantity !== undefined) {
+            } else if (product.quantity !== undefined) {
                 quantity = product.quantity;
                 min_stock = product.min_stock || 0;
-            }
-            // Case 3: Inventory array
-            else if (
-                Array.isArray(product.inventories) &&
-                product.inventories.length > 0
-            ) {
-                const mainInventory =
-                    product.inventories.find(
-                        (inv) => inv.outlet_id == currentOutletId
-                    ) || product.inventories[0];
+            } else if (Array.isArray(product.inventories) && product.inventories.length > 0) {
+                const mainInventory = product.inventories.find(
+                    (inv) => inv.outlet_id == currentOutletId
+                ) || product.inventories[0];
                 quantity = mainInventory.quantity || 0;
                 min_stock = mainInventory.min_stock || 0;
             }
@@ -592,13 +494,12 @@ const ProductManager = (() => {
             row.innerHTML = `
                 <td class="py-3 px-4">${index + 1}</td>
                 <td class="py-3 px-4 flex items-center space-x-3">
-                    <img src="${
-                        product.image_url || "/images/default-product.png"
-                    }" 
+                    <img src="${product.image_url || "/images/default-product.png"}" 
                         alt="${product.name}" 
                         class="w-10 h-10 bg-gray-100 rounded object-cover" />
                     <div>
                         <p class="font-medium">${product.name || "-"}</p>
+                        ${product.description ? `<p class="text-sm text-gray-500">${product.description}</p>` : ''}
                     </div>
                 </td>
                 <td class="py-3 px-4">
@@ -618,14 +519,12 @@ const ProductManager = (() => {
                         ${product.category?.name || "Tanpa Kategori"}
                     </span>
                 </td>
-                <td class="py-3 px-4">Rp ${formatNumber(
-                    product.price || 0
-                )}</td>
+                <td class="py-3 px-4">Rp ${formatNumber(product.price || 0)}</td>
                 <td class="py-3 px-4">
                     <div class="flex flex-col">
                         <span class="font-medium">${quantity}</span>
                         <div class="text-xs text-gray-500">
-                            <span>Min: ${min_stock}</span><br>
+                            <span>Min: ${min_stock}</span>
                         </div>
                     </div>
                 </td>
@@ -664,36 +563,8 @@ const ProductManager = (() => {
             tbody.appendChild(row);
         });
         
-        // Initialize all barcodes after DOM is updated
         JsBarcode(".barcode").init();
-
         if (window.lucide) window.lucide.createIcons();
-    };
-
-    // Format number for currency display
-    const formatNumber = (num) => new Intl.NumberFormat("id-ID").format(num);
-
-    // Filter products by search term
-    const filterProducts = async (searchTerm) => {
-        try {
-            const outletId = currentOutletId; // Gunakan outlet yang aktif
-            
-            // Ambil data produk hanya untuk outlet yang aktif
-            const response = await fetch(`/api/products/outlet/${outletId}`);
-            if (!response.ok) throw new Error("Gagal memuat data produk");
-    
-            const { data: products } = await response.json();
-    
-            const filtered = products.filter(product => 
-                product.name.toLowerCase().includes(searchTerm) ||
-                (product.description && product.description.toLowerCase().includes(searchTerm)) ||
-                (product.sku && product.sku.toLowerCase().includes(searchTerm))
-            );
-    
-            renderProducts({ data: filtered });
-        } catch (error) {
-            showAlert("error", error.message);
-        }
     };
 
     // Add new product
@@ -703,17 +574,36 @@ const ProductManager = (() => {
         const form = document.getElementById(elements.forms.add);
 
         try {
-            // Set loading state
             btnSimpan.disabled = true;
             btnSimpan.innerHTML = '<i data-lucide="loader-circle" class="animate-spin mr-2"></i> Menyimpan...';
             if (window.lucide) window.lucide.createIcons();
 
-            // Prepare form data
             const formData = new FormData(form);
+            
+            // Set default values
             !formData.get("barcode") && formData.set("barcode", generateBarcode());
             !formData.get("sku") && formData.set("sku", `SKU-${Date.now()}`);
-            !formData.get("quantity") && formData.set("quantity", "0");
-            !formData.get("min_stock") && formData.set("min_stock", "0");
+            
+            const productType = formData.get("product_type");
+            
+            // Handle different product types
+            if (productType === 'minuman') {
+                // For drinks, use recipes instead of direct stock
+                formData.delete("stock");
+                formData.delete("min_stock");
+                
+                // Add recipes data
+                selectedBahanBaku.forEach((bahan, index) => {
+                    formData.append(`recipes[${index}][raw_material_id]`, bahan.ingredient_id);
+                    formData.append(`recipes[${index}][quantity]`, bahan.quantity);
+                    formData.append(`recipes[${index}][unit]`, bahan.unit);
+                });
+            } else {
+                // For food, use direct stock management
+                formData.set("quantity", formData.get("stock") || "0");
+                formData.set("min_stock", formData.get("min_stock") || "0");
+            }
+
             formData.append("outlet_id", currentOutletId.toString());
 
             const response = await fetch("/api/products", {
@@ -732,12 +622,9 @@ const ProductManager = (() => {
 
                 if (typeof data.message === 'string') {
                     errorMessage = data.message;
-                } 
-                else if (typeof data.error === 'string') {
+                } else if (typeof data.error === 'string') {
                     errorMessage = data.error;
-                }
-                else if (data.message && typeof data.message === 'object') {
-                    // Mapping field dan error ke bahasa Indonesia
+                } else if (data.message && typeof data.message === 'object') {
                     const fieldLabels = {
                         name: "Nama Produk",
                         price: "Harga",
@@ -763,19 +650,18 @@ const ProductManager = (() => {
                     });
 
                     errorMessage = messages.join("<br>");
-                } 
-                else if (data.errors) {
+                } else if (data.errors) {
                     errorMessage = Object.values(data.errors).flat().join(', ');
                 }
 
                 throw new Error(errorMessage);
             }
 
-            // Success
             showAlert("success", data.message || "Produk berhasil ditambahkan");
             closeModal("modalTambahProduk");
             loadProducts();
             form.reset();
+            clearBahanBaku();
             
             const preview = document.getElementById("gambarPreview");
             preview && (preview.src = "") && preview.classList.add("hidden");
@@ -787,8 +673,7 @@ const ProductManager = (() => {
             
             if (error instanceof TypeError) {
                 userMessage = "Gagal terhubung ke server";
-            } 
-            else if (error instanceof Error) {
+            } else if (error instanceof Error) {
                 userMessage = error.message;
             }
             
@@ -818,9 +703,6 @@ const ProductManager = (() => {
             const token = localStorage.getItem("token");
             if (!token) throw new Error("Token tidak ditemukan");
     
-            // console.log("=== DEBUG: Opening edit modal for product ID:", productId);
-    
-            // Gunakan endpoint detail
             const productDetailResponse = await fetch(`/api/products/${productId}/detail`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -835,17 +717,11 @@ const ProductManager = (() => {
             const productDetailData = await productDetailResponse.json();
             const product = productDetailData.data;
     
-            // console.log("=== DEBUG: Raw product data from API:", product);
-            // console.log("=== DEBUG: Product outlets:", product.outlets);
-            // console.log("=== DEBUG: Product outlet_ids:", product.outlet_ids);
-    
             if (!product) throw new Error("Produk tidak ditemukan");
     
-            // Handle inventory data - prioritize outlet pivot data for current outlet
             let quantity = 0;
             let min_stock = 0;
     
-            // Case 1: Get data from outlets array based on current outlet
             if (Array.isArray(product.outlets) && product.outlets.length > 0) {
                 const currentOutletData = product.outlets.find(
                     outlet => outlet.id == currentOutletId
@@ -855,47 +731,54 @@ const ProductManager = (() => {
                     quantity = currentOutletData.pivot.quantity || 0;
                     min_stock = currentOutletData.pivot.min_stock || 0;
                 } else {
-                    // Fallback to first outlet if current outlet not found
                     const firstOutlet = product.outlets[0];
                     if (firstOutlet && firstOutlet.pivot) {
                         quantity = firstOutlet.pivot.quantity || 0;
                         min_stock = firstOutlet.pivot.min_stock || 0;
                     }
                 }
-            }
-            // Case 2: Fallback to inventory data if outlets not available
-            else if (product.inventory) {
+            } else if (product.inventory) {
                 quantity = product.inventory.quantity || 0;
                 min_stock = product.inventory.min_stock || 0;
-            }
-            // Case 3: Fallback to direct properties
-            else if (product.quantity !== undefined) {
+            } else if (product.quantity !== undefined) {
                 quantity = product.quantity;
                 min_stock = product.min_stock || 0;
-            }
-            // Case 4: Fallback to inventories array
-            else if (
-                Array.isArray(product.inventories) &&
-                product.inventories.length > 0
-            ) {
-                const mainInventory =
-                    product.inventories.find(
-                        (inv) => inv.outlet_id == currentOutletId
-                    ) || product.inventories[0];
+            } else if (Array.isArray(product.inventories) && product.inventories.length > 0) {
+                const mainInventory = product.inventories.find(
+                    (inv) => inv.outlet_id == currentOutletId
+                ) || product.inventories[0];
                 quantity = mainInventory.quantity || 0;
                 min_stock = mainInventory.min_stock || 0;
             }
     
             // Populate form fields
             document.getElementById("editProdukId").textContent = product.id;
-            document.getElementById("editNamaProduk").value = product.name;
+            document.getElementById("editNama").value = product.name;
             document.getElementById('editBarcode').value = product.barcode || '';
-            document.getElementById("editSkuProduk").value = product.sku || "";
+            document.getElementById("editSku").value = product.sku || "";
             document.getElementById("editDeskripsi").value = product.description || "";
             document.getElementById("editHarga").value = product.price;
-            document.getElementById("editStok").value = quantity; // Use calculated quantity from outlet pivot
-            document.getElementById("editStokMinimum").value = min_stock; // Use calculated min_stock from outlet pivot
+            document.getElementById("editStok").value = quantity;
+            document.getElementById("editStokMinimum").value = min_stock;
             document.getElementById("editGambarCurrent").value = product.image || "";
+    
+            // Set product type and show/hide sections
+            const productType = product.recipes && product.recipes.length > 0 ? 'minuman' : 'makanan';
+            document.querySelector(`input[name="edit_product_type"][value="${productType}"]`).checked = true;
+            handleEditProductTypeChange({ target: document.querySelector(`input[name="edit_product_type"][value="${productType}"]`) });
+    
+            // Load recipes if product is minuman
+            if (productType === 'minuman' && product.recipes) {
+                editSelectedBahanBaku = product.recipes.map(recipe => ({
+                    ingredient_id: recipe.ingredient_id,
+                    ingredient_name: recipe.raw_material?.name || 'Bahan Baku',
+                    quantity: parseFloat(recipe.quantity),
+                    unit: recipe.unit
+                }));
+                renderEditDaftarBahanBaku();
+            } else {
+                clearEditBahanBaku();
+            }
     
             await loadKategoriOptions();
     
@@ -906,7 +789,7 @@ const ProductManager = (() => {
                 }
             }
     
-            document.getElementById("editStatus").value = product.is_active ? "active" : "inactive";
+            document.getElementById("editStatus").value = product.is_active ? "1" : "0";
     
             const preview = document.getElementById("editGambarPreview");
             if (preview) {
@@ -918,19 +801,15 @@ const ProductManager = (() => {
                 }
             }
     
-            // Ambil outlet IDs yang dipilih
             let selectedOutletIds = [];
             if (product.outlet_ids && Array.isArray(product.outlet_ids)) {
                 selectedOutletIds = product.outlet_ids.map(id => id.toString());
             }
     
-            // console.log("=== DEBUG: Selected outlet IDs untuk checkbox:", selectedOutletIds);
-    
             await loadOutletCheckboxesForEdit(selectedOutletIds);
             openModal("modalEditProduk");
             
         } catch (error) {
-            // console.error("=== ERROR: Failed to open edit modal:", error);
             showAlert("error", `Gagal memuat produk: ${error.message}`);
     
             if (error.message.includes("token") || error.message.includes("401")) {
@@ -945,88 +824,6 @@ const ProductManager = (() => {
         }
     };
     
-    // Load outlet checkboxes for edit modal
-    const loadOutletCheckboxesForEdit = async (selectedOutletIds = []) => {
-        try {
-            // console.log("=== DEBUG loadOutletCheckboxesForEdit: Input selectedOutletIds:", selectedOutletIds);
-            
-            const token = localStorage.getItem("token");
-            const response = await fetch("/api/outlets", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    Accept: "application/json",
-                },
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            const responseData = await response.json();
-            const outlets = responseData.data || responseData;
-            const container = document.getElementById("editOutletList");
-    
-            // console.log("=== DEBUG: All outlets from API:", outlets);
-    
-            if (!container) return;
-    
-            container.innerHTML = "";
-    
-            // Pastikan selectedOutletIds adalah array of strings
-            const selectedIds = Array.isArray(selectedOutletIds)
-                ? selectedOutletIds.map((id) => id.toString())
-                : [];
-    
-            // console.log("=== DEBUG: Processed selectedIds:", selectedIds);
-    
-            outlets.forEach((outlet) => {
-                const outletIdStr = outlet.id.toString();
-                const isChecked = selectedIds.includes(outletIdStr);
-    
-                // console.log(`=== DEBUG: Outlet ${outlet.name} (ID: ${outletIdStr}) - Should be checked: ${isChecked}`);
-    
-                const div = document.createElement("div");
-                div.className = "flex items-center gap-2 py-1";
-    
-                const checkbox = document.createElement("input");
-                checkbox.type = "checkbox";
-                checkbox.name = "outlet_ids[]";
-                checkbox.value = outletIdStr;
-                checkbox.id = `edit-outlet-${outletIdStr}`;
-                checkbox.className =
-                    "w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500";
-                checkbox.checked = isChecked;
-    
-                const label = document.createElement("label");
-                label.htmlFor = `edit-outlet-${outletIdStr}`;
-                label.className = "text-sm text-gray-700";
-                label.textContent = outlet.name;
-    
-                div.appendChild(checkbox);
-                div.appendChild(label);
-                container.appendChild(div);
-            });
-    
-            // console.log(`=== DEBUG: Loaded ${outlets.length} outlets, ${selectedIds.length} should be selected`);
-            
-            // Verifikasi hasil
-            // const checkedBoxes = container.querySelectorAll('input[type="checkbox"]:checked');
-            // console.log("=== DEBUG: Actually checked checkboxes:", checkedBoxes.length);
-            // checkedBoxes.forEach(cb => console.log("=== DEBUG: Checked outlet ID:", cb.value));
-            
-        } catch (error) {
-            // console.error("=== ERROR: Error loading outlets:", error);
-            const container = document.getElementById("editOutletList");
-            if (container) {
-                container.innerHTML = `
-                    <div class="text-red-500 text-sm py-2">
-                        Gagal memuat daftar outlet: ${error.message}
-                    </div>
-                `;
-            }
-        }
-    };
-
     // Save product changes
     const simpanPerubahanProduk = async () => {
         const btnSimpan = document.getElementById("btnSimpanEdit");
@@ -1034,14 +831,13 @@ const ProductManager = (() => {
     
         try {
             btnSimpan.disabled = true;
-            btnSimpan.innerHTML =
-                '<i data-lucide="loader-circle" class="animate-spin mr-2"></i> Menyimpan...';
+            btnSimpan.innerHTML = '<i data-lucide="loader-circle" class="animate-spin mr-2"></i> Menyimpan...';
             if (window.lucide) window.lucide.createIcons();
     
             const id = document.getElementById("editProdukId").textContent;
             const formData = new FormData();
     
-            const namaProduk = document.getElementById("editNamaProduk").value.trim();
+            const namaProduk = document.getElementById("editNama").value.trim();
             const barcodeValue = document.getElementById('editBarcode').value.trim();
             if (!barcodeValue) {
                 formData.append("barcode", generateBarcode());
@@ -1052,51 +848,49 @@ const ProductManager = (() => {
             const kategori = document.getElementById("editKategori").value.trim();
             const quantity = document.getElementById("editStok").value || 0;
             const minStock = document.getElementById("editStokMinimum").value || 0;
+            const productType = document.querySelector('input[name="edit_product_type"]:checked')?.value;
     
             if (!namaProduk) throw new Error("Nama produk harus diisi");
             if (!harga) throw new Error("Harga harus diisi");
             if (!kategori) throw new Error("Kategori harus dipilih");
+            if (!productType) throw new Error("Tipe produk harus dipilih");
     
+            formData.append("_method", "PUT");
             formData.append("name", namaProduk);
-            formData.append("sku", document.getElementById("editSkuProduk").value.trim() || `SKU-${Date.now()}`);
+            formData.append("sku", document.getElementById("editSku").value.trim() || `SKU-${Date.now()}`);
             formData.append("description", document.getElementById("editDeskripsi").value);
             formData.append("price", harga);
             formData.append("category_id", kategori);
-            formData.append("is_active", document.getElementById("editStatus").value === "active" ? 1 : 0);
-            formData.append("min_stock", minStock);
+            formData.append("is_active", document.getElementById("editStatus").value);
             formData.append("outlet_id", currentOutletId.toString());
+    
+            // Handle different product types
+            if (productType === 'minuman') {
+                // For drinks, use recipes
+                editSelectedBahanBaku.forEach((bahan, index) => {
+                    formData.append(`recipes[${index}][ingredient_id]`, bahan.ingredient_id);
+                    formData.append(`recipes[${index}][quantity]`, bahan.quantity);
+                    formData.append(`recipes[${index}][unit]`, bahan.unit);
+                });
+            } else {
+                // For food, use direct stock
+                formData.append("quantity", quantity);
+                formData.append("min_stock", minStock);
+            }
     
             const selectedOutlets = [];
             const outletCheckboxes = document.querySelectorAll(
-                '#editOutletList input[type="checkbox"]:checked'
+                '#editOutletCheckboxes input[type="checkbox"]:checked'
             );
     
             if (outletCheckboxes && outletCheckboxes.length > 0) {
                 outletCheckboxes.forEach((checkbox) => {
                     selectedOutlets.push(checkbox.value);
                 });
-            } else {
-                const outletInputs = document.querySelectorAll(
-                    '#editOutletList input[type="hidden"][name*="outlet"]'
-                );
-                outletInputs.forEach((input) => {
-                    if (input.value) {
-                        selectedOutlets.push(input.value);
-                    }
-                });
             }
     
             if (selectedOutlets.length === 0) {
-                const outletElements = document.querySelectorAll(
-                    "#editOutletList [data-outlet-id]"
-                );
-                outletElements.forEach((el) => {
-                    selectedOutlets.push(el.dataset.outletId);
-                });
-    
-                if (selectedOutlets.length === 0) {
-                    selectedOutlets.push("1");
-                }
+                selectedOutlets.push(currentOutletId.toString());
             }
     
             selectedOutlets.forEach((outletId) => {
@@ -1112,9 +906,7 @@ const ProductManager = (() => {
                 method: "POST",
                 body: formData,
                 headers: {
-                    "X-CSRF-TOKEN": document.querySelector(
-                        'meta[name="csrf-token"]'
-                    ).content,
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
             });
@@ -1126,21 +918,14 @@ const ProductManager = (() => {
                 responseData = await response.json();
             } else {
                 const textData = await response.text();
-                throw new Error(
-                    `Server returned invalid response: ${textData.substring(
-                        0,
-                        100
-                    )}`
-                );
+                throw new Error(`Server returned invalid response: ${textData.substring(0, 100)}`);
             }
     
             if (!response.ok) {
                 if (response.status === 422) {
                     let errorMessage = " ";
                     
-                    // Handle different error response formats
                     if (responseData.message && typeof responseData.message === 'object') {
-                        // Format: {"message": {"field": ["error"]}}
                         for (const [field, errors] of Object.entries(responseData.message)) {
                             if (field === 'sku') {
                                 errorMessage += "\nSKU: sudah digunakan.";
@@ -1151,7 +936,6 @@ const ProductManager = (() => {
                             }
                         }
                     } else if (responseData.errors) {
-                        // Format: {"errors": {"field": ["error"]}}
                         for (const [field, errors] of Object.entries(responseData.errors)) {
                             if (field === 'sku') {
                                 errorMessage += "\nSKU: sudah digunakan.";
@@ -1167,20 +951,393 @@ const ProductManager = (() => {
                     
                     throw new Error(errorMessage);
                 }
-                throw new Error(
-                    responseData.message || "Gagal memperbarui produk"
-                );
+                throw new Error(responseData.message || "Gagal memperbarui produk");
             }
     
             showAlert("success", "Produk berhasil diperbarui");
             closeModal("modalEditProduk");
             loadProducts();
+            clearEditBahanBaku();
         } catch (error) {
             showAlert("error", error.message || "Terjadi kesalahan");
         } finally {
             btnSimpan.disabled = false;
             btnSimpan.innerHTML = originalText;
             if (window.lucide) window.lucide.createIcons();
+        }
+    };
+
+    // Load outlet checkboxes for edit modal
+    const loadOutletCheckboxesForEdit = async (selectedOutletIds = []) => {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await fetch("/api/outlets", {
+                headers: { Authorization: `Bearer ${token}`, Accept: "application/json" }
+            });
+            
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            
+            const responseData = await response.json();
+            const outlets = responseData.data || responseData;
+            const container = document.getElementById("editOutletCheckboxes");
+    
+            if (!container) return;
+    
+            container.innerHTML = "";
+    
+            const selectedIds = Array.isArray(selectedOutletIds)
+                ? selectedOutletIds.map((id) => id.toString())
+                : [];
+    
+            outlets.forEach((outlet) => {
+                const outletIdStr = outlet.id.toString();
+                const isChecked = selectedIds.includes(outletIdStr);
+    
+                const div = document.createElement("div");
+                div.className = "flex items-center gap-2 py-1";
+    
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.name = "outlet_ids[]";
+                checkbox.value = outletIdStr;
+                checkbox.id = `edit-outlet-${outletIdStr}`;
+                checkbox.className = "w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500";
+                checkbox.checked = isChecked;
+    
+                const label = document.createElement("label");
+                label.htmlFor = `edit-outlet-${outletIdStr}`;
+                label.className = "text-sm text-gray-700";
+                label.textContent = outlet.name;
+    
+                div.appendChild(checkbox);
+                div.appendChild(label);
+                container.appendChild(div);
+            });
+            
+        } catch (error) {
+            const container = document.getElementById("editOutletCheckboxes");
+            if (container) {
+                container.innerHTML = `<div class="text-red-500 text-sm py-2">Gagal memuat daftar outlet: ${error.message}</div>`;
+            }
+        }
+    };
+
+    // Setup outlet change listener
+    const setupOutletChangeListener = () => {
+        let lastOutletId = currentOutletId;
+        
+        setInterval(() => {
+            const newOutletId = localStorage.getItem('selectedOutletId') || currentOutletId;
+            if (newOutletId !== lastOutletId) {
+                lastOutletId = newOutletId;
+                loadProducts(newOutletId);
+            }
+        }, 500);
+        
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#outletListContainer li')) {
+                setTimeout(() => {
+                    const newOutletId = localStorage.getItem('selectedOutletId') || currentOutletId;
+                    loadProducts(newOutletId);
+                }, 100);
+            }
+        });
+    };
+
+    // Get selected outlet ID
+    const getSelectedOutletId = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const outletIdFromUrl = urlParams.get("outlet_id");
+
+        if (outletIdFromUrl && !isNaN(outletIdFromUrl)) {
+            return parseInt(outletIdFromUrl);
+        }
+
+        const savedOutletId = localStorage.getItem("selectedOutletId");
+        if (savedOutletId && !isNaN(savedOutletId)) {
+            return parseInt(savedOutletId);
+        }
+
+        return 1;
+    };
+
+    // Update outlet display
+    const updateOutletDisplay = () => {
+        const outletTitle = document.getElementById('currentOutletName');
+        const outletDesc = document.getElementById('outletNamePlaceholder');
+        
+        if (outletTitle) outletTitle.textContent = currentOutletName;
+        if (outletDesc) outletDesc.textContent = currentOutletName;
+    };
+
+    // Get outlet name
+    const getOutletName = async (outletId) => {
+        if (window.outletCache && window.outletCache[outletId]) {
+            return window.outletCache[outletId];
+        }
+
+        try {
+            const response = await fetch(`/api/outlets/${outletId}`);
+            const data = await response.json();
+
+            if (!window.outletCache) window.outletCache = {};
+            window.outletCache[outletId] = data.name || `Outlet ${outletId}`;
+
+            return window.outletCache[outletId];
+        } catch (error) {
+            console.error("Error fetching outlet:", error);
+            return `Outlet ${outletId}`;
+        }
+    };
+
+    // Load product data
+    const loadProductData = async (outletId) => {
+        try {
+            outletId = outletId || getSelectedOutletId();
+            if (!outletId || isNaN(outletId)) {
+                outletId = 1;
+            }
+
+            const outletDropdown = document.getElementById("outletDropdown");
+            if (outletDropdown) outletDropdown.classList.add("hidden");
+
+            const outletName = await getOutletName(outletId);
+            updateOutletDisplay(outletId, outletName);
+
+            await loadProducts(outletId);
+
+            localStorage.setItem("selectedOutletId", outletId);
+            currentOutletId = outletId;
+        } catch (error) {
+            console.error("Error loading product data:", error);
+            showAlert("error", "Gagal memuat data produk");
+        }
+    };
+
+    // Connect outlet selection to products
+    const connectOutletSelectionToProducts = () => {
+        const outletListContainer = document.getElementById("outletListContainer");
+        if (outletListContainer) {
+            outletListContainer.addEventListener("click", function (event) {
+                setTimeout(() => {
+                    currentOutletId = getSelectedOutletId();
+                    loadProducts();
+                }, 100);
+            });
+        }
+    };
+
+    // Preload outlets
+    const preloadOutlets = async () => {
+        try {
+            const response = await fetch("/api/outlets");
+            const { data: outlets } = await response.json();
+
+            window.outletCache = {};
+            outlets.forEach((outlet) => {
+                window.outletCache[outlet.id] = outlet.name;
+            });
+        } catch (error) {
+            console.error("Failed to preload outlets:", error);
+        }
+    };
+
+    // Setup modals
+    const setupModals = () => {
+        elements.modals.forEach((modalId) => {
+            const modal = document.getElementById(modalId);
+            if (!modal) return;
+
+            modal.addEventListener("click", (e) => {
+                if (e.target === modal) closeModal(modalId);
+            });
+
+            const modalContent = modal.querySelector("div[onclick]");
+            if (modalContent) {
+                modalContent.addEventListener("click", (e) => e.stopPropagation());
+            }
+        });
+    };
+
+    // Create auth interceptor
+    const createAuthInterceptor = () => {
+        const originalFetch = window.fetch;
+
+        window.fetch = async (resource, options = {}) => {
+            const token = localStorage.getItem("token");
+            if (token) {
+                options.headers = options.headers || {};
+                options.headers.Authorization = `Bearer ${token}`;
+                options.headers.Accept = "application/json";
+
+                if (!options.headers["Content-Type"] && !(options.body instanceof FormData)) {
+                    options.headers["Content-Type"] = "application/json";
+                }
+
+                options.headers["X-CSRF-TOKEN"] = document.querySelector('meta[name="csrf-token"]').content;
+            }
+
+            const response = await originalFetch(resource, options);
+
+            if (options.headers?.Accept === "application/json") {
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
+                    return response;
+                } else if (response.status !== 204) {
+                    return new Response(
+                        JSON.stringify({ message: "Server did not return valid JSON response" }),
+                        { status: 500, headers: { "Content-Type": "application/json" } }
+                    );
+                }
+            }
+
+            return response;
+        };
+    };
+
+    // Setup image preview
+    const setupImagePreview = (inputId, previewId) => {
+        document.getElementById(inputId)?.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const preview = document.getElementById(previewId);
+                    if (preview) {
+                        preview.src = e.target.result;
+                        preview.classList.remove("hidden");
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    };
+
+    // Initialize Lucide icons
+    const initLucideIcons = () => {
+        if (window.lucide) window.lucide.createIcons();
+    };
+
+    // Show alert
+    const showAlert = (type, message) => {
+        const alertContainer = document.getElementById(elements.containers.alert);
+        const alertId = `alert-${Date.now()}`;
+
+        const alertConfig = {
+            success: { bgColor: "bg-orange-50", borderColor: "border-orange-200", textColor: "text-orange-800", icon: "check-circle", iconColor: "text-orange-500" },
+            error: { bgColor: "bg-red-50", borderColor: "border-red-200", textColor: "text-red-800", icon: "alert-circle", iconColor: "text-red-500" },
+        };
+
+        const config = alertConfig[type] || alertConfig.success;
+
+        const alertElement = document.createElement("div");
+        alertElement.id = alertId;
+        alertElement.className = `p-4 border rounded-lg shadow-sm ${config.bgColor} ${config.borderColor} ${config.textColor} flex items-start gap-3 animate-fade-in-up`;
+        alertElement.innerHTML = `
+            <i data-lucide="${config.icon}" class="w-5 h-5 mt-0.5 ${config.iconColor}"></i>
+            <div class="flex-1">
+                <p class="text-sm font-medium">${message}</p>
+            </div>
+            <button onclick="ProductManager.closeAlert('${alertId}')" class="p-1 rounded-full hover:bg-gray-100">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        `;
+
+        alertContainer.prepend(alertElement);
+        initLucideIcons();
+
+        setTimeout(() => closeAlert(alertId), 5000);
+    };
+
+    // Close alert
+    const closeAlert = (id) => {
+        const alert = document.getElementById(id);
+        if (alert) {
+            alert.classList.add("animate-fade-out");
+            setTimeout(() => alert.remove(), 300);
+        }
+    };
+
+    // Open modal
+    const openModal = (modalId) => {
+        document.querySelectorAll('[id^="modal"]').forEach((modal) => {
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        });
+
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            document.body.style.overflow = "hidden";
+        }
+    };
+
+    // Close modal
+    const closeModal = (modalId) => {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+            document.body.style.overflow = "";
+        }
+    };
+
+    // Toggle dropdown
+    const toggleDropdown = (button) => {
+        const menu = button.nextElementSibling;
+    
+        document.querySelectorAll(".dropdown-menu").forEach((m) => {
+            if (m !== menu) {
+                m.classList.add("hidden");
+                m.classList.remove("dropdown-up", "dropdown-down");
+            }
+        });
+    
+        menu.classList.toggle("hidden");
+        menu.classList.remove("dropdown-up", "dropdown-down");
+    
+        const menuRect = menu.getBoundingClientRect();
+        const buttonRect = button.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - buttonRect.bottom;
+        const spaceAbove = buttonRect.top;
+    
+        if (spaceBelow < menuRect.height && spaceAbove > menuRect.height) {
+            menu.classList.add("dropdown-up");
+            menu.style.bottom = "100%";
+            menu.style.marginBottom = "0.25rem";
+            menu.style.top = "auto";
+            menu.style.marginTop = "0";
+        } else {
+            menu.classList.add("dropdown-down");
+            menu.style.top = "100%";
+            menu.style.marginTop = "0.25rem";
+            menu.style.bottom = "auto";
+            menu.style.marginBottom = "0";
+        }
+    };
+
+    // Format number
+    const formatNumber = (num) => new Intl.NumberFormat("id-ID").format(num);
+
+    // Filter products
+    const filterProducts = async (searchTerm) => {
+        try {
+            const outletId = currentOutletId;
+            const response = await fetch(`/api/products/outlet/${outletId}`);
+            if (!response.ok) throw new Error("Gagal memuat data produk");
+    
+            const { data: products } = await response.json();
+    
+            const filtered = products.filter(product => 
+                product.name.toLowerCase().includes(searchTerm) ||
+                (product.description && product.description.toLowerCase().includes(searchTerm)) ||
+                (product.sku && product.sku.toLowerCase().includes(searchTerm))
+            );
+    
+            renderProducts({ data: filtered });
+        } catch (error) {
+            showAlert("error", error.message);
         }
     };
 
@@ -1193,15 +1350,12 @@ const ProductManager = (() => {
             const { data: categories } = await response.json();
 
             if (!Array.isArray(categories)) {
-                throw new Error(
-                    "Data kategori tidak valid. Harus berupa array."
-                );
+                throw new Error("Data kategori tidak valid. Harus berupa array.");
             }
 
             const selectTambah = document.getElementById("kategori");
             if (selectTambah) {
-                selectTambah.innerHTML =
-                    '<option value="">Pilih Kategori</option>';
+                selectTambah.innerHTML = '<option value="">Pilih Kategori</option>';
                 categories.forEach((category) => {
                     const option = document.createElement("option");
                     option.value = category.id;
@@ -1212,8 +1366,7 @@ const ProductManager = (() => {
 
             const selectEdit = document.getElementById("editKategori");
             if (selectEdit) {
-                selectEdit.innerHTML =
-                    '<option value="">Pilih Kategori</option>';
+                selectEdit.innerHTML = '<option value="">Pilih Kategori</option>';
                 categories.forEach((category) => {
                     const option = document.createElement("option");
                     option.value = category.id.toString();
@@ -1235,9 +1388,7 @@ const ProductManager = (() => {
         try {
             const response = await fetch("/api/outlets");
             const { data: outlets } = await response.json();
-            const container = document.getElementById(
-                elements.containers.outletCheckboxes
-            );
+            const container = document.getElementById(elements.containers.outletCheckboxes);
 
             if (!container) return;
 
@@ -1252,8 +1403,7 @@ const ProductManager = (() => {
                 checkbox.name = "outlet_ids[]";
                 checkbox.value = outlet.id;
                 checkbox.id = `outlet-${outlet.id}`;
-                checkbox.className =
-                    "w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500";
+                checkbox.className = "w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500";
 
                 const label = document.createElement("label");
                 label.htmlFor = `outlet-${outlet.id}`;
@@ -1269,51 +1419,42 @@ const ProductManager = (() => {
         }
     };
 
-    // Prepare delete confirmation
+    // Hapus produk
     const hapusProduk = async (id) => {
         try {
             const token = localStorage.getItem("token");
             if (!token) throw new Error("Token tidak ditemukan");
 
-            const response = await fetch(
-                `/api/products/outlet/${currentOutletId}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        Accept: "application/json",
-                    },
-                }
-            );
+            const response = await fetch(`/api/products/outlet/${currentOutletId}`, {
+                headers: { Authorization: `Bearer ${token}`, Accept: "application/json" }
+            });
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(
-                    errorData.message || `Error: ${response.status}`
-                );
+                throw new Error(errorData.message || `Error: ${response.status}`);
             }
 
             const responseData = await response.json();
-            const product = responseData.data;
+            const products = responseData.data;
 
-            if (!product) throw new Error("Data produk tidak valid");
+            if (!products) throw new Error("Data produk tidak valid");
+
+            const product = products.find(p => p.id === id);
+            if (!product) throw new Error("Produk tidak ditemukan");
 
             produkHapusId = id;
-            document.getElementById("hapusNamaProduk").textContent =
-                product.name;
+            document.getElementById("hapusNamaProduk").textContent = product.name;
             openModal("modalKonfirmasiHapus");
         } catch (error) {
             showAlert("error", `Gagal memuat produk: ${error.message}`);
 
-            if (
-                error.message.includes("token") ||
-                error.message.includes("401")
-            ) {
+            if (error.message.includes("token") || error.message.includes("401")) {
                 window.location.href = "/login";
             }
         }
     };
 
-    // Confirm product deletion
+    // Konfirmasi hapus produk
     const konfirmasiHapusProduk = async () => {
         try {
             const token = localStorage.getItem("token");
@@ -1325,16 +1466,13 @@ const ProductManager = (() => {
                     Authorization: `Bearer ${token}`,
                     Accept: "application/json",
                     "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": document.querySelector(
-                        'meta[name="csrf-token"]'
-                    ).content,
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
                 },
             });
 
             const data = await response.json();
 
-            if (!response.ok)
-                throw new Error(data.message || "Gagal menghapus produk");
+            if (!response.ok) throw new Error(data.message || "Gagal menghapus produk");
 
             showAlert("success", "Produk berhasil dihapus");
             closeModal("modalKonfirmasiHapus");
@@ -1345,7 +1483,7 @@ const ProductManager = (() => {
         }
     };
 
-    // Fungsi untuk mencetak laporan produk
+    // Print product report
     const printProductReport = async () => {
         try {
             const outletId = currentOutletId;
@@ -1504,7 +1642,7 @@ const ProductManager = (() => {
         }
     };
 
-    // Fungsi untuk mengekspor data produk ke CSV
+    // Export products to CSV
     const exportProductsToCSV = async () => {
         try {
             const outletId = currentOutletId;
@@ -1590,6 +1728,10 @@ const ProductManager = (() => {
         konfirmasiHapusProduk,
         printProductReport,
         exportProductsToCSV,
+        hapusBahanBaku,
+        hapusEditBahanBaku,
+        tambahBahanBaku,
+        editTambahBahanBaku,
     };
 })();
 

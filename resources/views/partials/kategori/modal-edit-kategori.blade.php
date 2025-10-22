@@ -19,7 +19,7 @@
                     <input 
                         type="text" 
                         id="editNamaKategori" 
-                        class="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm hover:border-2 hover:border-green-600 focus:border-green-600 focus:ring-green-500" 
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" 
                         placeholder="Nama kategori"
                     >
                 </div>
@@ -29,7 +29,7 @@
                     <label class="block font-medium mb-1">Deskripsi</label>
                     <textarea 
                         id="editDeskripsiKategori" 
-                        class="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm hover:border-2 hover:border-green-600 focus:border-green-600 focus:ring-green-500" 
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition duration-200" 
                         rows="3" 
                         placeholder="Deskripsi kategori"
                     ></textarea>
@@ -56,7 +56,7 @@
                     Batal
                 </button>
                 <button 
-                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                    class="px-4 py-2 bg-[#3b6b0d] text-white rounded-lg hover:bg-[#3b6b0d]"
                     onclick="simpanPerubahanKategori()"
                 >
                     Simpan Perubahan
