@@ -66,7 +66,7 @@
                     </div> --}}
                     <div class="flex justify-between mb-4">
                         <span class="text-gray-700">Total Pembayaran:</span>
-                        <span id="paymentGrandTotal" class="text-orange-500 font-bold text-lg">Rp 0</span>
+                        <span id="paymentGrandTotal" class="text-[#3b6b0d] font-bold text-lg">Rp 0</span>
                     </div>
                     
                     <div class="mb-4">
@@ -99,7 +99,7 @@
                         <label class="block text-gray-700 text-sm font-bold mb-2" for="amountReceived">
                             Jumlah Uang Diterima
                         </label>
-                        <input type="text" id="amountReceived" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500" placeholder="Rp 0">
+                        <input type="text" id="amountReceived" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#3b6b0d]" placeholder="Rp 0">
                     </div>
                     
                     <div class="mb-4">
@@ -119,7 +119,7 @@
                                 <input
                                     id="memberSearch"
                                     type="text"
-                                    class="w-full px-3 py-2 text-sm rounded-md border border-gray-300 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 placeholder-gray-400"
+                                    class="w-full px-3 py-2 text-sm rounded-md border border-gray-300 focus:border-[#3b6b0d] focus:ring-1 focus:ring-[#3b6b0d] placeholder-gray-400"
                                     placeholder="Cari member (nama/kode)"
                                     autocomplete="off"
                                 >
@@ -133,7 +133,7 @@
                                 </div>
                             </div>
                             <div id="selectedMember" class="mt-2 hidden">
-                                <div class="flex justify-between items-center bg-orange-50 p-2 rounded">
+                                <div class="flex justify-between items-center bg-green-50 p-2 rounded">
                                     <span id="memberName" class="font-medium"></span>
                                     <button id="removeMember" class="text-red-500">
                                         <i class="fas fa-times"></i>
@@ -152,7 +152,7 @@
                 </div>
                 
                 <div class="flex justify-end pt-2">
-                    <button id="btnProcessPayment" class="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition-colors">
+                    <button id="btnProcessPayment" class="bg-[#3b6b0d] text-white px-4 py-2 rounded-md hover:bg-[#335e0c] transition-colors">
                         Proses Pembayaran
                     </button>
                 </div>

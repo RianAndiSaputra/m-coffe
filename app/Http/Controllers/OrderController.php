@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\Inventory;
 use App\Traits\ApiResponse;
 use Illuminate\Support\Str;

@@ -14,7 +14,7 @@
 
             <!-- Tabs -->
             <div class="flex bg-gray-100 rounded-lg p-1 mb-6 w-fit">
-                <button id="adjustTab" class="tab-button active px-6 py-2 rounded-lg font-medium text-base text-orange-500 bg-white shadow">Sesuaikan</button>
+                <button id="adjustTab" class="tab-button active px-6 py-2 rounded-lg font-medium text-base text-[#3b6b0d] bg-white shadow">Sesuaikan</button>
                 <button id="historyTab" class="tab-button px-6 py-2 rounded-lg font-medium text-base text-gray-500 hover:text-gray-700">Riwayat</button>
             </div>
 
@@ -26,7 +26,7 @@
                         <div class="relative">
                             <select 
                                 id="product_id" 
-                                class="hidden" <!-- Sembunyikan select asli -->
+                                class="hidden"{{--  <!-- Sembunyikan select asli --!> --}}
                             >
                                 <option value="">Pilih produk</option>
                             </select>
@@ -34,7 +34,7 @@
                             <!-- Custom dropdown trigger -->
                             <div 
                                 id="productDropdownTrigger" 
-                                class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 bg-white flex justify-between items-center cursor-pointer"
+                                class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-[#3b6b0d] focus:border-[#3b6b0d] bg-white flex justify-between items-center cursor-pointer"
                                 onclick="toggleProductDropdown()"
                             >
                                 <span id="selectedProductText">Pilih produk</span>
@@ -48,19 +48,19 @@
                             >
                                 <!-- Search box -->
                                 <div class="p-2 border-b">
-                                    <div class="relative">
-                                        <input 
-                                            type="text" 
-                                            id="productSearch" 
-                                            class="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500" 
-                                            placeholder="Cari produk..."
-                                            oninput="filterDropdownProducts()"
-                                        >
-                                        <div class="absolute left-3 top-2.5 text-gray-400">
-                                            <i data-lucide="search" class="w-4 h-4"></i>
-                                        </div>
+                                <div class="relative">
+                                    <input 
+                                        type="text" 
+                                        id="productSearch" 
+                                        class="w-full pl-10 pr-4 py-2 text-sm border border-[#335e0c] rounded-lg focus:ring-[#3b6b0d] focus:border-[#3b6b0d] focus:outline-none" 
+                                        placeholder="Cari produk..."
+                                        oninput="filterDropdownProducts()"
+                                    >
+                                    <div class="absolute left-3 top-2.5 text-gray-400">
+                                        <i data-lucide="search" class="w-4 h-4"></i>
                                     </div>
                                 </div>
+                            </div>
                                 
                                 <!-- Product list -->
                                 <div id="productList" class="overflow-y-auto max-h-80">
@@ -75,12 +75,12 @@
                     <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-base font-medium text-gray-700 mb-2">Nilai + / -</label>
-                            <input type="number" id="quantity_change" class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500" placeholder="Masukkan nilai">
+                            <input type="number" id="quantity_change" class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-[#3b6b0d] focus:border-[#3b6b0d]" placeholder="Masukkan nilai">
                         </div>
                         <div>
                             <label class="block text-base font-medium text-gray-700 mb-2">Tipe</label>
                             <div class="relative">
-                                <select id="adjust_type" class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 appearance-none bg-white pr-10">
+                                <select id="adjust_type" class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-[#3b6b0d] focus:border-[#3b6b0d] appearance-none bg-white pr-10">
                                     <option value="">Pilih tipe</option>
                                     <option value="shipment">Kiriman Pabrik</option>
                                     <option value="purchase">Pembelian</option>
@@ -97,7 +97,7 @@
 
                     <div>
                         <label class="block text-base font-medium text-gray-700 mb-2">Keterangan</label>
-                        <textarea id="notes" class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500" rows="3" placeholder="Masukkan keterangan (opsional)"></textarea>
+                        <textarea id="notes" class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-[#3b6b0d] focus:border-[#3b6b0d]" rows="3" placeholder="Masukkan keterangan (opsional)"></textarea>
                     </div>
                 </div>
 
@@ -105,7 +105,7 @@
                     <button onclick="closeModal('stockModal')" class="px-6 py-2.5 text-base bg-gray-300 rounded-lg hover:bg-gray-400 flex items-center gap-2">
                         <i data-lucide="x" class="w-4 h-4"></i> Batal
                     </button>
-                    <button onclick="submitStockAdjustment()" class="px-6 py-2.5 text-base bg-orange-500 text-white rounded-lg hover:bg-orange-600 flex items-center gap-2">
+                    <button onclick="submitStockAdjustment()" class="px-6 py-2.5 text-base bg-[#3b6b0d] text-white rounded-lg hover:bg-[#335e0c] flex items-center gap-2">
                         <i data-lucide="check" class="w-4 h-4"></i> Sesuaikan Stok
                     </button>
                 </div>
@@ -121,16 +121,16 @@
                             <div class="flex items-center">
                                 <label class="text-sm font-medium text-gray-700 mr-2">Dari:</label>
                                 <div class="relative">
-                                    <input type="date" id="date_from" class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500">
+                                    <input type="date" id="date_from" class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-[#3b6b0d] focus:border-[#335e0c]">
                                 </div>
                             </div>
                             <div class="flex items-center">
                                 <label class="text-sm font-medium text-gray-700 mr-2">Sampai:</label>
                                 <div class="relative">
-                                    <input type="date" id="date_to" class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500">
+                                    <input type="date" id="date_to" class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-[#3b6b0d] focus:border-[#335e0c]">
                                 </div>
                             </div>
-                            <button onclick="loadInventoryHistory()" class="px-4 py-1.5 text-sm bg-orange-500 text-white rounded-lg hover:bg-orange-600 flex items-center gap-1">
+                            <button onclick="loadInventoryHistory()" class="px-4 py-1.5 text-sm bg-[#3b6b0d] text-white rounded-lg hover:bg-[#335e0c] flex items-center gap-1">
                                 <i data-lucide="filter" class="w-4 h-4"></i> Filter
                             </button>
                         </div>
@@ -252,8 +252,8 @@
         
         if (adjustTab) {
             adjustTab.addEventListener('click', function () {
-                this.classList.add('active', 'text-orange-500', 'bg-white', 'shadow');
-                document.getElementById('historyTab').classList.remove('active', 'text-orange-500', 'bg-white', 'shadow');
+                this.classList.add('active', 'text-[#3b6b0d]', 'bg-white', 'shadow');
+                document.getElementById('historyTab').classList.remove('active', 'text-[#3b6b0d]', 'bg-white', 'shadow');
                 document.getElementById('historyTab').classList.add('text-gray-500');
                 document.getElementById('adjustContent').classList.remove('hidden');
                 document.getElementById('historyContent').classList.add('hidden');
@@ -262,8 +262,8 @@
         
         if (historyTab) {
             historyTab.addEventListener('click', function () {
-                this.classList.add('active', 'text-orange-500', 'bg-white', 'shadow');
-                document.getElementById('adjustTab').classList.remove('active', 'text-orange-500', 'bg-white', 'shadow');
+                this.classList.add('active', 'text-[#3b6b0d]', 'bg-white', 'shadow');
+                document.getElementById('adjustTab').classList.remove('active', 'text-[#3b6b0d]', 'bg-white', 'shadow');
                 document.getElementById('adjustTab').classList.add('text-gray-500');
                 document.getElementById('historyContent').classList.remove('hidden');
                 document.getElementById('adjustContent').classList.add('hidden');
@@ -696,7 +696,7 @@
 <style>
     .tab-button.active {
         background-color: white;
-        color: #f97316;
+        color: #3b6b0d;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
@@ -717,7 +717,7 @@
 
     #productList {
         scrollbar-width: thin;
-        scrollbar-color: #f97316 #f1f1f1;
+        scrollbar-color: #3b6b0d #f1f1f1;
     }
 
     #productList::-webkit-scrollbar {
@@ -729,7 +729,7 @@
     }
 
     #productList::-webkit-scrollbar-thumb {
-        background-color: #f97316;
+        background-color: #3b6b0d;
         border-radius: 6px;
     }
 
@@ -738,6 +738,6 @@
     }
 
     #productDropdownTrigger:hover {
-        border-color: #f97316;
+        border-color: #3b6b0d;
     }
 </style>

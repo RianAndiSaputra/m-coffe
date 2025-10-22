@@ -3,13 +3,13 @@
     <div class="modal-overlay absolute w-full h-full bg-gray-900 opacity-50"></div>
     <div class="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded-lg shadow-lg z-50 overflow-y-auto relative top-1/2 transform -translate-y-1/2">
         <!-- Orange accent header bar -->
-        <div class="bg-orange-500 h-2 rounded-t-lg"></div>
+        <div class="bg-[#3b6b0d] h-2 rounded-t-lg"></div>
         
         <div class="modal-content py-6 text-left px-6">
             <!-- Header -->
             <div class="flex justify-between items-center pb-4 border-b">
                 <p class="text-xl font-bold text-gray-800 flex items-center">
-                    <i class="fas fa-chart-line mr-2 text-orange-500"></i>
+                    <i class="fas fa-chart-line mr-2 text-[#3b6b0d]"></i>
                     Pendapatan Bulanan
                 </p>
                 <button onclick="closeModal('incomeModal')" class="modal-close cursor-pointer z-50 hover:bg-gray-100 rounded-full p-2 transition-colors">
@@ -22,7 +22,7 @@
                 <div id="incomeDataContainer" class="space-y-6">
                     <!-- Loading state -->
                     <div class="flex justify-center items-center py-8">
-                        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500"></div>
+                        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#3b6b0d]"></div>
                     </div>
                 </div>
             </div>
@@ -32,7 +32,7 @@
                 <button onclick="closeModal('incomeModal')" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-medium rounded-lg transition-colors duration-300">
                     Tutup
                 </button>
-                <button onclick="exportRevenueData()" class="ml-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-lg transition-colors duration-300">
+                <button onclick="exportRevenueData()" class="ml-2 px-4 py-2 bg-[#3b6b0d] hover:bg-[#335e0c] text-white text-sm font-medium rounded-lg transition-colors duration-300">
                     <i class="fas fa-download mr-1"></i> Ekspor
                 </button>
             </div>
@@ -98,7 +98,7 @@
         
         container.innerHTML = `
             <div class="flex justify-center items-center py-8">
-                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500"></div>
+                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#3b6b0d]"></div>
             </div>
         `;
 
@@ -179,7 +179,7 @@ function getCurrentOutletId() {
                         <i class="fas fa-exclamation-circle text-2xl mb-2"></i>
                         <p class="font-medium">Gagal memuat data pendapatan</p>
                         <p class="text-sm text-red-600 mt-1">${error.message}</p>
-                        <div class="mt-3 px-4 py-2 bg-orange-100 text-orange-800 text-sm rounded-lg">
+                        <div class="mt-3 px-4 py-2 bg-green-100 text-green-800 text-sm rounded-lg">
                             <p class="font-medium">Informasi Debug:</p>
                             <p class="text-xs mt-1">URL: ${apiUrl}</p>
                             <p class="text-xs">Periksa konsol browser (F12) untuk detail lebih lanjut</p>
@@ -218,7 +218,7 @@ function getCurrentOutletId() {
         if (btnIncomeModal) {
             // Cari icon dalam button dan pertahankan
             const icon = btnIncomeModal.querySelector('i');
-            const iconHtml = icon ? icon.outerHTML + ' ' : '<i class="fas fa-money-bill mr-1.5 text-orange-500 text-base"></i> ';
+            const iconHtml = icon ? icon.outerHTML + ' ' : '<i class="fas fa-money-bill mr-1.5 text-[#3b6b0d] text-base"></i> ';
             
             // Update text button dengan jumlah pendapatan
             btnIncomeModal.innerHTML = iconHtml + formatRupiah(amount);
@@ -248,13 +248,13 @@ function getCurrentOutletId() {
         
         // Tampilkan data di modal dengan UI yang lebih modern dengan aksen oranye
         container.innerHTML = `
-            <div class="relative overflow-hidden bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg p-6">
+            <div class="relative overflow-hidden bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-6">
                 <!-- Ornament circles -->
-                <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-orange-200 opacity-50"></div>
-                <div class="absolute -left-4 -bottom-4 w-16 h-16 rounded-full bg-orange-200 opacity-30"></div>
+                <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-green-200 opacity-50"></div>
+                <div class="absolute -left-4 -bottom-4 w-16 h-16 rounded-full bg-green-200 opacity-30"></div>
                 
                 <div class="relative z-10 text-center">
-                    <div class="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-orange-500 text-white">
+                    <div class="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-[#3b6b0d] text-white">
                         <i class="fas fa-wallet text-2xl"></i>
                     </div>
                     <h3 class="text-3xl font-bold text-gray-800">${formatRupiah(total)}</h3>
@@ -263,13 +263,13 @@ function getCurrentOutletId() {
             </div>
             
             <div class="grid grid-cols-2 gap-4 mt-4">
-                <div class="bg-white border border-orange-100 rounded-lg p-4 text-center shadow-sm hover:shadow transition-shadow duration-300">
-                    <div class="text-orange-500 mb-1"><i class="fas fa-calendar-day"></i></div>
+                <div class="bg-white border border-green-100 rounded-lg p-4 text-center shadow-sm hover:shadow transition-shadow duration-300">
+                    <div class="text-[#3b6b0d] mb-1"><i class="fas fa-calendar-day"></i></div>
                     <h4 class="text-lg font-semibold text-gray-700">${formatRupiah(avgPerDay)}</h4>
                     <p class="text-xs text-gray-500">Rata-rata per hari</p>
                 </div>
-                <div class="bg-white border border-orange-100 rounded-lg p-4 text-center shadow-sm hover:shadow transition-shadow duration-300">
-                    <div class="text-orange-500 mb-1"><i class="fas fa-calendar-week"></i></div>
+                <div class="bg-white border border-green-100 rounded-lg p-4 text-center shadow-sm hover:shadow transition-shadow duration-300">
+                    <div class="text-[#3b6b0d] mb-1"><i class="fas fa-calendar-week"></i></div>
                     <h4 class="text-lg font-semibold text-gray-700">${daysDiff} hari</h4>
                     <p class="text-xs text-gray-500">Periode</p>
                 </div>
@@ -277,7 +277,7 @@ function getCurrentOutletId() {
             
             <div class="mt-4 bg-white border border-gray-100 rounded-lg p-4 shadow-sm">
                 <div class="flex items-center mb-2">
-                    <div class="w-2 h-2 rounded-full bg-orange-500 mr-2"></div>
+                    <div class="w-2 h-2 rounded-full bg-[#3b6b0d] mr-2"></div>
                     <span class="text-sm font-medium text-gray-700">Detail Periode</span>
                 </div>
                 <div class="flex justify-between items-center text-sm text-gray-600 pl-4">
@@ -287,7 +287,7 @@ function getCurrentOutletId() {
             </div>
             
             <!-- Ornamental person icon -->
-            <div class="flex justify-end mt-2 text-orange-300">
+            <div class="flex justify-end mt-2 text-[#3b6b0d]">
                 <i class="fas fa-user-tie text-3xl"></i>
             </div>
         `;
