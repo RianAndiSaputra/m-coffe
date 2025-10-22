@@ -594,7 +594,7 @@ const ProductManager = (() => {
                 
                 // Add recipes data
                 selectedBahanBaku.forEach((bahan, index) => {
-                    formData.append(`recipes[${index}][ingredient_id]`, bahan.ingredient_id);
+                    formData.append(`recipes[${index}][raw_material_id]`, bahan.ingredient_id);
                     formData.append(`recipes[${index}][quantity]`, bahan.quantity);
                     formData.append(`recipes[${index}][unit]`, bahan.unit);
                 });

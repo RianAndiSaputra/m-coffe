@@ -172,8 +172,8 @@ class ProductController extends Controller
                 'is_active' => 'required|boolean',
                 'outlet_ids' => 'required|array',
                 'outlet_ids.*' => 'exists:outlets,id',
-                'quantity' => 'required|numeric',
-                'min_stock' => 'required|numeric',
+                'quantity' => 'nullable|numeric',
+                'min_stock' => 'nullable|numeric',
                 // Validasi untuk resep produk
                 'recipes' => 'nullable|array',
                 'recipes.*.raw_material_id' => 'required_with:recipes|exists:raw_materials,id|distinct',

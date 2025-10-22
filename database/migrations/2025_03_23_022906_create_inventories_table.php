@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('outlet_id')->constrained('outlets');
             $table->foreignId('product_id')->constrained('products');
-            $table->integer('quantity');
-            $table->integer('min_stock');
+            $table->integer('quantity')->nullable();
+            $table->integer('min_stock')->nullable();
             $table->unique(['outlet_id', 'product_id']);
             $table->timestamps();
         });
