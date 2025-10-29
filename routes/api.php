@@ -10,6 +10,7 @@ use App\Http\Controllers\OutletController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\LabaRugiController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\RawMaterialController;
 use App\Http\Controllers\CashRegisterController;
@@ -147,6 +148,10 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/raw-stock', 'index');
             Route::get('/get-low-stock', 'getLowStock');
             Route::get('/get-stock-history', 'getStockHistory');
+        });
+
+        Route::controller(LabaRugiController::class)->group(function(){
+            Route::get('/laba-rugi', 'index');
         });
 
         Route::post('/print-template', [PrintTemplateController::class, 'store']);
