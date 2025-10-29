@@ -16,7 +16,7 @@
 <div class="mb-6">
     <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold text-gray-800">Manajemen Produk</h1>
-        <button onclick="console.log('Opening modal'); ProductManager.openModal('modalTambahProduk')" class="px-5 py-3 text-base font-medium text-white bg-green-500 rounded-lg hover:bg-green-600 shadow">
+        <button onclick="console.log('Opening modal'); ProductManager.openModal('modalTambahProduk')" class="px-5 py-3 text-base font-medium text-white bg-[#3b6b0d] rounded-lg hover:bg-[#335e0c] shadow">
             + Tambah Produk
         </button>
     </div>

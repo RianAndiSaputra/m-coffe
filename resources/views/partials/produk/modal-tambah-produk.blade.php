@@ -73,16 +73,16 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block font-medium mb-2 text-gray-700" for="nama">Nama Produk <span class="text-red-500">*</span></label>
-                            <input type="text" id="nama" name="name" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200" placeholder="Contoh: Espresso / Croissant" required>
+                            <input type="text" id="nama" name="name" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition-all duration-200" placeholder="Contoh: Espresso / Croissant" required>
                         </div>
                         <div>
                             <label class="block font-medium mb-2 text-gray-700" for="sku">SKU Produk <span class="text-red-500">*</span></label>
-                            <input type="text" id="sku" name="sku" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200" placeholder="Kode unik produk" required>
+                            <input type="text" id="sku" name="sku" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition-all duration-200" placeholder="Kode unik produk" required>
                         </div>
                         <div>
                             <label class="block font-medium mb-2 text-gray-700" for="barcode">Barcode</label>
                             <div class="flex gap-2">
-                                <input type="text" id="barcode" name="barcode" class="flex-1 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200" placeholder="Kode barcode">
+                                <input type="text" id="barcode" name="barcode" class="flex-1 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition-all duration-200" placeholder="Kode barcode">
                                 <button type="button" id="generateBarcodeBtn" class="px-4 py-3 bg-gray-100 border border-gray-300 rounded-xl hover:bg-gray-200 text-sm whitespace-nowrap transition-colors duration-200">
                                     Generate
                                 </button>
@@ -91,7 +91,7 @@
                         </div>
                         <div class="md:col-span-2">
                             <label class="block font-medium mb-2 text-gray-700" for="deskripsi">Deskripsi Produk</label>
-                            <textarea id="deskripsi" name="description" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200" placeholder="Deskripsi singkat tentang produk..." rows="3"></textarea>
+                            <textarea id="deskripsi" name="description" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition-all duration-200" placeholder="Deskripsi singkat tentang produk..." rows="3"></textarea>
                         </div>
                     </div>
                 </div>
@@ -109,12 +109,12 @@
                             <label class="block font-medium mb-2 text-gray-700" for="harga">Harga Jual <span class="text-red-500">*</span></label>
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">Rp</span>
-                                <input type="number" id="harga" name="price" class="w-full border border-gray-300 rounded-xl pl-10 pr-4 py-3 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200" placeholder="0" required>
+                                <input type="number" id="harga" name="price" class="w-full border border-gray-300 rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition-all duration-200" placeholder="0" required>
                             </div>
                         </div>
                         <div>
                             <label class="block font-medium mb-2 text-gray-700" for="kategori">Kategori <span class="text-red-500">*</span></label>
-                            <select id="kategori" name="category_id" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200" required>
+                            <select id="kategori" name="category_id" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition-all duration-200" required>
                                 <option value="">Pilih Kategori</option>
                                 <!-- Options akan diisi via JavaScript -->
                             </select>
@@ -125,7 +125,7 @@
                 <!-- Card: Manajemen Bahan Baku (Hanya untuk Minuman) -->
                 <div id="bahanBakuSection" class="p-6 border border-gray-200 rounded-xl bg-white shadow-sm transition-all duration-300">
                     <h3 class="font-semibold mb-4 text-gray-800 flex items-center">
-                        <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 text-[#3b6b0d] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                         </svg>
                         Manajemen Bahan Baku
@@ -134,24 +134,24 @@
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
                                 <label class="block font-medium mb-2 text-gray-700" for="bahanBaku">Bahan Baku</label>
-                                <select id="bahanBaku" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200">
+                                <select id="bahanBaku" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition-all duration-200">
                                     <option value="">Pilih Bahan Baku</option>
                                     <!-- Options akan diisi via JavaScript -->
                                 </select>
                             </div>
                             <div>
                                 <label class="block font-medium mb-2 text-gray-700" for="jumlahBahan">Jumlah</label>
-                                <input type="number" id="jumlahBahan" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200" placeholder="0.00" step="0.01">
+                                <input type="number" id="jumlahBahan" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition-all duration-200" placeholder="0.00" step="0.01">
                             </div>
                             <div>
                                 <label class="block font-medium mb-2 text-gray-700" for="satuanBahan">Satuan</label>
-                                <select id="satuanBahan" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200">
+                                <select id="satuanBahan" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition-all duration-200">
                                     <option value="">Pilih Satuan</option>
                                     <!-- Options akan diisi via JavaScript -->
                                 </select>
                             </div>
                             <div class="flex items-end">
-                                <button type="button" id="tambahBahanBtn" class="px-4 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 text-sm w-full transition-colors duration-200 font-medium">
+                                <button type="button" id="tambahBahanBtn" class="px-4 py-3 bg-[#3b6b0d] text-white rounded-xl hover:bg-[#335e0c] text-sm w-full transition-colors duration-200 font-medium">
                                     + Tambah
                                 </button>
                             </div>
@@ -175,12 +175,12 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block font-medium mb-2 text-gray-700" for="stok">Stok Awal <span class="text-red-500">*</span></label>
-                            <input type="number" id="stok" name="stock" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200" value="0">
+                            <input type="number" id="stok" name="stock" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition-all duration-200" value="0">
                             <p class="text-xs text-gray-500 mt-2">Jumlah stok awal produk makanan</p>
                         </div>
                         <div>
                             <label class="block font-medium mb-2 text-gray-700" for="stokMinimum">Stok Minimum</label>
-                            <input type="number" id="stokMinimum" name="min_stock" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200" value="0">
+                            <input type="number" id="stokMinimum" name="min_stock" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition-all duration-200" value="0">
                             <p class="text-xs text-gray-500 mt-2">Peringatan ketika stok mencapai batas ini</p>
                         </div>
                     </div>
@@ -189,7 +189,7 @@
                 <!-- Card: Distribusi Outlet -->
                 <div class="p-6 border border-gray-200 rounded-xl bg-white shadow-sm">
                     <h3 class="font-semibold mb-4 text-gray-800 flex items-center">
-                        <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 text-[#3b6b0d] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
@@ -216,7 +216,7 @@
                         </svg>
                         Gambar Produk
                     </h3>
-                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-green-400 transition-colors duration-200">
+                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-[#3b6b0d] transition-colors duration-200">
                         <input type="file" id="gambar" name="image" class="hidden" accept="image/*">
                         <div class="flex flex-col items-center justify-center">
                             <svg class="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -236,7 +236,7 @@
                         </svg>
                         Status Produk
                     </h3>
-                    <select id="status" name="is_active" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200">
+                    <select id="status" name="is_active" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition-all duration-200">
                         <option value="1" selected>Aktif - Produk dapat dijual</option>
                         <option value="0">Nonaktif - Produk tidak dapat dijual</option>
                     </select>
