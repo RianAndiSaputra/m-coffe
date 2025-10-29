@@ -146,7 +146,7 @@ class OrderController extends Controller
 
             foreach ($request->items as $item) {
                 $product = Product::find($item['product_id']);
-                $recipes = $product->productRecipes;
+                $recipes = $product->recipes;
                 
                 foreach ($recipes as $recipe) {
                     $required = $recipe->quantity * $item['quantity'];
