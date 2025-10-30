@@ -112,7 +112,7 @@
                     <span class="sidebar-text">Stok Pertanggal</span>
                 </a>
                 @if(auth()->check() && auth()->user()->role !== 'supervisor')
-                <a href="/penyesuaian-stok" class="menu-subitem flex items-center py-2 transition-all w-full">
+                {{-- <a href="/penyesuaian-stok" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="edit" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Penyesuaian Stok</span>
                 </a>
@@ -123,7 +123,7 @@
                 <a href="/approve-stok" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="check-circle" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Approve Stok</span>
-                </a>
+                </a> --}}
                 @endif
             </div>
         </div>
@@ -198,18 +198,18 @@
                     <i data-lucide="user" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Per Member</span>
                 </a>
-                <a href="/stok" class="menu-subitem flex items-center py-2 transition-all w-full">
+                {{-- <a href="/stok" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="package" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Stock</span>
-                </a>
-                <a href="/laporan-riwayat-stok" class="menu-subitem flex items-center py-2 transition-all w-full">
+                </a> --}}
+                {{-- <a href="/laporan-riwayat-stok" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="history" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Riwayat Stok</span>
                 </a>
                 <a href="/laporan-approve" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="check-circle" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Approve</span>
-                </a>
+                </a> --}}
                  <a href="/laporan-laba" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="check-circle" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Laba</span>
