@@ -214,6 +214,10 @@
                     <i data-lucide="check-circle" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Laba</span>
                 </a>
+                <a href="/laporan-bahan-baku" class="menu-subitem flex items-center py-2 transition-all w-full">
+                    <i data-lucide="beaker" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">bahan baku</span>
+                </a>
             </div>
         </div>
 

@@ -135,6 +135,54 @@
                 </table>
             </div>
         </div>
+
+        <!-- Table: Bahan Baku Waste -->
+        <div id="wasteContainer" class="hidden">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <i data-lucide="trash-2" class="w-5 h-5 text-red-500"></i>
+                Bahan Baku - Waste
+            </h2>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="text-left text-gray-700 bg-gray-50">
+                        <tr>
+                            <th class="py-3 font-bold px-4">No. Order</th>
+                            <th class="py-3 font-bold px-4">Produk</th>
+                            <th class="py-3 font-bold px-4">Tanggal</th>
+                            <th class="py-3 font-bold px-4 text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-700 divide-y" id="wasteTable">
+                        <!-- Data akan diisi oleh JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Table: Bahan Baku Adjustment -->
+        <div id="adjustmentContainer" class="hidden">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <i data-lucide="settings" class="w-5 h-5 text-orange-500"></i>
+                Bahan Baku - Penyesuaian
+            </h2>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="text-left text-gray-700 bg-gray-50">
+                        <tr>
+                            <th class="py-3 font-bold px-4">No. Order</th>
+                            <th class="py-3 font-bold px-4">Produk</th>
+                            <th class="py-3 font-bold px-4">Tanggal</th>
+                            <th class="py-3 font-bold px-4 text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-700 divide-y" id="adjustmentTable">
+                        <!-- Data akan diisi oleh JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -224,7 +272,12 @@
 <script>
     // Data storage
     let materialData = [];
-    let groupedData = {};
+    let groupedData = {
+        purchase: {},
+        production: {},
+        waste: {},
+        adjustment: {}
+    };
     let currentStartDate;
     let currentEndDate;
 
@@ -306,23 +359,35 @@
         
         // Build URL dengan parameter tanggal
         let url = '/api/get-stock-history';
+        const params = new URLSearchParams();
+        
         if (startDate && endDate) {
-            url += `?start_date=${startDate}&end_date=${endDate}`;
+            params.append('start_date', startDate);
+            params.append('end_date', endDate);
         }
+        
+        // Tambahkan parameter ke URL jika ada
+        if (params.toString()) {
+            url += `?${params.toString()}`;
+        }
+        
+        console.log('Fetching from:', url); // Debug log
         
         fetch(url, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
             }
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error(`Network response was not ok: ${response.status}`);
             }
             return response.json();
         })
         .then(data => {
+            console.log('Data received:', data); // Debug log
             materialData = data.data || [];
             processMaterialData(materialData);
             showLoading(false);
@@ -341,18 +406,37 @@
         // Reset grouped data
         groupedData = {
             purchase: {},
-            production: {}
+            production: {},
+            waste: {},
+            adjustment: {}
         };
 
-        // Group data berdasarkan order_id dan type
+        console.log('Processing data:', data); // Debug log
+
+        // Group data berdasarkan type dan order_id/product_id
         data.forEach(item => {
-            const type = item.type; // 'purchase' atau 'production'
-            const orderKey = item.order_id ? `order-${item.order_id}` : `product-${item.product_id}-${item.created_at}`;
+            const type = item.type; // 'purchase', 'production', 'waste', 'adjustment'
             
+            // Buat key unik berdasarkan order_id atau kombinasi lain
+            let orderKey;
+            if (item.order_id) {
+                orderKey = `order-${item.order_id}`;
+            } else if (item.product_id) {
+                orderKey = `product-${item.product_id}-${item.created_at}`;
+            } else {
+                orderKey = `general-${item.id}-${item.created_at}`;
+            }
+
+            if (!groupedData[type]) {
+                groupedData[type] = {};
+            }
+
             if (!groupedData[type][orderKey]) {
                 groupedData[type][orderKey] = {
-                    order_number: item.order ? item.order.order_number : 'Stok Awal',
-                    product_name: item.product ? item.product.name : 'Produksi Stok Awal',
+                    order_number: item.order ? item.order.order_number : (type === 'purchase' ? 'Pembelian' : 
+                                 type === 'adjustment' ? 'Penyesuaian' : 'Produksi Stok Awal'),
+                    product_name: item.product ? item.product.name : (type === 'purchase' ? 'Pembelian Bahan Baku' : 
+                                  type === 'adjustment' ? 'Penyesuaian Stok' : 'Produksi Umum'),
                     date: item.created_at,
                     notes: item.notes,
                     materials: []
@@ -365,9 +449,11 @@
                 stock_before: parseFloat(item.stock_before),
                 material_used: parseFloat(item.quantity_change),
                 stock_after: parseFloat(item.stock_after),
-                unit: item.raw_material.unit
+                unit: item.raw_material.unit || 'pcs'
             });
         });
+
+        console.log('Grouped data:', groupedData); // Debug log
 
         // Display the processed data
         displayMaterialData();
@@ -378,12 +464,18 @@
         // Reset tables
         document.getElementById('purchaseTable').innerHTML = '';
         document.getElementById('productionTable').innerHTML = '';
+        document.getElementById('wasteTable').innerHTML = '';
+        document.getElementById('adjustmentTable').innerHTML = '';
         
         // Check if we have data
         const hasPurchaseData = Object.keys(groupedData.purchase).length > 0;
         const hasProductionData = Object.keys(groupedData.production).length > 0;
+        const hasWasteData = Object.keys(groupedData.waste).length > 0;
+        const hasAdjustmentData = Object.keys(groupedData.adjustment).length > 0;
         
-        if (!hasPurchaseData && !hasProductionData) {
+        const hasAnyData = hasPurchaseData || hasProductionData || hasWasteData || hasAdjustmentData;
+        
+        if (!hasAnyData) {
             showNoData(true);
             document.getElementById('tablesContainer').classList.add('hidden');
             return;
@@ -411,6 +503,28 @@
             document.getElementById('productionContainer').classList.add('hidden');
         }
         
+        // Display waste data
+        if (hasWasteData) {
+            Object.keys(groupedData.waste).forEach(key => {
+                const group = groupedData.waste[key];
+                addTableRow('wasteTable', group, key, 'waste');
+            });
+            document.getElementById('wasteContainer').classList.remove('hidden');
+        } else {
+            document.getElementById('wasteContainer').classList.add('hidden');
+        }
+        
+        // Display adjustment data
+        if (hasAdjustmentData) {
+            Object.keys(groupedData.adjustment).forEach(key => {
+                const group = groupedData.adjustment[key];
+                addTableRow('adjustmentTable', group, key, 'adjustment');
+            });
+            document.getElementById('adjustmentContainer').classList.remove('hidden');
+        } else {
+            document.getElementById('adjustmentContainer').classList.add('hidden');
+        }
+        
         // Show tables container
         document.getElementById('tablesContainer').classList.remove('hidden');
         showNoData(false);
@@ -425,7 +539,9 @@
         const formattedDate = date.toLocaleDateString('id-ID', {
             day: 'numeric',
             month: 'long',
-            year: 'numeric'
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
         });
         
         row.innerHTML = `
@@ -433,7 +549,7 @@
             <td class="py-4 px-4">${group.product_name}</td>
             <td class="py-4 px-4">${formattedDate}</td>
             <td class="py-4 px-4 text-right">
-                <button onclick="showMaterialDetail('${type}', '${key}', '${group.order_number}', '${group.product_name}')" 
+                <button onclick="showMaterialDetail('${type}', '${key}')" 
                         class="text-[#3b6b0d] hover:text-[#335e0c] flex items-center gap-1 justify-end w-full">
                     <i data-lucide="eye" class="w-4 h-4"></i>
                     Detail
@@ -443,20 +559,35 @@
         table.appendChild(row);
     }
 
-    function showMaterialDetail(type, key, orderNumber, productName) {
+    function showMaterialDetail(type, key) {
         const group = groupedData[type][key];
-        if (!group) return;
+        if (!group) {
+            console.error('Group not found:', type, key);
+            return;
+        }
+        
+        console.log('Showing detail for:', group); // Debug log
         
         // Set modal content
-        document.getElementById('modalOrderNumber').textContent = orderNumber;
-        document.getElementById('modalProductName').textContent = productName;
-        document.getElementById('modalType').textContent = type === 'purchase' ? 'Pembelian' : 'Produksi';
+        document.getElementById('modalOrderNumber').textContent = group.order_number;
+        document.getElementById('modalProductName').textContent = group.product_name;
+        
+        // Set type label
+        const typeLabels = {
+            purchase: 'Pembelian',
+            production: 'Produksi',
+            waste: 'Waste',
+            adjustment: 'Penyesuaian'
+        };
+        document.getElementById('modalType').textContent = typeLabels[type] || type;
         
         const date = new Date(group.date);
         document.getElementById('modalDate').textContent = date.toLocaleDateString('id-ID', {
             day: 'numeric',
             month: 'long',
-            year: 'numeric'
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
         });
         
         document.getElementById('modalTotalMaterials').textContent = `${group.materials.length} bahan`;
@@ -500,17 +631,20 @@
     document.getElementById('searchInput').addEventListener('keyup', function(e) {
         const searchTerm = this.value.trim().toLowerCase();
         
-        // Filter purchase table
-        filterTable('purchaseTable', searchTerm);
-        
-        // Filter production table
-        filterTable('productionTable', searchTerm);
+        // Filter semua tabel
+        ['purchaseTable', 'productionTable', 'wasteTable', 'adjustmentTable'].forEach(tableId => {
+            filterTable(tableId, searchTerm);
+        });
         
         // Show/hide containers based on results
         document.getElementById('purchaseContainer').classList.toggle('hidden', 
             !hasVisibleRows('purchaseTable'));
         document.getElementById('productionContainer').classList.toggle('hidden', 
             !hasVisibleRows('productionTable'));
+        document.getElementById('wasteContainer').classList.toggle('hidden', 
+            !hasVisibleRows('wasteTable'));
+        document.getElementById('adjustmentContainer').classList.toggle('hidden', 
+            !hasVisibleRows('adjustmentTable'));
     });
 
     function filterTable(tableId, searchTerm) {
@@ -541,6 +675,9 @@
     function showLoading(show) {
         document.getElementById('loadingState').style.display = show ? 'flex' : 'none';
         document.getElementById('tablesContainer').classList.toggle('hidden', show);
+        if (show) {
+            document.getElementById('noDataState').classList.add('hidden');
+        }
     }
 
     function showNoData(show) {
