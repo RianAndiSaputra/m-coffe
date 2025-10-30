@@ -97,6 +97,10 @@ Route::get('/laporan-riwayat-stok', function () {
     return view('dashboard.laporan.riwayat-stok');
 })->name('riwayat-stok');
 
+Route::get('/laporan-bahan-baku', function () {
+    return view('dashboard.laporan.bahan-baku');
+})->name('bahan-baku');
+
 Route::get('/laporan-approve', function () {
     return view('dashboard.laporan.approve');
 })->name('approve');
