@@ -855,7 +855,7 @@ const ProductManager = (() => {
             if (!kategori) throw new Error("Kategori harus dipilih");
             if (!productType) throw new Error("Tipe produk harus dipilih");
     
-            formData.append("_method", "PUT");
+            formData.append("_method", "POST");
             formData.append("name", namaProduk);
             formData.append("sku", document.getElementById("editSku").value.trim() || `SKU-${Date.now()}`);
             formData.append("description", document.getElementById("editDeskripsi").value);
@@ -1224,7 +1224,7 @@ const ProductManager = (() => {
         const alertId = `alert-${Date.now()}`;
 
         const alertConfig = {
-            success: { bgColor: "bg-orange-50", borderColor: "border-orange-200", textColor: "text-orange-800", icon: "check-circle", iconColor: "text-orange-500" },
+            success: { bgColor: "bg-green-50", borderColor: "border-green-200", textColor: "text-green-800", icon: "check-circle", iconColor: "text-green-500" },
             error: { bgColor: "bg-red-50", borderColor: "border-red-200", textColor: "text-red-800", icon: "alert-circle", iconColor: "text-red-500" },
         };
 
