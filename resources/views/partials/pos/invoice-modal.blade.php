@@ -37,7 +37,7 @@
         <!-- Icon Success -->
         <div class="flex justify-center mb-4">
             <div class="bg-green-100 rounded-full p-3">
-                <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" stroke-width="2" 
+                <svg class="w-8 h-8 text-[#3b6b0d]" fill="none" stroke="currentColor" stroke-width="2" 
                     viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
@@ -45,7 +45,7 @@
         </div>
 
         <!-- Text Success -->
-        <h3 class="text-lg font-semibold text-green-600 mb-1">Pembayaran Berhasil!</h3>
+        <h3 class="text-lg font-semibold text-[#3b6b0d] mb-1">Pembayaran Berhasil!</h3>
         <p class="text-gray-600 text-sm mb-4">Transaksi telah berhasil diselesaikan</p>
         
         <!-- Countdown Timer -->
@@ -55,7 +55,7 @@
 
         <!-- Buttons -->
         <div class="flex justify-center gap-3">
-            <button onclick="cetakInvoice()" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded">
+            <button onclick="cetakInvoice()" class="bg-[#3b6b0d] hover:bg-[#335e0c] text-white font-semibold px-4 py-2 rounded">
                 Cetak Struk
             </button>
             <button onclick="closeModalWithRefresh('successPaymentModal')" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-100">

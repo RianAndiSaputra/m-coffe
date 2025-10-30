@@ -157,9 +157,9 @@
                     <span id="outletName">Loading ...</span>
                 </a>
                 <div class="flex flex-wrap gap-2 items-center">
-                   <button id="btnStockModal" class="px-3 py-1.5 text-sm text-white font-bold bg-[#3b6b0d] border border-green-300 rounded-md hover:bg-[#335e0c] transition-colors">
+                   {{-- <button id="btnStockModal" class="px-3 py-1.5 text-sm text-white font-bold bg-[#3b6b0d] border border-green-300 rounded-md hover:bg-[#335e0c] transition-colors">
                         <i class="fas fa-box mr-1.5 text-white"></i> Stok
-                    </button>
+                    </button> --}}
 
                     <button id="btnIncomeModal" class="px-3 py-1.5 text-sm text-white font-bold bg-[#3b6b0d] border border-green-300 rounded-md hover:bg-[#335e0c] transition-colors">
                         <i class="fas fa-money-bill mr-1.5 text-white text-base"></i> Rp 0
