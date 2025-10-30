@@ -198,10 +198,10 @@
                     <i data-lucide="user" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Per Member</span>
                 </a>
-                <a href="/stok" class="menu-subitem flex items-center py-2 transition-all w-full">
+                {{-- <a href="/stok" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="package" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Stock</span>
-                </a>
+                </a> --}}
                 {{-- <a href="/laporan-riwayat-stok" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="history" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Riwayat Stok</span>
