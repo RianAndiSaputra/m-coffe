@@ -172,6 +172,27 @@
             </div>
         </div>
 
+        <!-- Insight Sales Dropdown -->
+        <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="insightSalesDropdown">
+            <div class="flex items-center justify-between w-full cursor-pointer">
+                <div class="flex items-center">
+                    <i data-lucide="brain" class="w-5 h-5 sidebar-icon"></i>
+                    <span class="ml-3 sidebar-text">Insight Penjualan</span>
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform sidebar-arrow" id="insightSalesDropdownArrow"></i>
+            </div>
+            <div id="insightSalesDropdown" class="hidden pl-12 mt-2 sidebar-dropdown">
+                <a href="/menu-favorit" class="menu-subitem flex items-center py-2 transition-all w-full">
+                    <i data-lucide="trending-up" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Prediksi Menu Favorit</span>
+                </a>
+                <a href="/prediksi-penjualan" class="menu-subitem flex items-center py-2 transition-all w-full">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Prediksi Penjualan</span>
+                </a>
+            </div>
+        </div>
+
         <!-- Report Dropdown -->
         <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="reportDropdown">
             <div class="flex items-center justify-between w-full cursor-pointer">
@@ -707,6 +728,7 @@
             'stockDropdown',
             'userDropdown',
             'closingDropdown',
+            'insightSalesDropdown',
             'reportDropdown',
             'settingsDropdown'
         ];
