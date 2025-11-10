@@ -928,9 +928,9 @@ const ProductManager = (() => {
                     if (responseData.message && typeof responseData.message === 'object') {
                         for (const [field, errors] of Object.entries(responseData.message)) {
                             if (field === 'sku') {
-                                errorMessage += "\nSKU: sudah digunakan.";
+                                errorMessage += "\nSKU: Sudah digunakan.";
                             } else if (field === 'barcode') {
-                                errorMessage += "\nBarcode: sudah digunakan.";
+                                errorMessage += "\nBarcode: Sudah digunakan.";
                             } else if (Array.isArray(errors)) {
                                 errorMessage += `\n${errors.join(", ")}`;
                             }

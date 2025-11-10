@@ -112,11 +112,11 @@
                     <span class="sidebar-text">Stok Pertanggal</span>
                 </a>
                 @if(auth()->check() && auth()->user()->role !== 'supervisor')
-                {{-- <a href="/penyesuaian-stok" class="menu-subitem flex items-center py-2 transition-all w-full">
+                <a href="/penyesuaian-stok" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="edit" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Penyesuaian Stok</span>
                 </a>
-                <a href="/transfer-stok" class="menu-subitem flex items-center py-2 transition-all w-full">
+                {{-- <a href="/transfer-stok" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="truck" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Transfer Stok</span>
                 </a>
