@@ -11,11 +11,13 @@ use Illuminate\Http\Request;
 use App\Models\ProductRecipe;
 use Illuminate\Validation\Rule;
 use App\Models\InventoryHistory;
+use App\Models\RawMaterialStock;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\DB;
 // use Illuminate\Container\Attributes\Log;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
+use App\Models\RawMaterialStockHistory;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -196,6 +198,7 @@ class ProductController extends Controller
 
             DB::beginTransaction();
             
+            // Upload image
             if ($request->hasFile('image')) {
                 $path = $request->file('image')->store('products', 'uploads');
                 $imagePath = $path;
@@ -218,33 +221,12 @@ class ProductController extends Controller
                 'is_active' => $request->is_active,
             ]);
 
-            // Create inventory untuk setiap outlet
-            foreach ($request->outlet_ids as $outletId) {
-                Inventory::create([
-                    'product_id' => $product->id,
-                    'outlet_id' => $outletId,
-                    'quantity' => $request->quantity,
-                    'min_stock' => $request->min_stock,
-                ]);
-                
-                InventoryHistory::create([
-                    'product_id' => $product->id,
-                    'outlet_id' => $outletId,
-                    'quantity_change' => $request->quantity,
-                    'quantity_before' => 0,
-                    'quantity_after' => $request->quantity,
-                    'type' => 'adjustment',
-                    'notes' => 'Stok awal produk baru',
-                    'user_id' => $request->user()->id,
-                ]);
-            }
-
-            // Create product recipes jika ada
-            if ($request->has('recipes') && is_array($request->recipes) && count($request->recipes) > 0) {
-                $createdRecipes = [];
-                
+            // Create product recipes jika ada (PINDAH KE SINI SEBELUM INVENTORY)
+            $hasRecipes = $request->has('recipes') && is_array($request->recipes) && count($request->recipes) > 0;
+            
+            if ($hasRecipes) {
                 foreach ($request->recipes as $recipe) {
-                    // Check if already exists (untuk keamanan)
+                    // Check if already exists
                     $exists = ProductRecipe::where('product_id', $product->id)
                         ->where('raw_material_id', $recipe['raw_material_id'])
                         ->exists();
@@ -258,22 +240,56 @@ class ProductController extends Controller
                         );
                     }
 
-                    $createdRecipe = ProductRecipe::create([
+                    ProductRecipe::create([
                         'product_id' => $product->id,
                         'raw_material_id' => $recipe['raw_material_id'],
                         'quantity' => $recipe['quantity'],
                         'notes' => $recipe['notes'] ?? null
                     ]);
-
-                    $createdRecipes[] = $createdRecipe->load('rawMaterial');
                 }
 
                 // Update product cost setelah semua recipe ditambahkan
                 $this->updateProductCost($product->id);
-                
-                // Refresh product untuk mendapatkan data terbaru
-                $product = $product->fresh(['recipes.rawMaterial']);
             }
+
+            // Create inventory untuk setiap outlet dan kurangi bahan baku
+            $initialQuantity = $request->quantity ?? 0;
+            
+            foreach ($request->outlet_ids as $outletId) {
+                // Create inventory produk jadi
+                Inventory::create([
+                    'product_id' => $product->id,
+                    'outlet_id' => $outletId,
+                    'quantity' => $initialQuantity,
+                    'min_stock' => $request->min_stock,
+                ]);
+                
+                // Create history produk jadi
+                InventoryHistory::create([
+                    'product_id' => $product->id,
+                    'outlet_id' => $outletId,
+                    'quantity_change' => $initialQuantity,
+                    'quantity_before' => 0,
+                    'quantity_after' => $initialQuantity,
+                    'type' => 'adjustment',
+                    'notes' => 'Stok awal produk baru',
+                    'user_id' => $request->user()->id,
+                ]);
+
+                // KALKULASI RESEP: Kurangi stok bahan baku jika ada resep dan quantity > 0
+                if ($hasRecipes && $initialQuantity > 0) {
+                    $this->deductRawMaterialsForProduction(
+                        $product->id,
+                        $outletId,
+                        $initialQuantity,
+                        $request->user()->id,
+                        'Produksi stok awal produk: ' . $product->name
+                    );
+                }
+            }
+
+            // Refresh product untuk mendapatkan data terbaru
+            $product = $product->fresh(['recipes.rawMaterial', 'outlets']);
 
             DB::commit();
 
@@ -288,6 +304,111 @@ class ProductController extends Controller
         }
     }
 
+    private function deductRawMaterialsForProduction($productId, $outletId, $productQuantity, $userId, $notes = null)
+    {
+        // Ambil semua resep produk
+        $recipes = ProductRecipe::where('product_id', $productId)
+            ->with('rawMaterial')
+            ->get();
+
+        if ($recipes->isEmpty()) {
+            return true; // Tidak ada resep, skip
+        }
+
+        // Validasi stok bahan baku cukup atau tidak
+        $insufficientMaterials = [];
+        
+        foreach ($recipes as $recipe) {
+            // Quantity dalam resep sudah dalam satuan yang sama dengan unit bahan baku
+            // Contoh: jika unit = kilogram, maka quantity = 0.8 artinya 0.8 kg
+            $requiredQuantity = $recipe->quantity * $productQuantity;
+            
+            // Cek stok bahan baku di outlet ini
+            $stock = RawMaterialStock::where('outlet_id', $outletId)
+                ->where('raw_material_id', $recipe->raw_material_id)
+                ->first();
+            
+            $currentStock = $stock ? floatval($stock->current_stock) : 0;
+            
+            // Debug log (bisa dihapus setelah testing)
+            \Log::info('Stock Check', [
+                'material' => $recipe->rawMaterial->name,
+                'required' => $requiredQuantity,
+                'available' => $currentStock,
+                'unit' => $recipe->rawMaterial->unit
+            ]);
+            
+            if ($currentStock < $requiredQuantity) {
+                $insufficientMaterials[] = [
+                    'name' => $recipe->rawMaterial->name,
+                    'code' => $recipe->rawMaterial->code,
+                    'required' => $requiredQuantity,
+                    'available' => $currentStock,
+                    'shortage' => $requiredQuantity - $currentStock,
+                    'unit' => $recipe->rawMaterial->unit
+                ];
+            }
+        }
+
+        // Jika ada bahan baku yang kurang, throw exception
+        if (!empty($insufficientMaterials)) {
+            $errorMessage = "Stok bahan baku tidak mencukupi untuk produksi {$productQuantity} unit:\n\n";
+            foreach ($insufficientMaterials as $material) {
+                $errorMessage .= sprintf(
+                    "• %s (%s)\n  Dibutuhkan: %s %s\n  Tersedia: %s %s\n  Kurang: %s %s\n\n",
+                    $material['name'],
+                    $material['code'],
+                    number_format($material['required'], 2),
+                    $material['unit'],
+                    number_format($material['available'], 2),
+                    $material['unit'],
+                    number_format($material['shortage'], 2),
+                    $material['unit']
+                );
+            }
+            throw new \Exception($errorMessage);
+        }
+
+        // Kurangi stok bahan baku
+        foreach ($recipes as $recipe) {
+            $requiredQuantity = $recipe->quantity * $productQuantity;
+            
+            // Get or create stock
+            $stock = RawMaterialStock::firstOrCreate(
+                [
+                    'outlet_id' => $outletId,
+                    'raw_material_id' => $recipe->raw_material_id
+                ],
+                [
+                    'current_stock' => 0,
+                    'total_value' => 0
+                ]
+            );
+
+            $stockBefore = floatval($stock->current_stock);
+            $stockAfter = $stockBefore - $requiredQuantity;
+
+            // Update stock
+            $stock->update([
+                'current_stock' => $stockAfter
+            ]);
+
+            // Create history
+            RawMaterialStockHistory::create([
+                'outlet_id' => $outletId,
+                'raw_material_id' => $recipe->raw_material_id,
+                'stock_before' => $stockBefore,
+                'stock_after' => $stockAfter,
+                'quantity_change' => -$requiredQuantity,
+                'type' => 'production',
+                'notes' => $notes ?? "Produksi {$productQuantity} unit produk",
+                'user_id' => $userId,
+                'product_id' => $productId
+            ]);
+        }
+
+        return true;
+    }
     /**
      * Display the specified resource.
      */
@@ -416,75 +537,14 @@ class ProductController extends Controller
                 ->whereNotIn('outlet_id', $request->outlet_ids)
                 ->delete();
 
-            // Update product recipes jika ada
+            // HANDLE RECIPE CHANGES dengan Stok Adjustment
             if ($request->has('recipes')) {
-                $recipeIds = [];
-                
-                foreach ($request->recipes as $recipeData) {
-                    // Skip jika ditandai untuk dihapus
-                    if (isset($recipeData['is_deleted']) && $recipeData['is_deleted']) {
-                        if (isset($recipeData['id'])) {
-                            ProductRecipe::where('id', $recipeData['id'])
-                                ->where('product_id', $product->id)
-                                ->delete();
-                        }
-                        continue;
-                    }
-
-                    // Check duplikat untuk recipe baru atau update
-                    $query = ProductRecipe::where('product_id', $product->id)
-                        ->where('raw_material_id', $recipeData['raw_material_id']);
-                    
-                    if (isset($recipeData['id'])) {
-                        $query->where('id', '!=', $recipeData['id']);
-                    }
-                    
-                    if ($query->exists()) {
-                        DB::rollBack();
-                        return $this->errorResponse(
-                            "Bahan baku dengan ID {$recipeData['raw_material_id']} sudah ada dalam resep produk ini",
-                            'Duplicate recipe found',
-                            422
-                        );
-                    }
-
-                    // Update existing recipe atau create new
-                    if (isset($recipeData['id'])) {
-                        $recipe = ProductRecipe::where('id', $recipeData['id'])
-                            ->where('product_id', $product->id)
-                            ->first();
-                        
-                        if ($recipe) {
-                            $recipe->update([
-                                'raw_material_id' => $recipeData['raw_material_id'],
-                                'quantity' => $recipeData['quantity'],
-                                'notes' => $recipeData['notes'] ?? null
-                            ]);
-                            $recipeIds[] = $recipe->id;
-                        }
-                    } else {
-                        $recipe = ProductRecipe::create([
-                            'product_id' => $product->id,
-                            'raw_material_id' => $recipeData['raw_material_id'],
-                            'quantity' => $recipeData['quantity'],
-                            'notes' => $recipeData['notes'] ?? null
-                        ]);
-                        $recipeIds[] = $recipe->id;
-                    }
-                }
-
-                // Hapus recipe yang tidak ada dalam request (jika user menghapus semua recipe lama)
-                if (!empty($recipeIds)) {
-                    ProductRecipe::where('product_id', $product->id)
-                        ->whereNotIn('id', $recipeIds)
-                        ->delete();
-                } else {
-                    // Jika tidak ada recipe yang dikirim, hapus semua recipe
-                    ProductRecipe::where('product_id', $product->id)->delete();
-                }
-
-                // Update product cost
-                $this->updateProductCost($product->id);
+                $this->handleRecipeChangesWithStockAdjustment(
+                    $product,
+                    $request->recipes,
+                    $request->outlet_ids,
+                    $request->user()->id
+                );
             }
 
             DB::commit();
@@ -502,6 +562,8 @@ class ProductController extends Controller
             return $this->errorResponse($th->getMessage());
         }
     }
+
+    
 
     /**
      * Remove the specified resource from storage.

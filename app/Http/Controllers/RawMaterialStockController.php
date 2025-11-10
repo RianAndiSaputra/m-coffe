@@ -87,7 +87,7 @@ class RawMaterialStockController extends Controller
             $query = RawMaterialStockHistory::query()
                 ->with([
                     'outlet:id,name',
-                    'rawMaterial:id,name',
+                    'rawMaterial:id,name,unit',
                     'user:id,name',
                     'product:id,name',
                     'order:id,order_number'
