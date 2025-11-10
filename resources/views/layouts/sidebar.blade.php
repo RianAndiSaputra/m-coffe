@@ -112,7 +112,7 @@
                     <span class="sidebar-text">Stok Pertanggal</span>
                 </a>
                 @if(auth()->check() && auth()->user()->role !== 'supervisor')
-                <a href="/penyesuaian-stok" class="menu-subitem flex items-center py-2 transition-all w-full">
+                {{-- <a href="/penyesuaian-stok" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="edit" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Penyesuaian Stok</span>
                 </a>
@@ -123,7 +123,7 @@
                 <a href="/approve-stok" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="check-circle" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Approve Stok</span>
-                </a>
+                </a> --}}
                 @endif
             </div>
         </div>
@@ -172,6 +172,27 @@
             </div>
         </div>
 
+        <!-- Insight Sales Dropdown -->
+        <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="insightSalesDropdown">
+            <div class="flex items-center justify-between w-full cursor-pointer">
+                <div class="flex items-center">
+                    <i data-lucide="brain" class="w-5 h-5 sidebar-icon"></i>
+                    <span class="ml-3 sidebar-text">Insight Penjualan</span>
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform sidebar-arrow" id="insightSalesDropdownArrow"></i>
+            </div>
+            <div id="insightSalesDropdown" class="hidden pl-12 mt-2 sidebar-dropdown">
+                <a href="/menu-favorit" class="menu-subitem flex items-center py-2 transition-all w-full">
+                    <i data-lucide="trending-up" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Prediksi Menu Favorit</span>
+                </a>
+                <a href="/prediksi-penjualan" class="menu-subitem flex items-center py-2 transition-all w-full">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Prediksi Penjualan</span>
+                </a>
+            </div>
+        </div>
+
         <!-- Report Dropdown -->
         <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="reportDropdown">
             <div class="flex items-center justify-between w-full cursor-pointer">
@@ -198,21 +219,25 @@
                     <i data-lucide="user" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Per Member</span>
                 </a>
-                <a href="/stok" class="menu-subitem flex items-center py-2 transition-all w-full">
+                {{-- <a href="/stok" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="package" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Stock</span>
-                </a>
-                <a href="/laporan-riwayat-stok" class="menu-subitem flex items-center py-2 transition-all w-full">
+                </a> --}}
+                {{-- <a href="/laporan-riwayat-stok" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="history" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Riwayat Stok</span>
                 </a>
                 <a href="/laporan-approve" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="check-circle" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Approve</span>
-                </a>
+                </a> --}}
                  <a href="/laporan-laba" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="check-circle" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Laba</span>
+                </a>
+                <a href="/laporan-bahan-baku" class="menu-subitem flex items-center py-2 transition-all w-full">
+                    <i data-lucide="beaker" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">bahan baku</span>
                 </a>
             </div>
         </div>
@@ -703,6 +728,7 @@
             'stockDropdown',
             'userDropdown',
             'closingDropdown',
+            'insightSalesDropdown',
             'reportDropdown',
             'settingsDropdown'
         ];

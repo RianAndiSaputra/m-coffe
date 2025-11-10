@@ -22,7 +22,7 @@
             <!-- Date Range & Search -->
             <div class="flex flex-col md:flex-row justify-between gap-4 mb-6">
                 <div class="relative w-full md:w-1/2">
-                    <input id="dateRange" type="text" class="border p-3 rounded w-full pl-12 text-base" placeholder="Pilih rentang tanggal" readonly />
+                    <input id="dateRange" type="text" class="border border-gray-300 p-3 rounded-xl w-full pl-12 text-base focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition-all duration-200" placeholder="Pilih rentang tanggal" readonly />
                     <div class="absolute left-4 top-3.5 text-gray-400">
                         <!-- Calendar Icon -->
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -32,13 +32,7 @@
                 </div>
 
                 <div class="relative w-full md:w-1/2">
-                    <input 
-                        id="searchInvoice" 
-                        type="text" 
-                        placeholder="Cari transaksi berdasarkan nomor invoice..." 
-                        class="border p-3 rounded w-full pl-12 text-base"
-                        oninput="filterTransaksi()"
-                    />
+                    <input id="searchInvoice" type="text" placeholder="Cari transaksi berdasarkan nomor invoice..." class="border border-gray-300 p-3 rounded-xl w-full pl-12 text-base focus:ring-1 focus:ring-[#3b6b0d] focus:border-[#3b6b0d] outline-none transition-all duration-200" oninput="filterTransaksi()">
                     <div class="absolute left-4 top-3.5 text-gray-400">
                         <!-- Search Icon -->
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -49,12 +43,12 @@
             </div>
 
             <!-- Summary -->
-            <div class="bg-orange-50 p-4 rounded mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
+            <div class="bg-green-50 p-4 rounded mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
                 <div id="summaryText">
                     <span class="font-semibold text-lg">Total Transaksi</span><br>
                     <span class="text-gray-500 text-sm">Memuat data...</span>
                 </div>
-                <div class="text-orange-600 font-bold text-2xl" id="totalAmount">Rp 0</div>
+                <div class="text-[#3b6b0d] font-bold text-2xl" id="totalAmount">Rp 0</div>
             </div>
 
             <!-- Table -->
@@ -84,7 +78,7 @@
         <!-- Footer (Fixed inside modal) -->
         <div class="border-t p-4 md:p-6 bg-white sticky bottom-0 z-10">
             <div class="flex justify-end">
-                <button onclick="tutupModal('historyModal')" class="px-5 py-3 text-base bg-orange-500 text-white rounded hover:bg-orange-600 transition">Tutup</button>
+                <button onclick="tutupModal('historyModal')" class="px-5 py-3 text-base bg-[#3b6b0d] text-white rounded hover:bg-[#335e0c] transition">Tutup</button>
             </div>
         </div>
 

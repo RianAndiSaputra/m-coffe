@@ -97,6 +97,22 @@ Route::get('/laporan-riwayat-stok', function () {
     return view('dashboard.laporan.riwayat-stok');
 })->name('riwayat-stok');
 
+Route::get('/laporan-bahan-baku', function () {
+    return view('dashboard.laporan.bahan-baku');
+})->name('bahan-baku');
+
+Route::get('/menu-favorit', function () {
+    return view('dashboard.insight.menu-favorit');
+})->name('menu-favorit');
+
+Route::get('/prediksi-penjualan', function () {
+    return view('dashboard.insight.prediksi-penjualan');
+})->name('prediksi-penjualan');
+
+Route::get('/analisis-pembelian', function () {
+    return view('dashboard.insight.analisis-pembelian');
+})->name('analisis-pembelian');
+
 Route::get('/laporan-approve', function () {
     return view('dashboard.laporan.approve');
 })->name('approve');

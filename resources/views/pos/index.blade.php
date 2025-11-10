@@ -15,137 +15,137 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-        .empty-cart {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: #9CA3AF;
-        }
-        .empty-cart i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-        .cart-items-container {
-            overflow-y: auto;
-            flex-grow: 1;
-        }
-        .cart-item-grid {
-            display: grid;
-            grid-template-columns: minmax(150px, 2fr) 120px 80px 100px 40px;
-            gap: 10px;
-            align-items: center;
-            padding: 12px 16px;
-            border-bottom: 1px solid #f3f4f6;
-        }
-        @media (max-width: 1024px) {
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes fadeOut {
+                from { opacity: 1; }
+                to { opacity: 0; }
+            }
+            .empty-cart {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+                color: #9CA3AF;
+            }
+            .empty-cart i {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+            }
+            .cart-items-container {
+                overflow-y: auto;
+                flex-grow: 1;
+            }
             .cart-item-grid {
-                grid-template-columns: minmax(120px, 2fr) 100px 70px 90px 40px;
+                display: grid;
+                grid-template-columns: minmax(150px, 2fr) 120px 80px 100px 40px;
+                gap: 10px;
+                align-items: center;
+                padding: 12px 16px;
+                border-bottom: 1px solid #f3f4f6;
             }
-        }
-        .qty-control {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .qty-input {
-            width: 40px;
-            text-align: center;
+            @media (max-width: 1024px) {
+                .cart-item-grid {
+                    grid-template-columns: minmax(120px, 2fr) 100px 70px 90px 40px;
+                }
+            }
+            .qty-control {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+            .qty-input {
+                width: 40px;
+                text-align: center;
+                border: 1px solid #d1d5db;
+                border-radius: 4px;
+                padding: 4px;
+            }
+            .discount-input {
+                width: 70px;
+                text-align: right;
+                border: 1px solid #d1d5db;
+                border-radius: 4px;
+                padding: 4px;
+            }
+            /* New styles for sticky cart footer */
+            .cart-section {
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+            }
+            .payment-section {
+                margin-top: auto;
+                background: white;
+            }
+            /* Scrollable products */
+            .products-list-container {
+                overflow-y: auto;
+                flex-grow: 1;
+            }
+            /* Payment method selection */
+            .payment-method {
             border: 1px solid #d1d5db;
-            border-radius: 4px;
-            padding: 4px;
-        }
-        .discount-input {
-            width: 70px;
-            text-align: right;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
-            padding: 4px;
-        }
-        /* New styles for sticky cart footer */
-        .cart-section {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-        .payment-section {
-            margin-top: auto;
-            background: white;
-        }
-        /* Scrollable products */
-        .products-list-container {
-            overflow-y: auto;
-            flex-grow: 1;
-        }
-        /* Payment method selection */
-        .payment-method {
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        padding: 12px;
-        margin-bottom: 8px;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    .payment-method:hover {
-        border-color: #3b6b0d;
-    }
-    .payment-method.selected {
-        border-color: #3b6b0d;
-        background-color: #f0f9f0; /* Ganti dengan warna hijau yang lebih soft */
-    }
-        /* Print styles for invoice */
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            #invoice-print, #invoice-print * {
-                visibility: visible;
-            }
-            #invoice-print {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-            }
-        }
-        /* Member search dropdown */
-        .member-search-container {
-            position: relative;
-        }
-        .member-results {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 10;
-            display: none;
-        }
-        .member-item {
-            padding: 8px 12px;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
             cursor: pointer;
-            border-bottom: 1px solid #f3f4f6;
+            transition: all 0.2s;
         }
-        .member-item:hover {
-            background-color: #f9fafb;
+        .payment-method:hover {
+            border-color: #3b6b0d;
         }
-        .member-item.active {
-            background-color: #dcfce7; /* green-100 equivalent */
-            color: #166534; /* green-800 equivalent */
+        .payment-method.selected {
+            border-color: #3b6b0d;
+            background-color: #f0f9f0; /* Ganti dengan warna hijau yang lebih soft */
         }
+            /* Print styles for invoice */
+            @media print {
+                body * {
+                    visibility: hidden;
+                }
+                #invoice-print, #invoice-print * {
+                    visibility: visible;
+                }
+                #invoice-print {
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                }
+            }
+            /* Member search dropdown */
+            .member-search-container {
+                position: relative;
+            }
+            .member-results {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                border: 1px solid #d1d5db;
+                border-radius: 4px;
+                max-height: 200px;
+                overflow-y: auto;
+                z-index: 10;
+                display: none;
+            }
+            .member-item {
+                padding: 8px 12px;
+                cursor: pointer;
+                border-bottom: 1px solid #f3f4f6;
+            }
+            .member-item:hover {
+                background-color: #f9fafb;
+            }
+            .member-item.active {
+                background-color: #dcfce7; /* green-100 equivalent */
+                color: #166534; /* green-800 equivalent */
+            }
     </style>
 </head>
 <body class="bg-white font-sans overflow-x-hidden">
@@ -157,9 +157,9 @@
                     <span id="outletName">Loading ...</span>
                 </a>
                 <div class="flex flex-wrap gap-2 items-center">
-                   <button id="btnStockModal" class="px-3 py-1.5 text-sm text-white font-bold bg-[#3b6b0d] border border-green-300 rounded-md hover:bg-[#335e0c] transition-colors">
+                   {{-- <button id="btnStockModal" class="px-3 py-1.5 text-sm text-white font-bold bg-[#3b6b0d] border border-green-300 rounded-md hover:bg-[#335e0c] transition-colors">
                         <i class="fas fa-box mr-1.5 text-white"></i> Stok
-                    </button>
+                    </button> --}}
 
                     <button id="btnIncomeModal" class="px-3 py-1.5 text-sm text-white font-bold bg-[#3b6b0d] border border-green-300 rounded-md hover:bg-[#335e0c] transition-colors">
                         <i class="fas fa-money-bill mr-1.5 text-white text-base"></i> Rp 0
